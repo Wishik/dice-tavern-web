@@ -4,7 +4,7 @@ import { backend } from '../store';
 import { useDatos, type Clase, type Dote, type Razas, type Trasfondo } from '../data';
 import { calcularAvisos, type Avisos } from '../avisos';
 import { DadoIcono, PanelDados, useDados } from '../dice';
-import { conSigno, modificador, pgSubida } from '../rules';
+import { conSigno, modificador } from '../rules';
 import { Modal, PuntoRojo } from '../ui';
 import { TabPersonaje } from './TabPersonaje';
 import { TabAtributos } from './TabAtributos';
@@ -135,13 +135,13 @@ function SubidaNivel() {
     <div className="modal-fondo">
       <div className="modal elegir-modo">
         <h3>¡Subes a nivel {nivelDe}!</h3>
-        <p>Tira tu dado de golpe de {p.clase}: <strong>1{dado} {conSigno(con)} CON</strong>. Lo que salga se suma a tus PG máximos.</p>
+        <p>Tira tu dado de golpe de {p.clase}: <strong>1{dado} +1 {conSigno(con)} CON</strong>. El total se suma a tus PG máximos y actuales.</p>
         {p.subidasPendientes > 1 && <p className="nota">Te quedan {p.subidasPendientes} niveles por tirar.</p>}
         <div className="fila-botones">
           <button className="btn primario" onClick={() => {
-            const t = tirar(`PG al subir a nivel ${nivelDe} (1${dado} ${conSigno(con)})`, `1${dado}`);
+            const t = tirar(`PG al subir a nivel ${nivelDe}`, `1${dado}+1${conSigno(con)}`);
             if (!t) return;
-            const gana = pgSubida(t.total, p.caracteristicas.CON);
+            const gana = Math.max(1, t.total); // ya incluye +1 y CON
             upd((x) => { x.pg.max += gana; x.pg.actual += gana; x.subidasPendientes = Math.max(0, x.subidasPendientes - 1); });
           }}>🎲 Tirar 1{dado}</button>
         </div>

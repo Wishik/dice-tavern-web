@@ -48,6 +48,8 @@ export function normalizar(p: Partial<Personaje>): Personaje {
     if (!isNaN(n)) out.bonusCA = n - calcularCA(out).total;
   }
   out.ca = '';
+  // Los PG actuales nunca pueden pasar de los máximos: si pasa (datos antiguos), el máximo sube.
+  if (out.pg.actual > out.pg.max) out.pg.max = out.pg.actual;
   return out;
 }
 

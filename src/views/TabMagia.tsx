@@ -14,7 +14,7 @@ export function TabMagia() {
   const [anadir, setAnadir] = useState<null | 'truco' | 'conjuro' | 'adicional'>(null);
   const [todasClases, setTodasClases] = useState(false);
   const [ver, setVer] = useState<{ c: ConjuroPersonaje; def?: Conjuro } | null>(null);
-  const [nuevo, setNuevo] = useState<{ nombre: string; nivel: number; adicional: boolean; base?: Conjuro } | null>(null);
+  const [nuevo, setNuevo] = useState<{ nombre: string; nivel: number; adicional: boolean; base?: Conjuro; descripcion: string } | null>(null);
   const [elegirBase, setElegirBase] = useState(false);
   const claseMin = p.clase.toLowerCase();
   const nTrucos = p.conjuros.filter((c) => c.nivel === 0 && !c.adicional).length;
@@ -83,38 +83,42 @@ export function TabMagia() {
                 && !p.conjuros.some((x) => x.nombre === c.nombre)}
               render={(c) => <span className="res-conjuro"><strong>{c.nombre}</strong><small>{c.nivel ? `Nivel ${c.nivel}` : 'Truco'} · {c.escuela} · {c.clases.join(', ')}</small></span>}
               onElegir={(c) => {
-                if (typeof c === 'string') { setNuevo({ nombre: c, nivel: anadir === 'truco' ? 0 : 1, adicional: anadir === 'adicional' }); setAnadir(null); return; }
+                if (typeof c === 'string') { setNuevo({ nombre: c, nivel: anadir === 'truco' ? 0 : 1, adicional: anadir === 'adicional', descripcion: '' }); setAnadir(null); return; }
                 upd((x) => { x.conjuros.push({ nombre: c.nombre, nivel: c.nivel, ...(anadir === 'adicional' ? { adicional: true } : {}) }); });
                 setAnadir(null);
               }}
             />
           )}
-          <p className="nota pequena">¿Es un conjuro propio? Escribe su nombre y toca «Crear»: podrás copiar el texto de otro conjuro como base.</p>
+          <button className="btn crear-propio" onClick={() => { setNuevo({ nombre: '', nivel: anadir === 'truco' ? 0 : 1, adicional: anadir === 'adicional', descripcion: '' }); setAnadir(null); }}>✏️ Crear conjuro propio (puede basarse en otro)</button>
           {anadir === 'conjuro' && avisos.limiteConjuros !== null && nConj >= avisos.limiteConjuros && <p className="nota">Ya tienes los {avisos.limiteConjuros} que marcan las reglas, pero puedes añadir más.</p>}
         </Modal>
       )}
       {nuevo && (
-        <Modal titulo={`Nuevo conjuro: ${nuevo.nombre}`} onClose={() => setNuevo(null)}
-          pie={<button className="btn primario" onClick={() => {
-            upd((x) => { x.conjuros.push({ nombre: nuevo.nombre, nivel: nuevo.nivel, ...(nuevo.adicional ? { adicional: true } : {}), ...(nuevo.base ? { base: nuevo.base.nombre, descripcion: nuevo.base.descripcion } : { descripcion: '' }) }); });
+        <Modal titulo="Crear conjuro propio" onClose={() => setNuevo(null)}
+          pie={<button className="btn primario" disabled={!nuevo.nombre.trim()} onClick={() => {
+            upd((x) => { x.conjuros.push({ nombre: nuevo.nombre.trim(), nivel: nuevo.nivel, ...(nuevo.adicional ? { adicional: true } : {}), ...(nuevo.base ? { base: nuevo.base.nombre } : {}), descripcion: nuevo.descripcion }); });
             setNuevo(null);
-          }}>Añadir</button>}>
-          <label className="etiqueta"><span>Nivel</span>
-            <select className="campo" value={nuevo.nivel} onChange={(e) => setNuevo({ ...nuevo, nivel: +e.target.value })}>{NIVELES.map((n, i) => <option key={i} value={i}>{n}</option>)}</select>
+          }}>Guardar conjuro</button>}>
+          <label className="etiqueta"><span>Nombre de tu conjuro</span>
+            <input className="campo" value={nuevo.nombre} placeholder="p. ej. Bola de hielo de Wishik" onChange={(e) => setNuevo({ ...nuevo, nombre: e.target.value })} />
           </label>
           <label className="etiqueta"><span>Basado en (opcional)</span>
             <button type="button" className="campo boton-exp" onClick={() => setElegirBase(true)}>{nuevo.base ? nuevo.base.nombre : 'Elegir un conjuro base…'}</button>
           </label>
-          {nuevo.base && <>
-            <p className="nota">Se copia la descripción de «{nuevo.base.nombre}». Podrás cambiarla después en el conjuro.</p>
-            <TextoLargo texto={nuevo.base.descripcion} />
-            <button className="btn enlace pequeno" onClick={() => setNuevo({ ...nuevo, base: undefined })}>Quitar base</button>
-          </>}
+          <label className="etiqueta"><span>Nivel</span>
+            <select className="campo" value={nuevo.nivel} onChange={(e) => setNuevo({ ...nuevo, nivel: +e.target.value })}>{NIVELES.map((n, i) => <option key={i} value={i}>{n}</option>)}</select>
+          </label>
+          <label className="etiqueta"><span>Descripción{nuevo.base ? ` (copiada de ${nuevo.base.nombre}: cámbiala como quieras)` : ''}</span>
+            <Texto multilinea filas={10} valor={nuevo.descripcion} set={(v) => setNuevo((n) => n && { ...n, descripcion: v })} placeholder="Qué hace, daño, alcance, duración…" />
+          </label>
           {elegirBase && todos && (
             <Modal titulo="Conjuro base" onClose={() => setElegirBase(false)}>
               <Buscador<Conjuro> items={todos} texto={(c) => c.nombre} placeholder="Busca el conjuro base…"
                 render={(c) => <span className="res-conjuro"><strong>{c.nombre}</strong><small>{c.nivel ? `Nivel ${c.nivel}` : 'Truco'} · {c.escuela}</small></span>}
-                onElegir={(c) => { if (typeof c !== 'string') setNuevo({ ...nuevo, base: c, nivel: c.nivel }); setElegirBase(false); }} />
+                onElegir={(c) => {
+                  if (typeof c !== 'string') setNuevo((n) => n && { ...n, base: c, nivel: c.nivel, descripcion: `${c.tiempo} · ${c.alcance} · ${c.componentes} · ${c.duracion}\n\n${c.descripcion}` });
+                  setElegirBase(false);
+                }} />
             </Modal>
           )}
         </Modal>
@@ -124,10 +128,9 @@ export function TabMagia() {
           pie={<button className="btn peligro" onClick={() => { upd((x) => { const i = x.conjuros.findIndex((c) => c.nombre === ver.c.nombre && c.nivel === ver.c.nivel); if (i >= 0) x.conjuros.splice(i, 1); }); setVer(null); }}>Quitar de la lista</button>}>
           {(() => {
             const mio = p.conjuros.find((c) => c.nombre === ver.c.nombre);
-            const base = mio?.base ? def(mio.base) : undefined;
             if (mio && mio.descripcion !== undefined) return <>
               <Lanzar texto={mio.descripcion} nivel={mio.nivel} nombre={mio.nombre} />
-              <p className="subtitulo">Conjuro propio{mio.base ? ` basado en ${mio.base}` : ''}{base ? ` · ${base.tiempo} · ${base.alcance} · ${base.duracion}` : ''}</p>
+              <p className="subtitulo">Conjuro propio{mio.base ? ` basado en ${mio.base}` : ''}</p>
               <label className="etiqueta"><span>Descripción (puedes cambiarla)</span>
                 <Texto multilinea filas={8} valor={mio.descripcion} set={(v) => upd((x) => { const c = x.conjuros.find((c) => c.nombre === ver.c.nombre); if (c) c.descripcion = v; })} />
               </label>

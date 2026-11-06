@@ -1,5 +1,6 @@
 import { useFicha } from './Ficha';
-import { Etiqueta, Numero, Seccion, Texto } from '../ui';
+import { useState } from 'react';
+import { Etiqueta, Modal, Numero, Seccion, Texto } from '../ui';
 import { Contador, useDados } from '../dice';
 import { CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetencia, calcularCA, conSigno, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto } from '../rules';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO } from '../types';
@@ -13,6 +14,7 @@ export function TabAtributos() {
   const clase = buscarClase(clases, p.clase);
   const dado = clase?.atributos.dadoGolpe ?? '';
   const pen = carga.penalizacion;
+  const [corregir, setCorregir] = useState(false);
   const ca = calcularCA(p);
   const pgDef = pgPorDefecto(p, dado);
 
@@ -21,13 +23,16 @@ export function TabAtributos() {
       <div className="fila-3-tarjetas">
         <Seccion titulo="PG (vida)" className="pg">
           <div className="pg-actual">
-            <Contador valor={p.pg.actual} set={(n) => upd((x) => { x.pg.actual = n; })} min={-99} max={999} />
-            <span className="de">/ {p.pg.max}</span>
+            <Contador valor={p.pg.actual} set={(n) => upd((x) => { x.pg.actual = Math.min(n, x.pg.max); })} min={-99} max={p.pg.max} />
+            <button className="de enlace-max" onClick={() => setCorregir(true)} title="Corregir máximo">/ {p.pg.max}</button>
           </div>
-          <div className="fila-2">
-            <Etiqueta texto="Máximos"><Numero valor={p.pg.max} min={0} set={(n) => upd((x) => { x.pg.max = n; })} /></Etiqueta>
-            <Etiqueta texto="Temporales"><Numero valor={p.pg.temp} min={0} set={(n) => upd((x) => { x.pg.temp = n; })} /></Etiqueta>
-          </div>
+          <Etiqueta texto="Temporales"><Numero valor={p.pg.temp} min={0} set={(n) => upd((x) => { x.pg.temp = n; })} /></Etiqueta>
+          {corregir && (
+            <Modal titulo="Corregir PG máximos" onClose={() => setCorregir(false)}>
+              <p className="nota">Los PG máximos suben solos al tirar el dado de golpe al subir de nivel. Cámbialos aquí solo si hay que corregir algo.</p>
+              <Etiqueta texto="PG máximos"><Numero valor={p.pg.max} min={1} set={(n) => upd((x) => { x.pg.max = n; x.pg.actual = Math.min(x.pg.actual, n); })} /></Etiqueta>
+            </Modal>
+          )}
           {pgDef > 0 && p.nivel === 1 && p.pg.max !== pgDef && (
             <button className="btn enlace pequeno" onClick={() => upd((x) => { const sube = x.pg.actual === x.pg.max || x.pg.actual === 0; x.pg.max = pgDef; if (sube) x.pg.actual = pgDef; })}>↺ Por defecto: {pgDef}</button>
           )}

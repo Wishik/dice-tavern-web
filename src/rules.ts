@@ -275,8 +275,8 @@ export function cambiarNivel(p: Personaje, nivel: number) {
   p.nivel = nivel;
   p.subidasPendientes = Math.max(0, (p.subidasPendientes || 0) + d);
 }
-/** PG ganados al subir un nivel: lo que sale en el dado + CON (mínimo 1). */
-export const pgSubida = (tirada: number, con: number) => Math.max(1, tirada + modificador(con));
+/** PG ganados al subir un nivel: lo que sale en el dado + 1 + modificador de CON (mínimo 1). */
+export const pgSubida = (tirada: number, con: number) => Math.max(1, tirada + 1 + modificador(con));
 
 export interface DesgloseCA { total: number; partes: string[]; sigiloDesventaja: string[]; fuerzaMinima: number }
 /** CA = 10 + DES sin armadura; con armadura, su fórmula; + escudo; + ajuste manual. */
