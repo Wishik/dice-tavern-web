@@ -1,0 +1,742 @@
+[
+ {
+  "nombre": "Bastón",
+  "dano": "1d6 Contundente",
+  "propiedades": "Versátil (1d8)",
+  "maestria": "Derribar",
+  "precio": "2pp",
+  "categoria": "armas sencillas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Cestus",
+  "dano": "1d4 Contundente",
+  "propiedades": "Ligera, Sutil",
+  "maestria": "Debilitar",
+  "precio": "10po",
+  "categoria": "armas sencillas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Daga",
+  "dano": "1d4 Perforante",
+  "propiedades": "Arrojadiza (20/60), Ligera, Sutil",
+  "maestria": "Mellar",
+  "precio": "2po",
+  "categoria": "armas sencillas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Garrote",
+  "dano": "1d4 Contundente",
+  "propiedades": "Ligero",
+  "maestria": "Ralentizar",
+  "precio": "1pp",
+  "categoria": "armas sencillas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Garrote grande",
+  "dano": "1d8 Contundente",
+  "propiedades": "A dos manos",
+  "maestria": "Empujar",
+  "precio": "2pp",
+  "categoria": "armas sencillas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Hacha de mano",
+  "dano": "1d6 Cortante",
+  "propiedades": "Arrojadiza (20/60), Ligera",
+  "maestria": "Molestar",
+  "precio": "5po",
+  "categoria": "armas sencillas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Hoz",
+  "dano": "1d4 Cortante",
+  "propiedades": "Ligera",
+  "maestria": "Mellar",
+  "precio": "1po",
+  "categoria": "armas sencillas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Lanza",
+  "dano": "1d6 Perforante",
+  "propiedades": "Arrojadiza (20/60), Versátil (1d8)",
+  "maestria": "Debilitar",
+  "precio": "1po",
+  "categoria": "armas sencillas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Lanza de caza",
+  "dano": "2d4 Perforante",
+  "propiedades": "A dos manos, Gran Alcance",
+  "maestria": "Debilitar",
+  "precio": "5po",
+  "categoria": "armas sencillas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Martillo ligero",
+  "dano": "1d4 Contundente",
+  "propiedades": "Arrojadiza (20/60), Ligero",
+  "maestria": "Mellar",
+  "precio": "2po",
+  "categoria": "armas sencillas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Maza",
+  "dano": "1d6 Contundente",
+  "propiedades": "--",
+  "maestria": "Debilitar",
+  "precio": "5po",
+  "categoria": "armas sencillas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Nudillo de latón",
+  "dano": "1d4 Contundente",
+  "propiedades": "Ligera, Sutil",
+  "maestria": "Derribar",
+  "precio": "10po",
+  "categoria": "armas sencillas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Puñal",
+  "dano": "1d6 Perforante",
+  "propiedades": "Ligero, Sutil",
+  "maestria": "Mellar",
+  "precio": "5po",
+  "categoria": "armas sencillas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Arco corto",
+  "dano": "1d6 Perforante",
+  "propiedades": "A dos manos, Munición(flecha), Alcance(80/320)",
+  "maestria": "Molestar",
+  "precio": "25po",
+  "categoria": "armas sencillas a distancia"
+ },
+ {
+  "nombre": "Ballesta ligera",
+  "dano": "1d8 Perforante",
+  "propiedades": "A dos manos, Munición (virote), Alcance(80/320), Recarga",
+  "maestria": "Ralentizar",
+  "precio": "25po",
+  "categoria": "armas sencillas a distancia"
+ },
+ {
+  "nombre": "Dardo",
+  "dano": "1d4 Perforante",
+  "propiedades": "Arrojadiza(20/60), Silenciosa, Sutil",
+  "maestria": "Molestar",
+  "precio": "5pc",
+  "categoria": "armas sencillas a distancia"
+ },
+ {
+  "nombre": "Honda",
+  "dano": "1d4 Contundente",
+  "propiedades": "Munición (proyectil), Alcance(30/120)",
+  "maestria": "Ralentizar",
+  "precio": "1pp",
+  "categoria": "armas sencillas a distancia"
+ },
+ {
+  "nombre": "Jabalina",
+  "dano": "1d6 Perforante",
+  "propiedades": "Arrojadiza (30/120)",
+  "maestria": "Ralentizar",
+  "precio": "5pp",
+  "categoria": "armas sencillas a distancia"
+ },
+ {
+  "nombre": "Alabarda",
+  "dano": "1d10 Cortante",
+  "propiedades": "A dos manos, Gran alcance, Pesada",
+  "maestria": "Hender",
+  "precio": "20po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Cimitarra",
+  "dano": "1d6 Cortante",
+  "propiedades": "Ligera, Sutil",
+  "maestria": "Mellar",
+  "precio": "25po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Espada corta",
+  "dano": "1d6 Perforante",
+  "propiedades": "Ligera, Sutil",
+  "maestria": "Molestar",
+  "precio": "10po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Espada larga",
+  "dano": "1d8 Cortante",
+  "propiedades": "Versátil (1d10)",
+  "maestria": "Debilitar",
+  "precio": "15po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Espadón",
+  "dano": "1d12 Cortante",
+  "propiedades": "A dos manos, Pesado",
+  "maestria": "Rozar",
+  "precio": "50po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Estoque",
+  "dano": "1d8 Perforante",
+  "propiedades": "Sutil",
+  "maestria": "Molestar",
+  "precio": "25po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Garra",
+  "dano": "1d6 Cortante",
+  "propiedades": "Ligera, Sutil",
+  "maestria": "Mellar",
+  "precio": "10po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Guja",
+  "dano": "1d10 Cortante",
+  "propiedades": "A dos manos, Gran alcance, Pesada",
+  "maestria": "Rozar",
+  "precio": "20po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Hacha a dos manos",
+  "dano": "1d12 Cortante",
+  "propiedades": "A dos manos, Pesada",
+  "maestria": "Hender",
+  "precio": "50po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Hacha de guerra",
+  "dano": "1d8 Cortante",
+  "propiedades": "Versátil (1d10)",
+  "maestria": "Derribar",
+  "precio": "10po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Lanza de caballería",
+  "dano": "2d6 Perforante",
+  "propiedades": "A dos manos (si no montas), Gran alcance, Pesada",
+  "maestria": "Derribar",
+  "precio": "50po",
+  "categoria": "armas marciales cuerpo a cuerpo",
+  "nota": "Cuando se usa a pie a parte de usarse con ambas manos los ataques con ella se hacen con desventaja."
+ },
+ {
+  "nombre": "Látigo",
+  "dano": "1d4 Cortante",
+  "propiedades": "Gran alcance, Sutil",
+  "maestria": "Ralentizar",
+  "precio": "2po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Lucero del alba",
+  "dano": "1d8 Perforante",
+  "propiedades": "--",
+  "maestria": "Debilitar",
+  "precio": "10po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Mangual",
+  "dano": "1d8 Contundente",
+  "propiedades": "--",
+  "maestria": "Debilitar",
+  "precio": "10po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Martillo de guerra",
+  "dano": "1d8 Contundente",
+  "propiedades": "Versátil (1d10)",
+  "maestria": "Empujar",
+  "precio": "15po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Maza a dos manos",
+  "dano": "1d12 Contundente",
+  "propiedades": "A dos manos, Pesada",
+  "maestria": "Derribar",
+  "precio": "50po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Pica",
+  "dano": "1d10 Perforante",
+  "propiedades": "A dos manos, Gran alcance, Pesada",
+  "maestria": "Empujar",
+  "precio": "20po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Pico de guerra",
+  "dano": "1d8 Perforante",
+  "propiedades": "Versátil (1d10)",
+  "maestria": "Debilitar",
+  "precio": "15po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Tridente",
+  "dano": "1d8 Perforante",
+  "propiedades": "Arrojadizo (20/60), Versátil (1d10)",
+  "maestria": "Derribar",
+  "precio": "20po",
+  "categoria": "armas marciales cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Arco largo",
+  "dano": "1d8 Perforante",
+  "propiedades": "A dos manos, Munición(flecha), Pesado, Alcance(150/600)",
+  "maestria": "Ralentizar",
+  "precio": "50po",
+  "categoria": "armas marciales a distancia"
+ },
+ {
+  "nombre": "Ballesta de mano",
+  "dano": "1d6 Perforante",
+  "propiedades": "Ligera, Munición(virote), Alcance(30/120), Recarga",
+  "maestria": "Molestar",
+  "precio": "75po",
+  "categoria": "armas marciales a distancia"
+ },
+ {
+  "nombre": "Ballesta pesada",
+  "dano": "1d10 Perforante",
+  "propiedades": "A dos manos, Munición(virote), Alcance(100/400), Pesada, Recarga",
+  "maestria": "Empujar",
+  "precio": "50po",
+  "categoria": "armas marciales a distancia"
+ },
+ {
+  "nombre": "Cerbatana",
+  "dano": "1 Perforante",
+  "propiedades": "Munición (dardo de cerbatana), Alcance (25/55), Recarga, Silenciosa",
+  "maestria": "Molestar",
+  "precio": "10po",
+  "categoria": "armas marciales a distancia"
+ },
+ {
+  "nombre": "Bec de corbin (Alabarda)",
+  "dano": "2d6 Cortante o Perforante",
+  "propiedades": "A dos manos, Gran alcance, Pesada",
+  "maestria": "Hender o Empujar",
+  "precio": "250po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Breidox (Hacha a dos manos)",
+  "dano": "2d6 Cortante",
+  "propiedades": "A dos manos, Pesada",
+  "maestria": "Hender o Derribar",
+  "precio": "250po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Contus (Lanza)",
+  "dano": "1d6 Perforante",
+  "propiedades": "Arrojadiza(20/60), Gran alcance, Versátil (2d4)",
+  "maestria": "Empujar o Debilitar",
+  "precio": "25po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Espada de arzón (Espada larga)",
+  "dano": "2d4 Cortante",
+  "propiedades": "Versátil (1d10)",
+  "maestria": "Hender o Debilitar",
+  "precio": "150po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Espada Ulfberht (Espada larga)",
+  "dano": "1d10 Cortante",
+  "propiedades": "Pesada, Versátil (2d6)",
+  "maestria": "Hender o Molestar",
+  "precio": "150po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Gladius (Espada corta)",
+  "dano": "1d6 Perforante o Cortante",
+  "propiedades": "Ligera, Sutil",
+  "maestria": "Rozar o Molestar",
+  "precio": "100po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Kama (Hoz)",
+  "dano": "1d4 Cortante",
+  "propiedades": "Ligera, Sutil, Veloz",
+  "maestria": "Ralentizar o Mellar",
+  "precio": "50",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Kama con cadena (Látigo)",
+  "dano": "1d6 Cortante",
+  "propiedades": "A dos manos, Gran alcance, Sutil",
+  "maestria": "Derribar o Ralentizar",
+  "precio": "150po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Katana (Espada larga)",
+  "dano": "2d4 Cortante",
+  "propiedades": "Sutil, Veloz, Versátil (1d10)",
+  "maestria": "Hender o Molestar",
+  "precio": "150po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Katar (Garra)",
+  "dano": "1d6 Perforante o Cortante",
+  "propiedades": "Ligero, Sutil, Veloz",
+  "maestria": "Debilitar o Mellar",
+  "precio": "100po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Khopesh (Cimitarra)",
+  "dano": "1d6 Cortante",
+  "propiedades": "Ligera, Versátil (2d4), Sutil",
+  "maestria": "Empujar o Molestar",
+  "precio": "150po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Macuahuitl (Espada larga)",
+  "dano": "1d10 Cortante",
+  "propiedades": "Pesada, Versátil (2d6)",
+  "maestria": "Hender o Rozar",
+  "precio": "150po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Mayal (Mangua)",
+  "dano": "2d4 Perforante o Contundente",
+  "propiedades": "Veloz",
+  "maestria": "Derribar o Molestar",
+  "precio": "100po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Mer (Lanza)",
+  "dano": "1d6 Perforante",
+  "propiedades": "Arrojadiza (20/60), Sutil, Versátil (2d4)",
+  "maestria": "Debilitar o Empujar",
+  "precio": "50po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Pugio (Daga)",
+  "dano": "1d4 Perforante",
+  "propiedades": "Arrojadiza(20/60), Ligero, Sutil",
+  "maestria": "Mellar o Debilitar",
+  "precio": "25po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Sekhetep (Hacha a dos manos)",
+  "dano": "2d6 Cortante",
+  "propiedades": "A dos manos, Pesada",
+  "maestria": "Debilitar o Derribar",
+  "precio": "250po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Skeggox (Hacha de mano)",
+  "dano": "1d6 Cortante",
+  "propiedades": "Arrojadiza(20/60), Ligera, Sutil, Veloz",
+  "maestria": "Rozar o Mellar",
+  "precio": "100po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Stilleto (Puñal)",
+  "dano": "1d6 Perforante o Cortante",
+  "propiedades": "Ligero, Sutil, Veloz",
+  "maestria": "Mellar o Rozar",
+  "precio": "50po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Tepoztopilli (Lanza)",
+  "dano": "1d6 Perforante",
+  "propiedades": "Arrojadiza(20/60), Veloz, Versátil (2d4)",
+  "maestria": "Hender o Debilitar",
+  "precio": "25po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Wakizashi (Espada corta)",
+  "dano": "1d6 Cortante",
+  "propiedades": "Ligera, Sutil, Veloz",
+  "maestria": "Mellar o Rozar",
+  "precio": "100po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Yari (Lanza de caza)",
+  "dano": "2d4 Perforante",
+  "propiedades": "A dos manos, Gran alcance, Sutil",
+  "maestria": "Molestar o Debilitar",
+  "precio": "50po",
+  "categoria": "armas exóticas cuerpo a cuerpo"
+ },
+ {
+  "nombre": "Arco Nubio (Arco largo)",
+  "dano": "2d4 Perforante",
+  "propiedades": "A dos manos, Alcance(150/600), Compuesto, Munición(flecha), Pesado",
+  "maestria": "Ralentizar o Debilitar",
+  "precio": "250po",
+  "categoria": "armas exóticas a distancia"
+ },
+ {
+  "nombre": "Arcus (Arco corto)",
+  "dano": "1d6 Perforante",
+  "propiedades": "A dos manos, Alcance(80/320), Compuesto, Munición(flecha)",
+  "maestria": "Molestar o Rozar",
+  "precio": "125po",
+  "categoria": "armas exóticas a distancia"
+ },
+ {
+  "nombre": "Atlatl (Jabalina)",
+  "dano": "1d6 Perforante",
+  "propiedades": "Arrojadiza(60/200), Sutil",
+  "maestria": "Debilitar o Ralentizar",
+  "precio": "20pp",
+  "categoria": "armas exóticas a distancia"
+ },
+ {
+  "nombre": "Ballesta de asedio (Ballesta pesada)",
+  "dano": "2d6 Perforante",
+  "propiedades": "A dos manos, Munición(virote), Alcance(120/450), Pesada, Recarga",
+  "maestria": "Empujar o Debilitar",
+  "precio": "250po",
+  "categoria": "armas exóticas a distancia"
+ },
+ {
+  "nombre": "Bogi (Arco largo)",
+  "dano": "2d4 Perforante",
+  "propiedades": "A dos manos, Alcance(150/600), Munición(flecha), Pesado, Veloz",
+  "maestria": "Ralentizar o Rozar",
+  "precio": "250po",
+  "categoria": "armas exóticas a distancia"
+ },
+ {
+  "nombre": "Mosquete",
+  "dano": "2d8 Perforante",
+  "propiedades": "A dos manos, Alcance(100/300), Munición(bala), Pesado, Recarga",
+  "maestria": "Ralentizar",
+  "precio": "500po",
+  "categoria": "armas exóticas a distancia"
+ },
+ {
+  "nombre": "Pilum (Jabalina)",
+  "dano": "1d6 Perforante",
+  "propiedades": "Arrojadiza(30/120), Sutil",
+  "maestria": "Debilitar",
+  "precio": "25pp",
+  "categoria": "armas exóticas a distancia"
+ },
+ {
+  "nombre": "Pimentero",
+  "dano": "1d10 Perforante",
+  "propiedades": "Ligero, Munición (bala), Alcance(30/100), Recarga",
+  "maestria": "Ralentizar o Molestar",
+  "precio": "350po",
+  "categoria": "armas exóticas a distancia"
+ },
+ {
+  "nombre": "Shuriken (Dardo)",
+  "dano": "1d4 Perforante",
+  "propiedades": "Arrojadizo (30/90), Ligera, Silenciosa, Sutil, Veloz",
+  "maestria": "Mellar",
+  "precio": "5pp",
+  "categoria": "armas exóticas a distancia"
+ },
+ {
+  "nombre": "Tlahuitolli (Arco corto)",
+  "dano": "1d6 Perforante",
+  "propiedades": "A dos manos, Alcance(80/320), Munición(flecha), Silencioso, Veloz",
+  "maestria": "Molestar o Rozar",
+  "precio": "125po",
+  "categoria": "armas exóticas a distancia"
+ },
+ {
+  "nombre": "Yumi (Arco largo)",
+  "dano": "2d4 Perforante",
+  "propiedades": "A dos manos, Alcance(200/600), Munición(flecha), Pesado",
+  "maestria": "Molestar o Debilitar",
+  "precio": "250po",
+  "categoria": "armas exóticas a distancia"
+ },
+ {
+  "nombre": "Armadura acolchada",
+  "ca": "11 + modificador de Destreza",
+  "fuerza": "--",
+  "sigilo": "Desventaja",
+  "precio": "5po",
+  "categoria": "armaduras ligeras"
+ },
+ {
+  "nombre": "Armadura de cuero",
+  "ca": "11 + modificador de Destreza",
+  "fuerza": "--",
+  "sigilo": "--",
+  "precio": "10po",
+  "categoria": "armaduras ligeras"
+ },
+ {
+  "nombre": "Armadura de tela reforzada",
+  "ca": "11 + modificador de Destreza",
+  "fuerza": "--",
+  "sigilo": "--",
+  "precio": "100po",
+  "categoria": "armaduras ligeras"
+ },
+ {
+  "nombre": "Armadura de cuero tachonado",
+  "ca": "12 + modificador de Destreza",
+  "fuerza": "--",
+  "sigilo": "--",
+  "precio": "45po",
+  "categoria": "armaduras ligeras"
+ },
+ {
+  "nombre": "Armadura de madera",
+  "ca": "13 + modificador de Destreza",
+  "fuerza": "--",
+  "sigilo": "Desventaja",
+  "precio": "50po",
+  "categoria": "armaduras ligeras"
+ },
+ {
+  "nombre": "Abrigo acorazado",
+  "ca": "12 + modificador de Destreza (máx.2)",
+  "fuerza": "12",
+  "sigilo": "--",
+  "precio": "350po",
+  "categoria": "armaduras medias",
+  "nota": "Esta armadura reduce en 5pg todo el daño físico, que no sea de origen mágico que sufra el portador y se pone y se quita como acción de movimiento (10pies). El abrigo acorazado puede llevarse sobre otras piezas de armadura para obtener la reducción de daño, en ese caso usa la CA más alta de entre las dos pero reduce la velocidad de movimiento en -5pies."
+ },
+ {
+  "nombre": "Armadura de pieles",
+  "ca": "12 + modificador de Destreza (máx.2)",
+  "fuerza": "--",
+  "sigilo": "--",
+  "precio": "10po",
+  "categoria": "armaduras medias"
+ },
+ {
+  "nombre": "Camisa de malla",
+  "ca": "13 + modificador de Destreza (máx.2)",
+  "fuerza": "--",
+  "sigilo": "--",
+  "precio": "50po",
+  "categoria": "armaduras medias"
+ },
+ {
+  "nombre": "Cota de escamas",
+  "ca": "14 + modificador de Destreza (máx.2)",
+  "fuerza": "--",
+  "sigilo": "Desventaja",
+  "precio": "50po",
+  "categoria": "armaduras medias"
+ },
+ {
+  "nombre": "Coraza",
+  "ca": "14 + modificador de Destreza (máx.2)",
+  "fuerza": "--",
+  "sigilo": "--",
+  "precio": "400po",
+  "categoria": "armaduras medias"
+ },
+ {
+  "nombre": "Media armadura",
+  "ca": "15 + modificador de Destreza (máx.2)",
+  "fuerza": "--",
+  "sigilo": "Desventaja",
+  "precio": "750po",
+  "categoria": "armaduras medias"
+ },
+ {
+  "nombre": "Cota guarnecida",
+  "ca": "14",
+  "fuerza": "--",
+  "sigilo": "Desventaja",
+  "precio": "30po",
+  "categoria": "armaduras pesadas"
+ },
+ {
+  "nombre": "Cota de malla",
+  "ca": "16",
+  "fuerza": "13",
+  "sigilo": "Desventaja",
+  "precio": "75po",
+  "categoria": "armaduras pesadas"
+ },
+ {
+  "nombre": "Armadura de bandas",
+  "ca": "17",
+  "fuerza": "15",
+  "sigilo": "Desventaja",
+  "precio": "200po",
+  "categoria": "armaduras pesadas"
+ },
+ {
+  "nombre": "Armadura de placas",
+  "ca": "18",
+  "fuerza": "15",
+  "sigilo": "Desventaja",
+  "precio": "1500po",
+  "categoria": "armaduras pesadas"
+ },
+ {
+  "nombre": "Guantelete",
+  "ca": "--",
+  "fuerza": "--",
+  "sigilo": "--",
+  "precio": "+50po",
+  "categoria": "armaduras pesadas",
+  "nota": "Este complemento para armaduras pesadas te concede ventaja en las tiradas para evitar ser desarmado."
+ },
+ {
+  "nombre": "Guantelete armado",
+  "ca": "--",
+  "fuerza": "--",
+  "sigilo": "--",
+  "precio": "+100po",
+  "categoria": "armaduras pesadas",
+  "nota": "Este complemento para armaduras pesadas te concede ventaja en las tiradas para evitar ser desarmado, y tus ataques desarmado infligen 1d4pg de daño contundente o perforante elegido al momento de comprar los guanteletes en vez del 1d4pg no letal habitual."
+ },
+ {
+  "nombre": "Escudo",
+  "ca": "+2",
+  "fuerza": "--",
+  "sigilo": "--",
+  "precio": "10po",
+  "categoria": "escudos"
+ },
+ {
+  "nombre": "Escudo pavés",
+  "ca": "+3",
+  "fuerza": "15",
+  "sigilo": "Desventaja",
+  "precio": "100po",
+  "categoria": "escudos"
+ }
+]

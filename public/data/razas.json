@@ -1,0 +1,1706 @@
+{
+ "razas": [
+  {
+   "nombre": "Aasimar",
+   "descripcion": "Los Aasimar son la herencia de aquellos celestiales que se unieron con humanos. Aunque los Aasimar suelen ser los campeones de los dioses y su nacimiento es celebrado como una bendición, no siempre son buenos. De forma natural tienden hacia fes buenas o hacia organizaciones asociadas con los celestiales. La herencia de los Aasimar puede ocultarse durante generaciones, sólo para revelarse de repente en el hijo de unos padres aparentemente humanos. Los Aasimar aparentan ser mayormente humanos excepto por algunos rasgos físicos menores que revelan su inusual herencia, entre las características típicas de los Aasimar están el cabello con un brillo metálico, un color inusual de ojos o de piel o incluso aureolas con un brillo dorado",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Celestial y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Luz Divina",
+     "texto": "Como acción puedes tocar a una criatura para sanarla una cantidad de PG igual a tu nivel + Bonif.Comp o bien para eliminarle una de las siguientes condiciones (ceguera, sordera, enfermedad, paralisis, envenenado [el veneno eliminado depende de tu nivel]). Puedes usar este rasgo una cantidad de veces por descanso largo igual a tu Modificador de Carisma (mín.1)."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Aasimar y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Aasimar pueden ver en la Oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Resistencia Celestial",
+     "texto": "Los Aasimar cuentan con RD-Radiante/-."
+    },
+    {
+     "nombre": "Poder de los Altos Cielos",
+     "texto": "Como acción y 1 vez/descanso largo puedes imbuirte de poder celestial durante 1 minuto. Mientras estés bajo este efecto todo el daño que causes pasa a ser radiante, y todo el daño que causes y las sanaciones que realices añaden 1d6 adicional a nivel 1, 1d8 a nivel 5, 1d10 a nivel 11 y 1d12 a nivel 17."
+    },
+    {
+     "nombre": "Portador de Luz",
+     "texto": "Conoces el truco “Luz” no cuenta para el límite de conjuros conocidos. A nivel 5 aprendes el conjuro “Luz de Día” que puedes lanzar sin consumir recursos 1 vez/descanso largo y no cuenta para el limite de conjuros conocidos. Si no eres lanzador de conjuros, el Carisma es la característica para el lanzamiento de conjuros Aasimar (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Alas Celestiales",
+     "texto": "Los Aasimar pueden como acción adicional desplegar 1vez/descanso alas que les permiten volar a una velocidad de 30pies durante 1min. Las alas de un Aasimar irradian luz brillante en un radio de 20pies y luz ténue en 20pies adicionales. Al inicio de cada uno de sus turnos, todas las criaturas aliadas que se encuentren a 20pies o menos del Aasimar, recuperan 1d4pg (a nivel 5 recupran 2d4, a nivel 11 recuperan 3d4 y a nivel 17 recuperan 4d4). Además las criaturas enemigas que se encuentran dentro de la luz emitida por las alas no pueden beneficiarse de invisibilidad."
+    }
+   ]
+  },
+  {
+   "nombre": "Anuro",
+   "descripcion": "Estas pequeñas e inteligentes ranas arborícolas humanoides viven en sociedades primitivas en lo profundo de los bosques y pantanos del mundo.\nCazan insectos gigantes y comen frutas y flores de sus casas arbóreas. A menudo practican el trueque con criaturas más avanzadas para conseguir metal y ornamentos con piedras preciosas.\nLas crías de los anuros se desarrollan hasta convertirse en adultos en menos de un año a menos que encuentren un final violento debido a alguna amenaza del bosque, pueden vivir 60 años, con su piel oscureciéndose y perdiendo su brillo a medida que envejecen.\nUn Anuro mide poco más de 2 pies de altura y pesa 30 libras.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Pequeño",
+   "velocidad": "25pies y 40pies nadando",
+   "idiomas": "Boggard y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Defensa de los pequeños",
+     "texto": "Al ser criaturas pequeñas, los Anuros obtienen los siguientes bonificadores: - +1 a la Clase de Armadura. - +2 a las tiradas de Sigilo."
+    },
+    {
+     "nombre": "Anfibio",
+     "texto": "Los Anuros pueden respirar bajo el agua y no se ven afectados por el terreno difícil de los pantanos excepto si este es de origen mágico."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Anuros y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Anuros pueden ver en la oscuridad como si fuese penumbra hasta 60 pies."
+    },
+    {
+     "nombre": "Camuflaje",
+     "texto": "Los Anuros ganan competencia en Sigilo y un bonificador +2 a las pruebas de Sigilo realizadas en zonas pantanosas y boscosas."
+    },
+    {
+     "nombre": "Saltador",
+     "texto": "Tu capacidad de salto es asombrosa, cuando lleves a cabo la acción de saltar trata tu Fuerza como si fuese de 30 y no necesitas corres previamente para saltar más de 10pies."
+    },
+    {
+     "nombre": "Resistencia de los Anuro",
+     "texto": "Los Anuro obtienen RD-veneno/- y tienen ventaja en las Tiradas de Salvación contra efectos de veneno y para ser envenenados."
+    },
+    {
+     "nombre": "Lengüetazo",
+     "texto": "Puedes usar tu lengua para realizar un ataque a distancia (alcance 15pies) que inflige 1pg de daño contundente +1d4pg de daño por veneno y envenena al objetivo del ataque durante 1d4 asaltos a menos que supere una TS de Constitución CD 8 + Mod. Con + Bonif.Comp, en cuyo caso únicamente sufre el daño.\nTambién puedes usar tu lengua para interactuar y agarrar objetos pequeños que se encuentren a 15pies o menos de ti con una precisión increíble casi inperceptible para la mayoría de los ojos."
+    }
+   ]
+  },
+  {
+   "nombre": "Araina",
+   "descripcion": "Los Araina son criaturas surgidas de la oscuridad mediante magia negra, pese a ello no son criaturas malignas persé, aunque la mayoría de ellos son seguidores de Lolth y su senda oscura.\nLos Araina son muy territoriales y cualquiera que se adentre en sus dominios fácilmente será tratado como una presa con la que alimentarse\nLas leyendas dicen que proceden de lo más profundo de la tierra, pero los registros existentes los ubican en territorios boscosos, donde extienden sus telarañas a lo largo de cientos de millas.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Arácnido y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Telaraña",
+     "texto": "Como acción lanzas una telaraña contra un objetivo (ataque a distancia, 30pies), o un punto que puedas ver. Si impacta contra un objetivo, este pasa a estar apresado hasta romper la telaraña. Si impacta contra un punto al alcance, se forma una capa de telaraña de 10pies de radio sobre dicha superficie que se convierte en terreno difícil. Una criatura apresada en su turno únicamente puede realizar una prueba de Fuerza CD = 8 + Mod.Con + Bon.Comp. para tratar de romper la telaraña. La telaraña tiene CA 10, 5pg, VD-fuego/- e inflamable, ID-contundente, psíquico, veneno/-. Puedes usar esta rasgo una cantidad de veces por descanso largo igual a tu Mod.Con (mínimo 1)."
+    },
+    {
+     "nombre": "Caminar por la telaraña",
+     "texto": "Los Araina son imnunes a los efectos del terreno difícil causado por las telarañas, incluso si son de orígen mágico."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Araina y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Araina pueden ver en la oscuridad como si fuese penumbra hasta 120 pies."
+    },
+    {
+     "nombre": "Sentidos arácnidos",
+     "texto": "Los Araina obtienen competencia en Percepción y tienen un bonificador +2 a las pruebas de percepción basadas en la vista. Mientrás están en contacto con una telaraña saben la ubicación exacta de aquellas criaturas que estén en contacto con la ella."
+    },
+    {
+     "nombre": "Trepadores",
+     "texto": "Los Araina pueden trepar por casi cualquier superficie incluso boca abajo a una velocidad de 30pies."
+    },
+    {
+     "nombre": "Mordisco paralizante",
+     "texto": "Los Araina cuentan con un ataque de mordisco que inflige 1d4pg de daño por veneno y obliga al objetivo a superar una TS de Constitución CD = 8 + Mod.Con + Bonif.Comp para no quedar paralizado una cantidad de asaltos igual a la diferencia entra las respectivas puntuaciones de constitución (mínimo 1). Una criatura paralizada de esta manera puede al final de sus turnos repetir la TS para librarse del efecto. Las criaturas afectadas o que superen la TS se vuelven inmunes a este efecto durante 24h."
+    },
+    {
+     "nombre": "Brazos múltiples",
+     "texto": "Los Araina cuentan con 2 brazos adicionales con los que pueden atacar, interactuar, etc. (a Discreción del DM)Son brazos normalmente funcionales."
+    }
+   ]
+  },
+  {
+   "nombre": "Asura",
+   "descripcion": "Los Asura son una raza de artesanos, investigadores y constructores diminutos que vivió en secreto bajo tierra durante miles de años hasta que los esbirros del Gran Destructor les obligaron a abandonar sus hogares bajo tierra.\nDesde entonces, se han adaptado a la vida en la superficie y rápidamente se establecieron como una de las razas más poderosas de las tierra salvajes, si no se centrasen tanto en sus investigaciones y creaciones, podrían ser la raza dominante y reinar en las tierras salvajes por encima del resto de razas, des plegando un poder de tales dimensiones que nunca jamás se habría visto.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Pequeño",
+   "velocidad": "25pies",
+   "idiomas": "Asura y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Defensa de los pequeños",
+     "texto": "Al ser criaturas pequeñas, los Anuros obtienen los siguientes bonificadores: - +1 a la Clase de Armadura. - +2 a las tiradas de Sigilo."
+    },
+    {
+     "nombre": "Artesanía Hextech",
+     "texto": "Puedes dedicar 2 días y 100po para mejorar un objeto y concederle propiedades únicas. Únicamente puedes mejorar una cantidad de objetos igual a tu Bonif.Comp. - Armas: - Bonificador +1 al ataque y +1d4pg de un tipo de daño cualquiera elejido en el momento de mejorar el arma. - A nivel 10 el bonificador al ataque pasa a ser +2 y el daño adicional a ser +2d4pg. - A nivel 17 el bonificador al ataque pasa a ser +3 y el daño adicional a ser +3d4pg. - Armaduras y Escudos: - Bonificador +1 a la Clase de Armadura. - A nivel 10 el bonificador a la Clase de Armadura pasa a ser de +2. - A nivel 17 concede Resistencia a un tipo de daño cualquiera (cambiar el tipo de daño implica reforjar el objeto). - Foco: - Bonificador +1 a las tiradas de ataque con conjuro y a sus CD. - A nivel 11 el bonificador al ataque y a la CD de tus conjuros pasa a ser de +2 y tus conjuros ignoran cobertura media. - A nivel 17 reduce en 1 el valor necesario para lograr un crítico con conjuros."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Asura y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Asura pueden ver en la oscuridad como si fuese penumbra hasta 60 pies."
+    },
+    {
+     "nombre": "Estudios Avanzados",
+     "texto": "Los Asura obtienen competencia en las siguientes habilidades: Arcano, Historia, Investigación, Naturaleza y Religión. Si un Asura es competente en alguna de estas habilidades por Clase, entonces obtiene un bonificador +2 en dicha habilidad."
+    },
+    {
+     "nombre": "Agilidad Mental",
+     "texto": "Los Asura tienen ventaja en las TS de Sabiduría."
+    },
+    {
+     "nombre": "Resistencia Adquirida",
+     "texto": "Los Asura obtienen un bonificador +2 a las TS contra Conjuros."
+    }
+   ]
+  },
+  {
+   "nombre": "Avianthar",
+   "descripcion": "Los Avianthar son un conjunto de razas de humanoides tipo pájaro que según su origen aviar se asemajan a distintas aves, aqunque los más comunes se asemajan a cuervos, cornejas, buhos y halcones.\nA pesar de que frecuentemente escogen vivir entre otras razas en ciudades densamente pobladas, sus sociedades son estrictas y cerradas, y rarament permiten que otros vean su funcionamiento interno.\nLos Avianthar suelen agruparse en pequeños grupos para crear refugios en almacenes vacíos o edificios cerrados, y los forasteros asumen generalmente que esos estridentes lugares de reunión son cofradías de ladrones, una asunción que es correcta aproximadamente la mitad de las veces.\nPese a que todos los Avianthar poseen alas, no todos ellos conservan la capacidad de volar.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Aviano y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Llamar al viento",
+     "texto": "Conoces el conjuro “Ráfaga de viento”, no cuenta para el límite de conjuros conocidos, y puedes lanzarlo a nivel 2 sin consumir recursos una cantidad de veces por descanso largo igual a tu Mod.Sab (mínimo 1). Si no eres lanzador de conjuros, la Sabiduría es la característica para el lanzamiento de conjuros Avianthar (si es negativo no se aplica)."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Avianthar y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Avianthar pueden ver en la oscuridad como si fuese penumbra hasta 60 pies."
+    },
+    {
+     "nombre": "Alas",
+     "texto": "Los Avianthar tienen alas que les permiten volar a una velocidad de 30pies. Además obtienen un bonificador +2 a las tiradas de Acrobacias realizadas en el aire."
+    },
+    {
+     "nombre": "Carroñero",
+     "texto": "Los Avianthar son capaces de detectara criaturas muertas (recientemente), moribundas, o heridas (33% de PG o menos) mediante el olfato siempre que se encuentren a 250pies o menos."
+    },
+    {
+     "nombre": "Armas Naturales",
+     "texto": "- Picotazo (x1): Puedes realizar un ataque cuerpo a cuerpo con tu pico que si impacta inflige 1d4pg de daño perforante. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño). - Garras (x2): Puedes realizar hasta dos ataques cuerpo a cuerpo con tus garras, cada una de ellas inflige 2d4pg de daño cortante o perforante si impactan. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño)."
+    },
+    {
+     "nombre": "Vista de Halcón",
+     "texto": "Los Avianthar obtienen competencia en Percepción y un bonificador +2 a la pruebas de Percepción que dependan de la vista."
+    }
+   ]
+  },
+  {
+   "nombre": "Charr",
+   "descripcion": "Los Charr son una raza de criaturas leoninas salvajes y feroces.\nLa gran mayoría han renunciado a todos los dioses como falsos, y en cambio, ven toda la vida, desde la magia hasta el combate, con una mirada dura y cínica.\nSu cultura se ha convertido en un estado militar donde son criados como guerreros desde que nacen.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Félido y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Armas naturales",
+     "texto": "- Mordisco (x1): Puedes realizar un ataque cuerpo a cuerpo de Mordisco que si impacta inflige 1d6pg de daño perforante. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño). - Garras(x2): Puedes realizar hasta dos ataques cuerpo a cuerpo con tus garras, cada una de ellas inflige 2d4pg de daño cortante o perforante si impactan. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño)."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Charr y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Penumbra",
+     "texto": "Los Charr pueden ver en la penumbra como si fuese luz brillante hasta 60 pies."
+    },
+    {
+     "nombre": "Poderoso",
+     "texto": "Los Charr tienen un bonificador +2 en las pruebas y TS de Fuerza."
+    },
+    {
+     "nombre": "Piel gruesa",
+     "texto": "Los Charr tienen RD5-Frío/-."
+    },
+    {
+     "nombre": "Fortaleza Mental",
+     "texto": "Los Charr Obtienen un bonificador +2 a las tiradas contra efectos de Hechizar."
+    },
+    {
+     "nombre": "A la Carrera",
+     "texto": "Si un Charr tiene sus dos manos libres cuando lleva a cabo la acción de correr o cargar duplica la distancia que puede recorrer."
+    }
+   ]
+  },
+  {
+   "nombre": "Diablillo",
+   "descripcion": "Los Diablillos aunque muy poca gente lo sabe surgieron de la terrible unión entre goblins salvajes y demonios mediante magia, que dio como resultado a estas pequeñas malévolas y molestas criaturas. Originariamente, los diablillos habitaban en los planos infernales, pero con el paso del tiempo muchos de los diablillos que cruzaban al plano material se fueron quedando atrapados en él y perdiendo parte de sus poderes, eso ocasionó que fuesen un blanco fácil de la venganza de los mortales. Este hecho, izo que muchos de los diablillos se agrupasen formando sociedades para protegerse, que con el tiempo se han ido adaptando e integrando en el plano material y conviviendo más o menos con el resto de razas. Aún así, la gran mayoría de los diablillos siguen siendo de alineamiento maligno o caótico, lo cual hace que la mayoría de razas los evite o los vea como una amenaza.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Pequeño",
+   "velocidad": "25pies",
+   "idiomas": "Infernal, Goblin y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Defensa de los pequeños",
+     "texto": "Al ser criaturas pequeñas, los Diablillos obtienen los siguientes bonificadores: - +1 a la Clase de Armadura. - +2 a las tiradas de Sigilo."
+    },
+    {
+     "nombre": "Herencia infernal",
+     "texto": "Los diablillos cuentan como Infernales en vez de como humanoides, lo que los hace inmune a todo aquello que únicamente afecta o tiene como objetivo a humanos o humanoides, pero se ven afectados por aquello que afecte a los infernales. También obtienen Resisténcia al daño de Fuego o al daño Necrótico (Elije cual de ellas en el momento de crearte a tu Diablillo), y RD5 al tipo de daño que no has elegido para tener Resistencia."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Diablillos y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión demoníaca",
+     "texto": "Los Diablillos ven en la oscuridad como si fuese penumbra incluso en la oscuridad mágica a 120pies."
+    },
+    {
+     "nombre": "Poder Innato",
+     "texto": "Los Diablillos conocen 2 trucos de la lista del brujo que no cuentan para el límite de conjuros conocidos. Si no eres lanzador de conjuros, el Carisma es la característica para el lanzamiento de conjuros de Diablillo (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Resistencia mágica",
+     "texto": "El Diablillo tiene ventaja en las tiradas de salvación contra conjuros y otros efectos mágicos."
+    },
+    {
+     "nombre": "Garras Necróticas (x2)",
+     "texto": "Puedes realizar hasta dos ataques cuerpo a cuerpo con tus garras, cada una de ellas inflige 1d4pg de daño cortante o perforante +1d4pg de daño necrótico si impactan. Los objetivos que sufran daño necrótico de esta manera deben realizar una TS de Constitución CD = 8 + Mod.Con + Bonif.Comp, si la fallan pasan a sufrir los efectos de Corrupción. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño)."
+    },
+    {
+     "nombre": "Alas",
+     "texto": "El Diablillo obtiene alas funcionales que le conceden una velocidad de vuelo de 30pies."
+    }
+   ]
+  },
+  {
+   "nombre": "Dracónido",
+   "descripcion": "Nacidos de dragones, tal como su nombre proclama, los dracónidos caminan orgullosos por un mundo que los recibe con incomprensión temerosa. Creados por los dioses dracónidos o por los dragones mismos, los dracónidos nacían originalmente de huevos de dragón como una única raza híbrida entre dragón y humano. Algunos dracónidos son fieles servidores de verdaderos dragones, otros son soldados que luchan en grandes guerras, y otros se encuentran a la deriva, sin una vocación clara en la vida. Normalmente los dracónidos son extremistas, eligiendo un camino de completa bondad, o convirtiéndose en terribles villanos.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Dracónido y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Linaje Dracónido",
+     "texto": "Como Dracónido obtienes Resitencia a un tipo de daño deribado de su Linaje, y 1 vez/descanso puedes usar tu acción para exhalar energía destructiva en un cono de 15pies, o en una líena recta de 5x30pies, que inflige a cada criatura dentro del área de efecto 2d6pg del tipo de daño derivado de su linaje (3d6 a nivel 5 / 4d6 a nivel 11 y 5d6 a nivel 17) o la mitas si supera una TS CD = 8 + Mod.Con + Bonif.Comp. Elige que tipo de Resistencia, daño y TS te concede tu Linaje Dracónido al crear tu PJ. No puede cambiarse tras escogerse. Rojo, de Oro, y de Oropel = Fuego - TS de Destreza / Blanco, y de Plata = Frío - TS de Constitución / Azul, y de Bronce = Eléctrico - TS de Destreza / Cobre, y Negro = Ácido - TS de Destreza / Verde = Veneno - TS de Constitución."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Dracónidos y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Escamas reforzadas",
+     "texto": "Los Dracónidos obtienen un bonificador +1 a la CA."
+    },
+    {
+     "nombre": "Presencia aterradora",
+     "texto": "Los Dracónidos obtienen competencia en Intimidación y un bonificador +2 a las tiradas de Intimidar."
+    },
+    {
+     "nombre": "Resistencia Dracónida",
+     "texto": "Los Dracónidos son inmunes a los efectos de Dormir y tienes un bonificador +2 a las TS contra cualquier efecto que trate de paralizarlos o causarles miedo."
+    },
+    {
+     "nombre": "Armas Naturales",
+     "texto": "- Mordisco (x1): Puedes realizar un ataque cuerpo a cuerpo que si impacta inflige 1d6pg de daño perforante. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño). - Garras (x2): Puedes realizar hasta dos ataques cuerpo a cuerpo con tus garras, cada una de ellas inflige 2d4pg de daño cortante o perforante si impactan. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño). - Cola (x1): Puedes realizar un ataque cuerpo a cuerpo que si impacta inflige 1d8pg de daño contundente. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño).\nElfos Los elfos valoran su intimidad y sus tradiciones y, si bien a menudo son lentos en hacer amigos tanto a nivel personal como nacional, una vez un extraño es aceptado como camarada, tales alianzas pueden durar generaciones.\nLos elfos tienen un curioso apego a su entorno, quizá como resultado de su increíblemente larga vida, o quizá por razones más profundas y místicas.\nLos elfos que permanecen mucho tiempo en una región se adaptan físicamente para ajustarse a su entorno, y lo más notable de ello es que adoptan una coloración que refleja el entorno local."
+    }
+   ]
+  },
+  {
+   "nombre": "Altos Elfos",
+   "descripcion": "Como un alto elfo, posees una mente aguda y un dominio de, al menos, los conceptos básicos de la magia. En muchos mundos de fantasía existen dos tipos de altos elfos. Uno es altivo y solitario, creyéndose superior a los no elfos e incluso a otros elfos. El otro es más común y más amigable, y a menudo se encuentra entre humanos y otras razas.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Élfico y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Linaje Feérico",
+     "texto": "Tienes ventaja en las TS para no quedar hechizado y no puedes quedarte dormido por ningún efecto mágico."
+    },
+    {
+     "nombre": "Trance",
+     "texto": "Los elfos no necesitan dormir, en lugar de ello meditan profundamente y permanecen semiinconscientes durante cuatro horas al día, tiempo suficiente para que un descanso largo resulte efectivo."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Altos Elfos y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Puedes ver en la penumbra como si fuera luz brillante y, en la oscuridad como si fuera penumbra, hasta a 60pies."
+    },
+    {
+     "nombre": "Sentidos Élficos",
+     "texto": "Eres competente en Percepción, si ya eres competente por Clase, obtienes un bonificador +2."
+    },
+    {
+     "nombre": "Alta Magia",
+     "texto": "Los Altos Elfos conocen 3 trucos de la lista del mago que no cuentan para el límite de conjuros conocidos y tienen un bonificador +2 a las tiradas de ataque con conjuros. Si no eres lanzador de conjuros, la Inteligencia es la característica para el lanzamiento de conjuros de Alto Elfo (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Arcanistas",
+     "texto": "Los Altos Elfos tienen competencia en Conocimiento Arcano, si ya eres competente por Clase, obtienes un bonificador +2."
+    },
+    {
+     "nombre": "Cuerpo Feérico",
+     "texto": "Los Altos Elfos obtienen un bonificador +2 en las TS contra conjuros."
+    },
+    {
+     "nombre": "Reserva Energética",
+     "texto": "Los Altos Elfos obtienen 1 punto de maná adicional por nivel. Si en vez de maná usas espacios de conjuro, obtienes un espacio de conjuro adicional de cada nivel."
+    }
+   ]
+  },
+  {
+   "nombre": "Elfos de los Bosques",
+   "descripcion": "Como elfo de los bosques, tu intuición y tus sentidos son agudos, y tus pies ligeros pueden transportarte rápida y sigilosamente a través de tus bosques natales. Esta categoría incluye a los elfos salvajes (grugach) de Greyhawk y a los Kagonesti de Dragonlance, al igual que a las razas conocidas como elfos de los bosques en Greyhawk y los Reinos Olvidados. En Faerûn, los elfos de los bosques (también conocidos como elfos salvajes, elfos verdes, o elfos del bosque) son aislacionistas y desconfían de los no elfos.\nLa piel de los elfos de los bosques tiende a un tono cobrizo, a veces con trazas de verde. Su cabello tiende al castaño y al negro, pero ocasionalmente es rubio o cobrizo. Sus ojos son verdes, marrones o color avellana.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "35pies",
+   "idiomas": "Élfico, Silvano y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Linaje Feérico",
+     "texto": "Tienes ventaja en las TS para no quedar hechizado y no puedes quedarte dormido por ningún efecto mágico."
+    },
+    {
+     "nombre": "Trance",
+     "texto": "Los elfos no necesitan dormir, en lugar de ello meditan profundamente y permanecen semiinconscientes durante cuatro horas al día, tiempo suficiente para que un descanso largo resulte efectivo."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Elfos del Bosque y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Puedes ver en la penumbra como si fuera luz brillante y, en la oscuridad como si fuera penumbra, hasta a 60pies."
+    },
+    {
+     "nombre": "Sentidos Élficos",
+     "texto": "Eres competente en Percepción, si ya eres competente por Clase, obtienes un bonificador +2."
+    },
+    {
+     "nombre": "Uno con la Naturaleza",
+     "texto": "Los Elfos del Bosque pueden intentar escondertese incluso cuando sólo están ligeramente cubiertos por el follaje, una lluvia fuerte, la nieve que cae, niebla y otros fenómenos naturales."
+    },
+    {
+     "nombre": "Paso Boscoso",
+     "texto": "Los Elfos del Bosque son competentes en Sigilo y tienen Ventaja en las pruebas de Sigilo que realicen en zonas boscosas."
+    },
+    {
+     "nombre": "Tiradores Furtivos",
+     "texto": "Tras realizar un ataque con arma a distáncia estando oculto, si fallas el ataque tu posición no se revela."
+    },
+    {
+     "nombre": "Magia del Bosque",
+     "texto": "Conoces 2 trucos de la lista del Druida que no cuentan para el límite de conjuros conocidos. Si no eres lanzador de conjuros, la Sabiduría es la característica para el lanzamiento de conjuros de Elfo del Bosque (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Conocimientos Naturales",
+     "texto": "Los Elfos del Bosque son competentes en Trato con Animales y Naturaleza, si ya tenias competencia en alguna de ellas por Clase obtienes un bonificador +2."
+    }
+   ]
+  },
+  {
+   "nombre": "Elfo Oscuro (Drow)",
+   "descripcion": "Descendientes de una subraza anterior de elfos de piel oscura, los drow desaparecieron de la superficie del mundo siguiendo a la diosa Lolth por el camino de la maldad y la corrupción. Ahora han construido su propia civilización en las profundidades de la Infraoscuridad, bajo el llamado Camino de Lolth. También conocidos como elfos oscuros, los drow tienen la piel negra como la obsidiana pulida y los ojos pálidos (tan pálidos que se confunden con el blanco) en tonos de lila, plata, rosa, rojo y azul. Tienden a ser más pequeños y delgados que la mayoría de elfos.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Élfico e Infracomún",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Linaje Feérico",
+     "texto": "Tienes ventaja en las TS para no quedar hechizado y no puedes quedarte dormido por ningún efecto mágico."
+    },
+    {
+     "nombre": "Trance",
+     "texto": "Los Drow no necesitan dormir, en lugar de ello meditan profundamente y permanecen semiinconscientes durante cuatro horas al día, tiempo suficiente para que un descanso largo resulte efectivo."
+    },
+    {
+     "nombre": "Habitantes de Underdark",
+     "texto": "Los Drow pueden ver en la oscuridad como si fuese penumbra hasta 120pies. Pero la exposición repentina a la luz brillante los ciega durante 1 asalto, y mientras permanezca bajo luz brillante está deslumbrado."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Drow y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Sentidos Élficos",
+     "texto": "Eres competente en Percepción, si ya eres competente por Clase, obtienes un bonificador +2."
+    },
+    {
+     "nombre": "Maestros conjuradores",
+     "texto": "Los Drow poseen un bonificador +2 a las pruebas para mantener la concentración. Además ven incrementada la CD de sus conjuros en +2."
+    },
+    {
+     "nombre": "Magia Drow",
+     "texto": "Conoces el truco “Luces danzantes” y otro truco a tu elección de la lista del Mago o del Brujo que no cuentan para el límite de conjuros conocido. A nivel 3 aprendes “Fuego feérico”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo sin consumir recuros 1vez/ descanso. A nivel 5 aprendes “Oscuridad”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo sin consumir recuros 1vez/ descanso. Si no eres lanzador de conjuros, el Carisma es la característica para el lanzamiento de conjuros Drow (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Resistencia Arcana",
+     "texto": "Los Drow tienen Resistencia a los Conjuros = 8 + 1/2 de su nivel (mínimo 1). Lo que implica que siempre que sean objetivos involuntarios de un conjuro que únicamente tenga al Drow como objetivo, el lanzador del conjuro debe superar la RC mediante una tirada de nivel de lanzador (D20 + Nivel del conjuro lanzado), si no la supera el conjuro falla automáticamente."
+    },
+    {
+     "nombre": "Embaucador",
+     "texto": "Los Drow son competentes con la habilidad de Engañar, si ya lo eres por Clase, obtienes un bonificador +2\nEnanos Los enanos son una raza estoica y adusta, que residen en altas montañas y en peligrosos reinos bajo tierra, constantemente en guerra contra los gigantes, los goblin y otros horrores. Más que cualquier otra raza, los enanos han adquirido la reputación de ser artesanos de la tierra, adustos y desprovistos de humo, aunque se les satiriza a menudo como orgullosos, a los enanos les guía el honor y la tradición y tienen un fuerte sentido de la amistad y la justicia. Aquellos que se ganan su confianza saben que, si bien trabajan duro, también saben disfrutar a lo grande, en especial si hay cerveza de por medio."
+    }
+   ]
+  },
+  {
+   "nombre": "Enanos de las Montañas",
+   "descripcion": "Los enanos de las Minas tienen unos sentidos agudos, una gran intuición y una fortaleza increíble.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "25pies",
+   "idiomas": "Khuzdûl y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Lentos pero Firmes",
+     "texto": "Los Enanos poseen un bonificador +2 a las pruebas para ser embestidos o derribados mientras estén en tierra firme, y su velocidad nunca se ve afectada por la carga (excepto por un sobrepeso que impida el movimiento)."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Enanos de las Montañas y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Enanos pueden ver en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Fortaleza Enana",
+     "texto": "Tienes ventaja en las tiradas de salvación contra venenos y eres resistente al daño por veneno."
+    },
+    {
+     "nombre": "Afinidad con la Piedra",
+     "texto": "Los Enanos obtienen un bonificador racial +2 a las pruebas de Percepción destinadas a encontrar trabajos en piedra poco usuales (como trampas, puertas ocultas, etc) en muros o suelos de piedra. Tienen derecho a una prueba de Percepción para darse cuanta de tales rasgos siempre que pasen a 10 pies o menos de alguno de ellos, tanto si están buscando como si no."
+    },
+    {
+     "nombre": "Odio Cavernario",
+     "texto": "Los enanos por lo general no soportan a las criaturas del tipo / subtipo: Orco / Gigante / Goblin. Y obtienen un bonificador +2 al ataque contra las criaturas de dicho tipo / subtipo."
+    },
+    {
+     "nombre": "Formación Defensiva",
+     "texto": "Mientras un enano lleve escudo, él y sus aliados adyacentes obtienen un bonificador +1 a la CA y siempre que el enano se encuentre adyacente como mínimo a un aliado suyo que porta escudo, obtiene un bonificador +1 a la CA."
+    }
+   ]
+  },
+  {
+   "nombre": "Enanos de las Colinas",
+   "descripcion": "Como enano de las colinas, eres fuerte y duro, acostumbrado a una vida difícil en un terreno áspero. Probablemente eres alto (para un enano) y tiendes hacia una coloración de piel más clara.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "25pies",
+   "idiomas": "Khuzdûl y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Lentos pero Firmes",
+     "texto": "Los Enanos poseen un bonificador +2 a las pruebas para ser embestidos o derribados mientras estén en tierra firme, y su velocidad nunca se ve afectada por la carga (excepto por un sobrepeso que impida el movimiento)."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Enanos de las Colinas y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Enanos pueden ver en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Fortaleza Enana",
+     "texto": "Tienes ventaja en las tiradas de salvación contra venenos y eres resistente al daño por veneno."
+    },
+    {
+     "nombre": "Afinidad con la Piedra",
+     "texto": "Los Enanos obtienen un bonificador racial +2 a las pruebas de Percepción destinadas a encontrar trabajos en piedra poco usuales (como trampas, puertas ocultas, etc) en muros o suelos de piedra. Tienen derecho a una prueba de Percepción para darse cuanta de tales rasgos siempre que pasen a 10 pies o menos de alguno de ellos, tanto si están buscando como si no."
+    },
+    {
+     "nombre": "Aguante Enano",
+     "texto": "Los Enanos de las Colinas obtienen 1PG adicional por nivel."
+    },
+    {
+     "nombre": "Furia de la Colina",
+     "texto": "Los enanos obtienen un bonificador +2 a las tiradas de daño cuando sus PG están por debajo del 50% de sus PG máximos, este bonificador se incrementa en un +1 adicional cuando sus PG están por debajo del 25%."
+    }
+   ]
+  },
+  {
+   "nombre": "Enanos Grises (Duergar)",
+   "descripcion": "Primos de los enanos, los duergar son criaturas con mal genio que detestan a los intrusos en sus reinos de la suboscuridad pero no tanto como lo hacen sus parientes más cercanos a la superficie. Los duergar habitan en comunidades en las profundidades de la tierra, y aparentan ser más oscuros, versiones retorcidas de sus parientes más amables.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "25pies",
+   "idiomas": "Khuzdûl e Infracomún",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Lentos pero Firmes",
+     "texto": "Los Duergar poseen un bonificador +2 a las pruebas para ser embestidos o derribados mientras estén en tierra firme, y su velocidad nunca se ve afectada por la carga (excepto por un sobrepeso que impida el movimiento)."
+    },
+    {
+     "nombre": "Habitantes de Underdark",
+     "texto": "Los Duergar pueden ver en la oscuridad como si fuese penumbra hasta 120pies. Pero la exposición repentina a la luz brillante los ciega durante 1 asalto, y mientras permanezca bajo luz brillante está deslumbrado."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Duergar y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Fortaleza Enana",
+     "texto": "Tienes ventaja en las tiradas de salvación contra venenos y eres resistente al daño por veneno."
+    },
+    {
+     "nombre": "Resiliencia Duergar",
+     "texto": "Los Duergar tienen ventaja en las tiradas contra parálisis, efectos ilusorios y para ser hechizados."
+    },
+    {
+     "nombre": "Afinidad con la Piedra",
+     "texto": "Los Duergar obtienen un bonificador racial +2 a las pruebas de Percepción destinadas a encontrar trabajos en piedra poco usuales (como trampas, puertas ocultas, etc) en muros o suelos de piedra. Tienen derecho a una prueba de Percepción para darse cuanta de tales rasgos siempre que pasen a 10 pies o menos de alguno de ellos, tanto si están buscando como si no."
+    },
+    {
+     "nombre": "Magia Duergar",
+     "texto": "Obtienes el conjuro “Agrandar/Reducir” que únicamente puedes lanzar sobre ti mismo y no requiere concentración, tampoco cuenta para el límite de conjuros conocidos. Puedes usarlo 1vez/descanso largo. Cuando alcanzas el nivel 3, obtienes el conjuro “Invisibilidad”, no cuenta para el límite de conjuros conocidos y puedes usarlo 1vez/descanso largo. Cuando alcanzas el nivel 5, puedes lanzar “Agrander/Reducir” 1vez/descanso. Si no eres lanzador de conjuros la Inteligencia es tu aptitud mágica para los conjuros Duergar."
+    },
+    {
+     "nombre": "Resistencia Duergar",
+     "texto": "Los Duergar obtienen un bonificador +2 en las TS contra conjuros."
+    }
+   ]
+  },
+  {
+   "nombre": "Félidos",
+   "descripcion": "La mayoría de los félidos son cazadores recolectores tribales que viven en armonía con la naturaleza, aunque algunas tribus se han aclimatado bien a entornos urbanos.\nComo cultura, los félidos son leales, generosos y amistosos. Les gusta pertenecer y estar en armonía con un grupo cuyos miembros trabajen juntos para cumplir sus necesidades y deseos.\nLos félidos tienen pocos tabúes y a menudo exhiben excentricidades inofensivas aunque extrañas. Los individuos cultivan un amplio rango de búsquedas y autoexpresión, tomando riesgos que otros calificarían como imprudentes.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Félido y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Visón en la Penumbra",
+     "texto": "Los félidos pueden ver en la penumbra como si fuese luz brillante."
+    },
+    {
+     "nombre": "Garras",
+     "texto": "Puedes realizar hasta dos ataques cuerpo a cuerpo con tus garras, cada una de ellas inflige 2d4pg de daño cortante o perforante si impactan. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño)."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Félidos y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Puedes ver en oscuridad como si fuera penumbra, hasta a 60pies."
+    },
+    {
+     "nombre": "Reflejos Felinos",
+     "texto": "Los Félidos tienen ventaja en las pruebas de Acrobacias y en las TS de Destreza."
+    },
+    {
+     "nombre": "Velocista",
+     "texto": "Los Félidos obtienen 10pies adicionales de movimiento cuando hacen las acciones de correr, cargar o destravarse."
+    },
+    {
+     "nombre": "Cazador Natural",
+     "texto": "Los Félidos son competentes con Sigilo, Percepción y Supervivencia, si ya eran competentes en alguna de estas habilidades por Clase, obtienen un bonificador +2 en dicha habilidad."
+    }
+   ]
+  },
+  {
+   "nombre": "Fúngicos",
+   "descripcion": "Los Fúngicos son una raza de hongos humanoides que vienen de las más remotas y subterráneas cavernas. Como sociedad, son solitarios y extremadamente cautelosos en sus tratos con otras razas, y raramente son vistos por otros que no sean sus vecinos. La mayoría de los individuos fúngicos son trabajadores diligentes que emplean sus vidas por completo trabajando únicamente para la colonia, pero tienen un pequeño sentido del individualismo. Los fúngicos son humanoides rechonchos con carne hinchada y esponjosa. Sus tonos de piel oscilan entre sombras grises y broncedadas, que incluyen de manera ocasional sombras oscuras de rojo y púrpura. Sus cabezas son coronadas con un casquillo de hongo y sus caras son únicamente reconocibles por un par de granes ojos.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Silvano e Infracomún",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Herencia Silvana",
+     "texto": "Los Fúngicos cuentan como Plantas en vez de como humanoides, lo que los hace inmune a todo aquello que únicamente afecta o tiene como objetivo a humanos o humanoides, pero se ven afectado por todo aquello que afecta a las plantas."
+    },
+    {
+     "nombre": "Habitantes de Underdark",
+     "texto": "Los Fúngicos pueden ver en la oscuridad como si fuese penumbra hasta 120pies. Pero la exposición repentina a la luz brillante los ciega durante 1 asalto, y mientras permanezca bajo luz brillante está deslumbrado."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Fúngicos y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Esporas Paralizantes",
+     "texto": "1vez/descanso largo, un Fúngico puede como acción, expulsar esporas a una criatura que puedes ver a menos de 15 pies de el. Si el objetivo tiene la capacidad de respirar debe realizar una TS de Constitución CD = 8 + Mod.Con + Bonif.Comp, si falla es aturdido durante 1 minuto o hasta que reciba daño. El objetivo puede repetir la tirada de salvación al final de cada uno de sus turnos, terminando el efecto sobre sí mismo en un éxito."
+    },
+    {
+     "nombre": "Esporas Telepáticas",
+     "texto": "Como acción, un Fúngico puede expulsar esporas en un radio de 20pies. Estas esporas pueden dar la vuelta a las esquinas y afectar solo a las criaturas con la capacidad de respirar y con una Inteligencia de 2 o más. Las criaturas afectadas pueden comunicarse telepáticamente entre sí mientras están a menos de 30 pies una de la otra. El efecto dura 1 hora."
+    },
+    {
+     "nombre": "Esporas Tóxicas",
+     "texto": "1vez/descanso largo, un Fúngico puede como acción, expulsar esporas en un radio de 10pies de el. Todas las criaturas en el área de efecto que tengan la capacidad de respirar deben realizar una TS de Constitución CD = 8 + Mod.Con + Bonif.Comp, si fallan pasan a estar envenenadas. Las criaturas envenenadas de esta manera pueden repetir la tirada de salvación al final de cada uno de sus turnos, terminando el efecto sobre sí mismos en un éxito."
+    },
+    {
+     "nombre": "Esporas Revigorizantes",
+     "texto": "Un Fúngico puede como acción, expulsar esporas en un radio de 10pies de el. Todas las criaturas en el área de efecto que tengan la capacidad de respirar recuperan 1d4+Mod.Con PG al inicio de cada uno de sus turno o bien eliminan una de las siguientes condiciones (ceguera, sordera, enfermedad, paralisis, envenenado [el veneno eliminado depende de tu nivel]). Puedes usar este rasgo una cantidad de veces por descanso largo igual a tu Modificador de Constitución (mín.1)."
+    },
+    {
+     "nombre": "Estallido de Esporas",
+     "texto": "1vez/descanso largo, la primera vez que los PG de un Fúngico llegan a 0 o menos, crea un estallido de esporas en un radio de 5pies de el. Todas las criaturas en el área de efecto que tengan la capacidad de respirar deben realizar una TS de Constitución CD = 8 + Mod.Con + Bonif.Comp, si fallan son paralizadas hasta el final de su siguiente turno, momento en que deberán repetir la TS de Constitución, si la fallan nuevamente, quedan petrificadas durante 1min. Los Fúngicos son inmunes a este efecto."
+    }
+   ]
+  },
+  {
+   "nombre": "Githyanki",
+   "descripcion": "Los githyanki, que alguna vez fueron miembros de un pueblo que escapó de la servidumbre de los Azota-mentes, se separaron de sus primos, los githzerai, y huyeron al Plano Astral.\nEn ese reino plateado y atemporal, los githyanki perfeccionaron sus poderes psiónicos y construyeron una gran ciudad llamada Tu’narath. Desde entonces se han extendido por todo el multiverso, comenzando en puestos de avanzada fuera del Plano Astral, donde pasa el tiempo y sus hijos pueden llegar a la edad adulta.\nLos githyanki, un pueblo larguirucho con tonos de piel amarillos, verdes y marrones, complementan su destreza física con poder psiónico, inculcado por los Azota-mentes y cultivado durante eones en el Plano Astral.\nAhora todos los githyanki pueden usar su vínculo psíquico con ese plano para acceder a fragmentos de conocimiento dejados por seres que viajan, viven y mueren entre las bubes astrales plateadas",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Gith y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Resistencia Psiónica",
+     "texto": "Los Githyanki tienen Resistencia al daño psíquico."
+    },
+    {
+     "nombre": "Conocimiento Astral",
+     "texto": "Cada vez que terminas un descanso largo, adquieres competencia en una habilidad de tu elección, si ya tienes competencia en dicha habilidad obtienes un bonificador +2. Esta competencia o bonificador, dura hasta el final de tu próximo descanso largo."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Githyanki y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Disciplina Mental",
+     "texto": "Los Githyanki tienen ventaja en todas las TS contra conjuros y efectos de Miedo y Hechizado."
+    },
+    {
+     "nombre": "Influencia Psiónica",
+     "texto": "1vez/descanso, cuando realices una prueba de Engañar, Intimidar o Persuadir, puedes añadir 1d4 a la tirada."
+    },
+    {
+     "nombre": "Descarga Psiónica",
+     "texto": "1vez/turno, cuando inflijas daño a un objetivo, puedes hacer que este sufra 1d4+Mod.Sab PG de daño psíquico o la mitad si supera una TS de Sabiduría CD = 8 + Mod.Sab + Bonif.Comp. Puedes usar este rasgo una cantidad de veces por desanco largo igual a tu Mod.Sab."
+    },
+    {
+     "nombre": "Poder Psiónico Gith",
+     "texto": "Los Githyanki conocen el truco “Mano de mago”, no cuenta para el límite de conjuros conocidos y cuando lo usas la mano siempre es invisible. A nivel 3 los Githyanki aprenden el conjuro “Salto” o “Escudo” a tu elección, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso largo sin consumir recursos. A nivel 5 los Githyanki aprenden el conjuro “Paso Brumoso” o “Detectar Pensamientos”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso largo sin consumir recursos. Si no eres lanzador de conjuros, la inteligencia es tu característica para los conjuros Githyanki (si es negativa no se aplica).\nGnomos Los gnomos remontan su linaje hasta el misterioso reino de las hadas, un lugar donde los colores son más brillantes, las tierras salvajes son aún más salvajes, y las emociones son más primitivas. Fuerzas desconocidas empujaron a los antiguos gnomos hasta sacarles de dicho reino, obligándoles a buscar refugio en este mundo; a pesar de ello, ni abandonaron del todo sus raíces feéricas, ni se adaptaron completamente a la cultura mortal."
+    }
+   ]
+  },
+  {
+   "nombre": "Gnomo",
+   "descripcion": "Los gnomos son bienvenidos en todas partes como técnicos, alquimistas e inventores, pero muchos de ellos prefieren quedarse entre los suyos aunque sus habilidades estén muy demandadas. Viven en cómodas madrigueras excavadas bajo colinas onduladas y frondosas. Aunque en estos lugares abundan los animales, ir de caza es una pésima idea.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Pequeño",
+   "velocidad": "25pies",
+   "idiomas": "Gnomo y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Defensa de los pequeños",
+     "texto": "Al ser criaturas pequeñas, los Gnomos obtienen los siguientes bonificadores: - +1 a la Clase de Armadura. - +2 a las tiradas de Sigilo."
+    },
+    {
+     "nombre": "Astucia del Gnomo",
+     "texto": "Los Gnomos tienen ventaja en todas las tiradas de salvación de Inteligencia, Sabiduría y Carisma contra magia."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Gnomos y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Puedes ver en la penumbra como si fuera luz brillante y, en la oscuridad como si fuera penumbra, hasta a 60pies."
+    },
+    {
+     "nombre": "Conocimiento tecnológico",
+     "texto": "Cuando hagas una prueba de Inteligencia (Historia) relacionada con objetos mágicos, alquímicos o tecnológicos, puedes añadir tu bonificador por competencia multiplicado por 2 en lugar del bonificador habitual."
+    },
+    {
+     "nombre": "Constructor",
+     "texto": "Puedes dedicar una hora de trabajo y emplear materiales por valor de 10 po para fabricar un mecanismo Diminuto (CA 5, 1pg) de los de la siguiente lista. Puedes tener hasta tres mecanismos de este tipo a la vez. - Juguete Mecánico: Este juguete de cuerda tiene forma de animal, monstruo o persona. Cuando se coloca en el suelo tiene una velocidad de 15pies y puedes dirigirlo como acción adicional. El juguete puede escuchar, transmitir e interactuar con pequeños objetos. - Encendedor: Este dispositivo produce una diminuta llama que puede usarse como acción para prender objetos tales como antorchas, etc. - Caja de Música: Cuando se abre, suena una canción a un volumen moderado. Deja de sonar cuando acaba la canción o cuando se cierra."
+    },
+    {
+     "nombre": "Entrenamiento Defensivo",
+     "texto": "Los Gnomos obtienen un bonficador +2 a la CA contra criaturas del tipo/subtipo Gigante."
+    },
+    {
+     "nombre": "Odio",
+     "texto": "Los Gnomos tienen un bonificador +2 a las tiradas de ataque contra humanoides del tipo/subtipo Orco y Goblin."
+    },
+    {
+     "nombre": "Magia Gnomica",
+     "texto": "Los Gonomos conocen uno de los siguientes conjuros que no cuenta para el límite de conjuros conocidos, pueden lanzarlo tantas veces por descanso largo sin consumir recursos como su Mod.Int (mínimo 1). - Detectar Magia, Dormir, Escudo, Ola Atronadora, Proyectil Mágico. Si no eres lanzador de conjuros, la Inteligencia es la característica para los conjuros de Gnomo. (si es negativa no se aplica)."
+    }
+   ]
+  },
+  {
+   "nombre": "Gnomos Grises (Svirfneblin)",
+   "descripcion": "Los svirfneblin, son una solitaria rama de la raza gnoma. Viven bajo tierra en ciudades ocultas, a salvo de los elfos oscuros y otras razas subterráneas. Tienen la piel del color de la piedra gris o marrón.\nLos lazos de un svirfneblin con el misterioso reino del vidente son mucho más fuertes que los de sus familiares gnomos de la superficie, y eso los hace ser o bien extrañamente separados de sus emociones o tener arrebatos de violencia aleatoria.\nLos svirfneblin han tenido guerras durante mucho tiempo contra los duergar, y tienen dificultades para ver las diferencias entre los duergar y otros enanos.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Pequeño",
+   "velocidad": "25pies",
+   "idiomas": "Gnomo e Infracomún",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Defensa de los pequeños",
+     "texto": "Al ser criaturas pequeñas, los Svirfneblin obtienen los siguientes bonificadores: - +1 a la Clase de Armadura. - +2 a las tiradas de Sigilo."
+    },
+    {
+     "nombre": "Astucia del Gnomo",
+     "texto": "Los Svirfneblin tienen ventaja en todas las tiradas de salvación de Inteligencia, Sabiduría y Carisma contra magia."
+    },
+    {
+     "nombre": "Habitantes de Underdark",
+     "texto": "Los Svirfneblin pueden ver en la oscuridad como si fuese penumbra hasta 120pies. Pero la exposición repentina a la luz brillante los ciega durante 1 asalto, y mientras permanezca bajo luz brillante está deslumbrado."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Svirfneblin y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Uno con la Roca",
+     "texto": "Los Svirfneblin tienen ventaja en las pruebas de Sigilo en terrenos rocosos."
+    },
+    {
+     "nombre": "Conocimiento tecnológico",
+     "texto": "Cuando hagas una prueba de Inteligencia (Historia) relacionada con objetos mágicos, alquímicos o tecnológicos, puedes añadir tu bonificador por competencia multiplicado por 2 en lugar del bonificador habitual."
+    },
+    {
+     "nombre": "Entrenamiento Defensivo",
+     "texto": "Los Gnomos obtienen un bonficador +2 a la CA contra criaturas del tipo/subtipo Enano."
+    },
+    {
+     "nombre": "Odio",
+     "texto": "Los Gnomos tienen un bonificador +2 a las tiradas de ataque contra humanoides del tipo/subtipo Reptiliano y Enano."
+    },
+    {
+     "nombre": "Afinidad con la Piedra",
+     "texto": "Los Svirfneblin obtienen un bonificador racial +2 a las pruebas de Percepción destinadas a encontrar trabajos en piedra poco usuales (como trampas, puertas ocultas, etc) en muros o suelos de piedra. Tienen derecho a una prueba de Percepción para darse cuanta de tales rasgos siempre que pasen a 10 pies o menos de alguno de ellos, tanto si están buscando como si no."
+    },
+    {
+     "nombre": "Afinidad Mágica",
+     "texto": "Los Svirfneblin obtienen un bonificador +1 a las tiradas de ataque con conjuros y a la CD de sus conjuros, además conocen uno de los siguientes conjuros que no cuenta para el límite de conjuros conocidos, pueden lanzarlo tantas veces por descanso largo sin consumir recursos como su Mod.Int (mínimo 1). - Imagen Silenciosa, Armadura de Mago, Hechizar Persona, Orbe Cromático, Risa Horrible de Tasha. Si no eres lanzador de conjuros, la Inteligencia es la característica para los conjuros de Gnomo. (si es negativa no se aplica)."
+    }
+   ]
+  },
+  {
+   "nombre": "Goblin",
+   "descripcion": "Los goblins prefieren habitar en cuevas, en medio de grandes y densos matorrales de cardos y zarzas o en estructuras construidas y luego abandonadas por otros. El odio de los goblins es profundo, y pocas cosas inspiran más su ira que los gnomos, caballos y los perros normales (que los goblins consideran una pálida imitación de los perros goblin). Los goblins son también muy supersticiosos, y tratan la magia con una servil mezcla de temor y miedo, tienen la costumbre de atribuir a la magia los hechos mundanos, como el fuego y la escritura, ambos tienen un poder místico en la sociedad goblin. El fuego es muy querido por los goblins por su capacidad de causar una gran destrucción y porque no requiere del tamaño o la fuerza para usarlo. Las palabras escritas son odiadas ya que los goblins creen que la escritura roba palabras de su cabeza. Los Goblins son voraces y pueden comer su peso corporal en comida diariamente sin engordar y aunque prefieren la carne humana y gnoma, un goblin no rechaza ningún tipo de alimento, excepto, quizá, vegetales.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Pequeño",
+   "velocidad": "25pies",
+   "idiomas": "Goblin, Dracónido, Orco y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Defensa de los pequeños",
+     "texto": "Al ser criaturas pequeñas, los Goblin obtienen los siguientes bonificadores: - +1 a la Clase de Armadura. - +2 a las tiradas de Sigilo."
+    },
+    {
+     "nombre": "Crueldad Goblin",
+     "texto": "1vez/turno, cuando realices una tirada de ataque (arma o conjuro) contra una criatura y al menos un aliado tuyo no inconsciente se encuentre a 5pies o menos del objetivo, o ataques con ventaja, puedes elegir tener un penalizador -2 en la tirada de ataque. Si el ataque impacta inflige 1d4pg de daño necrótico adicional. Este daño se incrementa a 2d4 a nivel 5, a 3d4 a nivel 11 y a 4d4 a nivel 17."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Goblin y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Emboscador",
+     "texto": "Los Goblin obtienen competencia en Sigilo, si ya posees competencia en Sigilo por clase, obtienes un bonificador +2 a Sigilo."
+    },
+    {
+     "nombre": "Trampero",
+     "texto": "Los Goblin fabrican trampas el doble de rápido y con un bonificador +2 a la CD para descubirlas y para evitar sus efectos."
+    },
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Globlins pueden ver en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Cobardes",
+     "texto": "Los Goblins pueden usar Destrabarte, Correr y Esconderte como acciones adicionales en cada uno de sus turnos."
+    },
+    {
+     "nombre": "Pequeños Jinetes",
+     "texto": "Los Gobin obtienen un bonificador +1 a la CA y al ataque con armas mientras montan criaturas pequeñas, lobos o huargos."
+    },
+    {
+     "nombre": "Sobreviviente Nato",
+     "texto": "Los Goblin necesitan al día la mitad de raciones y agua para sobrevivir. Además tienen ventaja en las pruebas de Supervivencia para encontrar alimento y agua."
+    }
+   ]
+  },
+  {
+   "nombre": "Humano",
+   "descripcion": "Los humanos poseen un empuje excepcional, y una gran capacidad para resistir y expandirse, y como tales son actualmente la raza dominante del mundo.\nSus imperios y naciones son vastos y en creciente aumento, y los ciudadanos de dichas sociedades esculpen nombres para sí con la fuerza de la espada y el poder de los conjuros.\nLa humanidad se caracteriza por ser tumultuosa y diversa, y las culturas humanas van desde las tribus salvajes pero honorables, hasta las familias nobles decadentes y adoradoras del diablo en las ciudades más cosmopolitas.\nLa curiosidad y la ambición humanas a menudo triunfan sobre su predilección por un estilo de vida sedentario, y muchos abandonan sus hogares para explorar los innumerables rincones olvidados del mundo, o dirigir poderosos ejércitos para conquistar a sus vecinos, simplemente porque pueden.\nLa humanidad es quizá la más heterogénea de todas las razas comunes, con una capacidad tremenda tanto para grandes males como para el bien sin límites.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Hábil",
+     "texto": "Los humanos empiezan o bien con una Dote o bien con competencia en dos habilidades de su elección."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Humanos y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Conservar la esperanza",
+     "texto": "1vez/desanso, cuando un Humano realice una tirada de ataque, salvación o habilidad, puede como reacción, conceder a todos los aliados a 20pies de radio que puedan verlo u oírlo, y a si mismos, un bonificador +1d4 en todas las tiradas (exceptuando tiradas de daño) hasta el final de su siguiente turno."
+    },
+    {
+     "nombre": "Maña",
+     "texto": "Siempre que un humano realice una prueba de habilidad en la que intervenga alguna herramienta que esté usando, añade 1d4 a su tirada."
+    },
+    {
+     "nombre": "Comerciantes",
+     "texto": "Los Humanos son competentes con las habilidad de Persuasión, si ya la tenian por Clase, obtienen un bonifiador +2."
+    },
+    {
+     "nombre": "Resiliencia",
+     "texto": "Los Humanos obtienen competencia con una TS de su elección."
+    },
+    {
+     "nombre": "Trabajo en equipo",
+     "texto": "Cuando un humano realiza un ataque, si un aliado suyo no incapacitado se encuentra a 5pies o menos de su objetivo, obtiene un bonificador +1 en dicha tirada de ataque. Además siempre que use la acción de ayudar o reciva la acción de ayudar, el beneficiario de la ayuda obtienen un bonificador +1 en dicha tirada."
+    }
+   ]
+  },
+  {
+   "nombre": "Insectoide",
+   "descripcion": "Los Insectoides son una raza nacida de la unión entre humanoides y formas insectoides ancestrales. Sus cuerpos varían en aparienci (Hormigas, Escarabajos, Abejas...).\nViven en sociedades jerárquicas y organizadas, con una fuerte noción de comunidad y deber hacia el grupo, aunque los individuos que parten hacia el mundo exterior suelen hacerlo buscanso conocimiento, poder, o una nueva colmena a la que servir.\nLos insectoides inspiran tanto fascinación como temor, sus cuerpos exudan resiliencia, sus sentidos son agudos, y su forma de actuar en grupo los hace combatientes formidables.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Silvano y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Cuerpo Quitonoso",
+     "texto": "Los Insectoides tienen un bonificador +1 a la CA, son resistentes al daño por ácido y tienen ventaja en las TS contra efectos de ácido."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Insectoides y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión Compuesta",
+     "texto": "Los Insectoides pueden ver en la oscuridad como si fuese penumbra hasta 60pies, además obtienen ventaja en las pruebas de Percepción que dependen de la vista."
+    },
+    {
+     "nombre": "Cavatúneles",
+     "texto": "Los Insectoides pueden excavar a través de la tierra no mágica como si fuese terreno difícil."
+    },
+    {
+     "nombre": "Orientación infalible",
+     "texto": "Los Insectoides nunca se pierden en un área interior y recuerdan a la perfección el camino que han seguido."
+    },
+    {
+     "nombre": "Imitación",
+     "texto": "Siempre que una criatura que un Insectoide pueda ver realice una tirada con Ventaja, el Insectoide puede hasta el final de su siguiente turno usar su acción adicional para obtener ventaja en la misma tirada que vió."
+    },
+    {
+     "nombre": "Trepadores",
+     "texto": "Los Insectoides pueden trepar por casi cualquier superficie incluso boca abajo a una velocidad de 30pies."
+    },
+    {
+     "nombre": "Apéndice vestigial",
+     "texto": "Los Insectoides tienen uno de los siguientes apendices a tu elección en el momento de crearlo: - Brazos múltiples: Los Insectoides cuentan con 2 brazos adicionales con los que pueden atacar, interactuar, etc. a Discreción del DM. Son brazos normalmente funcionales. - Alas: Los Insectoides cuentan con alas que les conceden la capacidad de vuelo y una velocidad volando de 30pies. - Agijón: Los Insectoides cuentan con un aguijón con el que pueden realizar ataques cuerpo a cuerpo (usa la Destreza o la Fuerza a voluntad). Si dicho ataque impacta inflije 2d6pg de daño por veneno y fuerza al objetivo a superar una TS de Constitución CD 8 + Mod.Con + Bonif.Comp para no quedar envenenado. Este rasgo puede usarse una cantidad de veces por descanso largo igual al Mod.Con (mínimo 1)."
+    }
+   ]
+  },
+  {
+   "nombre": "Kitsune",
+   "descripcion": "Los Kitsune son criaturas mágicas de gracia de otro mundo, que viven en el mundo pero no son parte de él. Viven en lugares de belleza etérea, en medio de bosques antiguos en el lejano oriente. Los zorros, como las criaturas, aman la naturaleza y la magia, el arte, la música y la poesía, el engaño y las cosas buenas del mundo.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Silvano y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Forma Verdadera",
+     "texto": "Los Kitsune pueden como acción transformarse en un zorro, hasta que decidan volver a su forma humanoide, o caigan inconscientes o mueran."
+    },
+    {
+     "nombre": "Llamas Azules",
+     "texto": "Los Kitsune conocen el truco “Crear Llama” con la excepción que esta es de color azul, no cuenta para el límite de conjuros conocidos y si no son lanzadores de conjuros usan el carisma como caracterísitca para lanzar conjuros."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Kitsune y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Sentidos Agudos",
+     "texto": "Los Kitsune pueden ver en la oscuridad como si fuese penumbra hasta 60pies, y obtienen competencia con la habilidad de Percepción."
+    },
+    {
+     "nombre": "Naturaleza Engañosa",
+     "texto": "Los Kitsune obtienen competencia en Persuasión y Engaño, si ya tienen algua de ellas por clase obtienen un bonificador +2 en dicha habilidad."
+    },
+    {
+     "nombre": "Agilidad Zorruna",
+     "texto": "Los Kitsune pueden usar su reacción para repetir una tirada de destreza una vez por descanso corto."
+    },
+    {
+     "nombre": "Magia Kitsune",
+     "texto": "Los Kitsune conocen el truco “Prestidigitación”, no cuenta para el límite de conjuros conocidos. A nivel 3 los Kitsune aprenden el conjuro “Hechizar Persona”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso largo sin consumir recursos. A nivel 5 los Kitsune aprenden el conjuro “Imagen Múltiple”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso largo sin consumir recursos. Si no eres lanzador de conjuros, el Carisma es tu característica para los conjuros Kitsune (si es negativa no se aplica)."
+    }
+   ]
+  },
+  {
+   "nombre": "Kobold",
+   "descripcion": "Los kobolds son criaturas de la oscuridad, que se encuentran más habitualmente en enormes madrigueras subterráneas o en los oscuros rincones del bosque donde el sol no puede llegar. Debido a sus similitudes físicas, los kobolds se proclaman en voz alta como descendientes de los dragones, destinados a gobernar la tierra bajo las alas de sus grandes primos-dioses, pero para la mayoría de los dragones esta odiosa peste carece de utilidad. Aunque pueden hablar en voz alta de derecho divino y destino manifiesto, los kobolds son muy conscientes de su propia debilidad. Cobardes e intrigantes, nunca luchan de manera justa si pueden evitarlo, en su lugar prefieren las emboscadas y traiciones, encerrados en sus madrigueras detrás de incontables trampas, sencillas pero ingeniosas, o abalanzándose sobre el enemigo en vastas y aullantes hordas.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Pequeño",
+   "velocidad": "25pies",
+   "idiomas": "Dracónido y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Defensa de los pequeños",
+     "texto": "Al ser criaturas pequeñas, los Kobolds obtienen los siguientes bonificadores: - +1 a la Clase de Armadura. - +2 a las tiradas de Sigilo."
+    },
+    {
+     "nombre": "Piel escamosa",
+     "texto": "Los Kobolds obtienen un bonificador +1 a la CA."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Kobold y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Trampero",
+     "texto": "Los Kobolds fabrican trampas el doble de rápido y con un bonificador +2 a la CD para descubirlas y para evitar sus efectos."
+    },
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Kobolds pueden ver en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Cobardes",
+     "texto": "Los Kobolds pueden usar Destrabarte, Correr y Esconderte como acciones adicionales en cada uno de sus turnos."
+    },
+    {
+     "nombre": "Tácticas de Manada",
+     "texto": "Siempre que un Kobold se encuentre a 5 pies o menos de una criatura, y un aliado suyo (del kobold) se encuentre a 5pies o menos de la misma criatura, puede usar su acción adicional, para hasta el principio de su próximo turno, el y sus aliados tienen ventaja en la siguiente tirada de ataque cuerpo a cuerpo realizada contra esa criatura."
+    },
+    {
+     "nombre": "Legado Dracónico",
+     "texto": "Los Kobold tienen ventaja en las TS para evitar ser Dormidos y Asustados."
+    },
+    {
+     "nombre": "Cola (x1)",
+     "texto": "Los Kobolds pueden realizar un ataque cuerpo a cuerpo con la cola que si impacta inflige 1d8pg de daño contundente. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño)."
+    }
+   ]
+  },
+  {
+   "nombre": "Medianos",
+   "descripcion": "Los Medianos son optimistas y alegres por naturaleza, bendecidos con una suerte enorme, y empujados por una poderosa ansia viajera, los medianos compensan su corta estatura con una gran abundancia de valor y de curiosidad. A la vez excitables y de trato fácil, a los medianos les gusta mantener la calma y tener la vista puesta en la oportunidad, y no son tan dados como algunas de las razas más volátiles a estallidos violentos o emocionales, incluso en las fauces de la catástrofe, un mediano casi nunca pierde el sentido del humor.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Pequeño",
+   "velocidad": "25pies",
+   "idiomas": "Mediano y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Defensa de los pequeños",
+     "texto": "Al ser criaturas pequeñas, los Medianos obtienen los siguientes bonificadores: - +1 a la Clase de Armadura. - +2 a las tiradas de Sigilo."
+    },
+    {
+     "nombre": "Afortunado",
+     "texto": "Siempre que un Mediano saque un fallo directo en una tirada del d20, puede repetir la tirada pero debe quedarse con el nuevo resultado."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Medianos y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Valiente",
+     "texto": "Los Medianos tiran con ventaja todas las TS contra efectos de Miedo."
+    },
+    {
+     "nombre": "Agilidad de los Medianos",
+     "texto": "Los Medianos pueden moverse y ocupar cualquier espacio ocupado por una criatura que tenga un tamaño mayor que ells sin incurrir en penalizadores."
+    },
+    {
+     "nombre": "Pies Firmes",
+     "texto": "Los Medianos ignoran cualquier terreno difícil que no sea de origen mágico."
+    },
+    {
+     "nombre": "Pies Ligeros",
+     "texto": "Los medianos pueden usar la acción de correr como acción adicional y si en una tirada de iniciativa el valor del D20 es menor que 10, trata el resultado de este como si hubiese sido un 10."
+    },
+    {
+     "nombre": "Pisar sin rastro",
+     "texto": "Los medianos tienen ventaja en las tiradas de Supervivencia destinadas a ocultar sus pisadas."
+    }
+   ]
+  },
+  {
+   "nombre": "Norn",
+   "descripcion": "Esta raza originaria de las lejanas tierras heladas se a visto obligada a emigrar de su tierra natal de donde han sido expulsadas por un más que colosal dragón de hielo, aunque han buscado otras zonas frías, se han extendido por todas las tierras salvajes donde ahora residen. Los individualistas norn viven para cazar, sus habilidades de rastreo, sigilo y para matar los hacen aliados invaluables en cualquier situación de combate. Los norn son muy orgullosos de sus victorias personales, y su principal objetivo en la vida es lograr grandes hazañas para cultivar su leyenda.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Gigante y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Bendición de los Espíritus",
+     "texto": "Un Norn elige un Espíritu Animal al crear su personaje: Oso, Lobo o Cuervo. Esta elección es permanente y determina los rasgos de sus transformaciones. - Forma Híbrida: Como Acción adicional, adoptas tu Forma Híbrida, mostrando rasgos físicos de tu Espíritu. Puedes entrar y salir de esta forma de manera ilimitada. La forma híbrida dura 1min en combate y 10min fuera del combate, también termina si tus PG caen a 0 o menos. Cuando la forma híbrida finaliza obtienes un punto de Estrés Espiritual. - Oso: +1 de Fuerza y Constitución. Ventaja en Pruebas de Atletismo y en TS de Fuerza. Garras (x2) con las que puedes realizar hasta dos ataques que infligen 2d4pg de daño cortante o perforante cada uno (a nivel 5 el daño aumenta a 2d6, a nivel 11 a 2d8 y a nivel 17 a 2d10). Usan Fuerza o Destreza a voluntad. Mordisco (x1) con el que puedes realizar un ataque que inflige 1d6pg de daño perforante (a nivel 5 el daño aumenta a 1d8, a nivel 11 a 1d10 y a nivel 17 a 1d12). Usan Fuerza o Destreza a voluntad. - Lobo: +1 de Destreza y Constitución. Ventaja en Pruebas de Percepción basadas en el olfato y en TS de Destreza. Garras (x2) con las que puedes realizar hasta dos ataques que infligen 2d4pg de daño cortante o perforante cada uno (a nivel 5 el daño aumenta a 2d6, a nivel 11 a 2d8 y a nivel 17 a 2d10). Usan Fuerza o Destreza a voluntad. Mordisco (x1) con el que puedes realizar un ataque que inflige 1d6pg de daño perforante (a nivel 5 el daño aumenta a 1d8, a nivel 11 a 1d10 y a nivel 17 a 1d12). Usan Fuerza o Destreza a voluntad. - Cuervo: +1 de Inteligencia y Sabiduría. Ventaja en Pruebas de Percepción basadas en la vista y en TS de Sabiduría. Garras (x2) con las que puedes realizar hasta dos ataques que infligen 2d4pg de daño cortante o perforante cada uno (a nivel 5 el daño aumenta a 2d6, a nivel 11 a 2d8 y a nivel 17 a 2d10). Usan Fuerza o Destreza a voluntad. Picotazo (x1) con el que puedes realizar un ataque que inflige 1d6pg de daño perforante (a nivel 5 el daño aumenta a 1d8, a nivel 11 a 1d10 y a nivel 17 a 1d12). Usan Fuerza o Destreza a voluntad. - Estrés Espiritual: Cada vez que finalizas una transformación en Forma Híbrida, obtienes un punto de Estrés Espiritual. Cuando llegas a 3 puntos de Estrés Espiritual, estos se reinician a 0 y tu obtienes un nivel de Agotamiento. Los puntos de Estrés Espiritual se pueden eliminar a razón de 1 punto por descanso corto o todos en un descanso largo.\n- Forma Total: 1vez/descanso largo, como Acción adicional adoptas tu Forma Total, convirtiendote por completo en tu Animal Espiritual, la forma total dura 1min en combate y 10min fuera del combate, también termina si tus PG caen a 0 o menos. En forma total no puedes usar armas ni armaduras, no puedes lanzar conjuros, y únicamente puedes mantener la concentración en aquellos conjuros que ubieses lanzado antes de transformarte. - Oso: Tu tamaño es Grande, lo que te concede +4 a la Fuerza, +2 Constitución, -2 a la Destreza y -2 a las pruebas de Sigilo. Tu puntuación de Fuerza nunca puede ser inferior a 14 (a nivel 5 no puede ser inferior a 16, a nivel 11 a 18 y a nivel 17 a 20). Resistencia al Daño Físico que no sea de origen mágico. Ventaja en Pruebas de Atletismo y en TS de Fuerza. Garras(x2) con las que puedes realizar hasta dos ataques que infligen 2d6pg de daño cortante o perforante cada uno y obligan al objetivo superar una TS de Fuerza CD = 8 + Mod.Fue + Bonif.Comp para no quedar derribado (a nivel 5 el daño aumenta a 3d6, a nivel 11 a 4d6 y a nivel 17 a 5d6). Mordisco (x1) con el que puedes realizar un ataque que inflige 1d8pg de daño perforante (a nivel 5 el daño aumenta a 1d10, a nivel 11 a 1d12 y a nivel 17 a 2d8), si impacta puedes dejar al objetivo de tu ataque Agarrado (prueba enfrentada entre tu fuerza y su fuerza o destreza), mientras tengas un objetivo agarrado de esta manera en cada uno de tus turnos si quieres mantener el agarre únicmaente puedes realizar ataques de mordisco. Estos ataques usan Fuerza o Destreza a voluntad. - Lobo: Obtienes +10pies de movimiento, +2 a la Destreza y Constitución, y +2 a las pruebas de Sigilo. Tu puntuación de Destreza nunca puede ser inferior a 14 (a nivel 5 no puede serlo a 16, a nivel 11 a 18 y a nivel 17 a 20). Tus ataques tienen ventaja e infligen +1d4pg siempre que se realicen contra enemigos que se encuentren a 5pies o menos de un aliado tuyo no incapacitado. Ventaja en Pruebas de Percepción basadas en el olfato y en TS de Destreza. Mordisco (x1) con el que puedes realizar un ataque que inflige 2d4pg de daño perforante (a nivel 5 el daño aumenta a 3d4, a nivel 11 a 4d4 y a nivel 17 a 5d4), si impacta puedes dejar al objetivo de tu ataque Agarrado (prueba enfrentada entre tu fuerza y su fuerza o destreza), mientras tengas un objetivo agarrado de esta manera en cada uno de tus turnos si quieres mantener el agarre únicmaente puedes realizar ataques de mordisco. Estos ataques usan Fuerza o Destreza a voluntad. - Cuervo: Tu tamaño es Diminuto, lo que te concede +4 a Destreza, +4 a las Pruebas de Sigilo, +2 a Sabiduría e Inteligencia, -4 a Fuerza y +2 a la CA. Tu puntuación de Sabiduría nunca puede ser inferior a 14 (a nivel 5 no puede serlo a 16, a nivel 11 a 18 y a nivel 17 a 20). Obtienes Alas que te conceden una velocidad de vuelo de 30pies. Obtienes Ventaja en Pruebas de Percepción basadas en la vista y en TS de Sabiduría. Garras(x2) con las que puedes realizar hasta dos ataques que infligen 1d4pg de daño cortante o perforante cada uno (a nivel 5 el daño aumenta a 1d6, a nivel 11 a 1d8 y a nivel 17 a 1d10). Picotazo Sombría (x1): Ataque a distancia mediante Sabiduría (Alcance de 60pies) que inflige 2d4pg de daño necrótico (a nivel 5 el daño aumenta a 3d4, a nivel 11 a 4d4 y a nivel 17 a 5d4), si impacta el objetivo debe superar una TS de Constitución CD = 8 + Mod.Sab + Bonif.Comp o tendrá desventaja en su siguiente ataque."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Norn y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Resistencia de Piedra",
+     "texto": "1vez/descanso, cuando un Norn recive daño, puede usar su reacción para reducir dicho daño en 2d6+Mod.Con."
+    },
+    {
+     "nombre": "Nacido en la Montaña",
+     "texto": "Los Norn obtienen RD-Frío/- y el terreno difícil por nieve, hielo o similar no les afecta a menos que sea de origen mágico."
+    },
+    {
+     "nombre": "Cazador Invernal",
+     "texto": "Obtienes competencia en Sigilo, si ya la tenías por clase obtienes un bonficador +2. En zonas nevadas/heladas obtienen un bonificador +2 a Sigilo."
+    },
+    {
+     "nombre": "En Busca de la Gloria",
+     "texto": "Obtienes un bonificador +2 a las tiradas de ataque y conjuro contra criaturas del tipo Gigante, o de tamaño Enorme o Superior."
+    },
+    {
+     "nombre": "Poderoso",
+     "texto": "Los Norn obtienen un bonificador +2 en las pruebas de Fuerza."
+    }
+   ]
+  },
+  {
+   "nombre": "Orco",
+   "descripcion": "Junto con su fuerza bruta y comparativamente bajo intelecto, la principal diferencia entre los orcos y los humanoides civilizados es su actitud. Como cultura, los orcos son violentos y agresivos, con los más fuertes dominando al resto a través del miedo y la brutalidad. Toman lo que quieren por la fuerza, y no les importa asesinar o esclavizar a pueblos enteros cuando pueden salirse con la suya. No tienen tiempo para sutilezas o detalles, y sus campamentos y poblados tienden a ser sucios, con destartalados negocios llenos de peleas de borrachos, luchas en el foso y otros entretenimientos sádicos. Al carecer de paciencia para la agricultura y ser capaz de pastorear únicamente a los más robustos y autosuficientes animales, a los orcos casi siempre les resulta más fácil tomar lo que otro ha construido en lugar de crearlo ellos mismos. Orcos y humanos se cruzan con frecuencia, aunque esto es casi siempre el resultado de incursiones y toma de esclavos que de uniones consensuadas. Muchas tribus orcas engendran semiorcos a propósito y los crían como propios, como descendencia más inteligente resultan estrategas excelentes y lectores para sus tribus.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Orco y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Aguante Incansable",
+     "texto": "1vez/descanso largo, la primera vez que los PG de un Orco se reducen a 0 o menos, puede seguir luchando y obtien RD a todo el daño (aplica esta RD al excedente de daño que redujo sus PG por debajo de 0). En cada asalto en que actúe de esta manera únicamente puede llevar a cabo una acción de movimiento y una acción estándar. Sigue teniendo que realizar las tiradas contra muerte."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Orcos y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Orcos pueden ver en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Presencia Aterradora",
+     "texto": "Los Orcos tienen ventaja en las pruebas de Intimidar y tienen ventaja en las tiradas para evitar ser intimidados."
+    },
+    {
+     "nombre": "Poderoso",
+     "texto": "Los Orcos obtienen un bonificador +2 en la pruebas de fuerza."
+    },
+    {
+     "nombre": "Atacante Salvaje",
+     "texto": "Siempre que un Orco logre un crítico con un arma cuero a cuerpo incrementa los dados de daño en 1."
+    },
+    {
+     "nombre": "Arrollar",
+     "texto": "Cuando un Orco realiza la acción de cargar, puede arrollar a todas las criaturas que te encuentres por el camino que no sean el objetivo de tu carga. Cuando arrolla a una criatura de esta manera realiza una prueba enfrentada (su fuerza contra la Fuerza/Destreza de la criatura arrollada). Si supera la tirada aparta a la criatura 5pies y queda tumbada. Si pierde la tirada el orco pierde 10pies de movimiento. Si no puede pasar por el espacio ocupado por la criatura finaliza la carga."
+    }
+   ]
+  },
+  {
+   "nombre": "Rátidos",
+   "descripcion": "Se trata de una raza de roedores bípedos que comparten rasgos con sus parientes bestiales. Extremadamente adaptables y flexibles, estas criaturas aprovechan cada oportunidad que se les presenta para expandirse y desarrollarse. A menudo, la vida de un rátido es extremadamente complicada debido a la extrema competición por los preciados recursos, además, aquellos que alcanzan la madurez han aprendido habilidades esenciales para sobrevivir en todos los aspectos de la vida.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Pequeño",
+   "velocidad": "25pies",
+   "idiomas": "Común y Otro a tu elección",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Defensa de los pequeños",
+     "texto": "Al ser criaturas pequeñas, los Rátidos obtienen los siguientes bonificadores: - +1 a la Clase de Armadura. - +2 a las tiradas de Sigilo."
+    },
+    {
+     "nombre": "Reflejos Ratunos",
+     "texto": "Cuando un Rátido falla una TS de Destreza, puede usar su reacción para añadir 1d4 al resultado."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Ratidos y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Ratidos pueden ver en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Escurridizos",
+     "texto": "Los Rátidos pueden usar Destrabarte, Correr y Esconderte como acciones adicionales en cada uno de sus turnos."
+    },
+    {
+     "nombre": "Rata de Alcantarilla",
+     "texto": "Los Rátidos son resistentes al veneno y tienen ventaja en las TS para evitar ser envenenados y contra los efectos del veneno."
+    },
+    {
+     "nombre": "Empatía con los Roedores",
+     "texto": "Los Rátidos obtienen un bonificador +4 en las pruebas de Trato con Animales hechas a roedores."
+    },
+    {
+     "nombre": "Emboscador",
+     "texto": "Los Rátidos obtienen competencia en Sigilo, si ya posees competencia en Sigilo por clase, obtienes un bonificador +2 a Sigilo."
+    },
+    {
+     "nombre": "Ladronzuelos",
+     "texto": "Los Rátidos obtienen un bonificador +2 en las pruebas de Juego de Manos destinadas a sustraer objetos."
+    }
+   ]
+  },
+  {
+   "nombre": "Reptilianos",
+   "descripcion": "Humanoides reptilianos que moran en pantanos y junglas desde tiempos pretéritos, conocidos por su xenofobia, territorialidad y fiereza en el campo de batalla. Aunque primitivos, los reptilianos están totalmente adaptados a su entorno: son cazadores anfibios y diestros en la fabricación de armas con huesos de grandes bestias selváticas.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Reptiliano y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Metabolismo acelerado",
+     "texto": "En combate los Reptilianos recuperan al final de cada uno de sus turnos una cantidad de PG igual a su Mod.Con (mínimo 1). Sus PG deben ser superiores a 0. Fuera del combate esta cantidad de PG se recupera cada hora, hasta alcanzar como máximo la mitad de sus PG totales."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Reptilianos y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Reptilianos pueden ver en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Anfibio",
+     "texto": "Los Reptilianos pueden aguantar la respiración hasta 15min y obtienen una velocidad nadando de 30pies."
+    },
+    {
+     "nombre": "Trepadores",
+     "texto": "Los Reptilianos pueden trepar por casi cualquier superficie incluso boca abajo a una velocidad de 30pies."
+    },
+    {
+     "nombre": "Saber del Cazador",
+     "texto": "Los Reptilianos ganan competencia con dos de las siguientes habilidades de su elección: trato con animales, Naturaleza, Percepción, Sigilo y Supervivencia. En aquellas con las que ya tenga competencia por clase obtiene un bonificador +2."
+    },
+    {
+     "nombre": "Piel escamada",
+     "texto": "Los Reptilianos obtienen un bonificador +1 a la CA."
+    },
+    {
+     "nombre": "Resistencia del Pantano",
+     "texto": "Los Reptilianos son resistentes al veneno y tienen ventaja en las TS para evitar ser envenenados y contra los efectos del veneno."
+    },
+    {
+     "nombre": "Mordisco",
+     "texto": "Los Reptilianos poseen uno de los siguientes ataques de mordisco escogido en el momento de crear el Reptiliano y que no se puede cambiar posteriormente. - Mordisco tóxico: Como acción estándar puedes realizar un ataque cuerpo a cuerpo que si impacta inflige 1d6pg de daño perforante. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño) y obliga al objetivo a superar una TS de Constitución CD = 8 + Mod.Con + Bonif.Comp para no quedar envenenado. - Frenesí voraz: Como acción adicional puedes realizar un ataque cuerpo a cuerpo que si impacta inflige 1d4pg de daño perforante. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño). Si un objetivo muere como consecuencia de este ataque, el Reptiliano obtiene una cantidad de PG temporales igual a su Mod.Con + Bonif.Comp.\nSemielfos Los elfos han atraído desde siempre los ojos codiciosos de las demás razas. Su generoso ciclo vital, su afinidad por la magia, y su gracia inherente, contribuyen a la admiración o a la envidia más amarga de sus vecinos, sin embargo, de todos sus rasgos, el que más atrae a sus asociados humanos es el de la belleza. Desde que ambas razas entraron en contacto por vez primera, los humanos han tenido a los elfos como un modelo de perfección física, viendo en el Pueblo gentil versiones idealizadas de sí mismos. Por su parte, muchos elfos encuentran atractivos a los humanos a pesar de sus costumbres comparativamente bárbaras, atraídos por la pasión y el ímpetu con el que los miembros de la raza más joven viven sus cortas vidas. A veces, esta atracción mutua conduce a relaciones románticas, aunque por lo general de corta duración, incluso para los estándares humanos, estos escarceos suelen llevar al nacimiento de semielfos, una raza derivada de dos culturas, pero heredera de ninguna. Los semielfos pueden procrear entre sí, pero incluso estos semielfos de ‘sangre pura’ tienden a ser considerados como bastardos, tanto por los humanos como por los élfos. El aislamiento de los semielfos influencia fuertemente sus caracteres y filosofías. La crueldad no les es natural, ni lo es mezclarse con la sociedad o doblegarse a sus convenciones; como resultado, la mayoría de los semielfos son caóticos buenos."
+    }
+   ]
+  },
+  {
+   "nombre": "Semi-Alto elfo",
+   "descripcion": "",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Élfico y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Linaje Feérico",
+     "texto": "Tienes ventaja en las TS para no quedar hechizado y Dormido. Logras un descano efectivo durmiendo solo 6h."
+    },
+    {
+     "nombre": "Hábil",
+     "texto": "Los Semi-Altos Elfos empiezan con competencia en dos habilidades de su elección."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Semi-Altos Elfos y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Puedes ver en la penumbra como si fuera luz brillante y, en la oscuridad como si fuera penumbra, hasta a 60pies."
+    },
+    {
+     "nombre": "Sentidos Élficos",
+     "texto": "Eres competente en Percepción, si ya eres competente por Clase, obtienes un bonificador +2."
+    },
+    {
+     "nombre": "Alta Magia",
+     "texto": "Los Semi-Altos Elfos conocen 2 trucos de la lista del mago que no cuentan para el límite de conjuros conocidos y tienen un bonificador +1 a las tiradas de ataque con conjuros. Si no eres lanzador de conjuros, la Inteligencia es la característica para el lanzamiento de conjuros de Semi-Alto Elfo (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Maña",
+     "texto": "Siempre que un Semi-Alto Elfo realice una prueba de habilidad en la que intervenga alguna herramienta que esté usando, añade 1d4 a su tirada."
+    },
+    {
+     "nombre": "Resiliencia",
+     "texto": "Los Semi-Alto Elfo obtienen competencia con una TS de su elección."
+    },
+    {
+     "nombre": "Trabajo en equipo",
+     "texto": "Siempre que un Semi-Alto Elfo use la acción de ayudar o reciva la acción de ayudar, el beneficiario de la ayuda obtienen un bonificador +1 en dicha tirada."
+    }
+   ]
+  },
+  {
+   "nombre": "Semi-Elfo del Bosque",
+   "descripcion": "",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Élfico, Silvano y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Linaje Feérico",
+     "texto": "Tienes ventaja en las TS para no quedar hechizado y Dormido. Logras un descano efectivo durmiendo solo 6h."
+    },
+    {
+     "nombre": "Hábil",
+     "texto": "Los Semi-Elfos del Bosque empiezan con competencia en dos habilidades de su elección."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Semi-Elfos del Bosque y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Puedes ver en la penumbra como si fuera luz brillante y, en la oscuridad como si fuera penumbra, hasta a 60pies."
+    },
+    {
+     "nombre": "Sentidos Élficos",
+     "texto": "Eres competente en Percepción, si ya eres competente por Clase, obtienes un bonificador +2."
+    },
+    {
+     "nombre": "Conocimientos Naturales",
+     "texto": "Los Semi-Elfos del Bosque son competentes en Trato con Animales y Naturaleza, si ya tenias competencia en alguna de ellas por Clase obtienes un bonificador +2."
+    },
+    {
+     "nombre": "Magia del Bosque",
+     "texto": "Conoces 1 truco de la lista del Druida que no cuenta para el límite de conjuros conocidos. Si no eres lanzador de conjuros, la Sabiduría es la característica para el lanzamiento de conjuros de Elfo del Bosque (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Maña",
+     "texto": "Siempre que un Semi-Elfo del Bosque realice una prueba de habilidad en la que intervenga alguna herramienta que esté usando, añade 1d4 a su tirada."
+    },
+    {
+     "nombre": "Resiliencia",
+     "texto": "Los Semi-Elfos del Bosque obtienen competencia con una TS de su elección."
+    },
+    {
+     "nombre": "Trabajo en equipo",
+     "texto": "Siempre que un Semi-Elfo del Bosque use la acción de ayudar o reciva la acción de ayudar, el beneficiario de la ayuda obtienen un bonificador +1 en dicha tirada."
+    }
+   ]
+  },
+  {
+   "nombre": "Semi-Elfo Oscuro (Ni’Ssilin)",
+   "descripcion": "Generalmente esta raza no logra sobrevivir los primeros años de su vida sí nace en la Infraoscuridad, en el mejor de los casos este se verá obligado a vivir fuera de sus ciudades, a la interperie, o como un exiliado, pero generalmente son sacrificados al ser considerados seres inferiores e indignos del legado de los drow. Sí nace en la sociedad humana, lo más seguro es que sean escondidos y repudiados pues lo más provable es que sean fruto de una violación, estos Ni’ssilin terminan malvibiendo en los bajos fondos de las ciudades o al borde de la sociedad, pero en ocasiones son tratados del mismo modo que el resto de Semielfos de descendencia no drow, sobretodo si su progenitor humano tiene cierta reputación dentro de su sociedad.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Élfico, Infracomún y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Linaje Feérico",
+     "texto": "Tienes ventaja en las TS para no quedar hechizado y Dormido. Logras un descano efectivo durmiendo solo 6h."
+    },
+    {
+     "nombre": "Hábil",
+     "texto": "Los Ni’Ssilin empiezan con competencia en dos habilidades de su elección."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Ni’Ssilin y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Habitantes de Underdark",
+     "texto": "Los Ni’Ssilin pueden ver en la oscuridad como si fuese penumbra hasta 120pies. Pero la exposición repentina a la luz brillante los ciega durante 1 asalto, y mientras permanezca bajo luz brillante está deslumbrado."
+    },
+    {
+     "nombre": "Sentidos Élficos",
+     "texto": "Eres competente en Percepción, si ya eres competente por Clase, obtienes un bonificador +2."
+    },
+    {
+     "nombre": "Magia Drow",
+     "texto": "Conoces el truco “Luces danzantes” que no cuentan para el límite de conjuros conocidos. A nivel 3 aprendes “Fuego feérico”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo sin consumir recuros 1vez/ descanso. Si no eres lanzador de conjuros, el Carisma es la característica para el lanzamiento de conjuros Ni’Ssilin (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Maña",
+     "texto": "Siempre que un Ni’Ssilin realice una prueba de habilidad en la que intervenga alguna herramienta que esté usando, añade 1d4 a su tirada."
+    },
+    {
+     "nombre": "Resiliencia",
+     "texto": "Los Ni’Ssilin obtienen competencia con una TS de su elección."
+    },
+    {
+     "nombre": "Trabajo en equipo",
+     "texto": "Siempre que un Ni’Ssilin use la acción de ayudar o reciva la acción de ayudar, el beneficiario de la ayuda obtienen un bonificador +1 en dicha tirada."
+    }
+   ]
+  },
+  {
+   "nombre": "Semiorco",
+   "descripcion": "Los semiorcos son monstruosidades, cuyo trágico nacimiento es el resultado de la perversión y la violencia, o por lo menos así es como las demás razas les ven. Es cierto que los semiorcos raramente son el resultado de uniones en las que el amor está de por medio, y como resultado se suelen ver obligados a crecer de forma rápida y dura, luchando constantemente en busca de protección, o para hacerse un nombre por sí mismos. Temidos, motivo de desconfianza, y objeto de desprecio, los semiorcos consiguen sorprender de forma consistente a sus detractores con grandes gestas y una sabiduría inesperada, aunque a veces es más fácil aporrear cabezas. Obligados a vivir, o bien entre los brutales orcos, o bien como exiliados solitarios en las tierras civilizadas, la mayoría de los semiorcos son amargos, violentos, y reclusivos. El mal les llega con facilidad, pero no son malignos por naturaleza sino que la mayoría son caóticos neutrales, habiendo aprendido por experiencia que no hay razón alguna para hacer nada sino lo que les beneficia de forma directa.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Orco y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Aguante Incansable",
+     "texto": "1vez/descanso largo, la primera vez que los PG de un Semiorco se reducen a 0 o menos, puede seguir luchando una cantidad de asaltos igual a su Mod.Con (mínimo 1). En cada asalto en que actúe de esta manera únicamente puede llevar a cabo una acción de movimiento y una acción estándar. Sigue teniendo que realizar las tiradas contra muerte."
+    },
+    {
+     "nombre": "Hábil",
+     "texto": "Los Semiorcos empiezan con competencia en dos habilidades de su elección."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Semiorcos y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Semiorcos pueden ver en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Presencia Aterradora",
+     "texto": "Los Semiorcos tienen ventaja en las pruebas de Intimidar y tienen ventaja en las tiradas para evitar ser intimidados."
+    },
+    {
+     "nombre": "Poderoso",
+     "texto": "Los Semiorcos obtienen un bonificador +2 en la pruebas de fuerza."
+    },
+    {
+     "nombre": "Maña",
+     "texto": "Siempre que un Semiorco realice una prueba de habilidad en la que intervenga alguna herramienta que esté usando, añade 1d4 a su tirada."
+    },
+    {
+     "nombre": "Resiliencia",
+     "texto": "Los Semiorcos obtienen competencia con una TS de su elección."
+    },
+    {
+     "nombre": "Trabajo en equipo",
+     "texto": "Siempre que un Semiorco use la acción de ayudar o reciva la acción de ayudar, el beneficiario de la ayuda obtienen un bonificador +1 en dicha tirada."
+    }
+   ]
+  },
+  {
+   "nombre": "Sylvari",
+   "descripcion": "Los sylvari no nacen. Se despiertan bajo el Árbol Pálido con los conocimientos obtenidos en el Sueño de una vida pasada. Estos nobles seres viajan en busca de aventuras y descubrimiento, luchan por equilibrar la curiosidad con el deber, el entusiasmo con la caballería y la guerra con el honor. Los sylvari son un enigma con forma de humanoides, pero su carne está formada por enredaderas y hojas, con follaje y pétalos en lugar de pelo, y savia dorada fluyendo por sus venas. Son recién llegados a las Tierras Salvajes, tan solo llevan 25 años vagando por el mundo y nadie sabe por qué han aparecido, ni siquiera los propios Sylvari.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Silvano y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Anatomia Silvana",
+     "texto": "Los Sylvari cuentan a la vez como humanoides y planta."
+    },
+    {
+     "nombre": "Corteza Gruesa",
+     "texto": "Los Sylvari obtienen un bonificador +1 a la CA y Resistencia a todo el daño físico, pero son vulnerables al daño de fuego."
+    },
+    {
+     "nombre": "Sabueso Silvano",
+     "texto": "Durante un descanso efectivo mientras duermes, puedes conectarte mentalmente con el Árbol Pálido para hacer crecer a tu lado un Perro formado por plantas y helechos. A nivel 1 el Sabuso Silvano tiene las estadísitcas de un Lobo. A nivel 3 el Sabuso Silvano tiene las estadísitcas de un Lobo Terrible. A nivel 5 el Sabuso Silvano obtiene 7PG adicionales por cada uno de tus niveles. El Sabueso Silvano tiene sus propios turnos, su tipo es planta y obtiene +1 a la CA, Resistencia a todo el daño físico pero es vulnerable al fuego."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Sylvari y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Sylvari pueden ver en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Claridad Mental",
+     "texto": "Los Sylvari obtienen un bonificador +2 en todas las TS contra efectos que tengan como objetivo hacer que pierda el control de su cuerpo y no puede ser dormido mágicamente."
+    },
+    {
+     "nombre": "Afinidad Tóxica",
+     "texto": "Los Sylvari son inmunes al veneno y a todos sus efectos."
+    },
+    {
+     "nombre": "Magia Sylvari",
+     "texto": "Los Sylvari conocen el truco “Látigo de Espinas”, no cuenta para el límite de conjuros conocidos. A nivel 3 los Sylvari aprenden el conjuro “Enmarañar”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/ descanso sin consumir recursos. A nivel 5 los Sylvari aprenden el conjuro “Crecimiento Espinoso” o “Espíritu Sanador”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. Si no eres lanzador de conjuros, la Sabiduría es tu característica para los conjuros Sylvari (si es negativa no se aplica)."
+    }
+   ]
+  },
+  {
+   "nombre": "Taratuga",
+   "descripcion": "Las Taratugas son humanoides de aspecto reptil con grandes caparazones en la espalda que son capaces de contener todo su cuerpo. Tienen pieles escamosas que variaban entre tonos verde oliva y azul verdoso. La porción dorsal de sus caparazones suele ser más oscura que su piel, mientras que la porción ventral es más clara, generalmente con tonos amarillentos. La mayoría de las tortugas tienen la idea de tener la casa a cuestas, lo que significaba que rara vez sienten nostalgia o la necesidad de echar raíces en un solo lugar. Estan ansiosos por aprender nuevas costumbres y encontraron belleza en las cosas más comunes. A pesar de pasar gran parte de su vida aislados, a las taratugas les gusta formar amistades sólidas. Las Taratugas solo se reproducen cerca del final de su vida útil natural. Cuando sus crías nacen de sus huevos, pasan el resto de sus vidas compartiendo todas sus experiencias y enseñando habilidades de supervivencia. Los Taratugas jóvenes se convierten en huérfanos después de aproximadamente un año, momento en el que se espera que puedan valerse por sí mismos.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "25pies",
+   "idiomas": "Reptiliano y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Caparazón",
+     "texto": "Debido a su caparazón y a la forma de su cuerpo no pueden llevar armadura pesada. No obstante el caparazón les concede un bonificador +2 a la CA pero reduce en -1 el Bonificador a la CA concedido por la Destreza. Como acción, un Taratugo puede introducirtse en su caparazón. Hasta que salga de él, obtienes un +4 a su CA y ventaja en las TS de Fuerza y Constitución, pero se le considera “Tumbado”, su velocidad es 0 y tiene desventaja en las TS de Destreza. Tampoco puede usar su reacción y lo único que puede hacer es usar su acción adicional para salir del caparazón."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Taratuga y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Anfibio",
+     "texto": "Los Taratuga pueden aguantar la respiración hasta 1h y obtienen una velocidad nadando de 30pies."
+    },
+    {
+     "nombre": "Armas Naturales",
+     "texto": "- Mordisco (x1): Puedes realizar un ataque cuerpo a cuerpo que si impacta inflige 1d6pg de daño perforante. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño). - Garras (x2): Puedes realizar hasta dos ataques cuerpo a cuerpo con tus garras, cada una de ellas inflige 2d4pg de daño cortante o perforante si impactan. (puede usarse tanto con Fuerza como con Destreza para las tiradas de ataque y daño)."
+    },
+    {
+     "nombre": "Instinto de Supervivencia",
+     "texto": "Los Taratuga obtienen competencia en Supervivencia, si ya la tenian por clase obtienen un bonificador +2."
+    },
+    {
+     "nombre": "Hibernar",
+     "texto": "Cuando un Taratuga realiza un descanso corto y usa sus DG para recuperar PG, añade su Bonif.Comp a dicha curación."
+    }
+   ]
+  },
+  {
+   "nombre": "Tiefling",
+   "descripcion": "Los tiefling son humanoides con sangre de demonios, diablos u otros infernales en su ascendencia. A menudo perseguidos por su aspecto extraño y sus peculiaridades antinaturales, la mayoría de los tiefling disfrazan su naturaleza o son obligados a vivir en los límites o en los bajos fondos de las sociedades civilizadas. A pesar de que no nacen malvados, es sencillo para ellos seguir ese camino, especialmente debido a que la mayoría sufren a manos de la gente “normal” durante su crecimiento. Los tiefling aparentan ser humanos casi normales, excepto por algunas particularidades físicas que revelan su extraña herencia.",
+   "caracteristicas": "+2 a una característica y +1 a otra característica.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Infernal y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Herencia infernal",
+     "texto": "Obtienen Resisténcia al daño de Fuego o al Necrótico (Elije cual de ellas en el momento de crearte a tu Tiefling), y RD5 al tipo de daño que no has elegido para tener Resistencia."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Tiefling y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la Oscuridad",
+     "texto": "Los Tiefling pueden ver en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Embaucadores de bajos fondos",
+     "texto": "Obtienen competencia en Engaño y Sigilo, si ya tienen competencia en alguna de ellas por clase obtiene un bonificador +2."
+    },
+    {
+     "nombre": "Poder de los Nueve Infiernos",
+     "texto": "Como acción y 1 vez/descanso largo puedes imbuirte de poder Infernal durante 1 minuto. Mientras estés bajo este efecto todo el daño que causes pasa a ser necrótico o de fuego (a tu elección en el momento de infligirlo), y todo el daño que causes añade 2d4 adicional (a nivel 5 este daño se incrementa a 2d6, a nivel 11 a 2d8 y a nivel 17 a 2d10)."
+    },
+    {
+     "nombre": "Alas demoníacas (En el momento de elegir este rasgo elige que tipo de als son, no se pueden cambiar posteriormente)",
+     "texto": "- Alas Ígneas: Los Tiefling pueden como acción adicional desplegar 1vez/descanso alas que les permiten volar a una velocidad de 30pies durante 1min. Las alas de un Tiefling estan prendidas en llams que irradian luz brillante en un radio de 20pies y luz ténue en 20pies adicionales. Siempre que un enemigo se acerque a 20pies o menos del Tiefling por primera vez en cada uno de sus turnos, sufre 1d4pg de daño por fuego (a nivel 5 recupran 2d4, a nivel 11 recuperan 3d4 y a nivel 17 recuperan 4d4, o la mitad si supera una TS de Destreza CD = 8 + Mod.Car + Bonif.Comp. Además como acción adicional y 1vez/turno, puedes crear un estallido de chispas que replica el efecto dañino de las alas. - Alas Oscuras: Los Tiefling pueden como acción adicional desplegar 1vez/descanso alas que les permiten volar a una velocidad de 30pies durante 1min. Las alas de un Tiefling crean un área de 20pies de oscuridad mágica (las luces encendidas en el área de efecto se apagan). Siempre que un enemigo se encuentre en el área de oscuridad por primera vez en cada uno de sus turnos, sufre 1d4pg de daño por necrótico (a nivel 5 recupran 2d4, a nivel 11 recuperan 3d4 y a nivel 17 recuperan 4d4), si se reduce a 0 o menos los PG de un enemigo de esta manera, el Tiefling recupera PG igual a Mod.Car + Bonif.Comp."
+    },
+    {
+     "nombre": "Magia Tiefling",
+     "texto": "La magia de sus ancestros infernales corre diluida por la sangre de los Tiefling lo que les concede ciertas capacidades mágicas en función de su Ancestro infernal. Al alegir este rasgo elije tu Ancesto Infernal que una vez escogido no puede ser cambiado posteriormente."
+    },
+    {
+     "nombre": "Legado de Baalzebul",
+     "texto": "Los Tiefling conocen el truco “Taumaturgia”, no cuenta para el límite de conjuros conocidos. A nivel 3 los Tiefling aprenden el conjuro “Rayo Debilitador”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. A nivel 5 los Tiefling aprenden el conjuro “Corona de Locura”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. Si no eres lanzador de conjuros, el Carisma es tu característica para los conjuros Tiefling (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Legado de Levistus",
+     "texto": "Los Tiefling conocen el truco “Rayo de Escarcha”, no cuenta para el límite de conjuros conocidos. A nivel 3 los Tiefling aprenden el conjuro “Armadura de Agathys”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. A nivel 5 los Tiefling aprenden el conjuro “Oscuridad”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. Si no eres lanzador de conjuros, el Carisma es tu característica para los conjuros Tiefling (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Legado de Mammon",
+     "texto": "Los Tiefling conocen el truco “Mano de Mago”, no cuenta para el límite de conjuros conocidos. A nivel 3 los Tiefling aprenden el conjuro “Disco Flotante de Tenser”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. A nivel 5 los Tiefling aprenden el conjuro “Cerradura Arcana”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. Si no eres lanzador de conjuros, el Carisma es tu característica para los conjuros Tiefling (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Legado de Mefistófeles",
+     "texto": "Los Tiefling conocen el truco “Mano de Mago”, no cuenta para el límite de conjuros conocidos. A nivel 3 los Tiefling aprenden el conjuro “Manos Ardientes”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. A nivel 5 los Tiefling aprenden el conjuro “Hoja de Fuego”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. Si no eres lanzador de conjuros, el Carisma es tu característica para los conjuros Tiefling (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Legado de Zariel",
+     "texto": "Los Tiefling conocen el truco “Taumaturgia”, no cuenta para el límite de conjuros conocidos. A nivel 3 los Tiefling aprenden el conjuro “Castigo Abrasador”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. A nivel 5 los Tiefling aprenden el conjuro “Castigo Marcador”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. Si no eres lanzador de conjuros, el Carisma es tu característica para los conjuros Tiefling (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Legado de Maladomini",
+     "texto": "Los Tiefling conocen el truco “Burla Cruel”, no cuenta para el límite de conjuros conocidos. A nivel 3 los Tiefling aprenden el conjuro “Hechizar Persona”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. A nivel 5 los Tiefling aprenden el conjuro “Embelesar”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/ descanso sin consumir recursos. Si no eres lanzador de conjuros, el Carisma es tu característica para los conjuros Tiefling (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Legado de Dispater",
+     "texto": "Los Tiefling conocen el truco “Taumaturgia”, no cuenta para el límite de conjuros conocidos. A nivel 3 los Tiefling aprenden el conjuro “Disfrazarse”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. A nivel 5 los Tiefling aprenden el conjuro “Detectar Pensamientos”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. Si no eres lanzador de conjuros, el Carisma es tu característica para los conjuros Tiefling (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Legado de Phlegethos",
+     "texto": "Los Tiefling conocen el truco “Amistad”, no cuenta para el límite de conjuros conocidos. A nivel 3 los Tiefling aprenden el conjuro “Hechizar Persona”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. A nivel 5 los Tiefling aprenden el conjuro “Sugestión”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/ descanso sin consumir recursos. Si no eres lanzador de conjuros, el Carisma es tu característica para los conjuros Tiefling (si es negativo no se aplica)."
+    },
+    {
+     "nombre": "Legado de Malebolgia",
+     "texto": "Los Tiefling conocen el truco “Ilusión Menor”, no cuenta para el límite de conjuros conocidos. A nivel 3 los Tiefling aprenden el conjuro “Disfrazarse”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. A nivel 5 los Tiefling aprenden el conjuro “Invisibilidad”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. Si no eres lanzador de conjuros, el Carisma es tu característica para los conjuros Tiefling (si es negativo no se aplica)."
+    }
+   ]
+  }
+ ],
+ "rasgosGenericos": {
+  "excluyentes": [
+   {
+    "nombre": "Lycantropia",
+    "texto": "Puedes cambiar de forma como acción y convertirte en un híbrido en función de tu lycantropia. Sin embargo, durante la luna llena debes superar una TS de Sabiduría CD 15 o transformarte de manera incontrolable. En forma híbrida, no puedes usar ni armas ni escudos, y tampoco puedes lanzar conjuros, pero obtienes ataques naturales y características mejoradas. - Hombre Jabalí: - Colmillo(x1), ataque cuerpo a cuerpo (Fuerza o Destreza), inflige 2d6pg de daño perforante (el daño aumenta a 3d6 a nivel 5, a 4d6 a nivel 11 y a 5d6 a nivel 17). - Si te mueves por lo menos 15pies antes de atacar a un objetivo con tus colmillos, infliges 2d6pg de daño adicional y empujas al objetivo 10pies hacia atrás (tirada enfrentada de fuerza). - Tu puntuación de Fuerza no puede ser inferior a 17. - Obtienes resistencia al daño físico que no sea de armas de plata. - Hombre Lobo: - Morsico(x1), ataque cuerpo a cuerpo (Fuerza o Destreza), inflige 2d4pg de daño perforante (el daño aumenta a 3d4 a nivel 5, a 4d4 a nivel 11 y a 5d4 a nivel 17). - Garras(x2), ataque cuerpo a cuerpo (Fuerza o Destreza), inflige 2d4pg de daño cortante o perforante (el daño aumenta a 3d4 a nivel 5, a 4d4 a ivel 11 y a 5d4 a nivel 17). - Ventaja en las tiradas de Percepción basadas en el olfato. - Tu puntuación de Fuerza no puede ser inferior a 15. - Obtienes resistencia al daño físico que no sea de armas de plata. - Hombre Oso: - Morsico(x1), ataque cuerpo a cuerpo (Fuerza o Destreza), inflige 1d8pg de daño perforante (el daño aumenta a 2d8 a nivel 5, a 3d8 a nivel 11 y a 4d8 a nivel 17). - Garras(x2), ataque cuerpo a cuerpo (Fuerza o Destreza), inflige 2d6pg de daño cortante o perforante (el daño aumenta a 3d6 a nivel 5, a 4d6 a ivel 11 y a 5d6 a nivel 17). - Ventaja en las tiradas de Percepción basadas en el olfato. - Tu puntuación de Fuerza no puede ser inferior a 19. - Obtienes resistencia al daño físico que no sea de armas de plata. - Hombre Rata: - Morsico(x1), ataque cuerpo a cuerpo (Fuerza o Destreza), inflige 1d4pg de daño perforante (el daño aumenta a 2d4 a nivel 5, a 3d4 a nivel 11 y a 4d4 a nivel 17). - Mientras un aliado tuyo no incapacitado esté a 5pies o menos de tu objetivo tus ataques contra dicho objetivo se hacen con ventaja. - Ventaja en las Pruebas de Sigilo. - Tu puntuación de Destreza no puede ser inferior a 15. - Obtienes resistencia al daño físico que no sea de armas de plata. - Hombre Tigre: - Morsico(x1), ataque cuerpo a cuerpo (Fuerza o Destreza), inflige 1d10pg de daño perforante (el daño aumenta a 2d6 a nivel 5, a 3d6 a nivel 11 y a 4d6 a nivel 17). - Garras(x2), ataque cuerpo a cuerpo (Fuerza o Destreza), inflige 1d8pg de daño perforante (el daño aumenta a 2d8 a nivel 5, a 3d8 a nivel 11 y a 4d8 a nivel 17). - Tu primer ataque contra una criatura sorprendida es siempre un crítico. - Ventaja en las Pruebas de Sigilo. - Tu puntuación de Fuerza no puede ser inferior a 17. - Obtienes resistencia al daño físico que no sea de armas de plata."
+   },
+   {
+    "nombre": "Vampiro",
+    "texto": "- Tu tipo de criatura cambia a No-Muerto. - Obtienes inmunidad al daño de veneno, al daño necrótico, a las enfermedades y a todo el daño fisico de origen no mágico. - No necesitas dormir, pero si debes descansar para recuperar tus habilidades, rasgos, etc. - Si te encuentras directamente bajo la luz del sol o una fuente de luz muy brillante sufres 20pg de daño radiante por turno y no puedes usar tus habilidades de vampiro. - Eres vulnerable al daño radiante, así como al agua bendita y símbolos sagrados los cuales pueden repelerte o dañarte, si sufres daño de alguno de estos elementos no puedes recuperar PG hasta el final de tu siguiente turno. - Mordisco(x1): Ataque cuerpo a cuerpo (Fuerza o Destreza) que inflige 1d6pg de daño perforante +2d6pg de daño necrótico. Recuperas una cantidad de PG igual al daño necrótico causado. (A nivel 5 el daño necrótico se incrementa a 2d8, a nivel 11 a 2d10 y a nivel 17 a 2d12). - Obtienes el conjuro “Hechizar Persona”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo 1vez/descanso sin consumir recursos. Si no eres lanzador de conjuros, el Carisma es tu característica para lanzar este conjuro. - 1 vez/descanso puedes usar tu acción adicional para convertirte en un Enjambre de Murciélagos. - Ahora únicamente necesitas alimentarte de Sangre fresca, y por cada día que no te alimentes obtienes un contador de decrepitud. Por cada contador de decrepitud obtienes un penalizador -2 a Carisma. Si tu Carisma llega a 0 de esta manera, cada contador de decrepitud adicional te aplica un penalizador -2 a Fuerza y Destreza. Además cada contador de Decrepitud envejece tu piel y deteriora tu aspecto haciendo que las gentes cada vez desconfien más de tí y te vean realmente como un mónstruo. Los contadores de Decrepitud pueden eliminarse si te alimentas con tu Mordisco, y no puedes eliminar más de 1 contador por descanso. - Si te clavan una estaca de madera en el corazón quedas Incapacitado hasta que esta no sea retirada."
+   },
+   {
+    "nombre": "No-Muerto",
+    "texto": "- Tu tipo de criatura cambia a No-Muerto. - Obtienes inmunidad al daño de veneno, al daño necrótico, a las enfermedades y a todo el daño fisico de origen no mágico. - No necesitas comer, beber, respirar ni dormir, pero si debes descansar para recuperar tus habilidades, rasgos, etc. - Un No-Muerto no puede ser resucitado con conjuros tradicionales, únicamente puede lograrse mediante un conjuro de Deseo, mediante la intervención Divina o Demoníaca, o mediante aquellos mismos poderes que lo convirtieron en No-Muerto. - Cuando tus PG se reducen a 0 o menos sigues necesitando hacer tiradas de salvación contra la muerte pero con una mecánica distinta: - Si haces 3 fallos reinicia el contador de éxitos-fallos. - Con 3 éxitos te alzas nuevamente con un 20% de tus PG máximos (mínimo 1pg), pero cada fallo acumulado resta un 5%."
+   }
+  ],
+  "noExcluyentes": [
+   {
+    "nombre": "Aguante Sobrehumano",
+    "texto": "A la hora de calcular tu capacidad de carga tu fuerza obtiene un bonificador +2."
+   },
+   {
+    "nombre": "Arremetida Brutal",
+    "texto": "Si te mueves por lo menos 20pies al realizar una carga, infliges 1d6pg de daño adicional."
+   },
+   {
+    "nombre": "Asaltante Ágil",
+    "texto": "Obtienes un bonificador +1 a las tiradas de ataque con armas cuerpo a cuerpo."
+   },
+   {
+    "nombre": "Cobertura Maestra",
+    "texto": "La cobertura te concede un bonificador +1 adicional a la CA."
+   },
+   {
+    "nombre": "Concentración Firme",
+    "texto": "1vez/descanso corto, puedes usar tu reacción para obtener ventaja en una TS de Constitución destinada a mantener la concentración en un conjuro."
+   },
+   {
+    "nombre": "Conjurador Experto",
+    "texto": "1vez/descanso puedes volver a lanzar los dados que quieras de un conjuro y quedarte con el restultado más alto."
+   },
+   {
+    "nombre": "Curiosidad Incansable",
+    "texto": "Obtienes competencia en Investigación, si ya eras competente (o la obtienes posteriormente) obtienes un bonificador +1d4 a sus tiradas."
+   },
+   {
+    "nombre": "Despertar Interior",
+    "texto": "Obtienes 1 punto de maná adicional por nivel. Si no usas maná y usas Espacios de Conjuro, obtienes un espacio de conjuro adicional de cada uno de los niveles. Si no eres lanzador de conjuros, este rasgo funciona igualmente."
+   },
+   {
+    "nombre": "Golpe Preciso",
+    "texto": "1vez/turno, puedes aceptar tener un penalizador -1 en tu próximo ataque cuerpo a cuerpo pero que este infliga +2pg."
+   },
+   {
+    "nombre": "Improvisador de Venenos",
+    "texto": "Como acción, haces una prueba de Sabiduría (Supervivencia) CD17 para fabricar un veneno rudimentario. Si la superas, tu siguiente ataque con arma realizado antes del final de tu siguiente turno inflige 1d4pg de daño adicional por veneno y obliga al objetivo de tu ataque a superar una TS de Constitución CD = 8 + Mod.Sab + Bonif.Comp para no quedar envenando. Si fallas, debes superar tu la TS de Constitución para no quedar envenenado y el veneno se desperdicia. A la hora de crear el veneno, puedes invertir cierta cantidad de materiales “nobles” o PO para reducir la CD de fabricación según se muestra a continuación (únicamente puedes usar una de las opciones). - 25po o 1 Raíz de Belladona = CD 16. - 75po o 1 Esencia de Escorpión = CD 15. - 150po o 1 Extracto de Salamandra Concentrado = CD 14. - 300po o 1 Extracto de Basilisco Cristalizado = CD 13. - 600po o 1 Esencia de Mantícora = CD 12."
+   },
+   {
+    "nombre": "Instinto del Cazador",
+    "texto": "Tienes ventaja en las pruebas de Supervivencia destinadas a rastrear criaturas."
+   },
+   {
+    "nombre": "Instinto de Supervivencia",
+    "texto": "1vez/descanso puedes repetir una TS de Constitución, debes quedarte con el nuevo resultado."
+   },
+   {
+    "nombre": "Ira controlada",
+    "texto": "Tras recibir daño, tu siguiente ataque con arma antes del final de tu siguiente turno contra tu atacante inflige +2pg."
+   },
+   {
+    "nombre": "Lengua Veloz",
+    "texto": "1vez/descanso puedes obtener ventaja en una tirada de Persuasión o Engaño."
+   },
+   {
+    "nombre": "Maestro del Contraataque",
+    "texto": "Cuando un enemigo falle un ataque cuerpo a cuerpo contra tí, puedes usar tu reacción para realizar un ataque cuerpo a cuerpo con ventaja contra dicho objetivo."
+   },
+   {
+    "nombre": "Oídos Agudos",
+    "texto": "Obtienes ventaja en las pruebas de Percepción basadas en el oído."
+   },
+   {
+    "nombre": "Ojos de Halcón",
+    "texto": "Obtienes competencia en Percepción, si ya tenias competencia (o la obtienes posteriormente) tus ataques con arma a distáncia obtienen +10pies de alcance e ignoran cobertura media."
+   },
+   {
+    "nombre": "Palabra Potenciada",
+    "texto": "1vez/descanso largo al lanzar un conjuro aumentas su CD en +2."
+   },
+   {
+    "nombre": "Pies Ligeros",
+    "texto": "Obtienes +5pies de movimiento a pie."
+   },
+   {
+    "nombre": "Pies Seguros",
+    "texto": "Obtienes Ventaja en las pruebas de Acrobacias destinadas a mantener el equilibro o evitar caídas."
+   },
+   {
+    "nombre": "Pulmones de Hierro",
+    "texto": "Duplica el tiempo que puedes contener la respiración."
+   },
+   {
+    "nombre": "Pulso Estable",
+    "texto": "Obtienes ventaja en las pruebas de Medicina y Supervivencia destinadas a Estabilizar a una criatura."
+   },
+   {
+    "nombre": "Reflejos Rápidos",
+    "texto": "1vez/descanso puedes obtener un bonificador +2 a la Iniciativa."
+   },
+   {
+    "nombre": "Tirador veloz",
+    "texto": "1vez/turno tras fallar un ataque a distáncia, puedes repetir dicho ataque pero con un penalizador -2 al ataque."
+   },
+   {
+    "nombre": "Veterano de Batalla",
+    "texto": "1vez/descanso puedes añadir un bonificador +1d4 a una tirada de ataque (con arma o conjuro) fallida."
+   },
+   {
+    "nombre": "Voluntad de Acero",
+    "texto": "1vez/descanso puedes añadir un bonificador +1d4 a una tirada de Sabiduría o Carisma fallida."
+   }
+  ]
+ }
+}

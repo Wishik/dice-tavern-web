@@ -1,0 +1,377 @@
+[
+ {
+  "nombre": "Afortunado",
+  "categoria": "origen",
+  "descripcion": "Tienes una cantidad de puntos de suerte igual a tu bonificador por competencia que se recuperan tras un descanso largo y puedes gastarlos en los siguientes beneficios.\nVentaja:\nCuando tires 1d20 para realizar una prueba, puedes gastar 1 punto de suerte para otorgarte ventaja en la tirada. Desventaja:\nCuando una criatura tire 1d20 en una tirada de ataque contra ti, puedes gastar 1 punto de suerte para imponerle desventaja en esa tirada."
+ },
+ {
+  "nombre": "Alerta",
+  "categoria": "origen",
+  "descripcion": "Añades el BC a tus tiradas de Iniciativa. Justo después de tirar iniciativa, puedes intercambiar tu iniciativa con la de un aliado que esté dispuesto a hacerlo en el mismo combate. No puedes hacer este intercambio si el aliado o tú tenéis el estado de incapacitado."
+ },
+ {
+  "nombre": "Atacante salvaje",
+  "categoria": "origen",
+  "descripcion": "Te has preparado para asestar golpes especialmente dañinos. 1vez/turno, cuando aciertes a un objetivo con un arma, podrás tirar dos veces los dados de daño del arma y usar el resultado que prefieras."
+ },
+ {
+  "nombre": "Duro",
+  "categoria": "origen",
+  "descripcion": "Tus puntos de golpe máximos aumentan en una cantidad igual al doble del nivel de tu personaje cuando adquieres esta dote. A partir de entonces, cada vez que subas un nivel de personaje, tus puntos de golpe máximos aumentan en 2 puntos de golpe adicionales en vez de 1."
+ },
+ {
+  "nombre": "Fabricante",
+  "categoria": "origen",
+  "descripcion": "Ganas competencia con tres herramientas de artesano que elijas de la tabla “Fabricación rápida”. Cuando compres un objeto no mágico, conseguirás un 20 % de descuento. Tras finalizar un descanso largo, puedes fabricar un objeto de la tabla “Fabricación rápida” si posees las herramientas de artesano asociadas a ese objeto y tienes competencia con ellas. El objeto durará hasta finalizar otro descanso largo.\nFabricación rápida Herramientas de artesano\nEquipo fabricado\nHerramientas de albañil\nPolipasto\nHerramientas de alfarero\nJarrón, lámpara\nHerramientas de carpintero\nAntorcha, escalera\nHerramientas de curtidor\nBolsa, estuche\nHerramientas de ebanista\nBastón, garrote, garrote grande\nHerramientas de herrero\nAbrojos, bolas de metal, cubo, garfio de escalada, olla de hierro\nHerramientas de manitas\nCampana, pala, yesca\nHerramientas de tejedor\nCesta, cuerda, red, tienda"
+ },
+ {
+  "nombre": "Habilidoso",
+  "categoria": "origen",
+  "descripcion": "Ganas competencia en cualquier combinación de tres habilidades o herramientas que elijas. Puedes elegir esta dote más de una vez."
+ },
+ {
+  "nombre": "Iniciado en la magia",
+  "categoria": "origen",
+  "descripcion": "Aprendes dos trucos de tu elección y un conjuro de nivel 1 (no cuenta para el límite de conjuros conocidos), escogidos de lista de conjuros de clérigo, druida o mago (deben ser de la misma lista). 1vez/descanso largo puedes lanzar el conjuro de nivel 1 sin gastar maná o espacios de conjuro. Cada vez que subas de nivel, puedes reemplazarlo por otro distinto del mismo nivel de la lista de conjuros seleccionada. Tu aptitud mágica para estos conjuros es la Inteligencia, la Sabiduría o el Carisma (elígela cuando selecciones esta dote). Puedes elegir esta dote más de una vez, pero debes elegir una lista de conjuros distinta cada vez."
+ },
+ {
+  "nombre": "Matón de taberna",
+  "categoria": "origen",
+  "descripcion": "Ganas competencia con armas improvisadas y tus ataques sin arma infligen 1d4 + Mod.Fue de daño contundente. Siempre que tires un dado de daño para un ataque sin armas, podrás volver a tirarlo si sacas un 1 y deberás utilizar el nuevo resultado. 1vez/turno cuando inflijas daño a un objetivo con un ataque sin armas puedes empujarlo 5pies en dirección opuesta si es de tamaño grande o inferior."
+ },
+ {
+  "nombre": "Músico",
+  "categoria": "origen",
+  "descripcion": "Ganas competencia con tres instrumentos musicales de tu elección. Cuando termines un descanso, puedes tocar una canción con un instrumento musical con el que seas competente y darles inspiración a los aliados que te escuchen. La cantidad de aliados a los que puedas influir de esta forma es igual a tu BC."
+ },
+ {
+  "nombre": "Sanador",
+  "categoria": "origen",
+  "descripcion": "Si tienes útiles de sanador, puedes gastar un uso y tratar a una criatura que esté a 5pies o menos de ti como acción de utilizar. La criatura puede gastar uno de sus DG (lo tiras tú) para recupera una cantidad de PG igual al resultado más tu BC. Siempre que tires un dado para determinar cuántos puntos de golpe restableces con un conjuro o esta dote, podrás volver a tirarlo si sacas un 1 y deberás utilizar el nuevo resultado."
+ },
+ {
+  "nombre": "Acechador",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Destreza 13+ Aumenta tu puntuación de Destreza en 1, hasta un máximo de 20. Tienes visión ciega hasta 10pies. Tienes ventaja en las pruebas de Sigilo que hagas como parte de la acción de esconderse durante el combate. Si haces una tirada de ataque mientras estás escondido y no acierta, la tirada no revelará tu ubicación."
+ },
+ {
+  "nombre": "Actor",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Carisma 13+ Aumenta tu puntuación de Carisma en 1, hasta un máximo de 20. Mientras estés disfrazado tendrás ventaja en las pruebas de Carisma (Engaño o Interpretación) para convencer a los demás de que eres esa persona. Puedes imitar el sonido y habla de otras criaturas. Una criatura que escuche la imitación deberá superar una prueba de Perspicacia (CD 8 + Mod.Car + BC) para darse cuenta de que es una farsa."
+ },
+ {
+  "nombre": "Apresador",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Fuerza 13+ o Destreza 13+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. 1vez/turno, cuando aciertes a una criatura con un ataque sin armas como parte de la acción de atacar en tu turno, puedes tratar de agarrarla. Tienes ventaja en las tiradas de ataque contra una criatura a la que estés agarrando. No tienes que invertir movimiento adicional para mover a una criatura a la que estés agarrando si la criatura es de tu tamaño o más pequeña."
+ },
+ {
+  "nombre": "Atacante a la carga",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Fuerza 13+ o Destreza 13+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Cuando realizas la acción de correr, tu velocidad aumenta 10pies para esa acción. 1vez/turno, si te mueves al menos 10pies en línea recta hacia un objetivo justo antes de acertarle con una tirada de ataque cuerpo a cuerpo puedes o bien infligirle +1d8pg de daño, o bien empujarlo 10pies en dirección opuesta si su tamaño está, como mucho, una categoría por encima de la tuya."
+ },
+ {
+  "nombre": "Atleta",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Fuerza 13+ o Destreza 13+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Puedes trepar a tu velocidad normal. Si tienes el estado de derribado, puedes ponerte de pie con solo 5pies de movimiento. Puedes hacer un salto de longitud o de altura con carrerilla tras moverte solo 5pies."
+ },
+ {
+  "nombre": "Azote de magos",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Cuando dañes a una criatura que se esté concentrando, tendrá desventaja en la tirada de salvación que haga para mantener la concentración. 1vez/descanso, si fallas una TS de Inteligencia, Sabiduría o Carisma, puedes hacer que la superes."
+ },
+ {
+  "nombre": "Centinela",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Fuerza 13+ o Destreza 13+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Inmediatamente después de que una criatura que esté a tu alcance cuerpo a cuerpo use la acción de destrabarse o acierte a un objetivo que no seas tú con un ataque, podrás hacer un ataque de oportunidad contra a esa criatura. Cuando aciertes a una criatura con un ataque de oportunidad, su velocidad pasará a ser 0 para el resto del turno actual."
+ },
+ {
+  "nombre": "Chef",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Constitución o Sabiduría en 1, hasta un máximo de 20. Obtienes competencia con útiles de cocinero. Como parte de un descanso corto, puedes preparar una comida especial, siempre que tengas a mano los ingredientes y útiles de cocinero. Puedes preparar suficiente de esta comida como para una cantidad de criaturas igual a 4 + BC. Cualquier criatura que coma la comida y gaste uno o más dados de golpe en dicho descanso corto para recuperar puntos de golpe recuperará 1d8pg adicionales. Con 1 hora de trabajo o tras finalizar un descanso largo, puedes preparar una cantidad de tentempiés igual a tu BC si tienes ingredientes y útiles de cocinero a mano. Estos aperitivos especiales duran 8 horas una vez preparados. Una criatura que coma uno de estos refrigerios obtiene una cantidad de PG temporales igual a tu BC."
+ },
+ {
+  "nombre": "Combatiente con dos armas",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Fuerza 13+ o Destreza 13+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Cuando en tu turno ataques con un arma que tenga la propiedad “ligera”, podrás realizar un ataque extra como acción adicional con un arma cuerpo a cuerpo distinta sin la propiedad “a dos manos”. No sumarás tu modificador por característica al daño del ataque extra salvo que el modificador sea negativo. Puedes envainar y desenvainar dos armas sin la propiedad “a dos manos” en vez de 1."
+ },
+ {
+  "nombre": "Combatiente montado",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Fuerza, Destreza o Sabiduría en 1, hasta un máximo de 20. Mientras estés montando, tienes ventaja en las tiradas de ataque contra las criaturas que no estén montando situadas a 5pies o menos de tu montura si su tamaño es, al menos, una categoría inferior al de la montura. Si tu montura sufre un efecto que le permita hacer una tirada de salvación de Destreza para sufrir solo la mitad de daño, no recibe ningún daño si la supera y solo sufre la mitad si la falla. Para que la montura consiga este beneficio, debes estar montándola y ninguno de los dos puede tener el estado de incapacitado. Mientras estés montando, puedes hacer que un ataque que acierte a tu montura te acierte a ti en su lugar si no tienes el estado de incapacitado."
+ },
+ {
+  "nombre": "Duelista defensivo",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Destreza 13+ Aumenta tu puntuación de Destreza en 1, hasta un máximo de 20. Si empuñas un arma sutil y otra criatura te acierta con un ataque cuerpo a cuerpo, puedes llevar a cabo una reacción para sumar tu bonificador por competencia a tu clase de armadura, lo que podría hacer que el ataque falle. Ganas este bonificador a tu CA contra los ataques cuerpo a cuerpo hasta el principio de tu siguiente turno."
+ },
+ {
+  "nombre": "Entrenamiento con armas exóticas",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Obtienes competencia con armas exóticas."
+ },
+ {
+  "nombre": "Entrenamiento con armas marciales",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Obtienes competencia con armas marciales."
+ },
+ {
+  "nombre": "Envenenador",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Destreza o Inteligencia en 1, hasta un máximo de 20. Ganas competencia con útiles de envenenador si no la tenias ya. Cuando hagas una tirada de daño que cause daño de veneno, esta ignorará la resistencia a ese daño. Cuando crees un veneno, creas una cantidad de venenos adicionales igual a tu bonificador por competencia. Como acción adicional, puedes aplicar una dosis de veneno en un arma o unidad de munición, que una vez aplicado, conserva su potencia durante 1 minuto o hasta que inflijas daño con el objeto envenenado, lo que suceda antes. Cuando una criatura reciba daño de un objeto envenenado que portas, deberá superar una tirada de salvación de Constitución (CD 8 más el modificador de la característica aumentada por esta dote y tu bonificador por competencia) o recibirá 2d8 de daño de veneno y tendrá el estado de envenenada hasta el final de tu siguiente turno."
+ },
+ {
+  "nombre": "Experto en ballestas",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Destreza 13+ Aumenta tu puntuación de Destreza en 1, hasta un máximo de 20. Ignoras la propiedad de recarga de las ballestas. Estar a 5pies o menos de un enemigo no impone desventaja en tus tiradas de ataque con ballestas. Cuando hagas el ataque extra de la propiedad “ligera”, puedes sumar tu modificador por característica al daño del ataque extra si lo realizas con una ballesta con la propiedad “ligera” y no lo estás sumando ya al daño."
+ },
+ {
+  "nombre": "Experto en habilidades",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta una de tus puntuaciones de característica en 1, hasta un máximo de 20. Ganas competencia en una habilidad de tu elección. Ganas pericia en una habilidad en la que no la tengas ya pero tengas competencia en ella."
+ },
+ {
+  "nombre": "Influencia feérica",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Inteligencia, Sabiduría, o Carisma en 1, hasta un máximo de 20. Aprendes el conjuro “paso brumoso” y un conjuro a tu elección de nivel 1 de las escuelas mágicas de adivinación o encantamiento. No cuentan para el límite de conjuros conocidos. Puedes lanzar cada uno de estos conjuros 1vez/descanso largo sin gastar maná o espacios de conjuro. La aptitud mágica de los conjuros es la característica aumentada por esta dote."
+ },
+ {
+  "nombre": "Influencia sombría",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Inteligencia, Sabiduría, o Carisma en 1, hasta un máximo de 20. Aprendes el conjuro “invisibilidad” y un conjuro a tu elección de nivel 1 de las escuelas mágicas ilusión o nigromancia. No cuentan para el límite de conjuros conocidos. Puedes lanzar cada uno de estos conjuros 1vez/descanso largo sin gastar maná o espacios de conjuro. La aptitud mágica de los conjuros es la característica aumentada por esta dote."
+ },
+ {
+  "nombre": "Lanzador en combate",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y ser lanzador de conjuros Aumenta tu puntuación de Inteligencia, Sabiduría, o Carisma en 1, hasta un máximo de 20. Tienes ventaja en las tiradas de salvación de Constitución que realices para mantener la concentración. Cuando una criatura provoque un ataque de oportunidad al salir de tu alcance, puedes llevar a cabo una reacción para lanzar un conjuro sobre la criatura en lugar de hacer un ataque de oportunidad. El conjuro debe tener un tiempo de lanzamiento de una acción y solo puede hacer objetivo a esa criatura. Puedes ejecutar los componentes somáticos de los conjuros incluso teniendo ambas manos ocupadas."
+ },
+ {
+  "nombre": "Lanzador preciso",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y ser lanzador de conjuros Aumenta tu puntuación de Inteligencia, Sabiduría, o Carisma en 1, hasta un máximo de 20. Tus tiradas de ataque con conjuros ignoran las coberturas media y tres cuartos. Estar a 5pies o menos de un enemigo no impone desventaja en tus tiradas de ataque con conjuros a distancia. Cuando lances un conjuro que tenga un alcance de al menos 10pies y requiera una tirada de ataque, puedes aumentar el alcance del conjuro en 60pies."
+ },
+ {
+  "nombre": "Lanzador ritual",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ e Inteligencia o Sabiduría o Carisma 13+ Elige una cantidad de conjuros de nivel 1 marcados como “ritual” igual a tu BC. Pueden ser conjuros conocidos por ti o no, aquellos que no conozcas pasaran a ser conjuros conocidos que no contarán para el límite de conjuros conocidos. Siempre que tu BC aumente, puedes añadir otro conjuro de nivel 1 marcado como “ritual”. Puedes lanzar cada uno de estos conjuros 1vez/descanso largo con su forma de ritual pero con su tiempo de lanzamiento habitual sin consumir maná o espacios de conjuro."
+ },
+ {
+  "nombre": "Líder inspirador",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Sabiduría o Carisma 13+ Aumenta tu puntuación de Sabiduría o Carisma en 1, hasta un máximo de 20. Tras finalizar un descanso corto o largo, puedes hacer una interpretación inspiradora: un discurso, una canción o un baile. Cuando lo hagas, elige hasta seis aliados (entre los que puedes estar tú) que estén a 30pies o menos de ti y que hayan presenciado la interpretación. Las criaturas elegidas ganan una cantidad de puntos de golpe temporales igual a tu nivel de personaje más el modificador de la característica que has aumentado con esta dote."
+ },
+ {
+  "nombre": "Ligeramente acorazado",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Obtienes competencia con armaduras ligeras y escudos."
+ },
+ {
+  "nombre": "Maestro de armas",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Tu entrenamiento con armas te permite utilizar la propiedad de maestría con un tipo de arma sencilla, marcial o exótica de tu elección, siempre que tengas competencia con ella. Tras finalizar un descanso largo, puedes cambiar el tipo de arma elegida por otra que cumpla el requisito."
+ },
+ {
+  "nombre": "Maestro en armaduras medias",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y competencia con armaduras medias Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Incrementa el bonificador por destreza permitido por las armaduras medias a 3 en lugar del habitual 2."
+ },
+ {
+  "nombre": "Maestro en armaduras pesadas",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y competencia con armaduras pesadas Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Cuando te acierte un ataque mientras lleves puesta una armadura pesada, cualquier daño contundente, cortante y perforante que recibas se reducirá en una cantidad igual a tu bonificador por competencia."
+ },
+ {
+  "nombre": "Maestro en armas de asta",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Fuerza o Destreza 13+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Inmediatamente después de que realices la acción de atacar con un bastón, una lanza o un arma cuerpo a cuerpo que tenga las propiedades “gran alcance” y “pesada”, puedes usar una acción adicional para hacer un ataque cuerpo a cuerpo con el otro extremo del arma que si impacta causa 1d4pg daño contundente.\nMientras empuñes un bastón, una lanza o un arma cuerpo a cuerpo que tenga las propiedades “gran alcance” y “pesada”, podrás llevar a cabo una reacción para hacer un ataque cuerpo a cuerpo contra una criatura que entre dentro del alcance que tengas con esa arma."
+ },
+ {
+  "nombre": "Maestro en armas pesadas",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Fuerza o Destreza 13+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Cuando infliges daño a una criatura con un arma que tenga la propiedad “pesada” como parte de la acción de atacar en tu turno, puedes hacer que el arma cause un daño adicional igual a tu BC. Inmediatamente después de causar un crítico con un arma con la propiedad “pesada” o reducir a una criatura a 0 puntos de golpe con una, puedes hacer un ataque con el mismo arma como acción adicional."
+ },
+ {
+  "nombre": "Maestro en escudos",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y competencia con escudos Aumenta tu puntuación de Fuerza en 1, hasta un máximo de 20. Si atacas a una criatura que esté a 5pies o menos de ti como parte de la acción de atacar y le aciertas con un arma cuerpo a cuerpo, inmediatamente podrás golpearla con tu escudo si lo llevas equipado y obligarla a realizar una tirada de salvación de Fuerza (CD 8 + Mod.Fue + BC). Si la falla, podrás empujar al objetivo 5pies respecto a ti o hacer que tenga el estado de derribado (a tu elección). Puedes usar este beneficio solo una vez en cada uno de tus turnos. Si sufres un efecto que te permita hacer una tirada de salvación de Destreza para sufrir solo la mitad de daño, podrás llevar a cabo una reacción para no recibir daño alguno si la superas y estás embrazando un escudo."
+ },
+ {
+  "nombre": "Mejora de Característica",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta en 2 una puntuación de característica que elijas o aumenta dos en 1 cada una. Esta dote no puede aumentar una puntuación de característica por encima de 20. Repetible. Puedes elegir esta dote más de una vez."
+ },
+ {
+  "nombre": "Mente aguda",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ e Inteligencia 13+ Aumenta tu puntuación de Inteligencia en 1, hasta un máximo de 20. Elige una de las siguientes habilidades: Conocimiento arcano, Historia, Investigación, Naturaleza o Religión. Si no tienes competencia en la habilidad elegida, la consigues, y si ya la tienes, ganas pericia en ella. Puedes llevar a cabo la acción de estudiar como acción adicional."
+ },
+ {
+  "nombre": "Moderadamente acorazado",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y competencia con armaduras ligeras Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Obtienes competencia con armaduras medias."
+ },
+ {
+  "nombre": "Muy acorazado",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y competencia con armaduras medias Aumenta tu puntuación de Constitución o Fuerza en 1, hasta un máximo de 20. Obtienes competencia con armaduras pesadas."
+ },
+ {
+  "nombre": "Observador",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ e Inteligencia 13+ o Sabiduría 13+ Aumenta tu puntuación de Inteligencia o Sabiduría en 1, hasta un máximo de 20. Elige una de las siguientes habilidades: Investigación, Percepción o Perspicacia. Si no tienes competencia en la habilidad elegida, la consigues, y si ya la tienes, ganas pericia en ella. Puedes llevar a cabo la acción de buscar como acción adicional."
+ },
+ {
+  "nombre": "Perforador",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Una vez por turno, cuando aciertes a una criatura con un ataque que cause daño perforante, podrás volver a tirar uno de los dados de daño del ataque y deberás utilizar el nuevo resultado.\nCuando causes un crítico que inflija daño perforante a una criatura, podrás tirar un dado de daño más al determinar el daño perforante adicional que recibe el objetivo."
+ },
+ {
+  "nombre": "Rebanador",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Fuerza o Destreza en 1, hasta un máximo de 20. Una vez por turno, cuando aciertes a una criatura con un ataque que cause daño cortante, podrás reducir la velocidad del objetivo en 10pies hasta el principio de tu siguiente turno. Cuando causes un crítico que haga daño cortante a una criatura, esta tendrá desventaja en las tiradas de ataque hasta el principio de tu siguiente turno."
+ },
+ {
+  "nombre": "Resiliente",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Constitución en 1, hasta un máximo de 20. Tienes ventaja en las tiradas de salvación contra muerte. Como acción adicional, puedes gastar uno de tus dados de puntos de golpe, tirarlo y recuperar una cantidad de puntos de golpe igual al resultado."
+ },
+ {
+  "nombre": "Telepático",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Inteligencia o Sabiduría o Carisma en 1, hasta un máximo de 20. Puedes hablarle telepáticamente a cualquier criatura que puedas ver a 60pies o menos de ti. Hablas telepáticamente en un idioma que conoces y la criatura solo te entiende si también conoce dicho idioma. Tu comunicación no concede a la criatura la capacidad de responder telepáticamente. Aprende el conjuro “Detectar pensamientos”, no cuenta para el límite de conjuros conocidos. 1vez/descanso largo puedes lanzarlo sin consumir maná o espacios de conjuro. La aptitud mágica del conjuro es la característica aumentada por esta dote."
+ },
+ {
+  "nombre": "Telequinético",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Inteligencia o Sabiduría o Carisma en 1, hasta un máximo de 20. Aprendes el conjuro “Mano de mago”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo sin componentes verbales o somáticos, puedes hacer que la mano espectral sea invisible y su alcance y la distancia a la que puede estar de ti aumentan en 30pies cuando lo lances. La aptitud mágica del conjuro es la característica aumentada por esta dote. Como acción adicional, puedes empujar telepáticamente a una criatura que puedas ver a 30pies o menos de ti. Si lo haces, el objetivo deberá superar una tirada de salvación de Fuerza (CD 8 más tu modificador por característica de la puntuación aumentada por esta dota y tu bonificador por competencia) o se moverá 5pies hacia ti o lejos de ti."
+ },
+ {
+  "nombre": "Tirador de primera",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Destreza 13+ Aumenta tu puntuación de Destreza en 1, hasta un máximo de 20. Tus ataques a distancia con armas ignoran las coberturas media y tres cuartos. Estar a 1,5 m o menos de un enemigo no impone desventaja en tus tiradas de ataque con armas a distancia. Al atacar con alcance largo, tus tiradas de ataque no tendrán desventaja con las armas a distancia."
+ },
+ {
+  "nombre": "Triturador",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ Aumenta tu puntuación de Fuerza o Constitución en 1, hasta un máximo de 20. Una vez por turno, cuando aciertes a una criatura con un ataque que cause daño contundente, podrás moverla 5pies a un espacio sin ocupar, siempre que el tamaño del objetivo esté, como mucho, una categoría por encima de la tuya. Cuando causes un crítico que inflija daño contundente a una criatura, las tiradas de ataque contra esa criatura tendrán ventaja hasta el principio de tu siguiente turno."
+ },
+ {
+  "nombre": "Veloz",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y Destreza 13+ o Constitución 13+ Aumenta tu puntuación de Destreza o Constitución en 1, hasta un máximo de 20. Tu velocidad aumenta en 10pies. Cuando realizas la acción de correr en tu turno, el terreno difícil no te cuesta movimiento adicional durante el resto de ese turno. Los ataques de oportunidad tienen desventaja contra ti."
+ },
+ {
+  "nombre": "Versado en un elemento",
+  "categoria": "general",
+  "descripcion": "Requisitos: Nivel 4+ y ser lanzador de conjuros Aumenta tu puntuación de Inteligencia o Sabiduría o Carisma en 1, hasta un máximo de 20. Elige uno de los siguientes tipos de daño: ácido, frío, fuego, relámpago o trueno. Los conjuros que lances ignoran la resistencia al daño del tipo que elijas. Además, cuando tires el daño de un conjuro que cause daño de ese tipo, podrás tratar cualquier 1 en los dados de daño como un 2. Puedes elegir esta dote más de una vez, pero debes elegir un tipo de daño distinto cada vez."
+ },
+ {
+  "nombre": "Combate con armas a dos manos",
+  "categoria": "estilo de combate",
+  "descripcion": "Requisitos: Rasgo estilo de combate Cuando tires el daño para un ataque hecho con un arma cuerpo a cuerpo que empuñas con ambas manos, puedes tratar cualquier 1 o 2 en los dados de daño como un 3. Para obtener este beneficio, el arma debe poseer la propiedad “a dos manos” o “versátil”."
+ },
+ {
+  "nombre": "Combate con armas arrojadizas",
+  "categoria": "estilo de combate",
+  "descripcion": "Requisitos: Rasgo estilo de combate Cuando aciertas con una tirada de ataque a distancia con un arma que tenga la propiedad “arrojadiza”, obtienes un bonificador de +2 a la tirada de daño."
+ },
+ {
+  "nombre": "Combate con dos armas",
+  "categoria": "estilo de combate",
+  "descripcion": "Requisitos: Rasgo estilo de combate Cuando haces un ataque extra como resultado de utilizar un arma con la propiedad “ligera”, puedes sumar tu modificador por característica al daño de ese ataque si no lo estás sumando ya al daño."
+ },
+ {
+  "nombre": "Combate sin armas",
+  "categoria": "estilo de combate",
+  "descripcion": "Requisitos: Rasgo estilo de combate Cuando aciertes con tu ataque sin armas y causes daño, puedes infligir una cantidad de daño contundente igual a 1d6 más tu modificador por Fuerza en lugar del daño habitual de un ataque sin armas. Si no estás empuñando armas ni embrazando un escudo al hacer la tirada de ataque, el d6 se convierte en un d8. Al principio de cada uno de tus turnos, puedes infligir 1d4 de daño contundente a una criatura a la que tengas agarrada."
+ },
+ {
+  "nombre": "Defensa",
+  "categoria": "estilo de combate",
+  "descripcion": "Requisitos: Rasgo estilo de combate Mientras lleves puesta una armadura ligera, media o pesada, recibes un bonificador de +1 a la CA."
+ },
+ {
+  "nombre": "Duelo",
+  "categoria": "estilo de combate",
+  "descripcion": "Requisitos: Rasgo estilo de combate Cuando empuñes un arma cuerpo a cuerpo con una mano y ninguna en la otra, recibes un bonificador de +2 a tus tiradas de daño con esa arma."
+ },
+ {
+  "nombre": "Intercepción",
+  "categoria": "estilo de combate",
+  "descripcion": "Requisitos: Rasgo estilo de combate Cuando una criatura que puedas ver acierte a otra criatura que esté a 5pies o menos de ti con una tirada de ataque, puedes llevar a cabo una reacción para reducir el daño causado al objetivo en 1d10 más tu bonificador por competencia. Para usar esta reacción, debes estar embrazando un escudo o empuñando un arma cuerpo a cuerpo."
+ },
+ {
+  "nombre": "Lucha a ciegas",
+  "categoria": "estilo de combate",
+  "descripcion": "Requisitos: Rasgo estilo de combate Tienes visión ciega a 10pies."
+ },
+ {
+  "nombre": "Protección",
+  "categoria": "estilo de combate",
+  "descripcion": "Requisitos: Rasgo estilo de combate Cuando una criatura que puedas ver ataque a un objetivo que no seas tú y esté a 5pies o menos de ti, puedes llevar a cabo una reacción para interponer tu escudo si estás embrazando uno e impones desventaja a la tirada de ataque ala que reaccionas y al resto de tiradas de ataque contra el objetivo hasta el principio de tu siguiente turno si permaneces a 5pies o menos del objetivo."
+ },
+ {
+  "nombre": "Tiro con arco",
+  "categoria": "estilo de combate",
+  "descripcion": "Requisitos: Rasgo estilo de combate Recibes un bonificador de +2 a las tiradas de ataque con armas a distancia."
+ },
+ {
+  "nombre": "Don de la fortaleza",
+  "categoria": "don épico",
+  "descripcion": "Requisitos: Nivel 19+ Aumenta una puntuación de característica de tu elección en 1 hasta un máximo de 30. Tus puntos de golpe máximos aumentan en 40. 1vez/turno cuando recuperes puntos de golpe, podrás recuperar una cantidad de puntos de golpe adicionales igual a tu modificador por Constitución."
+ },
+ {
+  "nombre": "Don de la habilidad",
+  "categoria": "don épico",
+  "descripcion": "Requisitos: Nivel 19+ Aumenta una puntuación de característica de tu elección en 1 hasta un máximo de 30. Ganas competencia en todas las habilidades. Ganas pericia en una habilidad en la que no tengas."
+ },
+ {
+  "nombre": "Don de la pericia en combate",
+  "categoria": "don épico",
+  "descripcion": "Requisitos: Nivel 19+ Aumenta una puntuación de característica de tu elección en 1 hasta un máximo de 30. 1vez/turno, cuando falles con una tirada de ataque, puedes acertarla."
+ },
+ {
+  "nombre": "Don de la recuperación",
+  "categoria": "don épico",
+  "descripcion": "Requisitos: Nivel 19+ Aumenta una puntuación de característica de tu elección en 1 hasta un máximo de 30. 1vez/descanso largo cuando tus puntos de golpe fueran a reducirse a 0, puedes quedarte con 1 punto de golpe y recuperar una cantidad de puntos de golpe igual a la mitad de tus puntos de golpe máximos. Tienes una reserva de 10d10. Como acción adicional, puedes gastar dados de la reserva, tirarlos y recuperar una cantidad de puntos de golpe igual al resultado total de la tirada. Recuperas todos los dados gastados tras finalizar un descanso largo."
+ },
+ {
+  "nombre": "Don de la resistencia a energías",
+  "categoria": "don épico",
+  "descripcion": "Requisitos: Nivel 19+ Aumenta una puntuación de característica de tu elección en 1 hasta un máximo de 30. Ganas resistencia a dos de los siguientes tipos de daño, a tu elección: ácido, frío, fuego, necrótico, psíquico, radiante, relámpago, trueno o veneno. Tras finalizar un descanso largo, puedes cambiar de opciones. Cuando recibas daño de uno de los tipos elegidos, puedes llevar a cabo una reacción para dirigir un daño del mismo tipo hacia otra criatura que puedas ver a 60pies o menos de ti que no esté tras cobertura completa. Si lo haces, esa criatura deberá superar una tirada de salvación de Destreza (CD 8 + Mod.Con + BC) o recibirá una cantidad de daño igual a 2d12 más tu modificador por Constitución."
+ },
+ {
+  "nombre": "Don de la velocidad",
+  "categoria": "don épico",
+  "descripcion": "Requisitos: Nivel 19+ Aumenta una puntuación de característica de tu elección en 1 hasta un máximo de 30. Como acción adicional, puedes llevar a cabo la acción de destrabarse, lo que también pone fin al estado de agarrado sobre ti. Tu velocidad aumenta en 30pies."
+ },
+ {
+  "nombre": "Don de la visión verdadera",
+  "categoria": "don épico",
+  "descripcion": "Requisitos: Nivel 19+ Aumenta una puntuación de característica de tu elección en 1 hasta un máximo de 30. Tienes visión verdadera hasta 60pies."
+ },
+ {
+  "nombre": "Don del ataque imparable",
+  "categoria": "don épico",
+  "descripcion": "Requisitos: Nivel 19+ Aumenta una puntuación de característica de tu elección en 1 hasta un máximo de 30. El daño contundente, cortante y perforante que causas siempre ignora la resistencia. Cuando logres un crítico, puedes infligir una cantidad de daño adicional al objetivo igual a la puntuación de característica aumentada con esta dote. El daño adicional es del mismo tipo que el del ataque."
+ },
+ {
+  "nombre": "Don del destino",
+  "categoria": "don épico",
+  "descripcion": "Requisitos: Nivel 19+ Aumenta una puntuación de característica de tu elección en 1 hasta un máximo de 30. Cuando tú u otra criatura que esté a 60pies o menos de ti superéis o falléis una tirada con d20, puedes tirar 2d4 y aplicar el resultado total como bonificador o penalizador a la tirada. Cuando uses este beneficio, no podrás volver a hacerlo hasta que tires iniciativa o finalices un descanso corto o largo."
+ },
+ {
+  "nombre": "Don del espíritu de la noche",
+  "categoria": "don épico",
+  "descripcion": "Requisitos: Nivel 19+ Aumenta una puntuación de característica de tu elección en 1 hasta un máximo de 30. Cuando estés en una zona de luz tenue u oscuridad, puedes otorgarte el estado de invisible como acción adicional. El estado finaliza inmediatamente después de que realices una acción, una acción adicional o una reacción. Cuando estés en una zona de luz tenue u oscuridad, tienes resistencia a todo el daño excepto al psíquico y al radiante."
+ },
+ {
+  "nombre": "Don del recuerdo de conjuros",
+  "categoria": "don épico",
+  "descripcion": "Requisitos: Nivel 19+ Aumenta una puntuación de característica de tu elección en 1 hasta un máximo de 30. Cada vez que lances un conjuro a nivel 1, 2, 3 o 4, lanza 1d4. Si el número que sacas es el mismo que el nivel al que has lanzado el conjuro, este no consume maná o espacios de conjuro (según el recurso que uses)."
+ },
+ {
+  "nombre": "Don del viaje dimensional",
+  "categoria": "don épico",
+  "descripcion": "Requisitos: Nivel 19+ Aumenta una puntuación de característica de tu elección en 1 hasta un máximo de 30. Inmediatamente después de que realices la acción de atacar o lanzar un conjuro, puedes teletransportarte hasta 30pies a un espacio sin ocupar que puedas ver."
+ }
+]

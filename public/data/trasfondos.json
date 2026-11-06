@@ -1,0 +1,145 @@
+[
+ {
+  "nombre": "Acólito",
+  "descripcion": "Llevas toda al vida al servicio de un templo, aprendiendo rituales sagrados y ofreciendo sacrificios a la deidad o deidades las que rindes culto. Servir a los dioses y descubrir sus sagradas obras será el camino que te lleve a la grandeza.",
+  "habilidades": [
+   "Perspicacia",
+   "Religión"
+  ],
+  "dotes": [
+   "Sanador",
+   "Iniciado en la magia",
+   "Habilidoso"
+  ]
+ },
+ {
+  "nombre": "Charlatán",
+  "descripcion": "Dominas el arte de la manipulación. Tienes cierta tendencia a la exageración y buena disposición para aprovecharte de ello. Retorcer la verdad y enfrentar a aliados entre sí son estrategias que te resultan muy fructíferas.",
+  "habilidades": [
+   "Engaño",
+   "Juego de Manos"
+  ],
+  "dotes": [
+   "Afortunado",
+   "Habilidoso",
+   "Iniciado en la magia"
+  ]
+ },
+ {
+  "nombre": "Criminal",
+  "descripcion": "Tienes cierto historial delictivo y sobrevives aprovechándote de contactos que ejercen actividades de dudosa legalidad. Beneficiarte de acciones criminales te conducirá a oportunidades aún más provechosas en el futuro.",
+  "habilidades": [
+   "Engaño",
+   "Sigilo"
+  ],
+  "dotes": [
+   "Afortunado",
+   "Habilidoso",
+   "Matón de taberna"
+  ]
+ },
+ {
+  "nombre": "Animador",
+  "descripcion": "Vives para agitar y subvertir a tu público, ya sea una multitud de plebeyos o un grupo de nobles. Preserva el arte y transmite felicidad a los débiles y oprimidos para potenciar tu aura carismática.",
+  "habilidades": [
+   "Acrobacias",
+   "Interpretación"
+  ],
+  "dotes": [
+   "Músico",
+   "Habilidoso",
+   "Afortunado"
+  ]
+ },
+ {
+  "nombre": "Héroe del pueblo",
+  "descripcion": "Eres un adalid del pueblo llano; desafías a tiranos y monstruos para proteger a los indefensos. Salvar a quienes se encuentran ante un peligro inminente hará crecer tu leyenda.",
+  "habilidades": [
+   "Trato con animales",
+   "Supervivencia"
+  ],
+  "dotes": [
+   "Duro",
+   "Atacante salvaje",
+   "Afortunado"
+  ]
+ },
+ {
+  "nombre": "Artesano gremial",
+  "descripcion": "Tu habilidad en un oficio en particular te ha permitido ingresar en un gremio mercante, lo que supone algunos privilegios y un cierto grado de protección al practicar tu arte. Descubrir y reparar artilugios poco frecuentes es tu fuente de inspiración.",
+  "habilidades": [
+   "Perspicacia",
+   "Persuasión"
+  ],
+  "dotes": [
+   "Fabricante",
+   "Habilidoso",
+   "Músico"
+  ]
+ },
+ {
+  "nombre": "Noble",
+  "descripcion": "Creciste en una familia de la élite social y te criaste en un entrono de poder y privilegios. Acumula renombre, poder y lealtad para mejorar tu estatus.",
+  "habilidades": [
+   "Historia",
+   "Persuasión"
+  ],
+  "dotes": [
+   "Alerta",
+   "Iniciado en la magia",
+   "Habilidoso"
+  ]
+ },
+ {
+  "nombre": "Forastero",
+  "descripcion": "Creciste en plan naturaleza prendiste a sobrevivir lejos de las comodidades de la civilización. Sobrevivir a los peligros inusuales que encuentres ahí fuera mejorará tu pericia y tu comprensión.",
+  "habilidades": [
+   "Atletismo",
+   "Supervivencia"
+  ],
+  "dotes": [
+   "Atacante salvaje",
+   "Alerta",
+   "Habilidoso"
+  ]
+ },
+ {
+  "nombre": "Erudito",
+  "descripcion": "Eres una persona curiosa e instruida, con una insaciable sed de conocimiento. Aprendes la historia secreta del mundo te inspirará para poner tu sabiduría al servicio de un bien mayor",
+  "habilidades": [
+   "Conocimiento Arcano",
+   "Historia"
+  ],
+  "dotes": [
+   "Músico",
+   "Iniciado en la magia",
+   "Sanador"
+  ]
+ },
+ {
+  "nombre": "Soldado",
+  "descripcion": "Has recibido entrenamiento en combate y estrategias militares; cuentas con experiencia al servicio de una milicia, compañía de mercenarios o fuerza armada. Demuestra tu astucia y tu valor en el campo de batalla para mejorar tu destreza marcial.",
+  "habilidades": [
+   "Atletismo",
+   "Intimidación"
+  ],
+  "dotes": [
+   "Duro",
+   "Atacante salvaje",
+   "Alerta"
+  ]
+ },
+ {
+  "nombre": "Huérfano",
+  "descripcion": "Tras sobrevivir a una infancia miserable, sabes cómo sacar el máximo partido a cualquier minucia. La experiencia de una vida en las calles refuerza tu determinación ante el viaje que te espera.",
+  "habilidades": [
+   "Juego de manos",
+   "Sigilo"
+  ],
+  "dotes": [
+   "Matón de taberna",
+   "Afortunado",
+   "Alerta"
+  ]
+ }
+]

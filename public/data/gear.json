@@ -1,0 +1,905 @@
+[
+ {
+  "nombre": "Herramientas de albañil",
+  "precio": "10po",
+  "pagina": 210,
+  "descripcion": "Característica: Fuerza.\nPeso: 9lb.\nUtilizar: Esculpir en la piedra (CD 10). Fabricar: Polipasto.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Herramientas de alfarero",
+  "precio": "10po",
+  "pagina": 210,
+  "descripcion": "Característica: Inteligencia.\nPeso: 3,5lb.\nUtilizar: Distinguir lo que ha contenido un objeto de cerámica durante las últimas 24 horas (CD 15). Fabricar: Jarro, lámpara.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Herramientas de carpintero",
+  "precio": "8po",
+  "pagina": 210,
+  "descripcion": "Característica: Fuerza.\nPeso: 7lb.\nUtilizar: Sellar o forzar una puerta o un recipiente (CD 20). Fabricar: Bastón, garrote, garrote grande, antorcha, ariete portátil, barril, cofre, escalera, vara.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Herramientas de cartógrafo",
+  "precio": "15po",
+  "pagina": 210,
+  "descripcion": "Característica: Sabiduría.\nPeso: 7lb.\nUtilizar: Dibujar un mapa de una zona pequeña (CD 15). Fabricar: Mapa.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Herramientas de curtidor",
+  "precio": "5po",
+  "pagina": 210,
+  "descripcion": "Característica: Destreza.\nPeso: 3lb.\nUtilizar: Añadir un diseño a un objeto de cuero (CD 10). Fabricar: Honda, látigo, armadura de cuero, armadura de cuero tachonado, armadura de pieles, aljaba, bolsa, cantimplora, estuche para mapas o pergaminos, estuche para virotes de ballesta, mochila, pergamino.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Herramientas de ebanista",
+  "precio": "1po",
+  "pagina": 210,
+  "descripcion": "Característica: Destreza.\nPeso: 3lb.\nUtilizar: Tallar un dibujo en madera (CD 10). Fabricar: Bastón, garrote, garrote grande, armas a distancia (salvo honda, mosquete, mosquete con tambor, pimentero y pimentero con tambor), canalizador arcano, canalizador druídico, dardos, flechas, pluma, virotes.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Herramientas de herrero",
+  "precio": "20po",
+  "pagina": 211,
+  "descripcion": "Característica: Fuerza.\nPeso: 9lb.\nUtilizar: Forzar una puerta o un recipiente (CD 20). Fabricar: Cualquier arma cuerpo a cuerpo (salvo bastón, garrote, garrote grande y látigo), armaduras medias (salvo de pieles), armaduras pesadas, abrojos, balas de arma de fuego, bolas de metal, cadena, cubo, garfio de escalada, olla de hierro, palanqueta, proyectiles de honda, puntas de hierro.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Herramientas de joyero",
+  "precio": "25po",
+  "pagina": 211,
+  "descripcion": "Característica: Inteligencia.\nPeso: 2lb.\nUtilizar: Discernir el valor de una gema (CD 15). Fabricar: Canalizador arcano, símbolo sagrado.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Herramientas de manitas",
+  "precio": "50po",
+  "pagina": 211,
+  "descripcion": "Característica: Destreza.\nPeso: 11lb.\nUtilizar: Montar un objeto Diminuto compuesto de chatarra, que se desarmará tras 1 minuto (CD 20). Fabricar: Mosquete, mosquete con tambor, pimentero, pimentero con tambor, campana, cerradura, espejo, esposas, frasco, linterna de ojo de buey, linterna sorda, pala, silbato de supervivencia, trampa para cazar, yesquero.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Herramientas de soplador de vidrio",
+  "precio": "30po",
+  "pagina": 211,
+  "descripcion": "Característica: Inteligencia.\nPeso: 3lb.\nUtilizar: Distinguir lo que ha contenido un objeto de vidrio durante las últimas 24 horas (CD 15). Fabricar: Botella de cristal, catalejo, lupa, vial.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Herramientas de tejedor",
+  "precio": "1po",
+  "pagina": 211,
+  "descripcion": "Característica: Destreza.\nPeso: 3lb.\nUtilizar: Remendar un roto en una prenda (CD 10) o coser un diseño Diminuto (CD 10). Fabricar: Armadura acolchada, cesta, cordel, cuerda, manta, petate, red, ropas de calidad, ropas de viaje, saco, tienda, túnica.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Herramientas de zapatero",
+  "precio": "5po",
+  "pagina": 211,
+  "descripcion": "Característica: Destreza.\nPeso: 3lb.\nUtilizar: Modificar calzado para dar ventaja a la siguiente prueba de Destreza (Acrobacias) de quien lo lleve (CD 10). Fabricar: Útiles de escalada.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Suministros de alquimista",
+  "precio": "50po",
+  "pagina": 211,
+  "descripcion": "Característica: Inteligencia.\nPeso: 9lb.\nUtilizar: Identificar una sustancia (CD 15) o encender un fuego (CD 15). Fabricar: Aceite, ácido, fuego de alquimista, papel, perfume, saquito de componentes.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Suministros de calígrafo",
+  "precio": "10po",
+  "pagina": 211,
+  "descripcion": "Característica: Destreza.\nPeso: 3lb.\nUtilizar: Escribir texto lleno de forituras que no se pueda falsificar (CD 15). Fabricar: Pergamino de conjuro, tinta.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Suministros de cervecero",
+  "precio": "20po",
+  "pagina": 211,
+  "descripcion": "Característica: Inteligencia.\nPeso: 10lb.\nUtilizar: Detectar bebida envenenada (CD 15) o identificar alcohol (CD 10). Fabricar: Antitoxina, licores.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Suministros de pintor",
+  "precio": "10po",
+  "pagina": 212,
+  "descripcion": "Característica: Sabiduría.\nPeso: 3lb.\nUtilizar: Pintar una imagen reconocible de algo que hayas visto (CD 10). Fabricar: Canalizador druídico, símbolo sagrado.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Útiles de cocinero",
+  "precio": "1po",
+  "pagina": 212,
+  "descripcion": "Característica: Sabiduría.\nPeso: 9lb.\nUtilizar: Mejorar el sabor de la comida (CD 10) o detectar alimentos podridos o envenenados (CD 15). Fabricar: Raciones.\nOtras herramientas Estas herramientas sirven de ayuda en las aventuras y en otros quehaceres. Cada una de estas herramientas requiere su propia competencia.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Herramientas de ladrón",
+  "precio": "25po",
+  "pagina": 212,
+  "descripcion": "Característica: Destreza.\nPeso: 1lb.\nUtilizar: Forzar cerraduras y desarmar trampas. Si tienes competencia con herramientas de ladrón reduce la CD de dicha prueba en -5.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Herramientas de navegante",
+  "precio": "25po",
+  "pagina": 212,
+  "descripcion": "Característica: Sabiduría.\nPeso: 2lb.\nUtilizar: Trazar un rumbo (CD 10) o determinar la posición contemplando las estrellas (CD 15).\nInstrumento musical (Variable) Característica: Carisma.\nPeso: Variable.\nUtilizar: Tocar una melodía conocida (CD 10) o improvisar una canción (CD 15). Variantes: Chirimía (2 po, 1lb), cuerno (3 po, 2lb), dulcémele (25 po, 10lb), flauta (2 po, 1lb), flauta de pan (12 po, 2lb), gaita (30 po, 7lb), laúd (35 po, 2lb), lira (30 po, 2lb), tambor (6 po, 3lb), viola (30 po, 1lb).\nJuego (Variable) Característica: Sabiduría.\nPeso: --\nUtilizar: Distinguir si alguien hace trampas (CD 10) o ganar la partida (CD 20). Variantes: Ajedrez dragón (1 po), apuesta de los tres dragones (1 po), dados (1 pp), naipes (5 pp).",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Útiles de envenenador",
+  "precio": "50po",
+  "pagina": 212,
+  "descripcion": "Característica: Inteligencia.\nPeso: 2lb.\nUtilizar: Detectar un objeto envenenado (CD 10). Fabricar: Venenos.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Útiles de herborista",
+  "precio": "5po",
+  "pagina": 212,
+  "descripcion": "Característica: Inteligencia.\nPeso: 3lb.\nUtilizar: Identificar una planta (CD 10). Fabricar: Antitoxina, elixires, pociones de curación, útiles de sanador, vela.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Útiles para disfrazarse",
+  "precio": "25po",
+  "pagina": 212,
+  "descripcion": "Característica: Carisma.\nPeso: 3lb.\nUtilizar: Maquillar (CD 10). Fabricar: Disfraces.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Útiles para falsificar",
+  "precio": "15po",
+  "pagina": 212,
+  "descripcion": "Característica: Destreza.\nPeso: 5lb.\nUtilizar: Escribir 10 o menos palabras imitando la letra de otra persona (CD 15) o duplicar un sello de cera (CD 20).\nEquipo de aventureros Esta sección incluye artículos que suelen resultar útiles a los aventureros. Estos objetos se describen en orden alfabético y el precio del objeto aparece tras su nombre.",
+  "categoria": "herramientas"
+ },
+ {
+  "nombre": "Abrojos",
+  "precio": "1po",
+  "pagina": 213,
+  "descripcion": "Como acción de utilizar, puedes esparcir los abrojos de tu bolsa para cubrir una zona cuadrada de 5pies de lado a 5pies o menos de ti. Las criaturas que entren en esta zona por primera vez en un turno deberán superar una tirada de salvación de Destreza con CD 15 o sufrirán 1 de daño perforante y su velocidad se reducirá a 0 hasta el principio de su siguiente turno. Se tarda 10 minutos en recuperar los abrojos.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Aceite",
+  "precio": "1pp",
+  "pagina": 213,
+  "descripcion": "Puedes empapar de aceite a una criatura, un objeto o un espacio o utilizarlo como combustible, como se detalla a continuación. Empapar a una criatura o un objeto: Cuando lleves a cabo la acción de atacar, puedes sustituir uno de tus ataques por lanzar un frasco de aceite. Haz objetivo a una criatura u objeto a 20pies o menos de ti. El objetivo deberá superar una tirada de salvación de Destreza (CD 8 más tu modificador por Destreza y tu bonificador por competencia) o quedará cubierto de aceite. Si el objetivo sufre daño de fuego antes de que el aceite se seque (tras 1 minuto), recibirá 5 de daño de fuego adicional y pasará a tener el estado ardiendo. Empapar un espacio: Puedes llevar a cabo la acción de utilizar para verter un frasco de aceite sobre un suelo plano para cubrir una zona cuadrada de 5pies de lado a 5pies o menos de ti. Si se prende, el aceite arderá durante 2 asaltos desde que se prendió hasta el final de ese turno y hará 5 de daño de fuego a cualquier criatura que entre en la zona o termine su turno en ella.\nCombustible: El aceite sirve para prender lámparas y linternas. Un frasco de aceite prendido arde durante 6 horas en una lámpara o linterna. Esa duración no tiene que ser consecutiva; puedes apagar el aceite ardiendo (como acción de utilizar) y volver a encenderlo hasta que haya ardido durante un total de 6 horas.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Ácido",
+  "precio": "25po",
+  "pagina": 213,
+  "descripcion": "Cuando lleves a cabo la acción de atacar, puedes sustituir uno de tus ataques por lanzar un vial de ácido. Haz objetivo a una criatura u objeto que puedas ver a 20pies o menos de ti. El objetivo deberá superar una tirada de salvación de Destreza (CD 8 más tu modificador por Destreza y tu bonificador por competencia) o sufrirá 2d6 de daño de ácido.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Agua bendita",
+  "precio": "25po",
+  "pagina": 213,
+  "descripcion": "Cuando lleves a cabo la acción de atacar, puedes sustituir uno de tus ataques por lanzar un frasco de agua bendita. Haz objetivo a una criatura que puedas ver a 20pies o menos de ti. El objetivo deberá superar una tirada de salvación de Destreza (CD 8 más tu modificador por Destreza y tu bonificador por competencia) o sufrirá 2d8 de daño radiante si es un infernal o un muerto viviente.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Aljaba",
+  "precio": "1po",
+  "pagina": 213,
+  "descripcion": "En una aljaba caben hasta 20 flechas.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Antitoxina",
+  "precio": "50po",
+  "pagina": 213,
+  "descripcion": "Como acción adicional, puedes beber un vial de antitoxina para obtener ventaja en las tiradas de salvación para evitar o poner fin al estado de envenenado durante 1 hora.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Antorcha",
+  "precio": "1pc",
+  "pagina": 213,
+  "descripcion": "Una antorcha arde durante 1 hora y emite luz brillante en un radio de 20pies y luz tenue 20pies más allá. Cuando llevas a cabo la acción de atacar, puedes hacerlo con la antorcha como si fuera un arma cuerpo a cuerpo sencilla que inflige 1pg de daño por fuego.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Ariete portátil",
+  "precio": "4po",
+  "pagina": 214,
+  "descripcion": "Puedes usar un ariete portátil para derribar puertas. Cuando lo hagas, obtendrás un bonificador de +4 a la prueba de Fuerza. Si otro personaje te ayuda a usar el ariete, tendrás ventaja en esta prueba.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Barril",
+  "precio": "2po",
+  "pagina": 214,
+  "descripcion": "En un barril caben 160L de líquido o un volumen de 120L de mercancías secas.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Bolas de metal",
+  "precio": "1po",
+  "pagina": 214,
+  "descripcion": "Como acción de utilizar, puedes verter las bolas de metal de su bolsa. Se esparcirán para cubrir una zona cuadrada y plana de 10pies de lado a 10pies o menos de ti. Las criaturas que entren en esta zona por primera vez en un turno deberán superar una tirada de salvación de Destreza con CD 10 o tendrán el estado de derribadas. Se tarda 10 minutos en recuperar las bolas de metal.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Bolsa",
+  "precio": "1po",
+  "pagina": 214,
+  "descripcion": "Una bolsa soporta hasta 7lb en un volumen de 6L.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Botella de cristal",
+  "precio": "2po",
+  "pagina": 214,
+  "descripcion": "En una botella de cristal caben hasta 0,75L de líquido.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Cadena",
+  "precio": "5po",
+  "pagina": 214,
+  "descripcion": "Como acción de utilizar, puedes atar con una cadena a una criatura no voluntaria a 5pies o menos de ti que tenga el estado de agarrada, apresada o incapacitada si superas una prueba de Fuerza (Atletismo) con CD 13. Si la criatura tiene las piernas atadas, tendrá el estado de apresada hasta que se libere. Para liberarse de la cadena, deberá superar una prueba de Destreza (Acrobacias) con CD 18 como acción. Romper la cadena requiere superar una prueba de Fuerza (Atletismo) con CD 20 como acción.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Campana",
+  "precio": "1po",
+  "pagina": 214,
+  "descripcion": "Al tañer una campana como acción de utilizar, producirá un sonido audible a 60pies de distancia.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Canalizador arcano",
+  "precio": "1po",
+  "pagina": 214,
+  "descripcion": "Un canalizador arcano es un objeto ornamentado o tallado para canalizar la magia arcana. Los brujos, hechiceros o magos pueden utilizar estos objetos como sustituto de los materiales necesarios para lanzar un conjuro siempre que estos no tengan un precio específico indicado.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Canalizador druídico",
+  "precio": "1po",
+  "pagina": 214,
+  "descripcion": "Un canalizador arcano es un objeto tallado, atado con un lazo o pintado para canalizar la magia primigenia. Los druidas o exploradores pueden utilizar estos objetos como sustituto de los materiales necesarios para lanzar un conjuro siempre que estos no tengan un precio específico indicado.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Cantimplora u Odre",
+  "precio": "2pp",
+  "pagina": 214,
+  "descripcion": "En una cantimplora caben hasta 2L de líquido. Si no bebes suficiente agua, te arriesgas a sufrir deshidratación.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Catalejo",
+  "precio": "1000po",
+  "pagina": 214,
+  "descripcion": "Los objetos que se observan a través de un catalejo se ven al doble de su tamaño real.\nCerradura (variable) Una cerradura viene con una llave. Sin la llave, una criatura puede tratar de forzar la cerradura mediante una prueba de juego de manos (únicamente aplica el BC si se poseen herramientas de ladrón y se es competente con ellas). El precio y la CD para forzar una cerradura dependen de su calidad.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Cerradura simple",
+  "precio": "10po",
+  "pagina": 214,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Cerradura normal",
+  "precio": "50po",
+  "pagina": 214,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Cerradura de calidad",
+  "precio": "200po",
+  "pagina": 214,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Cerradura excelente",
+  "precio": "500po",
+  "pagina": 214,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Cesta",
+  "precio": "4pp",
+  "pagina": 214,
+  "descripcion": "Una cesta soporta hasta 45lb en un volumen de 60L.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Charlalejo",
+  "precio": "2000po",
+  "pagina": 214,
+  "descripcion": "Un charlalejo permite comunicarse con otra criatura que se encuentre como máximo a 14 millas y también disponga de un charlalejo.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Cofre",
+  "precio": "5po",
+  "pagina": 215,
+  "descripcion": "En un cofre caben hasta 360L de contenido.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Cordel",
+  "precio": "1pp",
+  "pagina": 215,
+  "descripcion": "El cordel mide 10pies de longitud y puedes atar un nudo con él como acción de utilizar.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Cubo",
+  "precio": "5pc",
+  "pagina": 215,
+  "descripcion": "En un cubo cabe un volumen de 15L de contenido.\nCuerda (variable) Como acción de utilizar, puedes hacer un nudo con una cuerda si superas una prueba de Destreza (Juego de manos) con CD 10. Para romper la cuerda, se debe superar una prueba de Fuerza (Atletismo) con una CD en función del tipo de cuerda. Puedes atar a una criatura no voluntaria con la cuerda solo si está agarrada, apresada o incapacitada. Si la criatura tiene las piernas atadas, tendrá el estado de apresada hasta que se libere. Para liberarse de la cuerda, deberá superar una prueba de Destreza (Acrobacias) con CD 15 como acción.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Cuerda de cáñamo",
+  "precio": "1po",
+  "pagina": 215,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Cuerda de seda",
+  "precio": "10po",
+  "pagina": 215,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Cuerda de seda de araña",
+  "precio": "100po",
+  "pagina": 215,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Disfraz",
+  "precio": "5po",
+  "pagina": 215,
+  "descripcion": "Mientras lleves puesto un disfraz, tienes ventaja en cualquier prueba de característica que hagas para hacerte pasar por la persona o tipo de persona que representa.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Elixir",
+  "precio": "2500po",
+  "pagina": 215,
+  "descripcion": "Un elixir concede un bonificador +2 a una puntuación de característica durante 24h (múltiples dosis del mismo elixir no se acumulan). Elixir de Fuerza Elixir de Destreza Elixir de Constitución Elixir de Inteligencia Elixir de Sabiduría Elixir de Carisma",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Escalera",
+  "precio": "1pp",
+  "pagina": 215,
+  "descripcion": "Una escalera mide 10pies de altura. Debes trepar para subir o bajar por ella.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Espejo",
+  "precio": "5po",
+  "pagina": 215,
+  "descripcion": "Un espejito de acero portátil resulta útil para arreglarse, pero también para mirar por las esquinas y reflejar la luz a modo de señal.\nEsposas (variable) Como acción de utilizar, puedes esposar a una criatura Pequeña o Mediana no voluntaria que esté a 5pies o menos de ti que tenga el estado de agarrada, apresada o incapacitada si superas una prueba de Destreza (Juego de manos) con CD 13. Mientras esté esposada, la criatura tendrá desventaja en las tiradas de ataque y estará apresada si las esposas están sujetas a una cadena o garfio fijados en el sitio. Para liberarse de las esposas, deberá superar una prueba de Juego de manos con CD 20 como acción. Para romperlas, deberá superar una prueba de Atletismo con CD 25 como acción. Cada juego de esposas viene con una llave. Sin la llave, una criatura puede tratar de forzar la cerradura de las esposas mediante una prueba de juego de manos (únicamente aplica el BC si se poseen herramientas de ladrón y se es competente con ellas). El precio y la CD para forzar unas esposas dependen de su calidad.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Esposas simples",
+  "precio": "12po",
+  "pagina": 215,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Esposas normales",
+  "precio": "60po",
+  "pagina": 215,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Esposas de calidad",
+  "precio": "240po",
+  "pagina": 215,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Esposas excelentes",
+  "precio": "600po",
+  "pagina": 215,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Estuche para mapas o pergaminos",
+  "precio": "1po",
+  "pagina": 215,
+  "descripcion": "En un estuche para mapas o pergaminos caben hasta 10 hojas de papel o 5 hojas de pergamino.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Estuche para virotes de ballesta",
+  "precio": "1po",
+  "pagina": 215,
+  "descripcion": "En un estuche para virotes de ballesta caben hasta 20 virotes.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Frasco",
+  "precio": "2pc",
+  "pagina": 215,
+  "descripcion": "En un frasco caben hasta 0,5L de líquido.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Fuego de alquimista",
+  "precio": "50po",
+  "pagina": 216,
+  "descripcion": "Cuando lleves a cabo la acción de atacar, puedes sustituir uno de tus ataques por lanzar un frasco de fuego de alquimista. Haz objetivo a una criatura u objeto que puedas ver a 20pies o menos de ti. El objetivo deberá superar una tirada de salvación de Destreza (CD 8 más tu modificador por Destreza y tu bonificador por competencia) o sufrirá 1d4 de daño de fuego y sufrirá el estado ardiendo.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Garfio de escalada",
+  "precio": "2po",
+  "pagina": 216,
+  "descripcion": "Como acción de utilizar, puedes lanzar un garfio de escalada a una barandilla, cornisa u otro saliente a 15 m o menos de ti, y el garfio se enganchará si superas una prueba de Destreza (Acrobacias) con CD 13. Si el garfio tiene una cuerda atada, podrás escalar.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Jarro",
+  "precio": "2pc",
+  "pagina": 216,
+  "descripcion": "En un jarro caben hasta 4L de líquido.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Lámpara",
+  "precio": "5pp",
+  "pagina": 216,
+  "descripcion": "Una lámpara quema aceite como combustible para emitir luz brillante en un radio de 15pies y luz tenue 30pies más allá.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Libro",
+  "precio": "25po",
+  "pagina": 216,
+  "descripcion": "Un libro contiene ficción o no ficción. Si consultas un libro veraz de no ficción para saber algo sobre su materia, ganarás un bonificador de +5 a las pruebas de Inteligencia que hagas sobre esa materia.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Linterna de ojo de buey",
+  "precio": "10po",
+  "pagina": 216,
+  "descripcion": "Una linterna de ojo de buey quema aceite como combustible para emitir luz brillante en un cono de 60pies y luz tenue 60pies más allá.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Linterna sorda",
+  "precio": "5po",
+  "pagina": 216,
+  "descripcion": "Una linterna sorda quema aceite como combustible para emitir luz brillante en un radio de 30pies y luz tenue 30pies más allá. Como acción adicional, puedes cubrir la abertura con la tapa y hacer que solo emita luz tenue en un radio de 5pies, o abrirla de nuevo.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Lupa",
+  "precio": "100po",
+  "pagina": 216,
+  "descripcion": "Una lupa te da ventaja en las pruebas de característica que hagas para tasar o inspeccionar un objeto muy detallado. Para encender un fuego con una lupa, se necesita una luz tan brillante como la del sol para enfocar, yesca para prender y unos 5 minutos para se encienda el fuego.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Manta invernal",
+  "precio": "5pp",
+  "pagina": 216,
+  "descripcion": "Mientras te envuelvas en una manta, tendrás ventaja en las tiradas de salvación contra el frío extremo.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Mapa",
+  "precio": "1po",
+  "pagina": 216,
+  "descripcion": "Si consultas un mapa preciso, recibes un bonificador de +5 a las pruebas de Sabiduría (Supervivencia) que hagas para orientarte en el lugar representado en él.\nMunición (variable) La tabla “Munición” indica los diferentes tipos y la cantidad que obtienes cuando los compras.\nLista de munición para armas a distancia Nombre\nCantidad\nPrecio\nBalas\n3po\nDardo de cerbatana\n4pc\nFlechas\n1po\nProyectiles\n4pc\nVirotes\n1po",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Mochila",
+  "precio": "2po",
+  "pagina": 216,
+  "descripcion": "Una mochila soporta hasta 33lb en un volumen de 30L. También puede servir de alforja.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Olla de hierro",
+  "precio": "2po",
+  "pagina": 216,
+  "descripcion": "En una olla de hierro caben hasta 4L.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Pala",
+  "precio": "2po",
+  "pagina": 216,
+  "descripcion": "Con 1 hora de trabajo, puedes usar una pala para cavar un agujero cúbico de 5pies de lado en la tierra o en un material similar.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Palanqueta",
+  "precio": "2po",
+  "pagina": 216,
+  "descripcion": "Una palanqueta te da ventaja en las pruebas de Fuerza en las que se pueda hacer palanca.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Papel",
+  "precio": "2pp",
+  "pagina": 217,
+  "descripcion": "En una hoja de papel caben unas 250 palabras escritas a mano.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Perfume",
+  "precio": "5po",
+  "pagina": 217,
+  "descripcion": "El perfume viene en un vial de 120 ml. Después de ponerte el perfume, durante 1 hora tendrás ventaja en las pruebas de Carisma (Persuasión) que hagas para influir en un humanoide indiferente situado a 5pies o menos de ti.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Pergamino",
+  "precio": "1pp",
+  "pagina": 217,
+  "descripcion": "En una hoja de pergamino caben unas 250 palabras escritas a mano.\nPergamino de conjuro (variable) Un pergamino de conjuro es un objeto mágico que contiene las palabras de un conjuro de un nivel determinado por el creador del pergamino. Como acción de usar puedes leer el pergamino, y lanzar el conjuro. Si es uno de tus conjuros conocidos se lanza normalmente. Pero si no lo conoces necesitas superar una prueba de Conocimiento Arcano CD 15 + Nivel de conjuro. Una vez se lanza el conjuro o se falla la prueba de Conocimiento Arcano el pergamino se desintegra. Si el conjuro requiere una tirada de salvación o una tirada de ataque, la CD será 10 + Nivel del conjuro y el bonificador de ataque será de +5.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Pergamino de conjuro: Truco",
+  "precio": "30po",
+  "pagina": 217,
+  "descripcion": "",
+  "categoria": "pergaminos"
+ },
+ {
+  "nombre": "Pergamino de conjuro: Conjuro de nivel 1",
+  "precio": "50po",
+  "pagina": 217,
+  "descripcion": "",
+  "categoria": "pergaminos"
+ },
+ {
+  "nombre": "Pergamino de conjuro: Conjuro de nivel 2",
+  "precio": "200po",
+  "pagina": 217,
+  "descripcion": "",
+  "categoria": "pergaminos"
+ },
+ {
+  "nombre": "Pergamino de conjuro: Conjuro de nivel 3",
+  "precio": "300po",
+  "pagina": 217,
+  "descripcion": "",
+  "categoria": "pergaminos"
+ },
+ {
+  "nombre": "Pergamino de conjuro: Conjuro de nivel 4",
+  "precio": "2000po",
+  "pagina": 217,
+  "descripcion": "",
+  "categoria": "pergaminos"
+ },
+ {
+  "nombre": "Pergamino de conjuro: Conjuro de nivel 5",
+  "precio": "3000po",
+  "pagina": 217,
+  "descripcion": "",
+  "categoria": "pergaminos"
+ },
+ {
+  "nombre": "Pergamino de conjuro: Conjuro de nivel 6",
+  "precio": "10000po",
+  "pagina": 217,
+  "descripcion": "",
+  "categoria": "pergaminos"
+ },
+ {
+  "nombre": "Pergamino de conjuro: Conjuro de nivel 7",
+  "precio": "25000po",
+  "pagina": 217,
+  "descripcion": "",
+  "categoria": "pergaminos"
+ },
+ {
+  "nombre": "Pergamino de conjuro: Conjuro de nivel 8",
+  "precio": "30000po",
+  "pagina": 217,
+  "descripcion": "",
+  "categoria": "pergaminos"
+ },
+ {
+  "nombre": "Pergamino de conjuro: Conjuro de nivel 9",
+  "precio": "100000po",
+  "pagina": 217,
+  "descripcion": "",
+  "categoria": "pergaminos"
+ },
+ {
+  "nombre": "Petate o Saco de dormir",
+  "precio": "1po",
+  "pagina": 217,
+  "descripcion": "En un petate puede dormir una criatura Pequeña o Mediana. Mientras estés en un petate, superarás automáticamente las tiradas de salvación contra el frío extremo.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Pluma",
+  "precio": "2pc",
+  "pagina": 217,
+  "descripcion": "Una pluma sirve para escribir o dibujar con tinta.\nPoción de curación (variable) Esta poción es un objeto mágico. Como acción de usar, puedes beberla o administrarla a otra criatura que se encuentre a 5pies o menos de ti. La criatura que beba el fluido mágico de color rojo de este vial recuperará puntos de golpe.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Poción de curación menor",
+  "precio": "30po",
+  "pagina": 217,
+  "descripcion": "Restaura 2d4 + 2.",
+  "categoria": "pociones"
+ },
+ {
+  "nombre": "Poción de curación ligera",
+  "precio": "50po",
+  "pagina": 217,
+  "descripcion": "Restaura 2d8 + 4.",
+  "categoria": "pociones"
+ },
+ {
+  "nombre": "Poción de curación",
+  "precio": "150po",
+  "pagina": 217,
+  "descripcion": "Restaura 4d8 + 8.",
+  "categoria": "pociones"
+ },
+ {
+  "nombre": "Gran poción de curación",
+  "precio": "325po",
+  "pagina": 217,
+  "descripcion": "Restaura 6d8 + 16.",
+  "categoria": "pociones"
+ },
+ {
+  "nombre": "Súper poción de curación",
+  "precio": "700po",
+  "pagina": 217,
+  "descripcion": "Restaura 8d8 + 32.",
+  "categoria": "pociones"
+ },
+ {
+  "nombre": "Polipasto",
+  "precio": "2po",
+  "pagina": 217,
+  "descripcion": "Un polipasto te permite levantar hasta cuatro veces el peso que normalmente puedes levantar.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Puntas de hierro",
+  "precio": "1po",
+  "pagina": 217,
+  "descripcion": "Las puntas de hierro vienen en lotes de diez. Como acción de utilizar, puedes usar un objeto romo, como un martillo ligero, para clavar una punta en una superficie de madera, tierra u otra materia similar. Puedes hacerlo para atrancar una puerta o para después atar una cuerda o cadena a la punta.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Raciones",
+  "precio": "5pp",
+  "pagina": 217,
+  "descripcion": "Las raciones se componen de alimentos propicios para viajar, como cecina, fruta deshidratada, galletas y frutos secos.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Red",
+  "precio": "1po",
+  "pagina": 218,
+  "descripcion": "Cuando lleves a cabo la acción de atacar, puedes sustituir uno de tus ataques por lanzar una red. Haz objetivo a una criatura que puedas ver a 15pies o menos de ti. El objetivo deberá superar una tirada de salvación de Destreza (CD 8 más tu modificador por Destreza y tu bonificador por competencia) o tendrá el estado de apresado hasta que se libere. El objetivo la superará automáticamente si es Enorme o más grande. Para liberarse, el objetivo o una criatura que esté a 5pies o menos de él deberá usar una acción para hacer una prueba de Fuerza (Atletismo) con CD 10; si la supera, la criatura apresada se liberará. Si se destruye la red (CA 10, 5 pg; inmunidad al daño contundente, psíquico y de veneno), también se libera al objetivo y se pone fin al efecto.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Ropas de calidad",
+  "precio": "15po",
+  "pagina": 218,
+  "descripcion": "Las ropas de calidad están confeccionadas con telas caras y ornamentadas con detalles elaborados por manos expertas. Algunos eventos y lugares admiten solo a gente que lleve esta indumentaria.\nRopas de viaje (variable) Las ropas de viaje son prendas resistentes y diseñadas para viajar por diversos entornos, sin sufrir los efectos más adversos.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Ropa de viaje para clima templado",
+  "precio": "155pc",
+  "pagina": 218,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Ropa de viaje para clima frío",
+  "precio": "80pp",
+  "pagina": 218,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Ropa de viaje para clima cálido",
+  "precio": "5po",
+  "pagina": 218,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Saco",
+  "precio": "1pc",
+  "pagina": 218,
+  "descripcion": "Un saco soporta hasta 33lb en un volumen de 30L.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Saquito de componentes",
+  "precio": "25po",
+  "pagina": 218,
+  "descripcion": "Un saquito de componentes es una bolsa hermética y llena de compartimentos que contienen todos los componentes materiales gratuitos para tus conjuros.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Silbato de supervivencia",
+  "precio": "5pc",
+  "pagina": 218,
+  "descripcion": "Cuando se sopla como acción de utilizar, un silbato de supervivencia produce un sonido que se puede oír a 600pies de distancia.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Símbolo sagrado",
+  "precio": "5po",
+  "pagina": 218,
+  "descripcion": "Un símbolo sagrado es un objeto que está ornamentado o pintado para canalizar la magia divina. Los clérigos o paladines necesitan un símbolo sagrada para poder canalizar sus poderes divinos y contactar con su dios. También pueden utilizar el símbolo sagrado como sustituto de los materiales necesarios para lanzar un conjuro siempre que estos no tengan un precio específico indicado.\nTienda (variable) En una tienda pueden dormir distinta cantidad de criaturas en función de su tamaño. En una tienda pequeña únicamente cabe una criatura pequeña. En una tienda mediana, caben o bien 1 criatura mediana o 2 pequeñas. Y en una tienda grande caben o bien 4 criaturas pequeñas, o bien dos criaturas pequeñas y una mediana, o dos criaturas medianas, o una criatura grande. Las tiendas están preparadas para un clima concreto y evitar así sus efectos, usar una tienda para un clima distinto para el que está preparada puede conllevar consecuencias severas.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Tienda pequeña para clima templado",
+  "precio": "6po",
+  "pagina": 218,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Tienda pequeña para clima cálido",
+  "precio": "18po",
+  "pagina": 218,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Tienda pequeña para clima frío",
+  "precio": "30po",
+  "pagina": 218,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Tienda mediana para clima templado",
+  "precio": "9po",
+  "pagina": 218,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Tienda mediana para clima cálido",
+  "precio": "27po",
+  "pagina": 218,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Tienda mediana para clima frío",
+  "precio": "45po",
+  "pagina": 218,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Tienda grande para clima templado",
+  "precio": "14po",
+  "pagina": 218,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Tienda grande para clima cálido",
+  "precio": "42po",
+  "pagina": 218,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Tienda grande para clima frío",
+  "precio": "70po",
+  "pagina": 218,
+  "descripcion": "",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Tinta",
+  "precio": "10po",
+  "pagina": 218,
+  "descripcion": "La tinta viene en un frasco de 30ml que basta para escribir unas 500 páginas.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Trampa para cazar",
+  "precio": "5po",
+  "pagina": 219,
+  "descripcion": "Como acción de utilizar, puedes poner una trampa para cazar, que consiste en una anilla dentada de acero que se cierra cuando una criatura pisa una placa de presión situada en su centro. La trampa se fija mediante una pesada cadena a cualquier objeto inmóvil, como un árbol o una estaca clavada en el suelo. Si una criatura pisa la placa, deberá superar una tirada de salvación de Destreza con CD 13 o sufrirá 1d4 de daño perforante y su velocidad se reducirá a 0 hasta el principio de su siguiente turno. A partir de ese momento y hasta que la criatura se libere de la trampa, su movimiento se verá limitado por la longitud de la cadena (normalmente 3pies). Una criatura puede emplear su acción para hacer una prueba de Fuerza (Atletismo) con CD 13 para liberarse a sí misma o a otra criatura que esté a su alcance si la supera. Cada prueba fallida causa 1 de daño perforante a la criatura atrapada.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Túnica",
+  "precio": "1po",
+  "pagina": 219,
+  "descripcion": "Una túnica tiene un significado vocacional y ceremonial. Algunos eventos y lugares admiten solo a gente que vista una túnica con determinados colores o símbolos.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Útiles de escalada",
+  "precio": "25po",
+  "pagina": 219,
+  "descripcion": "Los útiles de escalada incluyen arnés, guantes, pitones y puntas para las botas. Como acción de utilizar, puedes emplear los útiles de escalada para anclarte; cuando lo hagas, no podrás caer más de 25pies desde el punto de anclaje ni podrás alejarte más de 25pies de ahí si no quitas la sujeción como acción adicional.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Útiles de sanador",
+  "precio": "5po",
+  "pagina": 219,
+  "descripcion": "Los útiles de sanador tienen diez usos. Como acción de utilizar, puedes gastar uno de ellos para estabilizar a una criatura inconsciente que tenga 0 puntos de golpe sin necesidad de hacer una prueba de Sabiduría (Medicina).",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Vara",
+  "precio": "5pc",
+  "pagina": 219,
+  "descripcion": "Una vara mide 10pies de longitud. Puedes usarla para tocar algo que esté a hasta 10pies de distancia. Si tienes que hacer una prueba de Fuerza (Atletismo) como parte de un salto de altura o longitud, puedes impulsarte con la vara, lo que te dará ventaja en la prueba.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Vela",
+  "precio": "1pc",
+  "pagina": 219,
+  "descripcion": "Durante 1 hora, una vela encendida emite luz brillante en un radio de 5pies y luz tenue 5pies más allá.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Veneno básico",
+  "precio": "100po",
+  "pagina": 219,
+  "descripcion": "Como acción de utilizar, puedes usar un vial de veneno básico para impregnar un arma o hasta tres unidades de munición. Las criaturas que sufran daño cortante o perforante por el arma o munición envenenadas recibirán 1d4 de daño de veneno adicional. Una vez aplicado, el veneno mantiene su efectividad durante 1 minuto o hasta que inflija su daño, lo que ocurra primero.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Vial",
+  "precio": "1po",
+  "pagina": 219,
+  "descripcion": "En un vial caben 120ml de líquido.",
+  "categoria": "equipo de aventureros"
+ },
+ {
+  "nombre": "Yesquero o Pedernal",
+  "precio": "1po",
+  "pagina": 219,
+  "descripcion": "El yesquero tiene diez usos. Como acción de utilizar se puede prender con él una antorcha, lámpara, linterna o vela (o cualquier otra cosa con combustible expuesto). Encender cualquier otro tipo de fuego lleva 1 minuto.\nFabricar objetos Mediante las reglas que aparecen a continuación, los personajes pueden crear objetos no mágicos, pergaminos de conjuro, pociones de curación y elixires.\nFabricar objetos no mágicos Para fabricar un objeto no mágico, necesitas herramientas, materias primas (El DM determinará si las materias primas están disponibles) y tiempo (si se requieren varios días de trabajo no tienen porque ser consecutivos), según se detalla a continuación.\nHerramientas Debes utilizar la herramienta necesaria para crear un objeto y ser competente con esa herramienta. Además, cualquiera que te ayude debe ser competente con ella también.\nMaterias primas Para crear un objeto se necesitan materias primas que valgan la mitad de su precio de compra.\nTiempo Por cada 10po que cueste el objeto se requerirá de 1 día de trabajo (8h al día). Mínimo 1 día de trabajo. Los personajes pueden aunar esfuerzos para reducir el tiempo de fabricación. Cada persona que ayude reduce el tiempo de fabricación un 50%. Normalmente, solo puede ayudarte otro personaje, pero tu DM podría permitir más ayudantes.\nElaborar pociones y elixires Los personajes que tengan competencia con los útiles de herborista pueden crear pociones de curación y elixires. El coste en materiales (Tu DM determinará si las materias primas adecuadas están disponibles) es la mitad del valor de compra de la poción o elixir y el tiempo de fabricación se indica a continuación.\nTiempo de fabricación de pociones y elixires Poción de curación menor (1 días - 8h/día) Poción de curación ligera (2 días - 8h/día) Poción de curación (5 días - 8h/día) Gran poción de curación (11 días - 8h/día) Súper poción de curación (23 días - 8h/día) Elixir (83 días - 8h/día)\nElaborar pergaminos de conjuro Un lanzador de conjuros puede transcribir un conjuro en un pergamino y crear un pergamino de conjuro siguiendo las reglas que aparecen a continuación.\nRequisitos para inscribir Para elaborar un pergamino, debes ser competente en la habilidad Conocimiento Arcano o con los Suministros de Calígrafo y conocer el conjuro. También debes tener a mano cualquier componente material que necesite el conjuro. Si el conjuro consume sus componentes materiales, se consumirán solo cuando hayas acabado el pergamino. El conjuro usará tu CD de salvación de conjuros y tu bonificador de ataque de conjuros.\nTiempo y precio Preparar un pergamino requiere cierto tiempo y dinero (materias primas, que el DM determinará si están disponibles) en función del nivel del conjuro, como se muestra a continuación. Por cada día de inscripción, debes trabajar 8 horas, pero no hace falta que los días de trabajo sean consecutivos. Pergamino de truco (1día, 15 po) Pergamino de nivel 1 (1día, 25 po) Pergamino de nivel 2 (3 días, 100po) Pergamino de nivel 3 (5 días, 150po) Pergamino de nivel 4 (10 días, 1000po) Pergamino de nivel 5 (25 días, 1500po) Pergamino de nivel 6 (40 días, 10000po) Pergamino de nivel 7 (50 días, 12500po) Pergamino de nivel 8 (60 días, 15000po) Pergamino de nivel 9 (120 días, 50000po)",
+  "categoria": "equipo de aventureros"
+ }
+]
