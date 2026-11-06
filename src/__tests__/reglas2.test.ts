@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { MOCHILA_MAX, avisosTirada, bonoArma, calcularCA, caracteristicaConjuros, dadosConjuro, embolsarExceso, espaciosUsados, idiomasDeTexto, pgPorDefecto } from '../rules';
+import { MOCHILA_MAX, avisosTirada, bonoArma, calcularCA, caracteristicaConjuros, dadosConjuro, embolsarExceso, espaciosUsados, idiomasDeTexto, pgPorDefecto, cambiarNivel, pgSubida } from '../rules';
 import { nuevoPersonaje, normalizar } from '../personaje';
 import type { Item } from '../types';
 
@@ -44,8 +44,9 @@ describe('PG, conjuros y armas', () => {
   it('PG por defecto: dado máximo + CON y luego la media', () => {
     const p = nuevoPersonaje(); p.caracteristicas.CON = 14;
     expect(pgPorDefecto(p, 'd8')).toBe(10);
-    p.nivel = 3;
-    expect(pgPorDefecto(p, 'd8')).toBe(10 + 2 * 7);
+    cambiarNivel(p, 3);
+    expect(p.subidasPendientes).toBe(2);
+    expect(pgSubida(1, 6)).toBe(1);
   });
   it('característica de conjuros automática por clase', () => {
     const p = nuevoPersonaje(); p.clase = 'Druida';

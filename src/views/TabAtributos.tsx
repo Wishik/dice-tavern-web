@@ -28,7 +28,7 @@ export function TabAtributos() {
             <Etiqueta texto="Máximos"><Numero valor={p.pg.max} min={0} set={(n) => upd((x) => { x.pg.max = n; })} /></Etiqueta>
             <Etiqueta texto="Temporales"><Numero valor={p.pg.temp} min={0} set={(n) => upd((x) => { x.pg.temp = n; })} /></Etiqueta>
           </div>
-          {pgDef > 0 && p.pg.max !== pgDef && (
+          {pgDef > 0 && p.nivel === 1 && p.pg.max !== pgDef && (
             <button className="btn enlace pequeno" onClick={() => upd((x) => { const sube = x.pg.actual === x.pg.max || x.pg.actual === 0; x.pg.max = pgDef; if (sube) x.pg.actual = pgDef; })}>↺ Por defecto: {pgDef}</button>
           )}
           <div className="barra-vida"><div style={{ width: `${p.pg.max ? Math.max(0, Math.min(100, (p.pg.actual / p.pg.max) * 100)) : 0}%` }} /></div>

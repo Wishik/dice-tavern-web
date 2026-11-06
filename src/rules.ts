@@ -264,13 +264,19 @@ export const cabeEnMochila = (p: Personaje, it: Item) => espaciosItem(it) <= esp
 
 // ---------------------------------------------------------------- PG y CA automáticos
 const carasDado = (dado: string) => parseInt(dado.replace(/\D/g, ''), 10) || 0;
-/** PG por defecto: máximo del dado de golpe + CON a nivel 1, y la media (redondeada arriba) + CON por cada nivel siguiente. */
+/** PG de nivel 1: máximo del dado de golpe + CON. A partir de ahí, cada nivel se tira el dado (ver subirNivel). */
 export function pgPorDefecto(p: Personaje, dado: string): number {
   const c = carasDado(dado); if (!c) return 0;
-  const con = modificador(p.caracteristicas.CON);
-  const media = c / 2 + 1;
-  return Math.max(1, c + con + (Math.max(1, p.nivel) - 1) * Math.max(1, media + con));
+  return Math.max(1, c + modificador(p.caracteristicas.CON));
 }
+/** Cambia el nivel y apunta las subidas pendientes de tirar dado de golpe. */
+export function cambiarNivel(p: Personaje, nivel: number) {
+  const d = nivel - p.nivel;
+  p.nivel = nivel;
+  p.subidasPendientes = Math.max(0, (p.subidasPendientes || 0) + d);
+}
+/** PG ganados al subir un nivel: lo que sale en el dado + CON (mínimo 1). */
+export const pgSubida = (tirada: number, con: number) => Math.max(1, tirada + modificador(con));
 
 export interface DesgloseCA { total: number; partes: string[]; sigiloDesventaja: string[]; fuerzaMinima: number }
 /** CA = 10 + DES sin armadura; con armadura, su fórmula; + escudo; + ajuste manual. */

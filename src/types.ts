@@ -94,6 +94,8 @@ export interface Personaje {
   /** Puntos de inspiración heroica (0-4). */
   inspiracion: number;
   dgUsados: number;
+  /** Subidas de nivel cuyo dado de golpe aún no se ha tirado (al tirar se suma a los PG máximos). */
+  subidasPendientes: number;
   caracteristicas: Record<Atributo, number>;
   bonusIniciativa: number;
   velocidad: { andando: number; corriendo: number; trepando: string; nadando: string; volando: string };

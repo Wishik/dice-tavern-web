@@ -3,7 +3,8 @@ import type { Personaje } from '../types';
 import { backend } from '../store';
 import { useDatos, type Clase, type Dote, type Razas, type Trasfondo } from '../data';
 import { calcularAvisos, type Avisos } from '../avisos';
-import { DadoIcono, PanelDados } from '../dice';
+import { DadoIcono, PanelDados, useDados } from '../dice';
+import { conSigno, modificador, pgSubida } from '../rules';
 import { Modal, PuntoRojo } from '../ui';
 import { TabPersonaje } from './TabPersonaje';
 import { TabAtributos } from './TabAtributos';
@@ -115,8 +116,36 @@ export function Ficha({ id, onVolver }: { id: string; onVolver: () => void }) {
         <main className="contenido"><T.C /></main>
         {T.id === 'notas' && <div className="pie-borrar"><button className="btn peligro" onClick={borrar}>Borrar personaje</button></div>}
         <button className="fab" onClick={() => setDados(true)} aria-label="Dados"><DadoIcono caras={20} size={40} /></button>
+        <SubidaNivel />
         {dados && <Modal titulo="Dados" onClose={() => setDados(false)}><PanelDados /></Modal>}
       </div>
     </Ctx.Provider>
+  );
+}
+
+/** Al subir de nivel hay que tirar el dado de golpe de la clase: lo que salga + CON se suma a los PG máximos. */
+function SubidaNivel() {
+  const { p, upd, clases } = useFicha();
+  const { tirar } = useDados();
+  const dado = clases?.find((c) => c.nombre === p.clase)?.atributos.dadoGolpe ?? '';
+  if (!p.subidasPendientes || !dado) return null;
+  const con = modificador(p.caracteristicas.CON);
+  const nivelDe = p.nivel - p.subidasPendientes + 1;
+  return (
+    <div className="modal-fondo">
+      <div className="modal elegir-modo">
+        <h3>¡Subes a nivel {nivelDe}!</h3>
+        <p>Tira tu dado de golpe de {p.clase}: <strong>1{dado} {conSigno(con)} CON</strong>. Lo que salga se suma a tus PG máximos.</p>
+        {p.subidasPendientes > 1 && <p className="nota">Te quedan {p.subidasPendientes} niveles por tirar.</p>}
+        <div className="fila-botones">
+          <button className="btn primario" onClick={() => {
+            const t = tirar(`PG al subir a nivel ${nivelDe} (1${dado} ${conSigno(con)})`, `1${dado}`);
+            if (!t) return;
+            const gana = pgSubida(t.total, p.caracteristicas.CON);
+            upd((x) => { x.pg.max += gana; x.pg.actual += gana; x.subidasPendientes = Math.max(0, x.subidasPendientes - 1); });
+          }}>🎲 Tirar 1{dado}</button>
+        </div>
+      </div>
+    </div>
   );
 }
