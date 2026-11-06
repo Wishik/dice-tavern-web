@@ -4,6 +4,7 @@ import { useDados } from '../dice';
 import { HABILIDADES, avisosTirada, conSigno, idHabilidad, valorHabilidad, valorSalvacion } from '../rules';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO } from '../types';
 import { buscarClase } from '../avisos';
+import { bonoHabilidad, bonoSalvacion } from '../bonos';
 
 const GRUPOS = [['cognitivas', 'Habilidades cognitivas'], ['fisicas', 'Habilidades físicas'], ['sociales', 'Habilidades sociales']] as const;
 
@@ -49,7 +50,7 @@ export function TabHabilidades() {
             return (
               <li key={a}>
                 <Check valor={p.salvaciones[a].comp} set={(b) => upd((x) => { x.salvaciones[a].comp = b; })} titulo="Competencia" />
-                <span className="lt-nombre">{NOMBRE_ATRIBUTO[a]}</span>
+                <span className="lt-nombre">{NOMBRE_ATRIBUTO[a]}{bonoSalvacion(p, a) !== 0 && <small className="por-rasgo">★ rasgos {conSigno(bonoSalvacion(p, a))}</small>}</span>
                 <Numero valor={p.salvaciones[a].bonus} set={(n) => upd((x) => { x.salvaciones[a].bonus = n; })} className="mini" />
                 <button className="lt-valor" onClick={() => tirarD20(`Salvación de ${NOMBRE_ATRIBUTO[a]}`, v, avisosTirada(p, 'salvacion', a))}>{conSigno(v)}</button>
               </li>
@@ -67,7 +68,7 @@ export function TabHabilidades() {
           <button className="btn" onClick={() => tirarD20('Salvación contra muerte', 0)}>Tirar</button>
         </div>
       </Seccion>
-      <p className="nota">C = competencia, P = pericia. La casilla pequeña es un bonus extra (p. ej. +2 a Sigilo de los Medianos).</p>
+      <p className="nota">C = competencia, P = pericia. La casilla pequeña es un bonus extra a mano. Los bonos de raza y dotes (★) ya se suman solos: no los repitas aquí.</p>
     </div>
   );
 }
@@ -82,13 +83,15 @@ function Grupo({ grupo, titulo, sugeridas }: { grupo: string; titulo: string; su
         {HABILIDADES.filter((h) => h.grupo === grupo).map((h) => {
           const st = p.habilidades[h.id];
           const v = valorHabilidad(p, h.id);
+          const r = bonoHabilidad(p, h.id, st.comp);
           return (
-            <li key={h.id}>
+            <li key={h.id} className={r.origen.length ? 'con-rasgo' : ''}>
               <Check valor={st.comp} set={(b) => upd((x) => { x.habilidades[h.id].comp = b; if (!b) x.habilidades[h.id].pericia = false; })} titulo="Competencia" />
               <Check valor={st.pericia} set={(b) => upd((x) => { x.habilidades[h.id].pericia = b; if (b) x.habilidades[h.id].comp = true; })} titulo="Pericia" />
-              <span className="lt-nombre">{h.nombre} <small>({h.atributo.slice(0, 3)})</small>{sugeridas.has(h.id) && !st.comp && <span className="sugerida">◆</span>}</span>
+              <span className="lt-nombre">{h.nombre} <small>({h.atributo.slice(0, 3)})</small>{sugeridas.has(h.id) && !st.comp && !r.comp && <span className="sugerida">◆</span>}
+                {r.origen.length > 0 && <small className="por-rasgo">★ {r.origen.join(', ')}</small>}</span>
               <Numero valor={st.bonus} set={(n) => upd((x) => { x.habilidades[h.id].bonus = n; })} className="mini" />
-              <button className="lt-valor" onClick={() => tirarD20(h.nombre, v, avisosTirada(p, 'habilidad', h.atributo, h.id))}>{conSigno(v)}</button>
+              <button className="lt-valor" onClick={() => tirarD20(h.nombre, v, [...r.notas, ...avisosTirada(p, 'habilidad', h.atributo, h.id)])}>{conSigno(v)}</button>
             </li>
           );
         })}

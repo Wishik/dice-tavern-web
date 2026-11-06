@@ -15,6 +15,9 @@ export interface Avisos {
   subclase: boolean;
   limiteTrucos: number | null;
   limiteConjuros: number | null;
+  /** El libro (Mago «6+») puede tener más conjuros que el número de la tabla. */
+  conjurosAbierto: boolean;
+  limitePreparados: number | null;
   nivelMaxConjuro: number | null;
   total: { general: number; habilidades: number; magia: number; rasgos: number };
 }
@@ -31,9 +34,12 @@ export function filaClase(c: Clase | null, nivel: number) {
 export function calcularAvisos(p: Personaje, clases: Clase[] | null, razas: Razas | null, trasfondos: Trasfondo[] | null): Avisos {
   const c = buscarClase(clases, p.clase);
   const f = filaClase(c, p.nivel);
-  const limiteTrucos = f && 'Trucos' in f ? num(f['Trucos']) : null;
-  const limiteConjuros = f && 'Conjuros conocidos' in f ? num(f['Conjuros conocidos']) : null;
-  const nivelMaxConjuro = f && 'Nivel máximo de conjuro' in f ? num(f['Nivel máximo de conjuro']) : null;
+  const sub = SUBCLASES_MAGICAS[p.subclase]?.[p.nivel - 1];
+  const limiteTrucos = f && 'Trucos' in f ? num(f['Trucos']) : sub ? sub[0] : null;
+  const limiteConjuros = f && 'Conjuros conocidos' in f ? num(f['Conjuros conocidos']) : sub ? sub[1] : null;
+  const conjurosAbierto = !!f && /\+/.test(String(f['Conjuros conocidos'] ?? ''));
+  const limitePreparados = f && 'Conjuros preparados' in f ? num(f['Conjuros preparados']) : limiteConjuros;
+  const nivelMaxConjuro = f && 'Nivel máximo de conjuro' in f ? num(f['Nivel máximo de conjuro']) : sub ? sub[2] : null;
   // Los conjuros adicionales (raza, dote, objeto…) no cuentan para el límite de la clase.
   const nTrucos = p.conjuros.filter((x) => x.nivel === 0 && !x.adicional).length;
   const nConj = p.conjuros.filter((x) => x.nivel > 0 && !x.adicional).length;
@@ -62,7 +68,7 @@ export function calcularAvisos(p: Personaje, clases: Clase[] | null, razas: Raza
 
   return {
     trucos, conjuros, dotes, rasgosRaza, habilidades, idiomas, oficios, profesiones, subclase,
-    limiteTrucos, limiteConjuros, nivelMaxConjuro,
+    limiteTrucos, limiteConjuros, conjurosAbierto, limitePreparados, nivelMaxConjuro,
     total: {
       general: idiomas + oficios + profesiones + (subclase ? 1 : 0),
       habilidades,
@@ -71,3 +77,16 @@ export function calcularAvisos(p: Personaje, clases: Clase[] | null, razas: Raza
     },
   };
 }
+
+/** Tablas de «Lanzamiento de conjuros» del Embaucador arcano y del Caballero arcano (manual): [trucos, conjuros conocidos, nivel máx.] por nivel. */
+const T = (trucos3: number, trucos10: number) => Array.from({ length: 20 }, (_, i) => {
+  const n = i + 1;
+  if (n < 3) return [0, 0, 0] as [number, number, number];
+  const conocidos = [0, 0, 0, 3, 4, 4, 4, 5, 6, 6, 7, 8, 8, 9, 10, 10, 11, 11, 11, 12, 13][n];
+  const max = n >= 19 ? 4 : n >= 13 ? 3 : n >= 7 ? 2 : 1;
+  return [n >= 10 ? trucos10 : trucos3, conocidos, max] as [number, number, number];
+});
+export const SUBCLASES_MAGICAS: Record<string, [number, number, number][]> = {
+  'Embaucador arcano': T(3, 4),
+  'Caballero arcano': T(2, 3),
+};

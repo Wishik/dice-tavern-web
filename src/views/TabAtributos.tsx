@@ -2,7 +2,8 @@ import { useFicha } from './Ficha';
 import { useState } from 'react';
 import { Etiqueta, Modal, Numero, Seccion, Texto } from '../ui';
 import { Contador, useDados } from '../dice';
-import { CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetencia, calcularCA, conSigno, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto } from '../rules';
+import { CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetencia, calcularCA, conSigno, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto, valorPrueba } from '../rules';
+import { bonoVelocidad } from '../bonos';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO } from '../types';
 import { buscarClase } from '../avisos';
 
@@ -14,6 +15,11 @@ export function TabAtributos() {
   const clase = buscarClase(clases, p.clase);
   const dado = clase?.atributos.dadoGolpe ?? '';
   const pen = carga.penalizacion;
+  const vel = bonoVelocidad(p);
+  const ajusteVel = (base: number, mult: number) => {
+    const d = vel * mult + pen * mult;
+    return d !== 0 && <b className={d < 0 ? 'penal' : 'extra'}> ({[vel && `+${vel * mult} rasgos`, pen && `${pen * mult} carga`].filter(Boolean).join(', ')}) = {Math.max(0, base + d)}</b>;
+  };
   const [corregir, setCorregir] = useState(false);
   const ca = calcularCA(p);
   const pgDef = pgPorDefecto(p, dado);
@@ -66,7 +72,7 @@ export function TabAtributos() {
             <div key={a} className="caracteristica">
               <div className="car-nombre">{NOMBRE_ATRIBUTO[a]}</div>
               <Numero valor={p.caracteristicas[a]} min={1} max={30} set={(n) => upd((x) => { x.caracteristicas[a] = n; })} className="car-valor" />
-              <button className="car-mod" onClick={() => tirarD20(`Prueba de ${NOMBRE_ATRIBUTO[a]}`, m, avisosTirada(p, 'prueba', a))} title="Tirar prueba">{conSigno(m)}</button>
+              <button className="car-mod" onClick={() => tirarD20(`Prueba de ${NOMBRE_ATRIBUTO[a]}`, valorPrueba(p, a), avisosTirada(p, 'prueba', a))} title="Tirar prueba">{conSigno(m)}{valorPrueba(p, a) !== m && <small className="extra-rasgo">{conSigno(valorPrueba(p, a) - m)}</small>}</button>
             </div>
           );
         })}
@@ -97,9 +103,9 @@ export function TabAtributos() {
         <Seccion titulo="Velocidad">
           <ul className="velocidades">
             <li><span>Andando</span><Numero valor={p.velocidad.andando} min={0} set={(n) => upd((x) => { x.velocidad.andando = n; })} ancho={64} />
-              <span className="pies">pies{pen < 0 && <b className="penal"> ({pen}) = {Math.max(0, p.velocidad.andando + pen)}</b>}</span></li>
+              <span className="pies">pies{ajusteVel(p.velocidad.andando, 1)}</span></li>
             <li><span>Corriendo</span><Numero valor={p.velocidad.corriendo} min={0} set={(n) => upd((x) => { x.velocidad.corriendo = n; })} ancho={64} />
-              <span className="pies">pies{pen < 0 && <b className="penal"> ({pen * 2}) = {Math.max(0, p.velocidad.corriendo + pen * 2)}</b>}</span></li>
+              <span className="pies">pies{ajusteVel(p.velocidad.corriendo, 2)}</span></li>
             <li><span>Trepando</span><Texto valor={p.velocidad.trepando} set={(s) => upd((x) => { x.velocidad.trepando = s; })} /></li>
             <li><span>Nadando</span><Texto valor={p.velocidad.nadando} set={(s) => upd((x) => { x.velocidad.nadando = s; })} /></li>
             <li><span>Volando</span><Texto valor={p.velocidad.volando} set={(s) => upd((x) => { x.velocidad.volando = s; })} /></li>

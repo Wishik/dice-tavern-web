@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { MOCHILA_MAX, avisosTirada, bonoArma, calcularCA, caracteristicaConjuros, dadosConjuro, embolsarExceso, espaciosUsados, idiomasDeTexto, pgPorDefecto, cambiarNivel, pgSubida } from '../rules';
+import { MOCHILA_MAX, valorHabilidad, avisosTirada, bonoArma, calcularCA, caracteristicaConjuros, dadosConjuro, embolsarExceso, espaciosUsados, idiomasDeTexto, pgPorDefecto, cambiarNivel, pgSubida } from '../rules';
 import { nuevoPersonaje, normalizar } from '../personaje';
 import type { Item } from '../types';
 
@@ -69,5 +69,24 @@ describe('PG, conjuros y armas', () => {
     expect(idiomasDeTexto('Élfico, Silvano y Común')).toEqual(['Élfico', 'Silvano', 'Común']);
     expect(idiomasDeTexto('Élfico e Infracomún')).toEqual(['Élfico', 'Infracomún']);
     expect(idiomasDeTexto('Común y Otro a tu elección')).toEqual(['Común']);
+  });
+});
+
+describe('bonos automáticos de rasgos y dotes', () => {
+  it('Defensa de los pequeños: +1 CA y +2 Sigilo (Medianos)', () => {
+    const p = nuevoPersonaje(); p.raza = 'Medianos'; p.caracteristicas.DES = 15;
+    expect(calcularCA(p).total).toBe(13);
+    p.habilidades.sigilo.comp = true;
+    expect(valorHabilidad(p, 'sigilo')).toBe(2 + 2 + 2);
+  });
+  it('Sentidos Élficos da competencia o +2 si ya la tenías', () => {
+    const p = nuevoPersonaje(); p.raza = 'Altos Elfos'; p.rasgosRaza = ['Sentidos Élficos'];
+    expect(valorHabilidad(p, 'percepcion')).toBe(2);
+    p.habilidades.percepcion.comp = true;
+    expect(valorHabilidad(p, 'percepcion')).toBe(4);
+  });
+  it('Defensa sin armadura del Bárbaro', () => {
+    const p = nuevoPersonaje(); p.clase = 'Bárbaro'; p.caracteristicas.DES = 14; p.caracteristicas.CON = 16;
+    expect(calcularCA(p).total).toBe(15);
   });
 });

@@ -20,6 +20,10 @@ export function TabMagia() {
   const nTrucos = p.conjuros.filter((c) => c.nivel === 0 && !c.adicional).length;
   const nConj = p.conjuros.filter((c) => c.nivel > 0 && !c.adicional).length;
   const def = (n: string) => todos?.find((x) => x.nombre === n);
+  const nPrep = p.conjuros.filter((c) => c.nivel > 0 && !c.adicional && c.preparado).length;
+  const llenoTrucos = avisos.limiteTrucos !== null && nTrucos >= avisos.limiteTrucos;
+  const llenoConj = avisos.limiteConjuros !== null && !avisos.conjurosAbierto && nConj >= avisos.limiteConjuros;
+  const lleno = (que: string, n: number) => alert(`Ya tienes los ${n} ${que} que te tocan a nivel ${p.nivel}. Quita uno para cambiarlo, o añádelo en «Conjuros adicionales» si te lo da la raza, una dote o un objeto.`);
 
   const ListaConjuros = ({ lista, preparar }: { lista: { c: ConjuroPersonaje; idx: number }[]; preparar: boolean }) => (
     <ul className="lista-conjuros">
@@ -27,7 +31,10 @@ export function TabMagia() {
         const d = def(c.nombre);
         return (
           <li key={idx}>
-            {preparar && <Check valor={!!c.preparado} set={(b) => upd((x) => { x.conjuros[idx].preparado = b; })} titulo="Preparado" />}
+            {preparar && <Check valor={!!c.preparado} set={(b) => {
+              if (b && avisos.limitePreparados !== null && nPrep >= avisos.limitePreparados) { alert(`Ya tienes ${avisos.limitePreparados} conjuros preparados, el máximo a nivel ${p.nivel}. Desmarca otro primero.`); return; }
+              upd((x) => { x.conjuros[idx].preparado = b; });
+            }} titulo="Preparado" />}
             <button className="conjuro-nombre" onClick={() => setVer({ c, def: d })}>
               <strong>{c.nombre}{c.adicional ? <small className="etq-nivel"> · {c.nivel ? `Nv ${c.nivel}` : 'Truco'}</small> : null}</strong>
               {c.base && <small>Propio, basado en {c.base}</small>}
@@ -45,11 +52,12 @@ export function TabMagia() {
   return (
     <div className="tab">
       <Seccion titulo="Trucos" aviso={avisos.trucos} extra={avisos.limiteTrucos !== null && <span className="contador-limite">{nTrucos}/{avisos.limiteTrucos}</span>}>
-        <BotonAnadir aviso={avisos.trucos > 0} onClick={() => setAnadir('truco')}>Añadir truco</BotonAnadir>
+        <BotonAnadir aviso={avisos.trucos > 0} onClick={() => llenoTrucos ? lleno('trucos', avisos.limiteTrucos!) : setAnadir('truco')}>Añadir truco</BotonAnadir>
         {porNivel[0].length > 0 && <ListaConjuros lista={porNivel[0]} preparar={false} />}
       </Seccion>
       <Seccion titulo="Conjuros" aviso={avisos.conjuros} extra={avisos.limiteConjuros !== null && <span className="contador-limite">{nConj}/{avisos.limiteConjuros}</span>}>
-        <BotonAnadir aviso={avisos.conjuros > 0} onClick={() => setAnadir('conjuro')}>Añadir conjuro</BotonAnadir>
+        <BotonAnadir aviso={avisos.conjuros > 0} onClick={() => llenoConj ? lleno('conjuros', avisos.limiteConjuros!) : setAnadir('conjuro')}>Añadir conjuro</BotonAnadir>
+        {avisos.limitePreparados !== null && nConj > 0 && <p className={`nota ${nPrep > avisos.limitePreparados ? 'error' : ''}`}>Preparados: {nPrep}/{avisos.limitePreparados}</p>}
         {avisos.nivelMaxConjuro !== null && <p className="nota">Nivel máximo de conjuro: {avisos.nivelMaxConjuro}</p>}
         {porNivel.slice(1).map((lista, k) => lista.length > 0 && (
           <div key={k}>
@@ -90,7 +98,7 @@ export function TabMagia() {
             />
           )}
           <button className="btn crear-propio" onClick={() => { setNuevo({ nombre: '', nivel: anadir === 'truco' ? 0 : 1, adicional: anadir === 'adicional', descripcion: '' }); setAnadir(null); }}>✏️ Crear conjuro propio (puede basarse en otro)</button>
-          {anadir === 'conjuro' && avisos.limiteConjuros !== null && nConj >= avisos.limiteConjuros && <p className="nota">Ya tienes los {avisos.limiteConjuros} que marcan las reglas, pero puedes añadir más.</p>}
+
         </Modal>
       )}
       {nuevo && (

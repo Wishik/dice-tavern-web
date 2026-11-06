@@ -1,4 +1,5 @@
 import type { Atributo, Item, Moneda, Personaje } from './types';
+import { bonoAtaqueArma, bonoAtaqueConjuro, bonoCdConjuro, bonoFuerzaCarga, bonoHabilidad, bonoPrueba, bonoSalvacion, bonosCA } from './bonos';
 
 export const modificador = (valor: number) => Math.floor((valor - 10) / 2);
 export const conSigno = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
@@ -45,24 +46,27 @@ export function valorHabilidad(p: Personaje, id: string): number {
   const def = HABILIDADES.find((h) => h.id === id)!;
   const h = p.habilidades[id] ?? { comp: false, pericia: false, bonus: 0 };
   const bc = bonoCompetencia(p.nivel);
-  return modificador(p.caracteristicas[def.atributo]) + (h.comp ? bc : 0) + (h.pericia ? bc : 0) + (h.bonus || 0);
+  const r = bonoHabilidad(p, id, h.comp);
+  return modificador(p.caracteristicas[def.atributo]) + (h.comp || r.comp ? bc : 0) + (h.pericia ? bc : 0) + (h.bonus || 0) + r.bono + bonoPrueba(p, def.atributo);
 }
+/** Prueba de característica: modificador + bonos de rasgos (p. ej. «Poderoso» +2 a FUE). */
+export const valorPrueba = (p: Personaje, a: Atributo) => modificador(p.caracteristicas[a]) + bonoPrueba(p, a);
 
 export function valorSalvacion(p: Personaje, a: Atributo): number {
   const s = p.salvaciones[a];
-  return modificador(p.caracteristicas[a]) + (s.comp ? bonoCompetencia(p.nivel) : 0) + (s.bonus || 0);
+  return modificador(p.caracteristicas[a]) + (s.comp ? bonoCompetencia(p.nivel) : 0) + (s.bonus || 0) + bonoSalvacion(p, a);
 }
 
-export const iniciativa = (p: Personaje) => modificador(p.caracteristicas.DES) + (p.bonusIniciativa || 0);
+export const iniciativa = (p: Personaje) => valorPrueba(p, 'DES') + (p.bonusIniciativa || 0);
 export const percepcionPasiva = (p: Personaje) => 10 + valorHabilidad(p, 'percepcion') + (p.bonusPercepcionPasiva || 0);
 
 export function cdConjuros(p: Personaje): number | null {
   const a = caracteristicaConjuros(p); if (!a) return null;
-  return 8 + bonoCompetencia(p.nivel) + modificador(p.caracteristicas[a]);
+  return 8 + bonoCompetencia(p.nivel) + modificador(p.caracteristicas[a]) + bonoCdConjuro(p);
 }
 export function ataqueConjuros(p: Personaje): number | null {
   const a = caracteristicaConjuros(p); if (!a) return null;
-  return bonoCompetencia(p.nivel) + modificador(p.caracteristicas[a]);
+  return bonoCompetencia(p.nivel) + modificador(p.caracteristicas[a]) + bonoAtaqueConjuro(p);
 }
 
 // ---------------------------------------------------------------- Inventario
@@ -99,7 +103,7 @@ export interface EstadoCarga {
 }
 
 export function estadoCarga(p: Personaje): EstadoCarga {
-  const libres = MOCHILA_BASE + espaciosPorFuerza(p.caracteristicas.FUE);
+  const libres = MOCHILA_BASE + espaciosPorFuerza(p.caracteristicas.FUE + bonoFuerzaCarga(p));
   const usados = espaciosUsados(p.mochila);
   const exceso = Math.max(0, usados - libres);
   const max = TRAMOS_SOBRECARGA[TRAMOS_SOBRECARGA.length - 1].hasta;
@@ -285,19 +289,26 @@ export function calcularCA(p: Personaje): DesgloseCA {
   const partes: string[] = [];
   const sigiloDesventaja: string[] = [];
   let fuerzaMinima = 0;
-  let base = 10 + des;
   const arm = Object.values(p.equipo).find((it) => it && it.tipo === 'armadura' && /^\d+/.test(it.detalles?.['Clase de armadura'] ?? ''));
+  const extra = bonosCA(p, !!arm);
+  const desEf = des > 0 ? Math.max(0, des - extra.menosDes) : des;
+  const escudo = [p.equipo.manoHabil, p.equipo.manoTorpe].some((it) => it?.tipo === 'escudo');
+  let base = 10 + desEf;
   if (arm) {
     const f = arm.detalles!['Clase de armadura'];
     const n = parseInt(f, 10);
     if (/Destreza/i.test(f)) {
       const tope = f.match(/m[aá]x\.?\s*(\d+)/i);
-      const d = tope ? Math.min(des, parseInt(tope[1], 10)) : des;
+      const d = tope ? Math.min(desEf, parseInt(tope[1], 10)) : desEf;
       base = n + d; partes.push(`${arm.nombre} ${n} ${conSigno(d)} DES`);
     } else { base = n; partes.push(`${arm.nombre} ${n}`); }
     if (/desventaja/i.test(arm.detalles?.['Sigilo'] ?? '')) sigiloDesventaja.push(arm.nombre);
     fuerzaMinima = Math.max(fuerzaMinima, parseInt(arm.detalles?.['Fuerza'] ?? '', 10) || 0);
-  } else partes.push(`10 ${conSigno(des)} DES`);
+  } else if (p.clase === 'Bárbaro') {
+    const c = modificador(p.caracteristicas.CON); base = 10 + desEf + c; partes.push(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(c)} CON`);
+  } else if (p.clase === 'Monje' && !escudo) {
+    const s = modificador(p.caracteristicas.SAB); base = 10 + desEf + s; partes.push(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(s)} SAB`);
+  } else partes.push(`10 ${conSigno(desEf)} DES`);
   let total = base;
   for (const it of [p.equipo.manoHabil, p.equipo.manoTorpe]) {
     if (it?.tipo !== 'escudo') continue;
@@ -306,6 +317,7 @@ export function calcularCA(p: Personaje): DesgloseCA {
     if (/desventaja/i.test(it.detalles?.['Sigilo'] ?? '')) sigiloDesventaja.push(it.nombre);
     fuerzaMinima = Math.max(fuerzaMinima, parseInt(it.detalles?.['Fuerza'] ?? '', 10) || 0);
   }
+  if (extra.total) { total += extra.total; partes.push(...extra.partes); }
   if (p.bonusCA) { total += p.bonusCA; partes.push(`ajuste ${conSigno(p.bonusCA)}`); }
   return { total, partes, sigiloDesventaja, fuerzaMinima };
 }
@@ -372,7 +384,7 @@ export function bonoArma(p: Personaje, it: Item): { ataque: number; mod: number;
   const distancia = usaMunicion(it) || (/alcance\s*\(/i.test(props) && !/arrojadiz/i.test(props));
   const atr: Atributo = distancia || (/sutil/i.test(props) && des > fue) ? 'DES' : 'FUE';
   const mod = atr === 'DES' ? des : fue;
-  return { ataque: mod + bonoCompetencia(p.nivel), mod, atr };
+  return { ataque: mod + bonoCompetencia(p.nivel) + bonoAtaqueArma(p, distancia), mod, atr };
 }
 
 // ---------------------------------------------------------------- Rasgos raciales recomendados e idiomas

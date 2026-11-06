@@ -494,3 +494,6 @@ details.corregir summary { cursor: pointer; color: var(--tinta-suave); font-size
 .chip-idioma small { color: #7a6450; font-size: 11px; }
 .res-conjuro.de-raza strong { color: #8b2e1f; }
 .enlace-max { background: none; border: 0; padding: 0 4px; font: inherit; color: inherit; cursor: pointer; text-decoration: underline dotted; }
+.por-rasgo { display: block; font-size: 11px; color: #8b2e1f; line-height: 1.2; }
+.extra-rasgo { font-size: 10px; margin-left: 1px; color: #2f6b2f; }
+.velocidades b.extra { color: #2f6b2f; }
