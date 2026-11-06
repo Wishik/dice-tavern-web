@@ -70,9 +70,17 @@ function Lista({ usuario, onAbrir, onSalir }: { usuario: Usuario; onAbrir: (id: 
   const [dados, setDados] = useState(false);
   const recargar = () => backend.listar().then(setLista).catch((e) => setError(e.message));
   useEffect(() => { recargar(); }, []);
+  const [creando, setCreando] = useState(false);
   const crear = async () => {
-    const p = nuevoPersonaje('Nuevo personaje');
-    await backend.guardar(p); onAbrir(p.id);
+    if (creando) return;
+    setCreando(true); setError('');
+    try {
+      const p = nuevoPersonaje('Nuevo personaje');
+      await backend.guardar(p); onAbrir(p.id);
+    } catch (e) {
+      setError(`No se pudo crear el personaje: ${(e as Error).message}`);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } finally { setCreando(false); }
   };
   return (
     <div className="pantalla-lista">
@@ -95,7 +103,7 @@ function Lista({ usuario, onAbrir, onSalir }: { usuario: Usuario; onAbrir: (id: 
               <div className="tp-texto"><strong>{r.nombre || 'Sin nombre'}</strong><span>{[r.raza, r.clase].filter(Boolean).join(' · ') || 'Sin raza ni clase'}</span><span className="nivel">Nivel {r.nivel}</span></div>
             </button>
           ))}
-          <button className="tarjeta-personaje nuevo" onClick={crear}><span className="mas-grande">+</span><span>Nuevo personaje</span></button>
+          <button type="button" className="tarjeta-personaje nuevo" onClick={crear} disabled={creando}><span className="mas-grande">+</span><span>{creando ? 'Creando…' : 'Nuevo personaje'}</span></button>
         </div>
       </main>
       <button className="fab" onClick={() => setDados(true)} aria-label="Dados"><DadoIcono caras={20} size={40} /></button>

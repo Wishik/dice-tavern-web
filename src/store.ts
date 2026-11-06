@@ -61,6 +61,7 @@ function backendNube(sb: SupabaseClient): Backend {
     },
     async guardar(p) {
       const { data: u } = await sb.auth.getUser();
+      if (!u.user) throw new Error('La sesión ha caducado. Sal y vuelve a entrar.');
       const { error } = await sb.from('personajes').upsert({ id: p.id, propietario: u.user!.id, datos: p, actualizado: p.actualizado });
       if (error) throw new Error(error.message);
     },
