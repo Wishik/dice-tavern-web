@@ -44,6 +44,16 @@ export function TabAtributos() {
           )}
           <div className="barra-vida"><div style={{ width: `${p.pg.max ? Math.max(0, Math.min(100, (p.pg.actual / p.pg.max) * 100)) : 0}%` }} /></div>
         </Seccion>
+        {p.pm.max > 0 && (
+          <Seccion titulo="Maná" className="pg mana">
+            <div className="pg-actual">
+              <Contador valor={p.pm.actual} set={(n) => upd((x) => { x.pm.actual = Math.max(0, Math.min(n, x.pm.max)); })} min={0} max={p.pm.max} />
+              <span className="de">/ {p.pm.max}</span>
+            </div>
+            <div className="barra-vida barra-mana"><div style={{ width: `${Math.max(0, Math.min(100, (p.pm.actual / p.pm.max) * 100))}%` }} /></div>
+            <p className="nota pequena centro">Por {p.clase} nivel {p.nivel}. Se recupera con descanso largo.</p>
+          </Seccion>
+        )}
         <Seccion titulo="Inspiración">
           <div className="fila-inspiracion">
             {[0, 1, 2, 3].map((i) => (
@@ -60,7 +70,7 @@ export function TabAtributos() {
           </div>
           <div className="fila-botones pequena">
             <button className="btn" onClick={() => upd((x) => { x.dgUsados = Math.min(x.nivel, x.dgUsados + 1); })}>Gastar</button>
-            <button className="btn" onClick={() => upd((x) => { x.dgUsados = 0; })}>Descanso largo</button>
+            <button className="btn" onClick={() => upd((x) => { x.dgUsados = 0; x.pm.actual = x.pm.max; })}>Descanso largo</button>
           </div>
         </Seccion>
       </div>

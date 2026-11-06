@@ -41,12 +41,15 @@ function Entrada({ onOk }: { onOk: (u: Usuario) => void }) {
   const [modo, setModo] = useState<'entrar' | 'registro'>('entrar');
   const [email, setEmail] = useState('');
   const [clave, setClave] = useState('');
+  const [clave2, setClave2] = useState('');
+  const [ver, setVer] = useState(false);
   const [msg, setMsg] = useState<{ t: 'error' | 'ok'; s: string } | null>(null);
   const [ocupado, setOcupado] = useState(false);
   const enviar = async (e: React.FormEvent) => {
     e.preventDefault(); setOcupado(true); setMsg(null);
     try {
       if (modo === 'registro') {
+        if (clave !== clave2) { setMsg({ t: 'error', s: 'Las contraseñas no coinciden.' }); return; }
         const r = await backend.registrar(email.trim(), clave);
         if (r === 'confirmar') { setMsg({ t: 'ok', s: 'Te hemos enviado un correo. Confírmalo y luego inicia sesión.' }); setModo('entrar'); return; }
       } else await backend.entrar(email.trim(), clave);
@@ -62,7 +65,21 @@ function Entrada({ onOk }: { onOk: (u: Usuario) => void }) {
           <button type="button" className={modo === 'registro' ? 'activo' : ''} onClick={() => setModo('registro')}>Crear cuenta</button>
         </div>
         <label className="etiqueta"><span>Correo</span><input className="campo" type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} /></label>
-        <label className="etiqueta"><span>Contraseña</span><input className="campo" type="password" autoComplete={modo === 'entrar' ? 'current-password' : 'new-password'} required minLength={6} value={clave} onChange={(e) => setClave(e.target.value)} /></label>
+        <label className="etiqueta"><span>Contraseña</span>
+          <span className="campo-clave">
+            <input className="campo" type={ver ? 'text' : 'password'} autoComplete={modo === 'entrar' ? 'current-password' : 'new-password'} required minLength={6} value={clave} onChange={(e) => setClave(e.target.value)} />
+            <button type="button" className="ojo" onClick={() => setVer(!ver)} aria-label={ver ? 'Ocultar contraseña' : 'Ver contraseña'}>{ver ? '🙈' : '👁️'}</button>
+          </span>
+        </label>
+        {modo === 'registro' && (
+          <label className="etiqueta"><span>Repite la contraseña</span>
+            <span className="campo-clave">
+              <input className="campo" type={ver ? 'text' : 'password'} autoComplete="new-password" required minLength={6} value={clave2} onChange={(e) => setClave2(e.target.value)} />
+              <button type="button" className="ojo" onClick={() => setVer(!ver)} aria-label={ver ? 'Ocultar contraseña' : 'Ver contraseña'}>{ver ? '🙈' : '👁️'}</button>
+            </span>
+            {clave2 && clave !== clave2 && <small className="error">No coinciden.</small>}
+          </label>
+        )}
         {msg && <p className={msg.t === 'error' ? 'error' : 'exito'}>{msg.s}</p>}
         <button className="btn primario grande" disabled={ocupado}>{ocupado ? '…' : modo === 'entrar' ? 'Entrar' : 'Crear cuenta'}</button>
       </form>

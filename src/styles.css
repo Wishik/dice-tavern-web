@@ -497,3 +497,7 @@ details.corregir summary { cursor: pointer; color: var(--tinta-suave); font-size
 .por-rasgo { display: block; font-size: 11px; color: #8b2e1f; line-height: 1.2; }
 .extra-rasgo { font-size: 10px; margin-left: 1px; color: #2f6b2f; }
 .velocidades b.extra { color: #2f6b2f; }
+.campo-clave { position: relative; display: block; }
+.campo-clave .campo { padding-right: 46px; width: 100%; }
+.campo-clave .ojo { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); background: none; border: 0; font-size: 20px; padding: 6px; cursor: pointer; }
+.barra-mana > div { background: linear-gradient(90deg, #2c5aa0, #5b8bd6) !important; }

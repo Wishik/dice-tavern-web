@@ -514,11 +514,11 @@
    {
     "nivel": 11,
     "rasgos": "",
-    "Dado bárdico": "--",
-    "Trucos": "d10",
-    "Conjuros conocidos": "4",
-    "Nivel máximo de conjuro": "16",
-    "Maná": "6"
+    "Dado bárdico": "d10",
+    "Trucos": "4",
+    "Conjuros conocidos": "16",
+    "Nivel máximo de conjuro": "6",
+    "Maná": "47"
    },
    {
     "nivel": 12,
@@ -532,11 +532,11 @@
    {
     "nivel": 13,
     "rasgos": "",
-    "Dado bárdico": "--",
-    "Trucos": "d10",
-    "Conjuros conocidos": "4",
-    "Nivel máximo de conjuro": "17",
-    "Maná": "7"
+    "Dado bárdico": "d10",
+    "Trucos": "4",
+    "Conjuros conocidos": "17",
+    "Nivel máximo de conjuro": "7",
+    "Maná": "54"
    },
    {
     "nivel": 14,
@@ -550,11 +550,11 @@
    {
     "nivel": 15,
     "rasgos": "",
-    "Dado bárdico": "--",
-    "Trucos": "d12",
-    "Conjuros conocidos": "4",
-    "Nivel máximo de conjuro": "18",
-    "Maná": "8"
+    "Dado bárdico": "d12",
+    "Trucos": "4",
+    "Conjuros conocidos": "18",
+    "Nivel máximo de conjuro": "8",
+    "Maná": "62"
    },
    {
     "nivel": 16,
@@ -568,11 +568,11 @@
    {
     "nivel": 17,
     "rasgos": "",
-    "Dado bárdico": "--",
-    "Trucos": "d12",
-    "Conjuros conocidos": "4",
-    "Nivel máximo de conjuro": "19",
-    "Maná": "9"
+    "Dado bárdico": "d12",
+    "Trucos": "4",
+    "Conjuros conocidos": "19",
+    "Nivel máximo de conjuro": "9",
+    "Maná": "71"
    },
    {
     "nivel": 18,
@@ -842,11 +842,11 @@
    {
     "nivel": 5,
     "rasgos": "",
-    "Invocaciones sobrenaturales": "--",
-    "Trucos": "5",
-    "Conjuros conocidos": "3",
-    "Nivel máximo de conjuro": "6",
-    "Maná": "3"
+    "Invocaciones sobrenaturales": "5",
+    "Trucos": "3",
+    "Conjuros conocidos": "6",
+    "Nivel máximo de conjuro": "3",
+    "Maná": "6"
    },
    {
     "nivel": 6,
@@ -860,11 +860,11 @@
    {
     "nivel": 7,
     "rasgos": "",
-    "Invocaciones sobrenaturales": "--",
-    "Trucos": "6",
-    "Conjuros conocidos": "3",
-    "Nivel máximo de conjuro": "8",
-    "Maná": "4"
+    "Invocaciones sobrenaturales": "6",
+    "Trucos": "3",
+    "Conjuros conocidos": "8",
+    "Nivel máximo de conjuro": "4",
+    "Maná": "8"
    },
    {
     "nivel": 8,
@@ -959,11 +959,11 @@
    {
     "nivel": 18,
     "rasgos": "",
-    "Invocaciones sobrenaturales": "--",
-    "Trucos": "10",
-    "Conjuros conocidos": "4",
-    "Nivel máximo de conjuro": "14",
-    "Maná": "5"
+    "Invocaciones sobrenaturales": "10",
+    "Trucos": "4",
+    "Conjuros conocidos": "14",
+    "Nivel máximo de conjuro": "5",
+    "Maná": "20"
    },
    {
     "nivel": 19,
@@ -1305,11 +1305,11 @@
    {
     "nivel": 9,
     "rasgos": "",
-    "Canalizar divinidad": "--",
-    "Trucos": "3",
-    "Conjuros conocidos": "4",
-    "Nivel máximo de conjuro": "14",
-    "Maná": "5"
+    "Canalizar divinidad": "3",
+    "Trucos": "4",
+    "Conjuros conocidos": "14",
+    "Nivel máximo de conjuro": "5",
+    "Maná": "36"
    },
    {
     "nivel": 10,
@@ -1323,11 +1323,11 @@
    {
     "nivel": 11,
     "rasgos": "",
-    "Canalizar divinidad": "--",
-    "Trucos": "3",
-    "Conjuros conocidos": "5",
-    "Nivel máximo de conjuro": "16",
-    "Maná": "6"
+    "Canalizar divinidad": "3",
+    "Trucos": "5",
+    "Conjuros conocidos": "16",
+    "Nivel máximo de conjuro": "6",
+    "Maná": "47"
    },
    {
     "nivel": 12,
@@ -1341,11 +1341,11 @@
    {
     "nivel": 13,
     "rasgos": "",
-    "Canalizar divinidad": "--",
-    "Trucos": "3",
-    "Conjuros conocidos": "5",
-    "Nivel máximo de conjuro": "17",
-    "Maná": "7"
+    "Canalizar divinidad": "3",
+    "Trucos": "5",
+    "Conjuros conocidos": "17",
+    "Nivel máximo de conjuro": "7",
+    "Maná": "54"
    },
    {
     "nivel": 14,
@@ -1359,11 +1359,11 @@
    {
     "nivel": 15,
     "rasgos": "",
-    "Canalizar divinidad": "--",
-    "Trucos": "3",
-    "Conjuros conocidos": "5",
-    "Nivel máximo de conjuro": "18",
-    "Maná": "8"
+    "Canalizar divinidad": "3",
+    "Trucos": "5",
+    "Conjuros conocidos": "18",
+    "Nivel máximo de conjuro": "8",
+    "Maná": "62"
    },
    {
     "nivel": 16,
@@ -1386,11 +1386,11 @@
    {
     "nivel": 18,
     "rasgos": "",
-    "Canalizar divinidad": "--",
-    "Trucos": "4",
-    "Conjuros conocidos": "5",
-    "Nivel máximo de conjuro": "20",
-    "Maná": "9"
+    "Canalizar divinidad": "4",
+    "Trucos": "5",
+    "Conjuros conocidos": "20",
+    "Nivel máximo de conjuro": "9",
+    "Maná": "76"
    },
    {
     "nivel": 19,
@@ -1704,11 +1704,11 @@
    {
     "nivel": 9,
     "rasgos": "",
-    "Forma salvaje": "--",
+    "Forma salvaje": "3",
     "Trucos": "3",
-    "Conjuros conocidos": "3",
-    "Nivel máximo de conjuro": "14",
-    "Maná": "5"
+    "Conjuros conocidos": "14",
+    "Nivel máximo de conjuro": "5",
+    "Maná": "36"
    },
    {
     "nivel": 10,
@@ -1722,11 +1722,11 @@
    {
     "nivel": 11,
     "rasgos": "",
-    "Forma salvaje": "--",
-    "Trucos": "3",
-    "Conjuros conocidos": "4",
-    "Nivel máximo de conjuro": "16",
-    "Maná": "6"
+    "Forma salvaje": "3",
+    "Trucos": "4",
+    "Conjuros conocidos": "16",
+    "Nivel máximo de conjuro": "6",
+    "Maná": "47"
    },
    {
     "nivel": 12,
@@ -1740,11 +1740,11 @@
    {
     "nivel": 13,
     "rasgos": "",
-    "Forma salvaje": "--",
-    "Trucos": "3",
-    "Conjuros conocidos": "4",
-    "Nivel máximo de conjuro": "17",
-    "Maná": "7"
+    "Forma salvaje": "3",
+    "Trucos": "4",
+    "Conjuros conocidos": "17",
+    "Nivel máximo de conjuro": "7",
+    "Maná": "54"
    },
    {
     "nivel": 14,
@@ -1776,11 +1776,11 @@
    {
     "nivel": 17,
     "rasgos": "",
-    "Forma salvaje": "--",
+    "Forma salvaje": "4",
     "Trucos": "4",
-    "Conjuros conocidos": "4",
-    "Nivel máximo de conjuro": "19",
-    "Maná": "9"
+    "Conjuros conocidos": "19",
+    "Nivel máximo de conjuro": "9",
+    "Maná": "71"
    },
    {
     "nivel": 18,
@@ -3033,11 +3033,11 @@
    {
     "nivel": 9,
     "rasgos": "",
-    "Puntos de hechicería": "--",
-    "Trucos": "9",
-    "Conjuros conocidos": "5",
-    "Nivel máximo de conjuro": "14",
-    "Maná": "5"
+    "Puntos de hechicería": "9",
+    "Trucos": "5",
+    "Conjuros conocidos": "14",
+    "Nivel máximo de conjuro": "5",
+    "Maná": "36"
    },
    {
     "nivel": 10,
@@ -3051,11 +3051,11 @@
    {
     "nivel": 11,
     "rasgos": "",
-    "Puntos de hechicería": "--",
-    "Trucos": "11",
-    "Conjuros conocidos": "6",
-    "Nivel máximo de conjuro": "16",
-    "Maná": "6"
+    "Puntos de hechicería": "11",
+    "Trucos": "6",
+    "Conjuros conocidos": "16",
+    "Nivel máximo de conjuro": "6",
+    "Maná": "47"
    },
    {
     "nivel": 12,
@@ -3069,11 +3069,11 @@
    {
     "nivel": 13,
     "rasgos": "",
-    "Puntos de hechicería": "--",
-    "Trucos": "13",
-    "Conjuros conocidos": "6",
-    "Nivel máximo de conjuro": "17",
-    "Maná": "7"
+    "Puntos de hechicería": "13",
+    "Trucos": "6",
+    "Conjuros conocidos": "17",
+    "Nivel máximo de conjuro": "7",
+    "Maná": "54"
    },
    {
     "nivel": 14,
@@ -3087,11 +3087,11 @@
    {
     "nivel": 15,
     "rasgos": "",
-    "Puntos de hechicería": "--",
-    "Trucos": "15",
-    "Conjuros conocidos": "6",
-    "Nivel máximo de conjuro": "18",
-    "Maná": "8"
+    "Puntos de hechicería": "15",
+    "Trucos": "6",
+    "Conjuros conocidos": "18",
+    "Nivel máximo de conjuro": "8",
+    "Maná": "62"
    },
    {
     "nivel": 16,
@@ -3412,11 +3412,11 @@
    {
     "nivel": 7,
     "rasgos": "",
-    "Trucos": "--",
-    "Conjuros conocidos": "4",
-    "Conjuros preparados": "13+",
-    "Nivel máximo de conjuro": "11",
-    "Maná": "4"
+    "Trucos": "4",
+    "Conjuros conocidos": "13+",
+    "Conjuros preparados": "11",
+    "Nivel máximo de conjuro": "4",
+    "Maná": "23"
    },
    {
     "nivel": 8,
@@ -3430,11 +3430,11 @@
    {
     "nivel": 9,
     "rasgos": "",
-    "Trucos": "--",
-    "Conjuros conocidos": "4",
-    "Conjuros preparados": "16+",
-    "Nivel máximo de conjuro": "14",
-    "Maná": "5"
+    "Trucos": "4",
+    "Conjuros conocidos": "16+",
+    "Conjuros preparados": "14",
+    "Nivel máximo de conjuro": "5",
+    "Maná": "36"
    },
    {
     "nivel": 10,
@@ -3448,11 +3448,11 @@
    {
     "nivel": 11,
     "rasgos": "",
-    "Trucos": "--",
-    "Conjuros conocidos": "5",
-    "Conjuros preparados": "18+",
-    "Nivel máximo de conjuro": "16",
-    "Maná": "6"
+    "Trucos": "5",
+    "Conjuros conocidos": "18+",
+    "Conjuros preparados": "16",
+    "Nivel máximo de conjuro": "6",
+    "Maná": "47"
    },
    {
     "nivel": 12,
@@ -3466,11 +3466,11 @@
    {
     "nivel": 13,
     "rasgos": "",
-    "Trucos": "--",
-    "Conjuros conocidos": "5",
-    "Conjuros preparados": "19+",
-    "Nivel máximo de conjuro": "17",
-    "Maná": "7"
+    "Trucos": "5",
+    "Conjuros conocidos": "19+",
+    "Conjuros preparados": "17",
+    "Nivel máximo de conjuro": "7",
+    "Maná": "54"
    },
    {
     "nivel": 14,
@@ -3484,11 +3484,11 @@
    {
     "nivel": 15,
     "rasgos": "",
-    "Trucos": "--",
-    "Conjuros conocidos": "5",
-    "Conjuros preparados": "21+",
-    "Nivel máximo de conjuro": "18",
-    "Maná": "8"
+    "Trucos": "5",
+    "Conjuros conocidos": "21+",
+    "Conjuros preparados": "18",
+    "Nivel máximo de conjuro": "8",
+    "Maná": "62"
    },
    {
     "nivel": 16,
@@ -3502,11 +3502,11 @@
    {
     "nivel": 17,
     "rasgos": "",
-    "Trucos": "--",
-    "Conjuros conocidos": "5",
-    "Conjuros preparados": "24+",
-    "Nivel máximo de conjuro": "19",
-    "Maná": "9"
+    "Trucos": "5",
+    "Conjuros conocidos": "24+",
+    "Conjuros preparados": "19",
+    "Nivel máximo de conjuro": "9",
+    "Maná": "71"
    },
    {
     "nivel": 18,
@@ -4379,10 +4379,10 @@
    {
     "nivel": 13,
     "rasgos": "",
-    "Canalizar divinidad": "--",
-    "Conjuros conocidos": "3",
-    "Nivel máximo de conjuro": "11",
-    "Maná": "4"
+    "Canalizar divinidad": "3",
+    "Conjuros conocidos": "11",
+    "Nivel máximo de conjuro": "4",
+    "Maná": "23"
    },
    {
     "nivel": 14,
@@ -4411,10 +4411,10 @@
    {
     "nivel": 17,
     "rasgos": "",
-    "Canalizar divinidad": "--",
-    "Conjuros conocidos": "3",
-    "Nivel máximo de conjuro": "14",
-    "Maná": "5"
+    "Canalizar divinidad": "3",
+    "Conjuros conocidos": "14",
+    "Nivel máximo de conjuro": "5",
+    "Maná": "36"
    },
    {
     "nivel": 18,

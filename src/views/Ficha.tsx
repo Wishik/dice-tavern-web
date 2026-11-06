@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useRef, use
 import type { Personaje } from '../types';
 import { backend } from '../store';
 import { useDatos, type Clase, type Dote, type Razas, type Trasfondo } from '../data';
-import { calcularAvisos, type Avisos } from '../avisos';
+import { calcularAvisos, manaMaximo, type Avisos } from '../avisos';
 import { DadoIcono, PanelDados, useDados } from '../dice';
 import { conSigno, modificador } from '../rules';
 import { Modal, PuntoRojo } from '../ui';
@@ -117,6 +117,7 @@ export function Ficha({ id, onVolver }: { id: string; onVolver: () => void }) {
         {T.id === 'notas' && <div className="pie-borrar"><button className="btn peligro" onClick={borrar}>Borrar personaje</button></div>}
         <button className="fab" onClick={() => setDados(true)} aria-label="Dados"><DadoIcono caras={20} size={40} /></button>
         <SubidaNivel />
+        <SincronizarMana />
         {dados && <Modal titulo="Dados" onClose={() => setDados(false)}><PanelDados /></Modal>}
       </div>
     </Ctx.Provider>
@@ -148,4 +149,15 @@ function SubidaNivel() {
       </div>
     </div>
   );
+}
+
+/** El maná máximo sale de la clase y el nivel: si cambia, se ajusta solo (y lo ganado se suma al actual). */
+function SincronizarMana() {
+  const { p, upd, clases } = useFicha();
+  const max = clases ? manaMaximo(p, clases) : p.pm.max;
+  useEffect(() => {
+    if (!clases || max === p.pm.max) return;
+    upd((x) => { const d = max - x.pm.max; x.pm.max = max; x.pm.actual = Math.max(0, Math.min(max, x.pm.actual + Math.max(0, d))); });
+  }, [max, p.pm.max, clases, upd]);
+  return null;
 }

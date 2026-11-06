@@ -1,0 +1,538 @@
+[
+ {
+  "nombre": "Caballo de monta",
+  "tamano": "Grande",
+  "ca": 11,
+  "pg": 13,
+  "dadosPG": "2d10+2",
+  "velocidad": {
+   "andando": 60,
+   "volando": "",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 16,
+   "DES": 13,
+   "CON": 12,
+   "INT": 2,
+   "SAB": 11,
+   "CAR": 7
+  },
+  "rasgos": [
+   {
+    "nombre": "Coz",
+    "texto": "Ataque cuerpo a cuerpo: +5, alcance 5 pies. Impacto: 1d8+3 contundente."
+   }
+  ],
+  "precio": "75 po"
+ },
+ {
+  "nombre": "Caballo de guerra",
+  "tamano": "Grande",
+  "ca": 11,
+  "pg": 19,
+  "dadosPG": "3d10+3",
+  "velocidad": {
+   "andando": 60,
+   "volando": "",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 18,
+   "DES": 12,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "rasgos": [
+   {
+    "nombre": "Coz",
+    "texto": "Ataque cuerpo a cuerpo: +6, alcance 5 pies. Impacto: 2d4+4 contundente."
+   },
+   {
+    "nombre": "Carga arrolladora",
+    "texto": "Si se mueve al menos 20 pies en línea recta hacia el objetivo justo antes de acertar con la coz, el objetivo (Grande o menor) debe superar una TS de Fuerza CD 14 o queda derribado."
+   }
+  ],
+  "precio": "400 po"
+ },
+ {
+  "nombre": "Caballo de tiro",
+  "tamano": "Grande",
+  "ca": 10,
+  "pg": 15,
+  "dadosPG": "2d10+4",
+  "velocidad": {
+   "andando": 40,
+   "volando": "",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 18,
+   "DES": 10,
+   "CON": 15,
+   "INT": 2,
+   "SAB": 11,
+   "CAR": 7
+  },
+  "rasgos": [
+   {
+    "nombre": "Coz",
+    "texto": "Ataque cuerpo a cuerpo: +6, alcance 5 pies. Impacto: 1d4+4 contundente."
+   }
+  ],
+  "precio": "50 po"
+ },
+ {
+  "nombre": "Poni",
+  "tamano": "Mediano",
+  "ca": 10,
+  "pg": 11,
+  "dadosPG": "2d8+2",
+  "velocidad": {
+   "andando": 40,
+   "volando": "",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 15,
+   "DES": 10,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 11,
+   "CAR": 7
+  },
+  "rasgos": [
+   {
+    "nombre": "Coz",
+    "texto": "Ataque cuerpo a cuerpo: +4, alcance 5 pies. Impacto: 1d4+2 contundente."
+   }
+  ],
+  "precio": "30 po"
+ },
+ {
+  "nombre": "Mula",
+  "tamano": "Mediano",
+  "ca": 10,
+  "pg": 11,
+  "dadosPG": "2d8+2",
+  "velocidad": {
+   "andando": 40,
+   "volando": "",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 14,
+   "DES": 10,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 5
+  },
+  "rasgos": [
+   {
+    "nombre": "Bestia de carga",
+    "texto": "Cuenta como un animal Grande para calcular cuánto puede cargar."
+   },
+   {
+    "nombre": "Paso firme",
+    "texto": "Ventaja en las TS de Fuerza y Destreza contra efectos que la derribarían."
+   },
+   {
+    "nombre": "Coz",
+    "texto": "Ataque cuerpo a cuerpo: +4, alcance 5 pies. Impacto: 1d4+2 contundente."
+   }
+  ],
+  "precio": "8 po"
+ },
+ {
+  "nombre": "Camello",
+  "tamano": "Grande",
+  "ca": 10,
+  "pg": 17,
+  "dadosPG": "2d10+6",
+  "velocidad": {
+   "andando": 50,
+   "volando": "",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 15,
+   "DES": 8,
+   "CON": 17,
+   "INT": 2,
+   "SAB": 11,
+   "CAR": 5
+  },
+  "rasgos": [
+   {
+    "nombre": "Mordisco",
+    "texto": "Ataque cuerpo a cuerpo: +4, alcance 5 pies. Impacto: 1d4+2 contundente."
+   }
+  ],
+  "precio": "50 po"
+ },
+ {
+  "nombre": "Elefante",
+  "tamano": "Enorme",
+  "ca": 12,
+  "pg": 76,
+  "dadosPG": "8d12+24",
+  "velocidad": {
+   "andando": 40,
+   "volando": "",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 22,
+   "DES": 9,
+   "CON": 17,
+   "INT": 3,
+   "SAB": 11,
+   "CAR": 6
+  },
+  "rasgos": [
+   {
+    "nombre": "Corneada",
+    "texto": "Ataque cuerpo a cuerpo: +8, alcance 5 pies. Impacto: 2d8+6 perforante. Si se ha movido 20 pies en línea recta antes, el objetivo (Enorme o menor) debe superar una TS de Fuerza CD 12 o queda derribado."
+   },
+   {
+    "nombre": "Pisotón",
+    "texto": "Contra una criatura derribada: +8, 2d10+6 contundente."
+   }
+  ],
+  "precio": "200 po"
+ },
+ {
+  "nombre": "Mastín",
+  "tamano": "Mediano",
+  "ca": 12,
+  "pg": 5,
+  "dadosPG": "1d8+1",
+  "velocidad": {
+   "andando": 40,
+   "volando": "",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 13,
+   "DES": 14,
+   "CON": 12,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "rasgos": [
+   {
+    "nombre": "Olfato agudo",
+    "texto": "Ventaja en pruebas de Sabiduría (Percepción) que dependan del olfato."
+   },
+   {
+    "nombre": "Mordisco",
+    "texto": "Ataque cuerpo a cuerpo: +3, alcance 5 pies. Impacto: 1d6+1 perforante; si es Mediano o menor, TS de Fuerza CD 11 o queda derribado."
+   }
+  ],
+  "precio": "25 po"
+ },
+ {
+  "nombre": "Lobo terrible",
+  "tamano": "Grande",
+  "ca": 14,
+  "pg": 22,
+  "dadosPG": "3d10+6",
+  "velocidad": {
+   "andando": 50,
+   "volando": "",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 17,
+   "DES": 15,
+   "CON": 15,
+   "INT": 3,
+   "SAB": 12,
+   "CAR": 7
+  },
+  "rasgos": [
+   {
+    "nombre": "Tácticas de manada",
+    "texto": "Ventaja en el ataque si un aliado está a 5 pies del objetivo."
+   },
+   {
+    "nombre": "Mordisco",
+    "texto": "Ataque cuerpo a cuerpo: +5, alcance 5 pies. Impacto: 1d10+3 perforante; si es Grande o menor, queda derribado."
+   }
+  ],
+  "precio": ""
+ },
+ {
+  "nombre": "Huargo",
+  "tamano": "Grande",
+  "ca": 13,
+  "pg": 26,
+  "dadosPG": "4d10+4",
+  "velocidad": {
+   "andando": 50,
+   "volando": "",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 16,
+   "DES": 13,
+   "CON": 13,
+   "INT": 7,
+   "SAB": 11,
+   "CAR": 8
+  },
+  "rasgos": [
+   {
+    "nombre": "Olfato y oído agudos",
+    "texto": "Ventaja en pruebas de Percepción que dependan del olfato o el oído."
+   },
+   {
+    "nombre": "Mordisco",
+    "texto": "Ataque cuerpo a cuerpo: +5, alcance 5 pies. Impacto: 2d6+3 perforante; si es Grande o menor, TS de Fuerza CD 13 o queda derribado."
+   }
+  ],
+  "precio": ""
+ },
+ {
+  "nombre": "Lagarto gigante",
+  "tamano": "Grande",
+  "ca": 12,
+  "pg": 19,
+  "dadosPG": "3d10+3",
+  "velocidad": {
+   "andando": 30,
+   "volando": "",
+   "nadando": "",
+   "trepando": "30"
+  },
+  "caracteristicas": {
+   "FUE": 15,
+   "DES": 12,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 10,
+   "CAR": 5
+  },
+  "rasgos": [
+   {
+    "nombre": "Trepador",
+    "texto": "Puede trepar por superficies difíciles, incluso boca abajo en techos."
+   },
+   {
+    "nombre": "Mordisco",
+    "texto": "Ataque cuerpo a cuerpo: +4, alcance 5 pies. Impacto: 1d8+2 perforante."
+   }
+  ],
+  "precio": ""
+ },
+ {
+  "nombre": "Jabalí gigante",
+  "tamano": "Grande",
+  "ca": 12,
+  "pg": 42,
+  "dadosPG": "5d10+15",
+  "velocidad": {
+   "andando": 40,
+   "volando": "",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 17,
+   "DES": 10,
+   "CON": 16,
+   "INT": 2,
+   "SAB": 7,
+   "CAR": 5
+  },
+  "rasgos": [
+   {
+    "nombre": "Implacable",
+    "texto": "1 vez por descanso largo, si recibe daño que lo dejaría a 0 PG (y no más de 10), queda a 1 PG."
+   },
+   {
+    "nombre": "Colmillo",
+    "texto": "Ataque cuerpo a cuerpo: +5, alcance 5 pies. Impacto: 2d6+3 cortante."
+   }
+  ],
+  "precio": ""
+ },
+ {
+  "nombre": "Alce gigante",
+  "tamano": "Enorme",
+  "ca": 14,
+  "pg": 42,
+  "dadosPG": "5d12+10",
+  "velocidad": {
+   "andando": 60,
+   "volando": "",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 19,
+   "DES": 16,
+   "CON": 14,
+   "INT": 7,
+   "SAB": 14,
+   "CAR": 10
+  },
+  "rasgos": [
+   {
+    "nombre": "Embestida",
+    "texto": "Ataque cuerpo a cuerpo: +6, alcance 10 pies. Impacto: 2d6+4 contundente."
+   }
+  ],
+  "precio": ""
+ },
+ {
+  "nombre": "Hipogrifo",
+  "tamano": "Grande",
+  "ca": 11,
+  "pg": 26,
+  "dadosPG": "4d10+4",
+  "velocidad": {
+   "andando": 40,
+   "volando": "60",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 17,
+   "DES": 13,
+   "CON": 13,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 8
+  },
+  "rasgos": [
+   {
+    "nombre": "Vista aguda",
+    "texto": "Ventaja en pruebas de Percepción que dependan de la vista."
+   },
+   {
+    "nombre": "Multiataque",
+    "texto": "Dos ataques de desgarrar."
+   },
+   {
+    "nombre": "Desgarrar",
+    "texto": "Ataque cuerpo a cuerpo: +5, alcance 5 pies. Impacto: 1d10+3 cortante."
+   }
+  ],
+  "precio": ""
+ },
+ {
+  "nombre": "Grifo",
+  "tamano": "Grande",
+  "ca": 12,
+  "pg": 59,
+  "dadosPG": "7d10+21",
+  "velocidad": {
+   "andando": 30,
+   "volando": "80",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 18,
+   "DES": 15,
+   "CON": 16,
+   "INT": 2,
+   "SAB": 13,
+   "CAR": 8
+  },
+  "rasgos": [
+   {
+    "nombre": "Vista aguda",
+    "texto": "Ventaja en pruebas de Percepción que dependan de la vista."
+   },
+   {
+    "nombre": "Multiataque",
+    "texto": "Dos ataques de desgarrar."
+   },
+   {
+    "nombre": "Desgarrar",
+    "texto": "Ataque cuerpo a cuerpo: +6, alcance 5 pies. Impacto: 1d8+4 perforante."
+   }
+  ],
+  "precio": ""
+ },
+ {
+  "nombre": "Pegaso",
+  "tamano": "Grande",
+  "ca": 12,
+  "pg": 59,
+  "dadosPG": "7d10+21",
+  "velocidad": {
+   "andando": 60,
+   "volando": "90",
+   "nadando": "",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 18,
+   "DES": 15,
+   "CON": 16,
+   "INT": 10,
+   "SAB": 15,
+   "CAR": 13
+  },
+  "rasgos": [
+   {
+    "nombre": "Coz",
+    "texto": "Ataque cuerpo a cuerpo: +6, alcance 5 pies. Impacto: 2d6+4 contundente."
+   },
+   {
+    "nombre": "Celestial",
+    "texto": "Entiende Celestial, Común, Élfico y Silvano, aunque no puede hablarlos."
+   }
+  ],
+  "precio": ""
+ },
+ {
+  "nombre": "Caballito de mar gigante",
+  "tamano": "Grande",
+  "ca": 14,
+  "pg": 16,
+  "dadosPG": "3d10",
+  "velocidad": {
+   "andando": 0,
+   "volando": "",
+   "nadando": "40",
+   "trepando": ""
+  },
+  "caracteristicas": {
+   "FUE": 12,
+   "DES": 15,
+   "CON": 11,
+   "INT": 2,
+   "SAB": 12,
+   "CAR": 5
+  },
+  "rasgos": [
+   {
+    "nombre": "Acuático",
+    "texto": "Solo respira bajo el agua."
+   },
+   {
+    "nombre": "Embestida",
+    "texto": "Ataque cuerpo a cuerpo: +3, alcance 5 pies. Impacto: 1d6+1 contundente."
+   }
+  ],
+  "precio": ""
+ }
+]

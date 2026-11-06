@@ -2,22 +2,31 @@ import { useEffect, useRef, useState } from 'react';
 import { useFicha } from './Ficha';
 import { BotonAnadir, Buscador, Etiqueta, ListaDatos, Modal, Numero, Seccion, Texto, TextoLargo, comprimirFoto } from '../ui';
 import { Contador, useDados } from '../dice';
-import { cargarObjetos, type ObjetoBase } from '../data';
+import { cargarObjetos, useDatos, type ObjetoBase } from '../data';
 import { MOCHILA_MAX, cabeEnMochila, conSigno, espaciosItem, espaciosUsados, modificador, uid } from '../rules';
 import { nuevaMontura } from '../personaje';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Item, type Montura } from '../types';
 
 type Zona = 'equipo' | 'carga';
+interface MonturaBase { nombre: string; tamano: string; ca: number; pg: number; dadosPG: string; precio: string;
+  velocidad: Montura['velocidad']; caracteristicas: Montura['caracteristicas']; rasgos: { nombre: string; texto: string }[] }
 
 export function TabMonturas() {
   const { p, upd } = useFicha();
   const [sel, setSel] = useState<string | null>(p.monturas[0]?.id ?? null);
   const m = p.monturas.find((x) => x.id === sel) ?? p.monturas[0] ?? null;
 
-  const crear = () => {
-    const n = nuevaMontura(`Montura ${p.monturas.length + 1}`);
+  const [elegir, setElegir] = useState(false);
+  const base = useDatos<MonturaBase[]>('monturas');
+  const crear = (b?: MonturaBase) => {
+    const n = nuevaMontura(b ? b.nombre : `Montura ${p.monturas.length + 1}`);
+    if (b) {
+      n.tipo = b.nombre; n.ca = String(b.ca); n.pg = { max: b.pg, actual: b.pg };
+      n.velocidad = { ...b.velocidad }; n.caracteristicas = { ...b.caracteristicas };
+      n.rasgos = [{ nombre: 'Tamaño', texto: `${b.tamano}. PG ${b.pg} (${b.dadosPG}).${b.precio ? ` Precio: ${b.precio}.` : ''}` }, ...b.rasgos];
+    }
     upd((x) => { x.monturas.push(n); });
-    setSel(n.id);
+    setSel(n.id); setElegir(false);
   };
 
   return (
@@ -29,7 +38,18 @@ export function TabMonturas() {
           ))}
         </div>
       )}
-      <BotonAnadir onClick={crear}>Añadir montura</BotonAnadir>
+      <BotonAnadir onClick={() => setElegir(true)}>Añadir montura</BotonAnadir>
+      {elegir && (
+        <Modal titulo="Añadir montura" onClose={() => setElegir(false)}>
+          {!base ? <p>Cargando monturas…</p> : (
+            <Buscador<MonturaBase> items={base} texto={(b) => b.nombre} placeholder="Caballo, grifo, poni…"
+              render={(b) => <span className="res-conjuro"><strong>{b.nombre}</strong><small>{b.tamano} · CA {b.ca} · PG {b.pg} · {b.velocidad.andando} pies{b.velocidad.volando ? `, vuela ${b.velocidad.volando}` : ''}{b.velocidad.nadando ? `, nada ${b.velocidad.nadando}` : ''}{b.precio ? ` · ${b.precio}` : ''}</small></span>}
+              onElegir={(b) => typeof b === 'string' ? (() => { crear(); })() : crear(b)} />
+          )}
+          <button className="btn" onClick={() => crear()}>Montura vacía (rellenar a mano)</button>
+          <p className="nota pequena">Datos del SRD 5.2 (parte gratuita del Manual de monstruos 2024, CC-BY-4.0). Puedes cambiarlos en la ficha.</p>
+        </Modal>
+      )}
       {!m && <p className="vacio">Aún no tienes monturas. Caballos, ponis, grifos… cada uno con su vida, armadura, velocidad, habilidades e inventario.</p>}
       {m && <FichaMontura key={m.id} m={m} onBorrada={() => setSel(null)} />}
     </div>
@@ -64,7 +84,6 @@ function FichaMontura({ m, onBorrada }: { m: Montura; onBorrada: () => void }) {
             <Etiqueta texto="Tipo"><Texto valor={m.tipo} set={(s) => set((x) => { x.tipo = s; })} placeholder="Caballo de guerra, poni…" /></Etiqueta>
           </div>
         </div>
-        <p className="nota pequena">Cuando nos paséis la base de monturas, el tipo se elegirá de una lista y rellenará sus datos.</p>
       </Seccion>
 
       <div className="fila-3-tarjetas">

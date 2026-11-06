@@ -90,3 +90,12 @@ export const SUBCLASES_MAGICAS: Record<string, [number, number, number][]> = {
   'Embaucador arcano': T(3, 4),
   'Caballero arcano': T(2, 3),
 };
+
+const MANA_ARCANO = [0, 0, 2, 3, 3, 3, 8, 8, 8, 10, 10, 10, 16, 16, 16, 19, 19, 19, 23, 23];
+/** Maná máximo: columna «Maná» de la tabla de la clase (o del Embaucador/Caballero arcano) + Despertar Interior (+1 por nivel). */
+export function manaMaximo(p: Personaje, clases: Clase[] | null): number {
+  const f = filaClase(buscarClase(clases, p.clase), p.nivel);
+  let m = f && 'Maná' in f ? num(f['Maná']) ?? 0 : SUBCLASES_MAGICAS[p.subclase] ? MANA_ARCANO[p.nivel - 1] ?? 0 : 0;
+  if (p.rasgosRaza.includes('Despertar Interior') && m > 0) m += p.nivel;
+  return m;
+}
