@@ -1,7 +1,7 @@
 import { useFicha } from './Ficha';
 import { Etiqueta, Numero, Seccion, Texto } from '../ui';
 import { Contador, useDados } from '../dice';
-import { bonoCompetencia, conSigno, estadoCarga, iniciativa, modificador, percepcionPasiva } from '../rules';
+import { CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, bonoCompetencia, conSigno, estadoCarga, iniciativa, modificador, percepcionPasiva } from '../rules';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO } from '../types';
 import { buscarClase } from '../avisos';
 
@@ -62,6 +62,9 @@ export function TabAtributos() {
         })}
       </div>
       <p className="nota centro">Toca el modificador para tirar 1d20.</p>
+      {CONJUNTO_ESTANDAR[p.clase] && (
+        <p className="nota centro"><button className="btn enlace pequeno" onClick={() => { if (confirm(`¿Poner el conjunto estándar de ${p.clase} (${CONJUNTO_ESTANDAR[p.clase].join(', ')})?`)) upd((x) => { aplicarConjuntoEstandar(x, x.clase); }); }}>↺ Conjunto estándar de {p.clase}</button></p>
+      )}
 
       <div className="fila-3-tarjetas">
         <Seccion titulo="Iniciativa">

@@ -1,4 +1,4 @@
-import { aplicarExperiencia, embolsarExceso, leerPrecio, pxParaSubir } from '../rules';
+import { aplicarConjuntoEstandar, aplicarExperiencia, caracteristicasSinTocar, embolsarExceso, leerPrecio, pxParaSubir } from '../rules';
 import { describe, it, expect } from 'vitest';
 import { bonoCompetencia, convertir, espaciosPorFuerza, estadoCarga, modificador, parseFormula, valorHabilidad } from '../rules';
 import { nuevoPersonaje } from '../personaje';
@@ -78,5 +78,17 @@ describe('bolsas de monedas', () => {
     expect(leerPrecio('50po')).toEqual({ cantidad: 50, moneda: 'PO' });
     expect(leerPrecio('155 pc')).toEqual({ cantidad: 155, moneda: 'PC' });
     expect(leerPrecio('gratis')).toBeNull();
+  });
+});
+
+describe('conjunto estándar', () => {
+  it('se aplica al elegir clase si no se ha tocado', () => {
+    const p = nuevoPersonaje();
+    expect(caracteristicasSinTocar(p)).toBe(true);
+    aplicarConjuntoEstandar(p, 'Pícaro');
+    expect(p.caracteristicas).toMatchObject({ FUE: 12, DES: 15, CON: 13, INT: 14, SAB: 10, CAR: 8 });
+    expect(caracteristicasSinTocar(p)).toBe(true);
+    p.caracteristicas.FUE = 17;
+    expect(caracteristicasSinTocar(p)).toBe(false);
   });
 });

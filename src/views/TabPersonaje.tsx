@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState } from 'react';
 import { useFicha } from './Ficha';
 import { Etiqueta, Modal, Numero, PuntoRojo, Seccion, Texto, TextoLargo, comprimirFoto } from '../ui';
-import { HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, aplicarExperiencia, huecoDisponible, idHabilidad, pxParaSubir } from '../rules';
+import { HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, aplicarConjuntoEstandar, aplicarExperiencia, caracteristicasSinTocar, huecoDisponible, idHabilidad, pxParaSubir } from '../rules';
 import { ATRIBUTOS, type Atributo, type Personaje } from '../types';
 import { buscarClase, buscarRaza } from '../avisos';
 
@@ -32,6 +32,8 @@ export function TabPersonaje() {
     x.clase = nombre; x.subclase = '';
     const c = buscarClase(clases, nombre);
     if (c) for (const a of ATRIBUTOS) x.salvaciones[a].comp = c.atributos.salvaciones.includes(a);
+    // Al elegir clase, si aún no has tocado las características, pone el conjunto estándar del manual.
+    if (caracteristicasSinTocar(x)) aplicarConjuntoEstandar(x, nombre);
   });
   const elegirTrasfondo = (nombre: string) => upd((x) => {
     const viejo = trasfondos?.find((t) => t.nombre === x.trasfondoEstilo);

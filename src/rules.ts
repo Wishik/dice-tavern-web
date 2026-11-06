@@ -231,3 +231,24 @@ export function leerPrecio(s: string): { cantidad: number; moneda: Moneda } | nu
   if (!m) return null;
   return { cantidad: parseFloat(m[1]), moneda: m[2].toUpperCase() as Moneda };
 }
+
+// ---------------------------------------------------------------- Conjunto estándar (manual, p. 11)
+/** Características iniciales recomendadas por clase: FUE, DES, CON, INT, SAB, CAR. */
+export const CONJUNTO_ESTANDAR: Record<string, [number, number, number, number, number, number]> = {
+  'Bárbaro': [15, 13, 14, 10, 12, 8], 'Bardo': [8, 14, 12, 13, 10, 15], 'Brujo': [8, 14, 13, 12, 10, 15],
+  'Clérigo': [14, 8, 13, 10, 15, 12], 'Druida': [8, 12, 14, 13, 15, 10], 'Explorador': [12, 15, 13, 8, 14, 10],
+  'Guerrero': [15, 14, 13, 8, 10, 12], 'Hechicero': [10, 13, 14, 8, 12, 15], 'Mago': [8, 12, 13, 15, 14, 10],
+  'Monje': [12, 15, 13, 10, 14, 8], 'Paladín': [15, 10, 13, 8, 12, 14], 'Pícaro': [12, 15, 13, 14, 10, 8],
+};
+const ORDEN_CAR: Atributo[] = ['FUE', 'DES', 'CON', 'INT', 'SAB', 'CAR'];
+export function aplicarConjuntoEstandar(p: Personaje, clase: string): boolean {
+  const c = CONJUNTO_ESTANDAR[clase]; if (!c) return false;
+  ORDEN_CAR.forEach((a, i) => { p.caracteristicas[a] = c[i]; });
+  return true;
+}
+/** true si las características siguen sin tocar (todo 10 o el conjunto de alguna clase). */
+export function caracteristicasSinTocar(p: Personaje): boolean {
+  const v = ORDEN_CAR.map((a) => p.caracteristicas[a]);
+  if (v.every((x) => x === 10)) return true;
+  return Object.values(CONJUNTO_ESTANDAR).some((c) => c.every((x, i) => x === v[i]));
+}
