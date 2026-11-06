@@ -1,5 +1,5 @@
 import { ATRIBUTOS, type Atributo, type Montura, type Personaje } from './types';
-import { HABILIDADES, calcularCA, uid } from './rules';
+import { HABILIDADES, uid } from './rules';
 
 export function nuevoPersonaje(nombre = ''): Personaje {
   const ahora = new Date().toISOString();
@@ -12,7 +12,7 @@ export function nuevoPersonaje(nombre = ''): Personaje {
     pg: { max: 0, actual: 0, temp: 0 }, pm: { max: 0, actual: 0 }, inspiracion: 0, dgUsados: 0, subidasPendientes: 0,
     caracteristicas: car, bonusIniciativa: 0,
     velocidad: { andando: 30, corriendo: 60, trepando: '', nadando: '', volando: '' },
-    ca: '', bonusCA: 0, bonusPercepcionPasiva: 0, recursos: '',
+    ca: '', bonusCA: 0, caV2: true, bonusPercepcionPasiva: 0, recursos: '',
     ataquesTurno: { habil: 1, torpe: 0 }, ataques: [],
     conjuroCaracteristica: '', conjurosTurno: { estandar: '', adicional: '' },
     salvaciones: Object.fromEntries(ATRIBUTOS.map((a) => [a, { comp: false, bonus: 0 }])) as Personaje['salvaciones'],
@@ -41,12 +41,9 @@ export function normalizar(p: Partial<Personaje>): Personaje {
   if (typeof out.viaje.pedernal !== 'number') out.viaje.pedernal = out.viaje.pedernal ? 10 : 0;
   out.habilidades = { ...base.habilidades, ...(p.habilidades ?? {}) };
   out.salvaciones = { ...base.salvaciones, ...(p.salvaciones ?? {}) };
-  // La CA antes se escribía a mano: la pasamos a «ajuste» sobre la calculada para no perderla.
-  if (typeof p.bonusCA !== 'number') {
-    out.bonusCA = 0;
-    const n = parseInt(out.ca, 10);
-    if (!isNaN(n)) out.bonusCA = n - calcularCA(out).total;
-  }
+  // La CA antigua escrita a mano no se traslada: la CA se calcula sola (10 + DES, armadura, escudo).
+  // caV2: limpia una vez el «ajuste» que la primera versión de esta migración calculó mal.
+  if (!p.caV2) { out.bonusCA = 0; out.caV2 = true; }
   out.ca = '';
   // Los PG actuales nunca pueden pasar de los máximos: si pasa (datos antiguos), el máximo sube.
   if (out.pg.actual > out.pg.max) out.pg.max = out.pg.actual;

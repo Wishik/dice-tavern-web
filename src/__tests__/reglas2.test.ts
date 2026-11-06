@@ -32,11 +32,9 @@ describe('CA automática', () => {
     expect(calcularCA(p).total).toBe(16);
     expect(avisosTirada(p, 'habilidad', 'DES', 'sigilo').join()).toMatch(/Sigilo/);
   });
-  it('la CA escrita a mano se conserva como ajuste', () => {
-    const viejo = { ...nuevoPersonaje(), ca: '15' } as Record<string, unknown>;
-    delete viejo.bonusCA;
-    const p = normalizar(viejo);
-    expect(calcularCA(p).total).toBe(15);
+  it('el ajuste de CA mal migrado se limpia', () => {
+    const viejo = { ...nuevoPersonaje(), ca: '3', bonusCA: -9, caV2: undefined };
+    expect(calcularCA(normalizar(viejo)).total).toBe(10);
   });
 });
 

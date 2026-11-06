@@ -103,6 +103,7 @@ export interface Personaje {
   ca: string;
   /** Ajuste a la CA calculada (anillos, Defensa sin armadura, magia…). */
   bonusCA: number;
+  caV2?: boolean;
   bonusPercepcionPasiva: number;
   recursos: string;
   // Hoja 4
