@@ -203,7 +203,8 @@ select.campo { appearance: none; background-image: linear-gradient(45deg, transp
 .pg-actual .de { font-size: 22px; color: var(--tinta-suave); }
 .barra-vida { height: 8px; background: #d5bf95; border-radius: 99px; overflow: hidden; margin-top: 10px; }
 .barra-vida div { height: 100%; background: linear-gradient(90deg, #a52a1f, #d4553f); transition: width .3s; }
-.inspiracion { display: block; margin: 0 auto; width: 70px; height: 70px; border-radius: 50%; border: 3px double #7d6448; background: none; font-size: 34px; color: #a89070; }
+.fila-inspiracion { display: grid; grid-template-columns: repeat(2, 44px); gap: 8px; justify-content: center; }
+.inspiracion { display: grid; place-items: center; padding: 0; width: 44px; height: 44px; border-radius: 50%; border: 3px double #7d6448; background: none; font-size: 22px; color: #a89070; }
 .inspiracion.activa { color: var(--oro); border-color: var(--oro); background: radial-gradient(circle, rgba(240,201,106,.5), transparent 70%); text-shadow: 0 0 12px var(--oro); }
 .dg { display: flex; align-items: center; justify-content: center; gap: 14px; font-size: 24px; font-weight: 700; }
 .dado-pequeno { font-size: 20px; min-width: 60px; }
@@ -354,11 +355,11 @@ select.campo { appearance: none; background-image: linear-gradient(45deg, transp
 @media (min-width: 720px) { .modal-fondo { align-items: center; } }
 .modal { background: linear-gradient(180deg, var(--pergamino), var(--pergamino-2)); color: var(--tinta); width: 100%; max-width: 620px; border-radius: 18px 18px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,.5); }
 @media (min-width: 720px) { .modal { border-radius: 18px; } }
-.modal.hoja { max-height: 92vh; display: flex; flex-direction: column; }
+.modal.hoja { max-height: calc(100% - 16px); display: flex; flex-direction: column; }
 .modal-cabecera { display: flex; align-items: center; gap: 10px; padding: 14px 16px 8px; border-bottom: 1px solid #c9b182; }
 .modal-cabecera h3 { flex: 1; font-size: 17px; }
 .cerrar { background: none; border: none; font-size: 20px; width: 36px; height: 36px; }
-.modal-cuerpo { padding: 12px 16px; overflow-y: auto; }
+.modal-cuerpo { padding: 12px 16px; overflow-y: auto; min-height: 0; flex: 1 1 auto; }
 .modal-pie { padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); border-top: 1px solid #c9b182; display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 .buscador .resultados { list-style: none; padding: 0; margin: 8px 0 0; max-height: 55vh; overflow-y: auto; }
 .buscador .resultados li button { width: 100%; text-align: left; background: none; border: none; border-bottom: 1px dashed rgba(106,86,67,.35); padding: 9px 4px; color: var(--tinta); }

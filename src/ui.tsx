@@ -1,13 +1,27 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
+/** Parte de la pantalla que no tapa el teclado del móvil (visualViewport). */
+function useZonaVisible() {
+  const leer = () => { const v = window.visualViewport; return v ? { top: v.offsetTop, alto: v.height } : null; };
+  const [z, setZ] = useState(leer);
+  useEffect(() => {
+    const v = window.visualViewport; if (!v) return;
+    const f = () => setZ(leer());
+    v.addEventListener('resize', f); v.addEventListener('scroll', f);
+    return () => { v.removeEventListener('resize', f); v.removeEventListener('scroll', f); };
+  }, []);
+  return z;
+}
+
 export function Modal({ titulo, onClose, children, pie }: { titulo: ReactNode; onClose: () => void; children: ReactNode; pie?: ReactNode }) {
   useEffect(() => {
     const f = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
     window.addEventListener('keydown', f);
     return () => window.removeEventListener('keydown', f);
   }, [onClose]);
+  const vv = useZonaVisible();
   return (
-    <div className="modal-fondo" onClick={onClose}>
+    <div className="modal-fondo" onClick={onClose} style={vv ? { top: vv.top, height: vv.alto, bottom: 'auto' } : undefined}>
       <div className="modal hoja" onClick={(e) => e.stopPropagation()} role="dialog">
         <div className="modal-cabecera"><h3>{titulo}</h3><button className="cerrar" onClick={onClose} aria-label="Cerrar">✕</button></div>
         <div className="modal-cuerpo">{children}</div>

@@ -29,8 +29,13 @@ export function TabAtributos() {
           <div className="barra-vida"><div style={{ width: `${p.pg.max ? Math.max(0, Math.min(100, (p.pg.actual / p.pg.max) * 100)) : 0}%` }} /></div>
         </Seccion>
         <Seccion titulo="Inspiración">
-          <button className={`inspiracion ${p.inspiracion ? 'activa' : ''}`} onClick={() => upd((x) => { x.inspiracion = !x.inspiracion; })}>✦</button>
-          <p className="nota centro">{p.inspiracion ? 'Tienes inspiración heroica' : 'Sin inspiración'}</p>
+          <div className="fila-inspiracion">
+            {[0, 1, 2, 3].map((i) => (
+              <button key={i} className={`inspiracion ${p.inspiracion > i ? 'activa' : ''}`} aria-label={`${i + 1}`}
+                onClick={() => upd((x) => { x.inspiracion = x.inspiracion === i + 1 ? i : i + 1; })}>✦</button>
+            ))}
+          </div>
+          <p className="nota centro">{p.inspiracion ? `${p.inspiracion} de 4` : 'Sin inspiración'}</p>
         </Seccion>
         <Seccion titulo="DG">
           <div className="dg">

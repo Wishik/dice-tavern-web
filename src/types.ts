@@ -81,7 +81,8 @@ export interface Personaje {
   // Hoja 3
   pg: { max: number; actual: number; temp: number };
   pm: { max: number; actual: number };
-  inspiracion: boolean;
+  /** Puntos de inspiración heroica (0-4). */
+  inspiracion: number;
   dgUsados: number;
   caracteristicas: Record<Atributo, number>;
   bonusIniciativa: number;

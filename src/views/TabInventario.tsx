@@ -317,6 +317,13 @@ function EquipoViaje() {
   const { p, upd } = useFicha();
   const v = p.viaje;
   const s = (f: (v: Personaje['viaje']) => void) => upd((x) => f(x.viaje));
+  const [nota, setNota] = useState('');
+  /** Solo cabe uno marcado: si ya hay otro, el nuevo va a la mochila como objeto. */
+  const elegir = <K extends 'cuerda' | 'ropa' | 'tienda'>(campo: K, id: Personaje['viaje'][K], item: { nombre: string; precio: string; descripcion: string }) => {
+    if (!v[campo] || v[campo] === id) { s((x) => { x[campo] = (x[campo] === id ? '' : id) as Personaje['viaje'][K]; }); setNota(''); return; }
+    upd((x) => { x.mochila.push({ id: uid(), nombre: item.nombre, precio: item.precio, descripcion: item.descripcion, cantidad: 1, tipo: 'otro' }); });
+    setNota(`Ya tienes uno marcado: «${item.nombre}» se ha añadido a la mochila.`);
+  };
   return (
     <Seccion titulo="Equipo de viaje">
       <ul className="viaje">
@@ -325,14 +332,16 @@ function EquipoViaje() {
         <li><label className="v-nombre"><input type="checkbox" checked={v.pedernal} onChange={(e) => s((x) => { x.pedernal = e.target.checked; })} /> Pedernal <small>(1 po)</small></label></li>
         <li><span className="v-nombre">Antorchas <small>(1 pc/u)</small></span><Rombos n={v.antorchas} max={10} set={(n) => s((x) => { x.antorchas = n; })} /></li>
         <li className="bloque"><span className="v-nombre">Cuerda de 50 pies <small>(máx. 1)</small></span>
-          <div className="opciones-viaje">{CUERDAS.map((c) => <button key={c.id} className={`opc ${v.cuerda === c.id ? 'sel' : ''}`} onClick={() => s((x) => { x.cuerda = x.cuerda === c.id ? '' : c.id; })}><strong>{c.nombre}</strong> <small>({c.precio})</small><em>{c.info}</em></button>)}</div></li>
+          <div className="opciones-viaje">{CUERDAS.map((c) => <button key={c.id} className={`opc ${v.cuerda === c.id ? 'sel' : ''}`} onClick={() => elegir('cuerda', c.id, { nombre: `Cuerda de ${c.nombre.toLowerCase()} (50 pies)`, precio: c.precio, descripcion: c.info })}><strong>{c.nombre}</strong> <small>({c.precio})</small><em>{c.info}</em></button>)}</div></li>
         <li className="bloque"><span className="v-nombre">Ropa de viaje <small>(máx. 1)</small></span>
-          <div className="opciones-viaje">{ROPAS.map((c) => <button key={c.id} className={`opc ${v.ropa === c.id ? 'sel' : ''}`} onClick={() => s((x) => { x.ropa = x.ropa === c.id ? '' : c.id; })}><strong>{c.nombre}</strong> <small>({c.precio})</small></button>)}</div></li>
+          <div className="opciones-viaje">{ROPAS.map((c) => <button key={c.id} className={`opc ${v.ropa === c.id ? 'sel' : ''}`} onClick={() => elegir('ropa', c.id, { nombre: `Ropa de viaje (${c.nombre.toLowerCase()})`, precio: c.precio, descripcion: '' })}><strong>{c.nombre}</strong> <small>({c.precio})</small></button>)}</div></li>
         <li><label className="v-nombre"><input type="checkbox" checked={v.sacoDormir} onChange={(e) => s((x) => { x.sacoDormir = e.target.checked; })} /> Saco de dormir <small>(1 pp)</small></label></li>
         <li><label className="v-nombre"><input type="checkbox" checked={v.manta} onChange={(e) => s((x) => { x.manta = e.target.checked; })} /> Manta invernal <small>(5 pp)</small></label></li>
         <li className="bloque"><span className="v-nombre">Tienda de campaña <small>(máx. 1)</small></span>
-          <div className="opciones-viaje tiendas">{TIENDAS.map(([n, pr]) => <button key={n} className={`opc ${v.tienda === n ? 'sel' : ''}`} onClick={() => s((x) => { x.tienda = x.tienda === n ? '' : n; })}>{n} <small>({pr})</small></button>)}</div></li>
+          <div className="opciones-viaje tiendas">{TIENDAS.map(([n, pr]) => <button key={n} className={`opc ${v.tienda === n ? 'sel' : ''}`} onClick={() => elegir('tienda', n, { nombre: `Tienda de campaña (${n})`, precio: pr, descripcion: 'P. = pequeña, M. = mediana, G. = grande.' })}>{n} <small>({pr})</small></button>)}</div></li>
       </ul>
+      {nota && <p className="exito">🎒 {nota}</p>}
+      <p className="nota pequena">Cuerda, ropa y tienda: se marca una. Si eliges otra distinta, va a la mochila.</p>
     </Seccion>
   );
 }
