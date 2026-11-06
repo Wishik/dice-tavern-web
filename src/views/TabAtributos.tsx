@@ -1,7 +1,7 @@
 import { useFicha } from './Ficha';
 import { Etiqueta, Numero, Seccion, Texto } from '../ui';
 import { Contador, useDados } from '../dice';
-import { CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, bonoCompetencia, conSigno, estadoCarga, iniciativa, modificador, percepcionPasiva } from '../rules';
+import { CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetencia, calcularCA, conSigno, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto } from '../rules';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO } from '../types';
 import { buscarClase } from '../avisos';
 
@@ -13,6 +13,8 @@ export function TabAtributos() {
   const clase = buscarClase(clases, p.clase);
   const dado = clase?.atributos.dadoGolpe ?? '';
   const pen = carga.penalizacion;
+  const ca = calcularCA(p);
+  const pgDef = pgPorDefecto(p, dado);
 
   return (
     <div className="tab">
@@ -26,6 +28,9 @@ export function TabAtributos() {
             <Etiqueta texto="Máximos"><Numero valor={p.pg.max} min={0} set={(n) => upd((x) => { x.pg.max = n; })} /></Etiqueta>
             <Etiqueta texto="Temporales"><Numero valor={p.pg.temp} min={0} set={(n) => upd((x) => { x.pg.temp = n; })} /></Etiqueta>
           </div>
+          {pgDef > 0 && p.pg.max !== pgDef && (
+            <button className="btn enlace pequeno" onClick={() => upd((x) => { const sube = x.pg.actual === x.pg.max || x.pg.actual === 0; x.pg.max = pgDef; if (sube) x.pg.actual = pgDef; })}>↺ Por defecto: {pgDef}</button>
+          )}
           <div className="barra-vida"><div style={{ width: `${p.pg.max ? Math.max(0, Math.min(100, (p.pg.actual / p.pg.max) * 100)) : 0}%` }} /></div>
         </Seccion>
         <Seccion titulo="Inspiración">
@@ -39,7 +44,7 @@ export function TabAtributos() {
         </Seccion>
         <Seccion titulo="DG">
           <div className="dg">
-            <button className="btn dado-pequeno" disabled={!dado} onClick={() => dado && tirar(`Dado de golpe (${dado})`, `1${dado}${conSigno(modificador(p.caracteristicas.CON))}`)}>{dado ? `1${dado}` : 'D'}</button>
+            <button className="btn dado-pequeno" disabled={!dado} onClick={() => dado && tirar(`Dado de golpe (${dado})`, `1${dado}`)}>{dado ? `1${dado}` : 'D'}</button>
             <span>{Math.max(0, p.nivel - p.dgUsados)} / {p.nivel}</span>
           </div>
           <div className="fila-botones pequena">
@@ -56,7 +61,7 @@ export function TabAtributos() {
             <div key={a} className="caracteristica">
               <div className="car-nombre">{NOMBRE_ATRIBUTO[a]}</div>
               <Numero valor={p.caracteristicas[a]} min={1} max={30} set={(n) => upd((x) => { x.caracteristicas[a] = n; })} className="car-valor" />
-              <button className="car-mod" onClick={() => tirarD20(`Prueba de ${NOMBRE_ATRIBUTO[a]}`, m)} title="Tirar prueba">{conSigno(m)}</button>
+              <button className="car-mod" onClick={() => tirarD20(`Prueba de ${NOMBRE_ATRIBUTO[a]}`, m, avisosTirada(p, 'prueba', a))} title="Tirar prueba">{conSigno(m)}</button>
             </div>
           );
         })}
@@ -68,7 +73,7 @@ export function TabAtributos() {
 
       <div className="fila-3-tarjetas">
         <Seccion titulo="Iniciativa">
-          <button className="valor-grande tirable" onClick={() => tirarD20('Iniciativa', iniciativa(p))}>{conSigno(iniciativa(p))}</button>
+          <button className="valor-grande tirable" onClick={() => tirarD20('Iniciativa', iniciativa(p), avisosTirada(p, 'prueba', 'DES'))}>{conSigno(iniciativa(p))}</button>
           <Etiqueta texto="Bonus extra"><Numero valor={p.bonusIniciativa} set={(n) => upd((x) => { x.bonusIniciativa = n; })} /></Etiqueta>
         </Seccion>
         <Seccion titulo="Competencia">
@@ -77,7 +82,9 @@ export function TabAtributos() {
           </div>
         </Seccion>
         <Seccion titulo="CA">
-          <input className="campo valor-grande" value={p.ca} inputMode="numeric" onChange={(e) => upd((x) => { x.ca = e.target.value; })} placeholder="—" />
+          <div className="valor-grande">{ca.total}</div>
+          <p className="nota pequena centro">{ca.partes.join(' · ')}</p>
+          <Etiqueta texto="Ajuste"><Numero valor={p.bonusCA} set={(n) => upd((x) => { x.bonusCA = n; })} /></Etiqueta>
         </Seccion>
       </div>
 

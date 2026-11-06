@@ -3,8 +3,8 @@ import { useFicha } from './Ficha';
 import { BotonAnadir, Buscador, Etiqueta, ListaDatos, Modal, Numero, Seccion, Texto, TextoLargo } from '../ui';
 import { cargarObjetos, type ObjetoBase } from '../data';
 import {
-  CINTURON_ESPACIOS, MAX_MONEDAS, MOCHILA_BASE, NOMBRE_MONEDA, TRAMOS_SOBRECARGA, UMBRALES_FUERZA, VALOR_PC,
-  convertir, embolsarExceso, espaciosItem, espaciosPorFuerza, espaciosUsados, estadoCarga, leerPrecio, uid,
+  CINTURON_ESPACIOS, MAX_MONEDAS, MAX_MUNICION, MOCHILA_BASE, MOCHILA_MAX, NOMBRE_MONEDA, TRAMOS_SOBRECARGA, UMBRALES_FUERZA, VALOR_PC,
+  cabeEnMochila, convertir, embolsarExceso, espaciosItem, espaciosLibresMochila, espaciosPorFuerza, espaciosUsados, estadoCarga, leerPrecio, uid, usaMunicion,
 } from '../rules';
 import { MONEDAS, RANURAS_EQUIPO, type Item, type Moneda, type Personaje, type RanuraEquipo, type TamanoCinturon } from '../types';
 
@@ -23,6 +23,19 @@ function quitar(p: Personaje, l: Lugar): Item | null {
 function poner(p: Personaje, it: Item, d: Destino) {
   if (d.zona === 'equipo') { const prev = p.equipo[d.r]; if (prev) p.mochila.push(prev); p.equipo[d.r] = it; }
   else (d.zona === 'mochila' ? p.mochila : p.cinturon.items).push(it);
+}
+const MOCHILA_LLENA = `La mochila está llena: como máximo ${MOCHILA_MAX} espacios. Saca, vende o tira algo antes.`;
+/** ¿Se puede hacer el movimiento sin pasar de 22 espacios en la mochila? Si no, avisa. */
+function cabe(p: Personaje, it: Item, d: Destino, desde?: Lugar): boolean {
+  if (desde?.zona === 'mochila' && d.zona === 'mochila') return true;
+  let necesita: Item | null = null;
+  if (d.zona === 'mochila') necesita = it;
+  else if (d.zona === 'equipo' && p.equipo[d.r] && desde?.zona !== 'mochila') necesita = p.equipo[d.r];
+  if (!necesita) return true;
+  const libres = espaciosLibresMochila(p) + (desde?.zona === 'mochila' ? espaciosItem(it) : 0);
+  if (espaciosItem(necesita) <= libres) return true;
+  alert(MOCHILA_LLENA);
+  return false;
 }
 
 export function TabInventario() {
@@ -53,14 +66,14 @@ export function TabInventario() {
         </ul>
       </Seccion>
 
-      <Seccion titulo="Mochila" extra={<span className={`contador-limite ${carga.exceso ? 'malo' : ''}`}>{carga.usados}/{carga.libres}</span>}>
+      <Seccion titulo="Mochila" extra={<span className={`contador-limite ${carga.exceso ? 'malo' : ''}`}>{carga.usados}/{carga.libres} · máx. {MOCHILA_MAX}</span>}>
         <BarraCarga usados={carga.usados} libres={carga.libres} />
         {carga.penalizacion < 0
           ? <p className="aviso-carga">Velocidad {carga.penalizacion} pies. {carga.efecto}</p>
           : <p className="nota">{MOCHILA_BASE} espacios + {espaciosPorFuerza(p.caracteristicas.FUE)} por Fuerza ({UMBRALES_FUERZA.map((u) => `${u}+`).join(', ')}).</p>}
-        {carga.sobreMaximo && <p className="error">Llevas más de lo que cabe en la mochila.</p>}
+        {carga.sobreMaximo && <p className="error">Llevas {carga.usados} espacios y el máximo es {MOCHILA_MAX}. Toca una bolsa de monedas para eliminarla (o todas las de esa moneda) o saca cosas.</p>}
         <ListaItems items={p.mochila} libres={carga.libres} onAbrir={(i) => setAbierto({ zona: 'mochila', i })} mostrarTramos />
-        <BotonAnadir onClick={() => setAnadir({ zona: 'mochila' })}>Añadir a la mochila</BotonAnadir>
+        <BotonAnadir onClick={() => carga.usados >= MOCHILA_MAX ? alert(MOCHILA_LLENA) : setAnadir({ zona: 'mochila' })}>Añadir a la mochila</BotonAnadir>
       </Seccion>
 
       <Seccion titulo="Cinturón (acceso rápido)" extra={<span className={`contador-limite ${usadosCint > capCint ? 'malo' : ''}`}>{usadosCint}/{capCint}</span>}>
@@ -86,16 +99,17 @@ export function TabInventario() {
 
 const resumenItem = (it: Item) => <>
   {it.cantidad > 1 && <span className="cant"> ×{it.cantidad}</span>}
+  {usaMunicion(it) && <span className="cant"> · 🏹 {it.municion ?? 0}/{MAX_MUNICION}</span>}
   {it.precio && <span className="precio">{it.precio}</span>}
 </>;
 
 function BarraCarga({ usados, libres }: { usados: number; libres: number }) {
-  const max = libres + TRAMOS_SOBRECARGA[TRAMOS_SOBRECARGA.length - 1].hasta;
+  const max = MOCHILA_MAX;
   const pct = (n: number) => `${(n / max) * 100}%`;
   return (
     <div className="barra-carga" title={`${usados} espacios usados`}>
       <div className="zona libre" style={{ width: pct(libres) }} />
-      {TRAMOS_SOBRECARGA.map((t, i) => <div key={i} className={`zona t${i}`} style={{ width: pct(t.hasta - (i ? TRAMOS_SOBRECARGA[i - 1].hasta : 0)) }} />)}
+      {TRAMOS_SOBRECARGA.map((t, i) => <div key={i} className={`zona t${i}`} style={{ width: pct(Math.max(0, Math.min(max, libres + t.hasta) - Math.min(max, libres + (i ? TRAMOS_SOBRECARGA[i - 1].hasta : 0)))) }} />)}
       <div className="relleno" style={{ width: pct(Math.min(usados, max)) }} />
     </div>
   );
@@ -128,7 +142,7 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
   const it = leer(p, lugar)!;
   const [equipar, setEquipar] = useState(false);
   const set = (f: (it: Item) => void) => upd((x) => { const y = leer(x, lugar); if (y) f(y); });
-  const mover = (d: Destino) => { upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, d); }); onClose(); };
+  const mover = (d: Destino) => { if (!cabe(p, it, d, lugar)) return; upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, d); }); onClose(); };
   const usable = it.tipo === 'pocion' || it.tipo === 'consumible';
   const [vender, setVender] = useState(false);
   if (it.bolsa) return <ModalBolsa lugar={lugar} onClose={onClose} />;
@@ -153,7 +167,15 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
         <Etiqueta texto="Precio (si lo sabes)"><input className="campo" value={it.precio} placeholder="p. ej. 25po" onChange={(e) => set((y) => { y.precio = e.target.value; })} /></Etiqueta>
         <Etiqueta texto="Máx. por espacio"><input className="campo" inputMode="numeric" value={it.maxPorEspacio ?? ''} placeholder="sin límite" onChange={(e) => { const n = parseInt(e.target.value, 10); set((y) => { y.maxPorEspacio = isNaN(n) || n < 1 ? undefined : n; }); }} /></Etiqueta>
       </div>
-      <p className="nota">Ocupa {espaciosItem(it)} espacio{espaciosItem(it) > 1 ? 's' : ''}.</p>
+      {usaMunicion(it) && (
+        <div className="municion">
+          <Etiqueta texto={`Munición en el mismo espacio (máx. ${MAX_MUNICION})`}>
+            <Numero valor={it.municion ?? 0} min={0} max={MAX_MUNICION} set={(n) => set((y) => { y.municion = Math.max(0, Math.min(MAX_MUNICION, n)); })} />
+          </Etiqueta>
+          <button className="btn" onClick={() => set((y) => { y.municion = MAX_MUNICION; })}>Llenar ({MAX_MUNICION})</button>
+        </div>
+      )}
+      <p className="nota">Ocupa {espaciosItem(it)} espacio{espaciosItem(it) > 1 ? 's' : ''}{usaMunicion(it) ? ', con su munición incluida' : ''}.</p>
       <Etiqueta texto="Descripción"><Texto multilinea filas={4} valor={it.descripcion} set={(v) => set((y) => { y.descripcion = v; })} /></Etiqueta>
       {vender && <ModalVender lugar={lugar} onClose={() => setVender(false)} onVendido={onClose} />}
       {equipar && (
@@ -206,8 +228,9 @@ function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
   const { p, upd } = useFicha();
   const it = leer(p, lugar)!;
   const b = it.bolsa!;
-  const cabe = Math.max(0, MAX_MONEDAS - p.monedas[b.moneda]);
-  const maxSacar = Math.min(b.cantidad, cabe);
+  const iguales = [...p.mochila, ...p.cinturon.items].filter((y) => y.bolsa?.moneda === b.moneda).length;
+  const hueco = Math.max(0, MAX_MONEDAS - p.monedas[b.moneda]);
+  const maxSacar = Math.min(b.cantidad, hueco);
   const [txt, setTxt] = useState(String(maxSacar));
   const n = parseInt(txt, 10);
   const ok = !isNaN(n) && n > 0 && n <= maxSacar;
@@ -227,7 +250,13 @@ function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
       pie={<div className="acciones-item">
         <button className="btn primario" disabled={!ok} onClick={sacar}>Pasar a mis monedas</button>
         {lugar.zona === 'mochila' && <button className="btn" onClick={() => { upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'cinturon' }); }); onClose(); }}>Al cinturón</button>}
-        {lugar.zona === 'cinturon' && <button className="btn" onClick={() => { upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'mochila' }); }); onClose(); }}>A la mochila</button>}
+        {lugar.zona === 'cinturon' && <button className="btn" onClick={() => { if (!cabe(p, it, { zona: 'mochila' }, lugar)) return; upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'mochila' }); }); onClose(); }}>A la mochila</button>}
+        <button className="btn peligro" onClick={() => { if (confirm(`¿Eliminar esta bolsa con ${b.cantidad} ${b.moneda}?`)) { upd((x) => { quitar(x, lugar); }); onClose(); } }}>Eliminar bolsa</button>
+        {iguales > 1 && <button className="btn peligro" onClick={() => {
+          if (!confirm(`¿Eliminar las ${iguales} bolsas de ${NOMBRE_MONEDA[b.moneda].toLowerCase()} (${b.moneda})?`)) return;
+          upd((x) => { x.mochila = x.mochila.filter((y) => y.bolsa?.moneda !== b.moneda); x.cinturon.items = x.cinturon.items.filter((y) => y.bolsa?.moneda !== b.moneda); });
+          onClose();
+        }}>Eliminar las {iguales} de {b.moneda}</button>}
       </div>}>
       <p>Dentro hay <strong>{b.cantidad} {b.moneda}</strong>. En tu bolsa de {NOMBRE_MONEDA[b.moneda].toLowerCase()} tienes {p.monedas[b.moneda]}/{MAX_MONEDAS}.</p>
       {maxSacar === 0 ? <p className="error">Tu bolsa de {b.moneda} está llena. Gasta o convierte monedas primero.</p> : (
@@ -250,7 +279,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
 
   if (borrador) return (
     <Modal titulo={`Añadir a ${nombreDestino}`} onClose={onClose}
-      pie={<button className="btn primario" disabled={!borrador.nombre.trim()} onClick={() => { upd((x) => poner(x, borrador, destino)); onClose(); }}>Añadir</button>}>
+      pie={<button className="btn primario" disabled={!borrador.nombre.trim()} onClick={() => { if (!cabe(p, borrador, destino)) return; upd((x) => poner(x, borrador, destino)); onClose(); }}>Añadir</button>}>
       {borrador.detalles && <ListaDatos datos={borrador.detalles} />}
       <div className="rejilla-campos">
         <Etiqueta texto="Nombre"><input className="campo" value={borrador.nombre} onChange={(e) => setBorrador({ ...borrador, nombre: e.target.value })} /></Etiqueta>
@@ -273,7 +302,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
         <>
           <h4>De tu inventario</h4>
           <div className="lista-opciones">
-            {sueltos.map(({ it, l }) => <button key={it.id} className="btn" onClick={() => { upd((x) => { const y = quitar(x, l); if (y) poner(x, y, destino); }); onClose(); }}>{it.nombre} <small>({l.zona})</small></button>)}
+            {sueltos.map(({ it, l }) => <button key={it.id} className="btn" onClick={() => { if (!cabe(p, it, destino, l)) return; upd((x) => { const y = quitar(x, l); if (y) poner(x, y, destino); }); onClose(); }}>{it.nombre} <small>({l.zona})</small></button>)}
           </div>
           <h4>Nuevo objeto</h4>
         </>
@@ -321,7 +350,9 @@ function EquipoViaje() {
   /** Solo cabe uno marcado: si ya hay otro, el nuevo va a la mochila como objeto. */
   const elegir = <K extends 'cuerda' | 'ropa' | 'tienda'>(campo: K, id: Personaje['viaje'][K], item: { nombre: string; precio: string; descripcion: string }) => {
     if (!v[campo] || v[campo] === id) { s((x) => { x[campo] = (x[campo] === id ? '' : id) as Personaje['viaje'][K]; }); setNota(''); return; }
-    upd((x) => { x.mochila.push({ id: uid(), nombre: item.nombre, precio: item.precio, descripcion: item.descripcion, cantidad: 1, tipo: 'otro' }); });
+    const nuevo: Item = { id: uid(), nombre: item.nombre, precio: item.precio, descripcion: item.descripcion, cantidad: 1, tipo: 'otro' };
+    if (!cabeEnMochila(p, nuevo)) { setNota(MOCHILA_LLENA); return; }
+    upd((x) => { x.mochila.push(nuevo); });
     setNota(`Ya tienes uno marcado: «${item.nombre}» se ha añadido a la mochila.`);
   };
   return (
@@ -329,7 +360,7 @@ function EquipoViaje() {
       <ul className="viaje">
         <li><span className="v-nombre">Raciones <small>(5 pp/u)</small></span><Rombos n={v.raciones} max={7} set={(n) => s((x) => { x.raciones = n; })} /></li>
         <li><span className="v-nombre">Odre 2L <small>(1 po)</small></span><Rombos n={v.odre} max={2} set={(n) => s((x) => { x.odre = n; })} /></li>
-        <li><label className="v-nombre"><input type="checkbox" checked={v.pedernal} onChange={(e) => s((x) => { x.pedernal = e.target.checked; })} /> Pedernal <small>(1 po)</small></label></li>
+        <li><span className="v-nombre">Pedernal <small>(1 po · 10 usos)</small></span><Rombos n={v.pedernal} max={10} set={(n) => s((x) => { x.pedernal = n; })} /></li>
         <li><span className="v-nombre">Antorchas <small>(1 pc/u)</small></span><Rombos n={v.antorchas} max={10} set={(n) => s((x) => { x.antorchas = n; })} /></li>
         <li className="bloque"><span className="v-nombre">Cuerda de 50 pies <small>(máx. 1)</small></span>
           <div className="opciones-viaje">{CUERDAS.map((c) => <button key={c.id} className={`opc ${v.cuerda === c.id ? 'sel' : ''}`} onClick={() => elegir('cuerda', c.id, { nombre: `Cuerda de ${c.nombre.toLowerCase()} (50 pies)`, precio: c.precio, descripcion: c.info })}><strong>{c.nombre}</strong> <small>({c.precio})</small><em>{c.info}</em></button>)}</div></li>
@@ -356,8 +387,8 @@ function Monedas() {
   const [aviso, setAviso] = useState('');
   // Si ya había más de 500 (personajes antiguos), lo pasamos a bolsas en la mochila.
   useEffect(() => {
-    if (MONEDAS.some((m) => p.monedas[m] > MAX_MONEDAS)) { upd((x) => { embolsarExceso(x); }); setAviso('Lo que pasaba de 500 se ha guardado en bolsas en la mochila.'); }
-  }, [p.monedas, upd]);
+    if (MONEDAS.some((m) => p.monedas[m] > MAX_MONEDAS) && espaciosLibresMochila(p) > 0) { upd((x) => { embolsarExceso(x); }); setAviso('Lo que pasaba de 500 se ha guardado en bolsas en la mochila.'); }
+  }, [p.monedas, p.mochila, upd]);
   return (
     <Seccion titulo="Bolsas de monedas" extra={<button className="btn enlace pequeno" onClick={() => setConv(true)}>⇄ Convertir</button>}>
       <ul className="monedas">
@@ -388,7 +419,10 @@ function ModalSumar({ m, signo, onClose }: { m: Moneda; signo: 1 | -1; onClose: 
   const [n, setN] = useState('');
   const v = parseInt(n, 10);
   const nuevo = isNaN(v) ? p.monedas[m] : p.monedas[m] + signo * v;
-  const ok = !isNaN(v) && v > 0 && nuevo >= 0;
+  const bolsasNecesarias = nuevo > MAX_MONEDAS ? Math.ceil((nuevo - MAX_MONEDAS) / MAX_MONEDAS) : 0;
+  const huecos = espaciosLibresMochila(p);
+  const noCabe = bolsasNecesarias > huecos;
+  const ok = !isNaN(v) && v > 0 && nuevo >= 0 && !noCabe;
   const aplicar = () => { if (!ok) return; upd((x) => { x.monedas[m] = nuevo; embolsarExceso(x); }); onClose(); };
   return (
     <Modal titulo={`${signo > 0 ? 'Añadir' : 'Gastar'} ${NOMBRE_MONEDA[m].toLowerCase()} (${m})`} onClose={onClose}
@@ -398,7 +432,8 @@ function ModalSumar({ m, signo, onClose }: { m: Moneda; signo: 1 | -1; onClose: 
       </form>
       <p className="formula-grande">{p.monedas[m]} {signo > 0 ? '+' : '−'} {isNaN(v) ? 0 : v} = <strong>{nuevo}</strong></p>
       {nuevo < 0 && <p className="error">No tienes tantas.</p>}
-      {nuevo > MAX_MONEDAS && <p className="nota">Pasas de {MAX_MONEDAS}: {Math.floor((nuevo - 1) / MAX_MONEDAS)} bolsa{nuevo > 2 * MAX_MONEDAS + 1 ? 's' : ''} de {MAX_MONEDAS} {m} irá{nuevo > 2 * MAX_MONEDAS + 1 ? 'n' : ''} a la mochila y te quedarán {nuevo - Math.floor((nuevo - 1) / MAX_MONEDAS) * MAX_MONEDAS} en la bolsa.</p>}
+      {noCabe && <p className="error">Harían falta {bolsasNecesarias} bolsas de {MAX_MONEDAS} y en la mochila solo quedan {huecos} espacio{huecos === 1 ? '' : 's'} (máx. {MOCHILA_MAX}).</p>}
+      {nuevo > MAX_MONEDAS && !noCabe && <p className="nota">Pasas de {MAX_MONEDAS}: {Math.floor((nuevo - 1) / MAX_MONEDAS)} bolsa{nuevo > 2 * MAX_MONEDAS + 1 ? 's' : ''} de {MAX_MONEDAS} {m} irá{nuevo > 2 * MAX_MONEDAS + 1 ? 'n' : ''} a la mochila y te quedarán {nuevo - Math.floor((nuevo - 1) / MAX_MONEDAS) * MAX_MONEDAS} en la bolsa.</p>}
     </Modal>
   );
 }

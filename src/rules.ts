@@ -57,12 +57,12 @@ export const iniciativa = (p: Personaje) => modificador(p.caracteristicas.DES) +
 export const percepcionPasiva = (p: Personaje) => 10 + valorHabilidad(p, 'percepcion') + (p.bonusPercepcionPasiva || 0);
 
 export function cdConjuros(p: Personaje): number | null {
-  if (!p.conjuroCaracteristica) return null;
-  return 8 + bonoCompetencia(p.nivel) + modificador(p.caracteristicas[p.conjuroCaracteristica]);
+  const a = caracteristicaConjuros(p); if (!a) return null;
+  return 8 + bonoCompetencia(p.nivel) + modificador(p.caracteristicas[a]);
 }
 export function ataqueConjuros(p: Personaje): number | null {
-  if (!p.conjuroCaracteristica) return null;
-  return bonoCompetencia(p.nivel) + modificador(p.caracteristicas[p.conjuroCaracteristica]);
+  const a = caracteristicaConjuros(p); if (!a) return null;
+  return bonoCompetencia(p.nivel) + modificador(p.caracteristicas[a]);
 }
 
 // ---------------------------------------------------------------- Inventario
@@ -108,7 +108,7 @@ export function estadoCarga(p: Personaje): EstadoCarga {
     const t = TRAMOS_SOBRECARGA.find((t) => exceso <= t.hasta) ?? TRAMOS_SOBRECARGA[TRAMOS_SOBRECARGA.length - 1];
     penalizacion = t.velocidad; efecto = t.efecto;
   }
-  return { usados, libres, capacidad: libres + max, exceso, penalizacion, efecto, sobreMaximo: exceso > max };
+  return { usados, libres, capacidad: Math.min(MOCHILA_MAX, libres + max), exceso, penalizacion, efecto, sobreMaximo: usados > MOCHILA_MAX };
 }
 
 export const CINTURON_ESPACIOS = { pequeño: 3, mediano: 6, grande: 9 } as const;
@@ -207,11 +207,14 @@ export function aplicarExperiencia(nivel: number, exp: number): { nivel: number;
 }
 
 // ---------------------------------------------------------------- Bolsas llenas y ventas
-/** Saca a la mochila una bolsa de 500 por cada vez que una moneda pasa de 500. Devuelve cuántas bolsas creó. */
+/**
+ * Saca a la mochila una bolsa de 500 por cada vez que una moneda pasa de 500, mientras quepa
+ * (la mochila no pasa de 22 espacios). Devuelve cuántas bolsas creó.
+ */
 export function embolsarExceso(p: Personaje): number {
   let n = 0;
   for (const m of Object.keys(p.monedas) as Moneda[]) {
-    while (p.monedas[m] > MAX_MONEDAS) {
+    while (p.monedas[m] > MAX_MONEDAS && espaciosLibresMochila(p) > 0) {
       p.monedas[m] -= MAX_MONEDAS;
       p.mochila.push(bolsaMonedas(m, MAX_MONEDAS));
       n++;
@@ -252,3 +255,137 @@ export function caracteristicasSinTocar(p: Personaje): boolean {
   if (v.every((x) => x === 10)) return true;
   return Object.values(CONJUNTO_ESTANDAR).some((c) => c.every((x, i) => x === v[i]));
 }
+
+// ---------------------------------------------------------------- Mochila: máximo absoluto
+/** La mochila nunca puede pasar de 22 espacios, haya la Fuerza que haya. */
+export const MOCHILA_MAX = 22;
+export const espaciosLibresMochila = (p: Personaje) => Math.max(0, MOCHILA_MAX - espaciosUsados(p.mochila));
+export const cabeEnMochila = (p: Personaje, it: Item) => espaciosItem(it) <= espaciosLibresMochila(p);
+
+// ---------------------------------------------------------------- PG y CA automáticos
+const carasDado = (dado: string) => parseInt(dado.replace(/\D/g, ''), 10) || 0;
+/** PG por defecto: máximo del dado de golpe + CON a nivel 1, y la media (redondeada arriba) + CON por cada nivel siguiente. */
+export function pgPorDefecto(p: Personaje, dado: string): number {
+  const c = carasDado(dado); if (!c) return 0;
+  const con = modificador(p.caracteristicas.CON);
+  const media = c / 2 + 1;
+  return Math.max(1, c + con + (Math.max(1, p.nivel) - 1) * Math.max(1, media + con));
+}
+
+export interface DesgloseCA { total: number; partes: string[]; sigiloDesventaja: string[]; fuerzaMinima: number }
+/** CA = 10 + DES sin armadura; con armadura, su fórmula; + escudo; + ajuste manual. */
+export function calcularCA(p: Personaje): DesgloseCA {
+  const des = modificador(p.caracteristicas.DES);
+  const partes: string[] = [];
+  const sigiloDesventaja: string[] = [];
+  let fuerzaMinima = 0;
+  let base = 10 + des;
+  const arm = Object.values(p.equipo).find((it) => it && it.tipo === 'armadura' && /^\d+/.test(it.detalles?.['Clase de armadura'] ?? ''));
+  if (arm) {
+    const f = arm.detalles!['Clase de armadura'];
+    const n = parseInt(f, 10);
+    if (/Destreza/i.test(f)) {
+      const tope = f.match(/m[aá]x\.?\s*(\d+)/i);
+      const d = tope ? Math.min(des, parseInt(tope[1], 10)) : des;
+      base = n + d; partes.push(`${arm.nombre} ${n} ${conSigno(d)} DES`);
+    } else { base = n; partes.push(`${arm.nombre} ${n}`); }
+    if (/desventaja/i.test(arm.detalles?.['Sigilo'] ?? '')) sigiloDesventaja.push(arm.nombre);
+    fuerzaMinima = Math.max(fuerzaMinima, parseInt(arm.detalles?.['Fuerza'] ?? '', 10) || 0);
+  } else partes.push(`10 ${conSigno(des)} DES`);
+  let total = base;
+  for (const it of [p.equipo.manoHabil, p.equipo.manoTorpe]) {
+    if (it?.tipo !== 'escudo') continue;
+    const b = parseInt((it.detalles?.['Clase de armadura'] ?? '+2').replace(/[^\d-]/g, ''), 10) || 2;
+    total += b; partes.push(`${it.nombre} +${b}`);
+    if (/desventaja/i.test(it.detalles?.['Sigilo'] ?? '')) sigiloDesventaja.push(it.nombre);
+    fuerzaMinima = Math.max(fuerzaMinima, parseInt(it.detalles?.['Fuerza'] ?? '', 10) || 0);
+  }
+  if (p.bonusCA) { total += p.bonusCA; partes.push(`ajuste ${conSigno(p.bonusCA)}`); }
+  return { total, partes, sigiloDesventaja, fuerzaMinima };
+}
+
+// ---------------------------------------------------------------- Conjuros por clase
+/** Característica para lanzar conjuros de cada clase (Pícaro y Guerrero: INT por Embaucador / Caballero arcano). */
+export const CARACTERISTICA_CONJUROS: Record<string, Atributo> = {
+  'Bardo': 'CAR', 'Brujo': 'CAR', 'Clérigo': 'SAB', 'Druida': 'SAB', 'Explorador': 'SAB', 'Hechicero': 'CAR',
+  'Mago': 'INT', 'Paladín': 'CAR', 'Pícaro': 'INT', 'Guerrero': 'INT', 'Monje': 'SAB',
+};
+/** La elegida a mano o, si no hay, la de la clase. */
+export const caracteristicaConjuros = (p: Personaje): Atributo | '' => p.conjuroCaracteristica || CARACTERISTICA_CONJUROS[p.clase] || '';
+
+/** Nº de dados de un truco según nivel de personaje (mejora a nivel 5, 11 y 17). */
+export const multiplicadorTruco = (nivel: number) => 1 + [5, 11, 17].filter((n) => nivel >= n).length;
+
+/**
+ * Dados de un conjuro listos para tirar: el primer dado del texto escalado por nivel de personaje (trucos)
+ * o por espacio de conjuro («aumenta en XdY por cada nivel por encima de N»).
+ */
+export function dadosConjuro(texto: string, nivelConjuro: number, nivelPersonaje: number, espacio: number): string[] {
+  // Los dados de «Mejora de truco» y «Con un espacio de nivel superior» son el incremento, no se tiran sueltos.
+  const corte = texto.search(/mejora de truco|con un espacio de conjuro de nivel superior/i);
+  const cuerpo = corte >= 0 ? texto.slice(0, corte) : texto;
+  const extra = corte >= 0 ? texto.slice(corte) : '';
+  const todos = [...new Set((cuerpo.match(/\b\d+d\d+(?:\s*\+\s*\d+)?/gi) ?? []).map((d) => d.replace(/\s+/g, '').toLowerCase()))];
+  if (!todos.length) return [];
+  const m = todos[0].match(/^(\d+)d(\d+)(.*)$/)!;
+  let n = parseInt(m[1], 10);
+  const caras = m[2], resto = m[3];
+  if (nivelConjuro === 0) {
+    if (/mejora de truco/i.test(extra)) n *= multiplicadorTruco(nivelPersonaje);
+  } else {
+    const sube = extra.match(/aumenta en (\d+)d(\d+) por cada nivel por encima de/i);
+    if (sube && sube[2] === caras) n += parseInt(sube[1], 10) * Math.max(0, espacio - nivelConjuro);
+  }
+  return [`${n}d${caras}${resto}`, ...todos.slice(1, 3)];
+}
+
+// ---------------------------------------------------------------- Avisos de ventaja/desventaja
+export type TipoTirada = 'prueba' | 'salvacion' | 'habilidad' | 'ataque';
+/** Motivos por los que podrías tener ventaja o desventaja en una tirada (solo aviso, no se aplica solo). */
+export function avisosTirada(p: Personaje, tipo: TipoTirada, atr: Atributo | null, habilidad?: string): string[] {
+  const out: string[] = [];
+  const carga = estadoCarga(p);
+  const tramo = carga.exceso > 0 ? TRAMOS_SOBRECARGA.findIndex((t) => carga.exceso <= t.hasta) : -1;
+  const fisica = atr === 'FUE' || atr === 'DES';
+  if (fisica && (tramo === 2 || carga.sobreMaximo)) out.push(`Desventaja: mochila muy sobrecargada (${carga.usados} espacios), todas las tiradas de Fuerza y Destreza.`);
+  else if (fisica && tramo === 1 && (tipo === 'salvacion' || tipo === 'habilidad')) out.push(`Desventaja: mochila sobrecargada (${carga.usados} espacios), TS y habilidades de Fuerza y Destreza.`);
+  const ca = calcularCA(p);
+  if (habilidad === 'sigilo' && ca.sigiloDesventaja.length) out.push(`Desventaja en Sigilo por ${ca.sigiloDesventaja.join(' y ')}.`);
+  if (ca.fuerzaMinima && p.caracteristicas.FUE < ca.fuerzaMinima && fisica) out.push(`Tu armadura pide Fuerza ${ca.fuerzaMinima}: pregunta al DM si te penaliza.`);
+  return out;
+}
+
+// ---------------------------------------------------------------- Armas a distancia
+/** true si el arma usa munición (arcos, ballestas, hondas…): lleva su munición (máx. 20) en el mismo espacio. */
+export const usaMunicion = (it: Item | null | undefined) => !!it && it.tipo === 'arma' && /munici[oó]n/i.test(it.detalles?.['Propiedades'] ?? '');
+export const MAX_MUNICION = 20;
+/** Bonificador de ataque de un arma: competencia + FUE (o DES si es a distancia o sutil, la mejor). */
+export function bonoArma(p: Personaje, it: Item): { ataque: number; mod: number; atr: Atributo } {
+  const props = it.detalles?.['Propiedades'] ?? '';
+  const fue = modificador(p.caracteristicas.FUE), des = modificador(p.caracteristicas.DES);
+  const distancia = usaMunicion(it) || (/alcance\s*\(/i.test(props) && !/arrojadiz/i.test(props));
+  const atr: Atributo = distancia || (/sutil/i.test(props) && des > fue) ? 'DES' : 'FUE';
+  const mod = atr === 'DES' ? des : fue;
+  return { ataque: mod + bonoCompetencia(p.nivel), mod, atr };
+}
+
+// ---------------------------------------------------------------- Rasgos raciales recomendados e idiomas
+/** Rasgos genéricos que encajan con cada clase (se marcan con 👍 al elegir). */
+export const RASGOS_RECOMENDADOS: Record<string, string[]> = {
+  'Bárbaro': ['Arremetida Brutal', 'Ira controlada', 'Instinto de Supervivencia', 'Aguante Sobrehumano', 'Maestro del Contraataque'],
+  'Bardo': ['Lengua Veloz', 'Palabra Potenciada', 'Conjurador Experto', 'Concentración Firme', 'Voluntad de Acero'],
+  'Brujo': ['Palabra Potenciada', 'Conjurador Experto', 'Concentración Firme', 'Lengua Veloz', 'Despertar Interior'],
+  'Clérigo': ['Concentración Firme', 'Pulso Estable', 'Voluntad de Acero', 'Palabra Potenciada', 'Conjurador Experto'],
+  'Druida': ['Concentración Firme', 'Pulso Estable', 'Instinto del Cazador', 'Palabra Potenciada', 'Conjurador Experto'],
+  'Explorador': ['Ojos de Halcón', 'Tirador veloz', 'Instinto del Cazador', 'Veterano de Batalla', 'Pies Ligeros'],
+  'Guerrero': ['Asaltante Ágil', 'Golpe Preciso', 'Maestro del Contraataque', 'Veterano de Batalla', 'Instinto de Supervivencia'],
+  'Hechicero': ['Palabra Potenciada', 'Conjurador Experto', 'Concentración Firme', 'Despertar Interior', 'Lengua Veloz'],
+  'Mago': ['Curiosidad Incansable', 'Palabra Potenciada', 'Conjurador Experto', 'Concentración Firme', 'Despertar Interior'],
+  'Monje': ['Pies Ligeros', 'Pies Seguros', 'Reflejos Rápidos', 'Asaltante Ágil', 'Maestro del Contraataque'],
+  'Paladín': ['Arremetida Brutal', 'Voluntad de Acero', 'Concentración Firme', 'Golpe Preciso', 'Veterano de Batalla'],
+  'Pícaro': ['Reflejos Rápidos', 'Lengua Veloz', 'Improvisador de Venenos', 'Pies Ligeros', 'Oídos Agudos'],
+};
+/** Rasgos de clase que en realidad son idiomas: van a «Idiomas», no a la lista de rasgos. */
+export const RASGOS_IDIOMA: Record<string, string> = { 'Druídico': 'Druídico', 'Jerga de ladrones': 'Jerga de ladrones' };
+/** «Élfico, Silvano y Común» → ['Élfico', 'Silvano', 'Común'] (sin «Otro a tu elección»). */
+export const idiomasDeTexto = (t: string) => t.split(/,|\s+y\s+|\s+e\s+/).map((x) => x.trim()).filter((x) => x && !/elecci[oó]n/i.test(x));

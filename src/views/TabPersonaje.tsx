@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState } from 'react';
 import { useFicha } from './Ficha';
 import { Etiqueta, Modal, Numero, PuntoRojo, Seccion, Texto, TextoLargo, comprimirFoto } from '../ui';
-import { HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, aplicarConjuntoEstandar, aplicarExperiencia, caracteristicasSinTocar, huecoDisponible, idHabilidad, pxParaSubir } from '../rules';
+import { HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, aplicarConjuntoEstandar, aplicarExperiencia, caracteristicasSinTocar, huecoDisponible, idHabilidad, idiomasDeTexto, pgPorDefecto, pxParaSubir, RASGOS_IDIOMA } from '../rules';
 import { ATRIBUTOS, type Atributo, type Personaje } from '../types';
 import { buscarClase, buscarRaza } from '../avisos';
 
@@ -16,6 +16,11 @@ export function TabPersonaje() {
   const clase = buscarClase(clases, p.clase);
   const raza = buscarRaza(razas, p.raza);
   const tras = trasfondos?.find((t) => t.nombre === p.trasfondoEstilo);
+  // Idiomas que ya vienen dados: los de la raza y los de rasgos de clase como «Druídico» o «Jerga de ladrones».
+  const idiomasFijos = [
+    ...(raza ? idiomasDeTexto(raza.idiomas).map((n) => ({ nombre: n, origen: raza.nombre })) : []),
+    ...(clase?.rasgos ?? []).filter((r) => r.nivel <= p.nivel && RASGOS_IDIOMA[r.nombre]).map((r) => ({ nombre: RASGOS_IDIOMA[r.nombre], origen: clase!.nombre })),
+  ];
 
   const elegirRaza = (nombre: string) => upd((x) => {
     x.raza = nombre;
@@ -29,11 +34,17 @@ export function TabPersonaje() {
     }
   });
   const elegirClase = (nombre: string) => upd((x) => {
+    const viejo = buscarClase(clases, x.clase);
+    const pgViejo = viejo ? pgPorDefecto(x, viejo.atributos.dadoGolpe) : 0;
     x.clase = nombre; x.subclase = '';
     const c = buscarClase(clases, nombre);
     if (c) for (const a of ATRIBUTOS) x.salvaciones[a].comp = c.atributos.salvaciones.includes(a);
     // Al elegir clase, si aún no has tocado las características, pone el conjunto estándar del manual.
     if (caracteristicasSinTocar(x)) aplicarConjuntoEstandar(x, nombre);
+    // PG por defecto si aún no los habías puesto (o seguían siendo los de la clase anterior).
+    if (c && (x.pg.max === 0 || x.pg.max === pgViejo)) { x.pg.max = pgPorDefecto(x, c.atributos.dadoGolpe); x.pg.actual = x.pg.max; }
+    // La característica de conjuros vuelve a ser la automática de la clase.
+    x.conjuroCaracteristica = '';
   });
   const elegirTrasfondo = (nombre: string) => upd((x) => {
     const viejo = trasfondos?.find((t) => t.nombre === x.trasfondoEstilo);
@@ -130,12 +141,17 @@ export function TabPersonaje() {
       </Seccion>
 
       <Seccion titulo="Alineamiento">
-        <Alineamiento p={p} set={(o, m) => upd((x) => { x.alineamiento = { orden: o, moral: m }; })} />
+        <Alineamiento p={p} set={(a) => upd((x) => { x.alineamiento = a; })} />
       </Seccion>
 
       <Seccion titulo="Idiomas" aviso={avisos.idiomas}>
+        {idiomasFijos.length > 0 && (
+          <ul className="idiomas-fijos">
+            {idiomasFijos.map((i) => <li key={i.nombre} className="chip-idioma" title={i.origen}>{i.nombre}<small>{i.origen}</small></li>)}
+          </ul>
+        )}
         <Huecos huecos={HUECOS_IDIOMAS} valores={p.idiomas} set={(k, v) => upd((x) => { x.idiomas[k] = v; })} p={p} />
-        {raza && <p className="nota">Idiomas de raza: {raza.idiomas}.</p>}
+        {raza && /elecci[oó]n/i.test(raza.idiomas) && <p className="nota">Tu raza te da además un idioma a tu elección: escríbelo en un hueco.</p>}
       </Seccion>
       <div className="fila-2-tarjetas">
         <Seccion titulo="Oficios" aviso={avisos.oficios}>
@@ -194,22 +210,36 @@ export function TablaClase({ clase, nivel }: { clase: NonNullable<ReturnType<typ
   );
 }
 
-function Alineamiento({ p, set }: { p: Personaje; set: (o: Personaje['alineamiento']['orden'], m: Personaje['alineamiento']['moral']) => void }) {
-  const ordenes = [['legal', 'Legal'], ['neutral', 'Neutral'], ['caotico', 'Caótico']] as const;
-  const morales = [['bueno', 'Bueno'], ['neutral', 'Neutral'], ['maligno', 'Maligno']] as const;
+const ORDENES = [['legal', 'Legal'], ['neutral', 'Neutral'], ['caotico', 'Caótico']] as const;
+const MORALES = [['bueno', 'Bueno'], ['neutral', 'Neutral'], ['maligno', 'Maligno']] as const;
+/** Rejilla de 15×15: cada bloque de 5×5 es uno de los 9 alineamientos clásicos. */
+function Alineamiento({ p, set }: { p: Personaje; set: (a: Personaje['alineamiento']) => void }) {
+  const a = p.alineamiento;
+  const io = ORDENES.findIndex(([o]) => o === a.orden), im = MORALES.findIndex(([m]) => m === a.moral);
+  const x = a.x ?? (io >= 0 ? io * 5 + 2 : -1), y = a.y ?? (im >= 0 ? im * 5 + 2 : -1);
+  const nombre = x >= 0 && y >= 0 ? (() => {
+    const o = ORDENES[Math.floor(x / 5)][1], m = MORALES[Math.floor(y / 5)][1];
+    return o === 'Neutral' && m === 'Neutral' ? 'Neutral auténtico' : `${o} ${m.toLowerCase()}`;
+  })() : '';
   return (
-    <div className="alineamiento">
-      <div />{ordenes.map(([, n]) => <div key={n} className="al-cab">{n}</div>)}
-      {morales.map(([m, mn]) => (
-        <Fragment key={m}>
-          <div className="al-cab lateral">{mn}</div>
-          {ordenes.map(([o]) => {
-            const sel = p.alineamiento.orden === o && p.alineamiento.moral === m;
-            return <button key={o + m} className={`al-celda ${sel ? 'sel' : ''}`} onClick={() => sel ? set('', '') : set(o, m)}>{sel ? '✕' : ''}</button>;
-          })}
-        </Fragment>
-      ))}
-    </div>
+    <>
+      <div className="alineamiento15">
+        <div />
+        {ORDENES.map(([, n]) => <div key={n} className="al-cab" style={{ gridColumn: 'span 5' }}>{n}</div>)}
+        {Array.from({ length: 15 }, (_, fy) => (
+          <Fragment key={fy}>
+            {fy % 5 === 0 && <div className="al-cab lateral" style={{ gridRow: 'span 5' }}><span>{MORALES[fy / 5][1]}</span></div>}
+            {Array.from({ length: 15 }, (_, fx) => {
+              const sel = fx === x && fy === y;
+              const zona = (Math.floor(fx / 5) + Math.floor(fy / 5)) % 2 ? 'b' : 'a';
+              return <button key={fx} aria-label={`${fx + 1},${fy + 1}`} className={`al15 z${zona} ${fx % 5 === 4 && fx < 14 ? 'borde-d' : ''} ${fy % 5 === 4 && fy < 14 ? 'borde-b' : ''} ${sel ? 'sel' : ''}`}
+                onClick={() => sel ? set({ orden: '', moral: '' }) : set({ orden: ORDENES[Math.floor(fx / 5)][0], moral: MORALES[Math.floor(fy / 5)][0], x: fx, y: fy })}>{sel ? '✕' : ''}</button>;
+            })}
+          </Fragment>
+        ))}
+      </div>
+      <p className="nota centro">{nombre ? <>Alineamiento: <strong>{nombre}</strong></> : 'Toca una casilla.'}</p>
+    </>
   );
 }
 
@@ -236,7 +266,18 @@ function ModalExperiencia({ onClose }: { onClose: () => void }) {
   const n = parseInt(txt, 10) || 0;
   const r = aplicarExperiencia(p.nivel, p.exp + n);
   const necesita = pxParaSubir(p.nivel);
-  const aplicar = () => { if (!n) return; upd((x) => { const q = aplicarExperiencia(x.nivel, x.exp + n); x.nivel = q.nivel; x.exp = q.exp; }); onClose(); };
+  const { clases } = useFicha();
+  const aplicar = () => {
+    if (!n) return;
+    upd((x) => {
+      const dado = buscarClase(clases, x.clase)?.atributos.dadoGolpe ?? '';
+      const antes = pgPorDefecto(x, dado);
+      const q = aplicarExperiencia(x.nivel, x.exp + n); x.nivel = q.nivel; x.exp = q.exp;
+      // Si llevabas los PG por defecto, suben solos con el nivel (media del dado + CON).
+      if (dado && q.subidos && x.pg.max === antes) { const d = pgPorDefecto(x, dado) - x.pg.max; x.pg.max += d; x.pg.actual += d; }
+    });
+    onClose();
+  };
   return (
     <Modal titulo="Experiencia" onClose={onClose}
       pie={<button className="btn primario" disabled={!n} onClick={aplicar}>Añadir PX</button>}>
@@ -245,7 +286,7 @@ function ModalExperiencia({ onClose }: { onClose: () => void }) {
         <input className="campo grande" autoFocus inputMode="numeric" value={txt} onChange={(e) => setTxt(e.target.value.replace(/\D/g, ''))} placeholder="PX ganados" />
       </form>
       {n > 0 && <p className="formula-grande">{p.exp} + {n} = <strong>{p.exp + n}</strong></p>}
-      {n > 0 && r.subidos > 0 && <p className="exito">¡Subes a nivel {r.nivel}! Te quedan {r.exp} PX{pxParaSubir(r.nivel) !== null ? ` de ${pxParaSubir(r.nivel)}` : ''}. Recuerda subir PG y lo demás.</p>}
+      {n > 0 && r.subidos > 0 && <p className="exito">¡Subes a nivel {r.nivel}! Te quedan {r.exp} PX{pxParaSubir(r.nivel) !== null ? ` de ${pxParaSubir(r.nivel)}` : ''}. Si llevas los PG por defecto, suben solos; revisa lo demás.</p>}
       <details className="corregir">
         <summary>Corregir a mano</summary>
         <div className="fila-2">

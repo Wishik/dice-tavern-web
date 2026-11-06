@@ -1,7 +1,7 @@
 import { useFicha } from './Ficha';
 import { Check, Numero, PuntoRojo, Seccion } from '../ui';
 import { useDados } from '../dice';
-import { HABILIDADES, conSigno, idHabilidad, valorHabilidad, valorSalvacion } from '../rules';
+import { HABILIDADES, avisosTirada, conSigno, idHabilidad, valorHabilidad, valorSalvacion } from '../rules';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO } from '../types';
 import { buscarClase } from '../avisos';
 
@@ -39,36 +39,34 @@ export function TabHabilidades() {
         {clase && <p className="nota pequena">◆ = habilidades que ofrece tu clase. Las razas y dotes pueden darte más: puedes marcar de más, solo se avisa.</p>}
       </Seccion>
       <div className="fila-2-tarjetas">
-        <div>
-          {GRUPOS.slice(0, 1).map(([g, t]) => <Grupo key={g} grupo={g} titulo={t} sugeridas={sugeridas} />)}
-          <Seccion titulo="Salvaciones">
-            <ul className="lista-tiradas">
-              {ATRIBUTOS.map((a) => {
-                const v = valorSalvacion(p, a);
-                return (
-                  <li key={a}>
-                    <Check valor={p.salvaciones[a].comp} set={(b) => upd((x) => { x.salvaciones[a].comp = b; })} titulo="Competencia" />
-                    <span className="lt-nombre">{NOMBRE_ATRIBUTO[a]}</span>
-                    <Numero valor={p.salvaciones[a].bonus} set={(n) => upd((x) => { x.salvaciones[a].bonus = n; })} className="mini" />
-                    <button className="lt-valor" onClick={() => tirarD20(`Salvación de ${NOMBRE_ATRIBUTO[a]}`, v)}>{conSigno(v)}</button>
-                  </li>
-                );
-              })}
-            </ul>
-            <div className="muerte">
-              <span>Contra muerte</span>
-              <div className="fila-muerte">
-                {[0, 1, 2].map((i) => <button key={'e' + i} className={`corazon ${p.muerte.exitos > i ? 'on' : ''}`} onClick={() => upd((x) => { x.muerte.exitos = x.muerte.exitos > i ? i : i + 1; })}>{'\u2665\uFE0E'}</button>)}
-              </div>
-              <div className="fila-muerte">
-                {[0, 1, 2].map((i) => <button key={'f' + i} className={`calavera ${p.muerte.fallos > i ? 'on' : ''}`} onClick={() => upd((x) => { x.muerte.fallos = x.muerte.fallos > i ? i : i + 1; })}>{'\u2620\uFE0E'}</button>)}
-              </div>
-              <button className="btn" onClick={() => tirarD20('Salvación contra muerte', 0)}>Tirar</button>
-            </div>
-          </Seccion>
-        </div>
+        <div>{GRUPOS.slice(0, 1).map(([g, t]) => <Grupo key={g} grupo={g} titulo={t} sugeridas={sugeridas} />)}</div>
         <div>{GRUPOS.slice(1).map(([g, t]) => <Grupo key={g} grupo={g} titulo={t} sugeridas={sugeridas} />)}</div>
       </div>
+      <Seccion titulo="Salvaciones">
+        <ul className="lista-tiradas">
+          {ATRIBUTOS.map((a) => {
+            const v = valorSalvacion(p, a);
+            return (
+              <li key={a}>
+                <Check valor={p.salvaciones[a].comp} set={(b) => upd((x) => { x.salvaciones[a].comp = b; })} titulo="Competencia" />
+                <span className="lt-nombre">{NOMBRE_ATRIBUTO[a]}</span>
+                <Numero valor={p.salvaciones[a].bonus} set={(n) => upd((x) => { x.salvaciones[a].bonus = n; })} className="mini" />
+                <button className="lt-valor" onClick={() => tirarD20(`Salvación de ${NOMBRE_ATRIBUTO[a]}`, v, avisosTirada(p, 'salvacion', a))}>{conSigno(v)}</button>
+              </li>
+            );
+          })}
+        </ul>
+        <div className="muerte">
+          <span>Contra muerte</span>
+          <div className="fila-muerte">
+            {[0, 1, 2].map((i) => <button key={'e' + i} className={`corazon ${p.muerte.exitos > i ? 'on' : ''}`} onClick={() => upd((x) => { x.muerte.exitos = x.muerte.exitos > i ? i : i + 1; })}>{'\u2665\uFE0E'}</button>)}
+          </div>
+          <div className="fila-muerte">
+            {[0, 1, 2].map((i) => <button key={'f' + i} className={`calavera ${p.muerte.fallos > i ? 'on' : ''}`} onClick={() => upd((x) => { x.muerte.fallos = x.muerte.fallos > i ? i : i + 1; })}>{'\u2620\uFE0E'}</button>)}
+          </div>
+          <button className="btn" onClick={() => tirarD20('Salvación contra muerte', 0)}>Tirar</button>
+        </div>
+      </Seccion>
       <p className="nota">C = competencia, P = pericia. La casilla pequeña es un bonus extra (p. ej. +2 a Sigilo de los Medianos).</p>
     </div>
   );
@@ -90,7 +88,7 @@ function Grupo({ grupo, titulo, sugeridas }: { grupo: string; titulo: string; su
               <Check valor={st.pericia} set={(b) => upd((x) => { x.habilidades[h.id].pericia = b; if (b) x.habilidades[h.id].comp = true; })} titulo="Pericia" />
               <span className="lt-nombre">{h.nombre} <small>({h.atributo.slice(0, 3)})</small>{sugeridas.has(h.id) && !st.comp && <span className="sugerida">◆</span>}</span>
               <Numero valor={st.bonus} set={(n) => upd((x) => { x.habilidades[h.id].bonus = n; })} className="mini" />
-              <button className="lt-valor" onClick={() => tirarD20(h.nombre, v)}>{conSigno(v)}</button>
+              <button className="lt-valor" onClick={() => tirarD20(h.nombre, v, avisosTirada(p, 'habilidad', h.atributo, h.id))}>{conSigno(v)}</button>
             </li>
           );
         })}

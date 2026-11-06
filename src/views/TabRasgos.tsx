@@ -4,6 +4,7 @@ import { BotonAnadir, Buscador, Modal, PuntoRojo, Seccion, Texto, TextoLargo } f
 import { buscarClase, buscarRaza } from '../avisos';
 import type { Dote, RasgoDef } from '../data';
 import type { EntradaTexto } from '../types';
+import { RASGOS_IDIOMA, RASGOS_RECOMENDADOS } from '../rules';
 
 export function TabRasgos() {
   const { p, upd, razas, clases, dotes, trasfondos, avisos } = useFicha();
@@ -14,15 +15,19 @@ export function TabRasgos() {
   const clase = buscarClase(clases, p.clase);
   const sub = clase?.subclases.find((s) => s.nombre === p.subclase);
   const excl = razas?.rasgosGenericos.excluyentes ?? [];
-  const opciones: (RasgoDef & { grupo: string })[] = [
-    ...(raza?.rasgosUnicos ?? []).map((r) => ({ ...r, grupo: `Únicos de ${raza!.nombre}` })),
-    ...(razas?.rasgosGenericos.noExcluyentes ?? []).map((r) => ({ ...r, grupo: 'Genéricos' })),
-    ...excl.map((r) => ({ ...r, grupo: 'Genéricos excluyentes (solo uno)' })),
+  const recomendados = new Set(RASGOS_RECOMENDADOS[p.clase] ?? []);
+  const genericos = (razas?.rasgosGenericos.noExcluyentes ?? []).map((r) => ({ ...r, grupo: 'Genéricos', deRaza: false, recomendado: recomendados.has(r.nombre) }));
+  // Primero los de tu raza, luego los recomendados para tu clase y luego el resto.
+  const opciones: (RasgoDef & { grupo: string; deRaza: boolean; recomendado: boolean })[] = [
+    ...(raza?.rasgosUnicos ?? []).map((r) => ({ ...r, grupo: `Únicos de ${raza!.nombre}`, deRaza: true, recomendado: false })),
+    ...genericos.filter((r) => r.recomendado),
+    ...genericos.filter((r) => !r.recomendado),
+    ...excl.map((r) => ({ ...r, grupo: 'Genéricos excluyentes (solo uno)', deRaza: false, recomendado: false })),
   ];
   const tieneExcl = p.rasgosRaza.some((n) => excl.some((e) => e.nombre === n));
   const tras = trasfondos?.find((t) => t.nombre === p.trasfondoEstilo);
   const rasgosClase = [...(clase?.rasgos ?? []), ...(sub?.rasgos ?? []).map((r) => ({ ...r, nombre: `${r.nombre} (${sub!.nombre})` }))]
-    .filter((r) => r.nivel <= p.nivel).sort((a, b) => a.nivel - b.nivel);
+    .filter((r) => r.nivel <= p.nivel && !RASGOS_IDIOMA[r.nombre]).sort((a, b) => a.nivel - b.nivel);
 
   return (
     <div className="tab">
@@ -66,10 +71,11 @@ export function TabRasgos() {
 
       {modal === 'rasgoRaza' && (
         <Modal titulo="Elegir rasgo racial" onClose={() => setModal(null)}>
-          <Buscador<RasgoDef & { grupo: string }>
+          <p className="nota pequena">★ = rasgo de tu raza · 👍 = recomendado para {p.clase || 'tu clase'}</p>
+          <Buscador<(typeof opciones)[number]>
             items={opciones} texto={(r) => r.nombre} placeholder="Busca un rasgo…"
             filtro={(r) => !p.rasgosRaza.includes(r.nombre) && !(tieneExcl && r.grupo.includes('excluyentes'))}
-            render={(r) => <span className="res-conjuro"><strong>{r.nombre}</strong><small>{r.grupo} · {r.texto.slice(0, 90)}…</small></span>}
+            render={(r) => <span className={`res-conjuro ${r.deRaza ? 'de-raza' : ''}`}><strong>{r.deRaza ? '★ ' : ''}{r.nombre}{r.recomendado ? ' 👍' : ''}</strong><small>{r.grupo} · {r.texto.slice(0, 90)}…</small></span>}
             onElegir={(r) => { const n = typeof r === 'string' ? r : r.nombre; upd((x) => { x.rasgosRaza.push(n); }); setModal(null); }}
           />
         </Modal>

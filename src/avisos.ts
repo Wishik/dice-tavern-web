@@ -34,8 +34,9 @@ export function calcularAvisos(p: Personaje, clases: Clase[] | null, razas: Raza
   const limiteTrucos = f && 'Trucos' in f ? num(f['Trucos']) : null;
   const limiteConjuros = f && 'Conjuros conocidos' in f ? num(f['Conjuros conocidos']) : null;
   const nivelMaxConjuro = f && 'Nivel máximo de conjuro' in f ? num(f['Nivel máximo de conjuro']) : null;
-  const nTrucos = p.conjuros.filter((x) => x.nivel === 0).length;
-  const nConj = p.conjuros.filter((x) => x.nivel > 0).length;
+  // Los conjuros adicionales (raza, dote, objeto…) no cuentan para el límite de la clase.
+  const nTrucos = p.conjuros.filter((x) => x.nivel === 0 && !x.adicional).length;
+  const nConj = p.conjuros.filter((x) => x.nivel > 0 && !x.adicional).length;
   const trucos = limiteTrucos ? Math.max(0, limiteTrucos - nTrucos) : 0;
   const conjuros = limiteConjuros ? Math.max(0, limiteConjuros - nConj) : 0;
 

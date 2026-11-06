@@ -21,6 +21,8 @@ export interface Item {
   bolsa?: { moneda: Moneda; cantidad: number };
   /** Datos extra mostrados en la ficha del objeto (daño, CA, propiedades...). */
   detalles?: Record<string, string>;
+  /** Armas a distancia: munición que lleva en el mismo espacio (máx. 20). */
+  municion?: number;
 }
 
 export type RanuraEquipo = 'yelmo' | 'amuleto' | 'armadura' | 'capa' | 'manoHabil' | 'manoTorpe';
@@ -37,14 +39,21 @@ export type TamanoCinturon = 'pequeño' | 'mediano' | 'grande';
 
 export interface EntradaTexto { nombre: string; texto: string; origen?: string }
 
-export interface ConjuroPersonaje { nombre: string; nivel: number; preparado?: boolean; notas?: string }
+export interface ConjuroPersonaje {
+  nombre: string; nivel: number; preparado?: boolean; notas?: string;
+  /** Conjuro adicional (de raza, dote, objeto…): no cuenta para el límite de la clase. */
+  adicional?: boolean;
+  /** Conjuro propio: copia editable del texto de un conjuro base. */
+  base?: string;
+  descripcion?: string;
+}
 
 export interface Habilidad { comp: boolean; pericia: boolean; bonus: number }
 
 export interface Viaje {
   raciones: number; // 0-7
   odre: number; // 0-2
-  pedernal: boolean;
+  pedernal: number; // usos 0-10
   antorchas: number; // 0-10
   cuerda: '' | 'cañamo' | 'seda' | 'araña';
   ropa: '' | 'templado' | 'frio' | 'calido';
@@ -74,7 +83,8 @@ export interface Personaje {
   personalidad: string;
   // Hoja 2
   competencias: string;
-  alineamiento: { orden: '' | 'legal' | 'neutral' | 'caotico'; moral: '' | 'bueno' | 'neutral' | 'maligno' };
+  /** Rejilla 15×15: x 0 (legal) → 14 (caótico), y 0 (bueno) → 14 (maligno). orden/moral se deducen de la casilla. */
+  alineamiento: { orden: '' | 'legal' | 'neutral' | 'caotico'; moral: '' | 'bueno' | 'neutral' | 'maligno'; x?: number; y?: number };
   idiomas: Record<string, string>; // clave: 'trasfondo-0', 'INT5', 'INT10', 'INT14', 'INT17', 'INT19'
   oficios: Record<string, string>; // 'trasfondo', 'SAB5', 'SAB12', 'SAB18'
   profesiones: Record<string, string>; // 'trasfondo', 'INT5', 'INT12', 'INT18'
@@ -87,7 +97,10 @@ export interface Personaje {
   caracteristicas: Record<Atributo, number>;
   bonusIniciativa: number;
   velocidad: { andando: number; corriendo: number; trepando: string; nadando: string; volando: string };
+  /** Antiguo campo de CA a mano (ya no se usa: la CA se calcula). */
   ca: string;
+  /** Ajuste a la CA calculada (anillos, Defensa sin armadura, magia…). */
+  bonusCA: number;
   bonusPercepcionPasiva: number;
   recursos: string;
   // Hoja 4

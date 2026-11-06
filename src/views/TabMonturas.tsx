@@ -3,7 +3,7 @@ import { useFicha } from './Ficha';
 import { BotonAnadir, Buscador, Etiqueta, ListaDatos, Modal, Numero, Seccion, Texto, TextoLargo, comprimirFoto } from '../ui';
 import { Contador, useDados } from '../dice';
 import { cargarObjetos, type ObjetoBase } from '../data';
-import { conSigno, espaciosItem, espaciosUsados, modificador, uid } from '../rules';
+import { MOCHILA_MAX, cabeEnMochila, conSigno, espaciosItem, espaciosUsados, modificador, uid } from '../rules';
 import { nuevaMontura } from '../personaje';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Item, type Montura } from '../types';
 
@@ -199,7 +199,7 @@ function ModalAnadirMontura({ m, zona, onClose }: { m: Montura; zona: Zona; onCl
 }
 
 function ModalItemMontura({ m, zona, i, onClose }: { m: Montura; zona: Zona; i: number; onClose: () => void }) {
-  const { upd } = useFicha();
+  const { p, upd } = useFicha();
   const it = m[zona][i];
   const set = (f: (y: Item) => void) => upd((x) => { const y = x.monturas.find((z) => z.id === m.id)?.[zona][i]; if (y) f(y); });
   const sacar = (f: (x: Parameters<Parameters<typeof upd>[0]>[0], y: Item) => void) => {
@@ -211,7 +211,7 @@ function ModalItemMontura({ m, zona, i, onClose }: { m: Montura; zona: Zona; i: 
     <Modal titulo={it.nombre} onClose={onClose}
       pie={<div className="acciones-item">
         <button className="btn" onClick={() => sacar((x, y) => { x.monturas.find((z) => z.id === m.id)?.[otra].push(y); })}>{otra === 'equipo' ? 'Equipar' : 'A las bolsas'}</button>
-        <button className="btn" onClick={() => sacar((x, y) => { x.mochila.push(y); })}>A tu mochila</button>
+        <button className="btn" onClick={() => { if (!cabeEnMochila(p, it)) { alert(`Tu mochila está llena (máx. ${MOCHILA_MAX} espacios).`); return; } sacar((x, y) => { x.mochila.push(y); }); }}>A tu mochila</button>
         <button className="btn peligro" onClick={() => { if (confirm(`¿Tirar ${it.nombre}?`)) sacar(() => {}); }}>Tirar</button>
       </div>}>
       {it.detalles && <ListaDatos datos={it.detalles} />}

@@ -1579,6 +1579,181 @@
      "texto": "Los Tiefling conocen el truco “Ilusión Menor”, no cuenta para el límite de conjuros conocidos. A nivel 3 los Tiefling aprenden el conjuro “Disfrazarse”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. A nivel 5 los Tiefling aprenden el conjuro “Invisibilidad”, no cuenta para el límite de conjuros conocidos y pueden lanzarlo 1vez/descanso sin consumir recursos. Si no eres lanzador de conjuros, el Carisma es tu característica para los conjuros Tiefling (si es negativo no se aplica)."
     }
    ]
+  },
+  {
+   "nombre": "Trol de hielo (Drakkari)",
+   "descripcion": "Los trols de hielo proceden de regiones glaciares donde solo los más fuertes logran sobrevivir. Sus cuerpos son robustos, de piel azul pálido o blanca, y soportan temperaturas que matarían a la mayoría de las razas humanoides. Viven en clanes austeros que valoran la fuerza individual y la capacidad para sobrevivir en condiciones extremas. Sus rituales son más rudos y pragmáticos que los de otras tribus troll, y su relación con los Loas se basa en pactos de pura supervivencia. Los Drakkari son fríos, directos y poco dados a la diplomacia, pero poseen una lealtad inquebrantable hacia sus clanes y una resistencia física legendaria.",
+   "caracteristicas": "+2 y +1 a dos características distintas.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Zandalari y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Trance Trol",
+     "texto": "Obtienes una cantidad de puntos de Trance iguales a tu Bonificador por Competencia. Al inicio de cada uno de tus turnos, puedes gastar uno de estos puntos para obtener uno de los siguientes beneficios. Al finalizar un descanso corto recuperas uno de estos puntos, y los recuperas todos tras un descanso largo.\n- Regenerar: Si tienes por lo menos 1PG y no has sufrido daño de fuego ni de ácido desde tu último turno, puedes recuperar una cantidad de PG igual a dos veces tu Bonificador por Competencia, más tu Modificador por Constitución (mínimo 1). O bien, puedes eliminar una de las siguientes condiciones que sufras: envenenado, cegado, ensordecido.\n- Rabiar: Si has sufrido daño desde tu último turno, puedes realizar un ataque con arma como acción gratuita antes del final del turno actual, o bien puedes lanzar un truco como acción gratuita antes del final del turno actual. En función de tus PG actuales este ataque o este truco infligen daño adicional: más del 75%: +1d4; entre 50% y 75%: +1d6; entre 25% y 49%: +1d8; menos del 25%: +1d10."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Trols y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la oscuridad",
+     "texto": "Los Trols ven en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Pacto con los Loa",
+     "texto": "Aprendes el truco “Taumaturgia”, no cuenta para el límite de trucos conocidos. A nivel 3 aprendes el conjuro “Protección contra el bien y el mal”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo una vez por descanso largo sin consumir recursos. A nivel 5 aprendes el conjuro “Auxilio”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo una vez por descanso largo sin consumir recursos. Si no eres lanzador de conjuros, tu característica para lanzar estos conjuros es el Carisma."
+    },
+    {
+     "nombre": "Resistencia gélida",
+     "texto": "Obtienes resistencia al daño de frío."
+    },
+    {
+     "nombre": "Sangre helada",
+     "texto": "Obtienes competencia en las tiradas de salvación de Constitución contra efectos que causen agotamiento y enfermedad."
+    }
+   ]
+  },
+  {
+   "nombre": "Trol de la jungla (Gurubashi)",
+   "descripcion": "Los trols de la jungla son criaturas salvajes nacidas en lo profundo de las selvas tropicales. Su piel rojiza y sus cuerpos fibrosos reflejan la dureza de un entorno implacable. Son conocidos por sus rituales sanguinarios, su dominio del vudú ancestral y su absoluta ferocidad en combate. Orgullosos y territoriales, los Gurubashi mantienen una estructura tribal rígida en la que la fuerza determina el estatus. Sus chamanes y sacerdotes llevan marcas místicas que honran a los Loas más violentos, y sus guerreros se pintan el cuerpo antes de entrar en batalla. Aunque muchos pueblos los consideran salvajes, poseen un profundo sentido del honor tribal y un respeto casi reverencial por la selva que los vio nacer.",
+   "caracteristicas": "+2 y +1 a dos características distintas.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Zandalari y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Trance Trol",
+     "texto": "Obtienes una cantidad de puntos de Trance iguales a tu Bonificador por Competencia. Al inicio de cada uno de tus turnos, puedes gastar uno de estos puntos para obtener uno de los siguientes beneficios. Al finalizar un descanso corto recuperas uno de estos puntos, y los recuperas todos tras un descanso largo.\n- Regenerar: Si tienes por lo menos 1PG y no has sufrido daño de fuego ni de ácido desde tu último turno, puedes recuperar una cantidad de PG igual a dos veces tu Bonificador por Competencia, más tu Modificador por Constitución (mínimo 1). O bien, puedes eliminar una de las siguientes condiciones que sufras: envenenado, cegado, ensordecido.\n- Rabiar: Si has sufrido daño desde tu último turno, puedes realizar un ataque con arma como acción gratuita antes del final del turno actual, o bien puedes lanzar un truco como acción gratuita antes del final del turno actual. En función de tus PG actuales este ataque o este truco infligen daño adicional: más del 75%: +1d4; entre 50% y 75%: +1d6; entre 25% y 49%: +1d8; menos del 25%: +1d10."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Trols y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la oscuridad",
+     "texto": "Los Trols ven en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Pacto con los Loa",
+     "texto": "Aprendes el truco “Taumaturgia”, no cuenta para el límite de trucos conocidos. A nivel 3 aprendes el conjuro “Protección contra el bien y el mal”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo una vez por descanso largo sin consumir recursos. A nivel 5 aprendes el conjuro “Auxilio”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo una vez por descanso largo sin consumir recursos. Si no eres lanzador de conjuros, tu característica para lanzar estos conjuros es el Carisma."
+    },
+    {
+     "nombre": "Resistencia selvática",
+     "texto": "Obtienes resistencia al daño necrótico."
+    },
+    {
+     "nombre": "Instinto ancestral",
+     "texto": "Obtienes competencia en Atletismo o en Sigilo. Si ya tienes competencia en la habilidad escogida obtienes Pericia."
+    }
+   ]
+  },
+  {
+   "nombre": "Trol del bosque (Amani)",
+   "descripcion": "Los trols del bosque son altos, corpulentos y cubiertos de piel verdosa o marrón que los camufla entre los bosques espesos. Habitan en grandes imperios tribales que se remontan a eras antiguas, donde la jerarquía y la fuerza física son la base de su sociedad. Son cazadores natos, capaces de desplazarse sin ser vistos entre raíces y matorrales. Sus rituales honran a los Loas animales que encarnan resistencia, ferocidad y astucia. Los Amani guardan rencillas ancestrales con los pueblos feéricos y élficos, y son conocidos por su inquebrantable resistencia ante cualquier invasor. Para ellos, el bosque no es solo un hogar, sino una extensión de su propia alma.",
+   "caracteristicas": "+2 y +1 a dos características distintas.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Zandalari y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Trance Trol",
+     "texto": "Obtienes una cantidad de puntos de Trance iguales a tu Bonificador por Competencia. Al inicio de cada uno de tus turnos, puedes gastar uno de estos puntos para obtener uno de los siguientes beneficios. Al finalizar un descanso corto recuperas uno de estos puntos, y los recuperas todos tras un descanso largo.\n- Regenerar: Si tienes por lo menos 1PG y no has sufrido daño de fuego ni de ácido desde tu último turno, puedes recuperar una cantidad de PG igual a dos veces tu Bonificador por Competencia, más tu Modificador por Constitución (mínimo 1). O bien, puedes eliminar una de las siguientes condiciones que sufras: envenenado, cegado, ensordecido.\n- Rabiar: Si has sufrido daño desde tu último turno, puedes realizar un ataque con arma como acción gratuita antes del final del turno actual, o bien puedes lanzar un truco como acción gratuita antes del final del turno actual. En función de tus PG actuales este ataque o este truco infligen daño adicional: más del 75%: +1d4; entre 50% y 75%: +1d6; entre 25% y 49%: +1d8; menos del 25%: +1d10."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Trols y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la oscuridad",
+     "texto": "Los Trols ven en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Pacto con los Loa",
+     "texto": "Aprendes el truco “Taumaturgia”, no cuenta para el límite de trucos conocidos. A nivel 3 aprendes el conjuro “Protección contra el bien y el mal”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo una vez por descanso largo sin consumir recursos. A nivel 5 aprendes el conjuro “Auxilio”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo una vez por descanso largo sin consumir recursos. Si no eres lanzador de conjuros, tu característica para lanzar estos conjuros es el Carisma."
+    },
+    {
+     "nombre": "Resistencia boscosa",
+     "texto": "Obtienes resistencia al daño de veneno."
+    },
+    {
+     "nombre": "Intuición salvaje",
+     "texto": "Obtienes un bonificador +1d4 a las pruebas de Perspicacia y Percepción."
+    }
+   ]
+  },
+  {
+   "nombre": "Trol lanza-negra",
+   "descripcion": "Los Lanza-Negra son trols ágiles y esbeltos que han aprendido a convivir en islas tropicales y selvas húmedas. Su piel suele ser azul o turquesa, y sus rasgos son más refinados que los de otras tribus. A diferencia de muchos de sus parientes, los Lanza-Negra son flexibles, ingeniosos y abiertos a la cooperación con otras razas. Aunque mantienen vivas sus tradiciones vudú y su conexión con los Loas, han adoptado nuevas filosofías y estructuras sociales que los hacen adaptables. Valoran la astucia y la supervivencia sobre la fuerza bruta, y se destacan como exploradores, cazadores y practicantes de artes chamánicas y espirituales.",
+   "caracteristicas": "+2 y +1 a dos características distintas.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Zandalari y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Trance Trol",
+     "texto": "Obtienes una cantidad de puntos de Trance iguales a tu Bonificador por Competencia. Al inicio de cada uno de tus turnos, puedes gastar uno de estos puntos para obtener uno de los siguientes beneficios. Al finalizar un descanso corto recuperas uno de estos puntos, y los recuperas todos tras un descanso largo.\n- Regenerar: Si tienes por lo menos 1PG y no has sufrido daño de fuego ni de ácido desde tu último turno, puedes recuperar una cantidad de PG igual a dos veces tu Bonificador por Competencia, más tu Modificador por Constitución (mínimo 1). O bien, puedes eliminar una de las siguientes condiciones que sufras: envenenado, cegado, ensordecido.\n- Rabiar: Si has sufrido daño desde tu último turno, puedes realizar un ataque con arma como acción gratuita antes del final del turno actual, o bien puedes lanzar un truco como acción gratuita antes del final del turno actual. En función de tus PG actuales este ataque o este truco infligen daño adicional: más del 75%: +1d4; entre 50% y 75%: +1d6; entre 25% y 49%: +1d8; menos del 25%: +1d10."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Trols y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la oscuridad",
+     "texto": "Los Trols ven en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Pacto con los Loa",
+     "texto": "Aprendes el truco “Taumaturgia”, no cuenta para el límite de trucos conocidos. A nivel 3 aprendes el conjuro “Protección contra el bien y el mal”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo una vez por descanso largo sin consumir recursos. A nivel 5 aprendes el conjuro “Auxilio”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo una vez por descanso largo sin consumir recursos. Si no eres lanzador de conjuros, tu característica para lanzar estos conjuros es el Carisma."
+    },
+    {
+     "nombre": "Legado de Vol’Jin",
+     "texto": "Obtienes resistencia al daño psíquico."
+    },
+    {
+     "nombre": "Aléjate del vudú",
+     "texto": "Aprendes el truco “Fragmento mental” o “Tañido por los muertos”, no cuenta para el límite de trucos conocidos. A nivel 3 aprendes el conjuro “Maleficio” o “Perdición”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo una vez por descanso largo sin consumir recursos. A nivel 5 aprendes el conjuro “Clavo mental”, o “Corona de la locura”, o “Sugestión”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo una vez por descanso largo sin consumir recursos. Si no eres lanzador de conjuros, tu característica para lanzar estos conjuros es la Sabiduría."
+    }
+   ]
+  },
+  {
+   "nombre": "Trol zandalari",
+   "descripcion": "Los Zandalari son la élite ancestral de la especie troll. Altos, majestuosos y de porte regio, su piel puede variar en tonos desde el dorado hasta el azul profundo. Proceden de un antiguo imperio construido sobre montañas y pirámides, donde el honor, la tradición y la fe en los Loas son pilares sagrados. A diferencia de las demás tribus, los Zandalari poseen una civilización avanzada, con eruditos, templos monumentales y un ejército disciplinado. Consideran que su linaje proviene directamente de los primeros trols y ven su misión como la preservación del orden establecido por sus deidades ancestrales. Su elegancia, orgullo y disciplina los convierten en líderes naturales y en figuras de peso en cualquier campaña.",
+   "caracteristicas": "+2 y +1 a dos características distintas.",
+   "tamano": "Mediano",
+   "velocidad": "30pies",
+   "idiomas": "Zandalari y Común",
+   "otros": {},
+   "rasgosFijos": [
+    {
+     "nombre": "Trance Trol",
+     "texto": "Obtienes una cantidad de puntos de Trance iguales a tu Bonificador por Competencia. Al inicio de cada uno de tus turnos, puedes gastar uno de estos puntos para obtener uno de los siguientes beneficios. Al finalizar un descanso corto recuperas uno de estos puntos, y los recuperas todos tras un descanso largo.\n- Regenerar: Si tienes por lo menos 1PG y no has sufrido daño de fuego ni de ácido desde tu último turno, puedes recuperar una cantidad de PG igual a dos veces tu Bonificador por Competencia, más tu Modificador por Constitución (mínimo 1). O bien, puedes eliminar una de las siguientes condiciones que sufras: envenenado, cegado, ensordecido.\n- Rabiar: Si has sufrido daño desde tu último turno, puedes realizar un ataque con arma como acción gratuita antes del final del turno actual, o bien puedes lanzar un truco como acción gratuita antes del final del turno actual. En función de tus PG actuales este ataque o este truco infligen daño adicional: más del 75%: +1d4; entre 50% y 75%: +1d6; entre 25% y 49%: +1d8; menos del 25%: +1d10."
+    }
+   ],
+   "rasgosAdicionales": "Elige 3 rasgos de entre la lista de Rasgos Únicos de los Trols y la lista de Rasgos Genéricos.",
+   "rasgosAElegir": 3,
+   "rasgosUnicos": [
+    {
+     "nombre": "Visión en la oscuridad",
+     "texto": "Los Trols ven en la oscuridad como si fuese penumbra hasta 60pies."
+    },
+    {
+     "nombre": "Pacto con los Loa",
+     "texto": "Aprendes el truco “Taumaturgia”, no cuenta para el límite de trucos conocidos. A nivel 3 aprendes el conjuro “Protección contra el bien y el mal”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo una vez por descanso largo sin consumir recursos. A nivel 5 aprendes el conjuro “Auxilio”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo una vez por descanso largo sin consumir recursos. Si no eres lanzador de conjuros, tu característica para lanzar estos conjuros es el Carisma."
+    },
+    {
+     "nombre": "Legado de los Loa",
+     "texto": "Obtienes resistencia al daño radiante."
+    },
+    {
+     "nombre": "Bendición de los Loa",
+     "texto": "Aprendes el conjuro “Bendición”, no cuenta para el límite de conjuros conocidos y puedes lanzarlo una vez por descanso largo sin consumir recursos. Si no eres lanzador de conjuros, tu característica para lanzar este conjuro es el Carisma. Al finalizar un descanso largo obtienes competencia en una tirada de salvación de tu elección. Este efecto dura hasta el final de tu siguiente descanso largo."
+    }
+   ]
   }
  ],
  "rasgosGenericos": {

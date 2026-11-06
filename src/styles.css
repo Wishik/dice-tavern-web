@@ -462,3 +462,34 @@ details.corregir summary { cursor: pointer; color: var(--tinta-suave); font-size
 .chips-monturas { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
 .chip { border: 1px solid var(--madera-borde); background: #2a1b11; color: var(--pergamino); border-radius: 99px; padding: 8px 14px; font-family: var(--fuente-titulo); font-size: 13px; }
 .chip.activo { background: var(--oro); color: #1d130c; border-color: var(--oro); }
+
+/* ---- Avisos de ventaja/desventaja al tirar */
+.aviso-tirada { background: #fff3cd; color: #6b4e00; border: 1px solid #e8c766; border-radius: 8px; padding: 6px 10px; margin: 6px 0; font-size: 14px; text-align: left; }
+.btn.sugerido { outline: 3px solid #e0a100; outline-offset: 1px; font-weight: 700; }
+.municion { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin: 8px 0; }
+
+/* ---- Alineamiento 15×15 */
+.alineamiento15 { display: grid; grid-template-columns: 22px repeat(15, minmax(0, 1fr)); gap: 0; max-width: 420px; margin: 0 auto; }
+.alineamiento15 .al-cab { font-size: 12px; text-align: center; font-weight: 600; padding: 2px 0; }
+.alineamiento15 .al-cab.lateral { display: flex; align-items: center; justify-content: center; }
+.alineamiento15 .al-cab.lateral span { writing-mode: vertical-rl; transform: rotate(180deg); }
+.al15 { aspect-ratio: 1; min-width: 0; padding: 0; border: 1px solid rgba(120, 90, 60, .25); font-size: 12px; line-height: 1; color: #fff; cursor: pointer; }
+.al15.za { background: #f6ecd9; }
+.al15.zb { background: #e9d9bb; }
+.al15.borde-d { border-right: 2px solid #7a5a3a; }
+.al15.borde-b { border-bottom: 2px solid #7a5a3a; }
+.al15.sel { background: #8b2e1f; font-weight: 700; }
+
+/* ---- Combate: campos alineados y armas automáticas */
+.fila-2.alineada { align-items: end; }
+.fila-2.alineada > .etiqueta, .fila-2.alineada > label { display: flex; flex-direction: column; justify-content: flex-end; }
+.subtitulo-campos { margin: 10px 0 4px; font-size: 14px; }
+.ataque.auto .ataque-titulo { display: flex; flex-direction: column; margin-bottom: 6px; }
+.ataque.auto .ataque-titulo small { color: #7a6450; }
+.ataque.auto .ataque-fila { flex-wrap: wrap; gap: 6px; }
+
+/* ---- Idiomas fijos y rasgos de raza */
+.idiomas-fijos { list-style: none; padding: 0; margin: 0 0 10px; display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-idioma { background: #efe3c8; border: 1px solid #c9ad7a; border-radius: 999px; padding: 3px 10px; font-size: 14px; display: inline-flex; gap: 6px; align-items: baseline; }
+.chip-idioma small { color: #7a6450; font-size: 11px; }
+.res-conjuro.de-raza strong { color: #8b2e1f; }

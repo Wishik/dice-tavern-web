@@ -1,5 +1,5 @@
 import { ATRIBUTOS, type Atributo, type Montura, type Personaje } from './types';
-import { HABILIDADES, uid } from './rules';
+import { HABILIDADES, calcularCA, uid } from './rules';
 
 export function nuevoPersonaje(nombre = ''): Personaje {
   const ahora = new Date().toISOString();
@@ -12,7 +12,7 @@ export function nuevoPersonaje(nombre = ''): Personaje {
     pg: { max: 0, actual: 0, temp: 0 }, pm: { max: 0, actual: 0 }, inspiracion: 0, dgUsados: 0,
     caracteristicas: car, bonusIniciativa: 0,
     velocidad: { andando: 30, corriendo: 60, trepando: '', nadando: '', volando: '' },
-    ca: '', bonusPercepcionPasiva: 0, recursos: '',
+    ca: '', bonusCA: 0, bonusPercepcionPasiva: 0, recursos: '',
     ataquesTurno: { habil: 1, torpe: 0 }, ataques: [],
     conjuroCaracteristica: '', conjurosTurno: { estandar: '', adicional: '' },
     salvaciones: Object.fromEntries(ATRIBUTOS.map((a) => [a, { comp: false, bonus: 0 }])) as Personaje['salvaciones'],
@@ -21,7 +21,7 @@ export function nuevoPersonaje(nombre = ''): Personaje {
     rasgosRaza: [], rasgos: [], dotes: [], conjuros: [],
     equipo: { yelmo: null, amuleto: null, armadura: null, capa: null, manoHabil: null, manoTorpe: null },
     mochila: [], cinturon: { tamano: 'pequeño', items: [] },
-    viaje: { raciones: 0, odre: 0, pedernal: false, antorchas: 0, cuerda: '', ropa: '', sacoDormir: false, manta: false, tienda: '' },
+    viaje: { raciones: 0, odre: 0, pedernal: 0, antorchas: 0, cuerda: '', ropa: '', sacoDormir: false, manta: false, tienda: '' },
     monedas: { PM: 0, PL: 0, PO: 0, PE: 0, PP: 0, PC: 0 },
     monturas: [],
     notas: '',
@@ -38,8 +38,16 @@ export function normalizar(p: Partial<Personaje>): Personaje {
   if (typeof out.inspiracion !== 'number') out.inspiracion = out.inspiracion ? 1 : 0;
   if (typeof out.exp !== 'number') { const n = parseInt(String(out.exp ?? '').replace(/\D/g, ''), 10); out.exp = isNaN(n) ? 0 : n; }
   out.monturas = (p.monturas ?? []).map(normalizarMontura);
+  if (typeof out.viaje.pedernal !== 'number') out.viaje.pedernal = out.viaje.pedernal ? 10 : 0;
   out.habilidades = { ...base.habilidades, ...(p.habilidades ?? {}) };
   out.salvaciones = { ...base.salvaciones, ...(p.salvaciones ?? {}) };
+  // La CA antes se escribía a mano: la pasamos a «ajuste» sobre la calculada para no perderla.
+  if (typeof p.bonusCA !== 'number') {
+    out.bonusCA = 0;
+    const n = parseInt(out.ca, 10);
+    if (!isNaN(n)) out.bonusCA = n - calcularCA(out).total;
+  }
+  out.ca = '';
   return out;
 }
 
