@@ -1,4 +1,4 @@
-import { ATRIBUTOS, type Atributo, type Personaje } from './types';
+import { ATRIBUTOS, type Atributo, type Montura, type Personaje } from './types';
 import { HABILIDADES, uid } from './rules';
 
 export function nuevoPersonaje(nombre = ''): Personaje {
@@ -23,6 +23,7 @@ export function nuevoPersonaje(nombre = ''): Personaje {
     mochila: [], cinturon: { tamano: 'pequeño', items: [] },
     viaje: { raciones: 0, odre: 0, pedernal: false, antorchas: 0, cuerda: '', ropa: '', sacoDormir: false, manta: false, tienda: '' },
     monedas: { PM: 0, PL: 0, PO: 0, PE: 0, PP: 0, PC: 0 },
+    monturas: [],
     notas: '',
   };
 }
@@ -36,7 +37,21 @@ export function normalizar(p: Partial<Personaje>): Personaje {
   }
   if (typeof out.inspiracion !== 'number') out.inspiracion = out.inspiracion ? 1 : 0;
   if (typeof out.exp !== 'number') { const n = parseInt(String(out.exp ?? '').replace(/\D/g, ''), 10); out.exp = isNaN(n) ? 0 : n; }
+  out.monturas = (p.monturas ?? []).map(normalizarMontura);
   out.habilidades = { ...base.habilidades, ...(p.habilidades ?? {}) };
   out.salvaciones = { ...base.salvaciones, ...(p.salvaciones ?? {}) };
   return out;
+}
+
+export function nuevaMontura(nombre = ''): Montura {
+  return {
+    id: uid(), nombre, tipo: '', foto: '', pg: { max: 0, actual: 0 }, ca: '',
+    velocidad: { andando: 0, volando: '', nadando: '', trepando: '' },
+    caracteristicas: Object.fromEntries(ATRIBUTOS.map((a) => [a, 10])) as Record<Atributo, number>,
+    rasgos: [], equipo: [], espaciosEquipo: 3, carga: [], espaciosCarga: 0, notas: '',
+  };
+}
+export function normalizarMontura(m: Partial<Montura>): Montura {
+  const b = nuevaMontura();
+  return { ...b, ...m, pg: { ...b.pg, ...m.pg }, velocidad: { ...b.velocidad, ...m.velocidad }, caracteristicas: { ...b.caracteristicas, ...m.caracteristicas } } as Montura;
 }

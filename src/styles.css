@@ -458,3 +458,7 @@ details.corregir summary { cursor: pointer; color: var(--tinta-suave); font-size
 .nivel-conjuro { margin: 14px 0 2px; font-size: 13px; letter-spacing: .08em; color: var(--tinta-suave); border-bottom: 1px dashed #c3a978; padding-bottom: 4px; }
 .lanzar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 12px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,.35); border: 1px solid #c3a978; }
 .cd-chip { font-size: 15px; }
+
+.chips-monturas { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+.chip { border: 1px solid var(--madera-borde); background: #2a1b11; color: var(--pergamino); border-radius: 99px; padding: 8px 14px; font-family: var(--fuente-titulo); font-size: 13px; }
+.chip.activo { background: var(--oro); color: #1d130c; border-color: var(--oro); }

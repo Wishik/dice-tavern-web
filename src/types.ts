@@ -109,5 +109,26 @@ export interface Personaje {
   cinturon: { tamano: TamanoCinturon; items: Item[] };
   viaje: Viaje;
   monedas: Record<Moneda, number>;
+  monturas: Montura[];
+  notas: string;
+}
+
+/** Montura del personaje: una mini ficha con vida, CA, velocidad, características, rasgos e inventario propio. */
+export interface Montura {
+  id: string;
+  nombre: string;
+  tipo: string; // p. ej. «Caballo de guerra» (de la base de monturas cuando la tengamos)
+  foto: string;
+  pg: { max: number; actual: number };
+  ca: string;
+  velocidad: { andando: number; volando: string; nadando: string; trepando: string };
+  caracteristicas: Record<Atributo, number>;
+  rasgos: EntradaTexto[];
+  /** Lo que lleva puesto: barda (armadura), silla, bolsas laterales… */
+  equipo: Item[];
+  espaciosEquipo: number;
+  /** Lo que va dentro de las bolsas laterales / alforjas. */
+  carga: Item[];
+  espaciosCarga: number;
   notas: string;
 }

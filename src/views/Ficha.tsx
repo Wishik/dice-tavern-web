@@ -13,6 +13,7 @@ import { TabMagia } from './TabMagia';
 import { TabRasgos } from './TabRasgos';
 import { TabInventario } from './TabInventario';
 import { TabNotas } from './TabNotas';
+import { TabMonturas } from './TabMonturas';
 
 interface FichaCtx {
   p: Personaje;
@@ -34,6 +35,7 @@ const TABS = [
   { id: 'magia', nombre: 'Conjuros', C: TabMagia, aviso: (a: Avisos) => a.total.magia },
   { id: 'rasgos', nombre: 'Rasgos y dotes', C: TabRasgos, aviso: (a: Avisos) => a.total.rasgos },
   { id: 'inventario', nombre: 'Inventario', C: TabInventario, aviso: () => 0 },
+  { id: 'monturas', nombre: 'Monturas', C: TabMonturas, aviso: () => 0 },
   { id: 'notas', nombre: 'Notas', C: TabNotas, aviso: () => 0 },
 ] as const;
 
