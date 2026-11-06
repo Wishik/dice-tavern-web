@@ -94,6 +94,7 @@ export function Ficha({ id, onVolver }: { id: string; onVolver: () => void }) {
   return (
     <Ctx.Provider value={{ p, upd, clases, razas, trasfondos, dotes, avisos }}>
       <div className="pantalla-ficha">
+        <div className="cabecera-fija">
         <header className="barra">
           <button className="btn enlace volver" onClick={onVolver}>‹ Personajes</button>
           <div className="titulo-ficha">
@@ -108,6 +109,7 @@ export function Ficha({ id, onVolver }: { id: string; onVolver: () => void }) {
             return <button key={t.id} className={tab === t.id ? 'activa' : ''} onClick={() => setTab(t.id)}>{t.nombre}{n > 0 && <PuntoRojo n={n} />}</button>;
           })}
         </nav>
+        </div>
         <main className="contenido"><T.C /></main>
         {T.id === 'notas' && <div className="pie-borrar"><button className="btn peligro" onClick={borrar}>Borrar personaje</button></div>}
         <button className="fab" onClick={() => setDados(true)} aria-label="Dados"><DadoIcono caras={20} size={40} /></button>

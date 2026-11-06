@@ -6,7 +6,7 @@ export function nuevoPersonaje(nombre = ''): Personaje {
   const car = Object.fromEntries(ATRIBUTOS.map((a) => [a, 10])) as Record<Atributo, number>;
   return {
     id: uid(), version: 1, creado: ahora, actualizado: ahora,
-    nombre, foto: '', tamano: '', edad: '', raza: '', clase: '', subclase: '', nivel: 1, exp: '',
+    nombre, foto: '', tamano: '', edad: '', raza: '', clase: '', subclase: '', nivel: 1, exp: 0,
     trasfondoEstilo: '', trasfondo: '', personalidad: '',
     competencias: '', alineamiento: { orden: '', moral: '' }, idiomas: {}, oficios: {}, profesiones: {},
     pg: { max: 0, actual: 0, temp: 0 }, pm: { max: 0, actual: 0 }, inspiracion: false, dgUsados: 0,
@@ -34,6 +34,7 @@ export function normalizar(p: Partial<Personaje>): Personaje {
   for (const k of ['caracteristicas', 'velocidad', 'pg', 'pm', 'equipo', 'viaje', 'monedas', 'alineamiento', 'ataquesTurno', 'conjurosTurno', 'muerte', 'cinturon'] as const) {
     (out as unknown as Record<string, unknown>)[k] = { ...(base[k] as object), ...((p as Record<string, unknown>)[k] as object ?? {}) };
   }
+  if (typeof out.exp !== 'number') { const n = parseInt(String(out.exp ?? '').replace(/\D/g, ''), 10); out.exp = isNaN(n) ? 0 : n; }
   out.habilidades = { ...base.habilidades, ...(p.habilidades ?? {}) };
   out.salvaciones = { ...base.salvaciones, ...(p.salvaciones ?? {}) };
   return out;

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useFicha } from './Ficha';
-import { BotonAnadir, Buscador, Check, Modal, PuntoRojo, Seccion, TextoLargo } from '../ui';
+import { BotonAnadir, Buscador, Check, Modal, PuntoRojo, Seccion, Texto, TextoLargo } from '../ui';
 import { useDatos, type Conjuro } from '../data';
 import type { ConjuroPersonaje } from '../types';
 
@@ -90,7 +90,7 @@ export function TabMagia() {
           pie={<button className="btn peligro" onClick={() => { upd((x) => { const i = x.conjuros.findIndex((c) => c.nombre === ver.c.nombre && c.nivel === ver.c.nivel); if (i >= 0) x.conjuros.splice(i, 1); }); setVer(null); }}>Quitar de la lista</button>}>
           {ver.def ? <FichaConjuro c={ver.def} /> : <p className="nota">Conjuro personalizado (no está en la base).</p>}
           <label className="etiqueta"><span>Mis notas</span>
-            <textarea className="campo" rows={3} defaultValue={ver.c.notas ?? ''} onChange={(e) => { const v = e.target.value; upd((x) => { const c = x.conjuros.find((c) => c.nombre === ver.c.nombre); if (c) c.notas = v; }); }} />
+            <Texto multilinea filas={3} valor={p.conjuros.find((c) => c.nombre === ver.c.nombre)?.notas ?? ''} set={(v) => upd((x) => { const c = x.conjuros.find((c) => c.nombre === ver.c.nombre); if (c) c.notas = v; })} />
           </label>
         </Modal>
       )}

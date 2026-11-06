@@ -1,3 +1,4 @@
+import { aplicarExperiencia, embolsarExceso, leerPrecio, pxParaSubir } from '../rules';
 import { describe, it, expect } from 'vitest';
 import { bonoCompetencia, convertir, espaciosPorFuerza, estadoCarga, modificador, parseFormula, valorHabilidad } from '../rules';
 import { nuevoPersonaje } from '../personaje';
@@ -48,5 +49,34 @@ describe('reglas', () => {
     expect(parseFormula('1d6+3')).toEqual({ dados: [{ n: 1, caras: 6 }], mod: 3 });
     expect(parseFormula('2d8 + 4')).toEqual({ dados: [{ n: 2, caras: 8 }], mod: 4 });
     expect(parseFormula('hola')).toBeNull();
+  });
+});
+
+describe('experiencia', () => {
+  it('sube de nivel y guarda el resto', () => {
+    expect(pxParaSubir(1)).toBe(300);
+    expect(aplicarExperiencia(1, 350)).toEqual({ nivel: 2, exp: 50, subidos: 1 });
+    expect(aplicarExperiencia(1, 300 + 600 + 5)).toEqual({ nivel: 3, exp: 5, subidos: 2 });
+    expect(aplicarExperiencia(3, 100)).toEqual({ nivel: 3, exp: 100, subidos: 0 });
+    expect(aplicarExperiencia(20, 99999).nivel).toBe(20);
+  });
+});
+
+describe('bolsas de monedas', () => {
+  it('600 PO → bolsa de 500 y quedan 100', () => {
+    const p = nuevoPersonaje(); p.monedas.PO = 600;
+    expect(embolsarExceso(p)).toBe(1);
+    expect(p.monedas.PO).toBe(100);
+    expect(p.mochila[0].bolsa).toEqual({ moneda: 'PO', cantidad: 500 });
+  });
+  it('500 justas no se tocan; 1001 → dos bolsas', () => {
+    const p = nuevoPersonaje(); p.monedas.PC = 500; p.monedas.PP = 1001;
+    expect(embolsarExceso(p)).toBe(2);
+    expect(p.monedas.PC).toBe(500); expect(p.monedas.PP).toBe(1);
+  });
+  it('lee precios', () => {
+    expect(leerPrecio('50po')).toEqual({ cantidad: 50, moneda: 'PO' });
+    expect(leerPrecio('155 pc')).toEqual({ cantidad: 155, moneda: 'PC' });
+    expect(leerPrecio('gratis')).toBeNull();
   });
 });

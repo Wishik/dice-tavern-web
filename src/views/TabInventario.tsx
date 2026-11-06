@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useFicha } from './Ficha';
-import { BotonAnadir, Buscador, Etiqueta, ListaDatos, Modal, Numero, Seccion, TextoLargo } from '../ui';
+import { BotonAnadir, Buscador, Etiqueta, ListaDatos, Modal, Numero, Seccion, Texto, TextoLargo } from '../ui';
 import { cargarObjetos, type ObjetoBase } from '../data';
 import {
   CINTURON_ESPACIOS, MAX_MONEDAS, MOCHILA_BASE, NOMBRE_MONEDA, TRAMOS_SOBRECARGA, UMBRALES_FUERZA, VALOR_PC,
-  convertir, espaciosItem, espaciosPorFuerza, espaciosUsados, estadoCarga, uid,
+  convertir, embolsarExceso, espaciosItem, espaciosPorFuerza, espaciosUsados, estadoCarga, leerPrecio, uid,
 } from '../rules';
 import { MONEDAS, RANURAS_EQUIPO, type Item, type Moneda, type Personaje, type RanuraEquipo, type TamanoCinturon } from '../types';
 
@@ -130,6 +130,8 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
   const set = (f: (it: Item) => void) => upd((x) => { const y = leer(x, lugar); if (y) f(y); });
   const mover = (d: Destino) => { upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, d); }); onClose(); };
   const usable = it.tipo === 'pocion' || it.tipo === 'consumible';
+  const [vender, setVender] = useState(false);
+  if (it.bolsa) return <ModalBolsa lugar={lugar} onClose={onClose} />;
   return (
     <Modal titulo={it.nombre} onClose={onClose}
       pie={<div className="acciones-item">
@@ -140,6 +142,7 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
         {lugar.zona === 'equipo' && <button className="btn" onClick={() => mover({ zona: 'mochila' })}>Quitar del equipo</button>}
         {lugar.zona === 'mochila' && <button className="btn" onClick={() => mover({ zona: 'cinturon' })}>Al cinturón</button>}
         {lugar.zona === 'cinturon' && <button className="btn" onClick={() => mover({ zona: 'mochila' })}>A la mochila</button>}
+        <button className="btn vender" onClick={() => setVender(true)}>Vender</button>
         <button className="btn peligro" onClick={() => { if (confirm(`¿Tirar ${it.nombre}?`)) { upd((x) => { quitar(x, lugar); }); onClose(); } }}>Tirar</button>
       </div>}>
       {it.detalles && <ListaDatos datos={it.detalles} />}
@@ -151,13 +154,87 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
         <Etiqueta texto="Máx. por espacio"><input className="campo" inputMode="numeric" value={it.maxPorEspacio ?? ''} placeholder="sin límite" onChange={(e) => { const n = parseInt(e.target.value, 10); set((y) => { y.maxPorEspacio = isNaN(n) || n < 1 ? undefined : n; }); }} /></Etiqueta>
       </div>
       <p className="nota">Ocupa {espaciosItem(it)} espacio{espaciosItem(it) > 1 ? 's' : ''}.</p>
-      <Etiqueta texto="Descripción"><textarea className="campo" rows={4} value={it.descripcion} onChange={(e) => set((y) => { y.descripcion = e.target.value; })} /></Etiqueta>
+      <Etiqueta texto="Descripción"><Texto multilinea filas={4} valor={it.descripcion} set={(v) => set((y) => { y.descripcion = v; })} /></Etiqueta>
+      {vender && <ModalVender lugar={lugar} onClose={() => setVender(false)} onVendido={onClose} />}
       {equipar && (
         <Modal titulo="¿Dónde lo equipas?" onClose={() => setEquipar(false)}>
           <div className="lista-opciones">
             {RANURAS_EQUIPO.map((r) => <button key={r.id} className="btn" onClick={() => mover({ zona: 'equipo', r: r.id })}>{r.icono} {r.nombre}{p.equipo[r.id] ? ` (cambia ${p.equipo[r.id]!.nombre})` : ''}</button>)}
           </div>
         </Modal>
+      )}
+    </Modal>
+  );
+}
+
+function ModalVender({ lugar, onClose, onVendido }: { lugar: Lugar; onClose: () => void; onVendido: () => void }) {
+  const { p, upd } = useFicha();
+  const it = leer(p, lugar)!;
+  const precio = leerPrecio(it.precio);
+  const [cant, setCant] = useState(it.cantidad);
+  const [moneda, setMoneda] = useState<Moneda>(precio?.moneda ?? 'PO');
+  const [txt, setTxt] = useState(precio ? String(Math.floor(precio.cantidad * cant)) : '');
+  const total = parseInt(txt, 10);
+  const ok = !isNaN(total) && total >= 0 && cant >= 1 && cant <= it.cantidad;
+  const cambiarCant = (c: number) => { setCant(c); if (precio) setTxt(String(Math.floor(precio.cantidad * c))); };
+  const vender = () => {
+    if (!ok) return;
+    upd((x) => {
+      const y = leer(x, lugar); if (!y) return;
+      if (cant >= y.cantidad) quitar(x, lugar); else y.cantidad -= cant;
+      x.monedas[moneda] += total;
+      embolsarExceso(x);
+    });
+    onClose(); onVendido();
+  };
+  return (
+    <Modal titulo={`Vender ${it.nombre}`} onClose={onClose}
+      pie={<button className="btn primario" disabled={!ok} onClick={vender}>Vender{ok ? ` por ${total} ${moneda}` : ''}</button>}>
+      <div className="rejilla-campos">
+        {it.cantidad > 1 && <Etiqueta texto={`Cuántos (tienes ${it.cantidad})`}><Numero valor={cant} min={1} max={it.cantidad} set={cambiarCant} /></Etiqueta>}
+        <Etiqueta texto="Te pagan"><input className="campo" inputMode="numeric" value={txt} onChange={(e) => setTxt(e.target.value.replace(/\D/g, ''))} placeholder="0" /></Etiqueta>
+        <Etiqueta texto="Moneda"><select className="campo" value={moneda} onChange={(e) => setMoneda(e.target.value as Moneda)}>{MONEDAS.map((m) => <option key={m} value={m}>{m} · {NOMBRE_MONEDA[m]}</option>)}</select></Etiqueta>
+      </div>
+      <p className="nota">{precio ? `Precio de la ficha: ${it.precio}${cant > 1 ? ' cada uno' : ''}. Cambia la cifra si el mercader paga otra cosa.` : 'Este objeto no tiene precio: escribe lo que te paguen.'}</p>
+      {ok && <p className="formula-grande">{p.monedas[moneda]} + {total} = <strong>{p.monedas[moneda] + total} {moneda}</strong></p>}
+      {ok && p.monedas[moneda] + total > MAX_MONEDAS && <p className="nota">Lo que pase de {MAX_MONEDAS} irá a la mochila en una bolsa de monedas.</p>}
+    </Modal>
+  );
+}
+
+function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
+  const { p, upd } = useFicha();
+  const it = leer(p, lugar)!;
+  const b = it.bolsa!;
+  const cabe = Math.max(0, MAX_MONEDAS - p.monedas[b.moneda]);
+  const maxSacar = Math.min(b.cantidad, cabe);
+  const [txt, setTxt] = useState(String(maxSacar));
+  const n = parseInt(txt, 10);
+  const ok = !isNaN(n) && n > 0 && n <= maxSacar;
+  const sacar = () => {
+    if (!ok) return;
+    upd((x) => {
+      const y = leer(x, lugar); if (!y?.bolsa) return;
+      x.monedas[b.moneda] += n;
+      y.bolsa.cantidad -= n;
+      if (y.bolsa.cantidad <= 0) quitar(x, lugar);
+      else { y.nombre = `Bolsa de ${NOMBRE_MONEDA[b.moneda].toLowerCase()} (${y.bolsa.cantidad} ${b.moneda})`; y.descripcion = `Una bolsa con ${y.bolsa.cantidad} ${b.moneda}. Ocupa un espacio en la mochila.`; }
+    });
+    onClose();
+  };
+  return (
+    <Modal titulo={it.nombre} onClose={onClose}
+      pie={<div className="acciones-item">
+        <button className="btn primario" disabled={!ok} onClick={sacar}>Pasar a mis monedas</button>
+        {lugar.zona === 'mochila' && <button className="btn" onClick={() => { upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'cinturon' }); }); onClose(); }}>Al cinturón</button>}
+        {lugar.zona === 'cinturon' && <button className="btn" onClick={() => { upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'mochila' }); }); onClose(); }}>A la mochila</button>}
+      </div>}>
+      <p>Dentro hay <strong>{b.cantidad} {b.moneda}</strong>. En tu bolsa de {NOMBRE_MONEDA[b.moneda].toLowerCase()} tienes {p.monedas[b.moneda]}/{MAX_MONEDAS}.</p>
+      {maxSacar === 0 ? <p className="error">Tu bolsa de {b.moneda} está llena. Gasta o convierte monedas primero.</p> : (
+        <>
+          <Etiqueta texto={`Cuántas sacas (máx. ${maxSacar})`}><input className="campo" inputMode="numeric" value={txt} onChange={(e) => setTxt(e.target.value.replace(/\D/g, ''))} /></Etiqueta>
+          {ok && <p className="formula-grande">{p.monedas[b.moneda]} + {n} = <strong>{p.monedas[b.moneda] + n} {b.moneda}</strong></p>}
+        </>
       )}
     </Modal>
   );
@@ -186,7 +263,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
           </select>
         </Etiqueta>
       </div>
-      <Etiqueta texto="Descripción"><textarea className="campo" rows={5} value={borrador.descripcion} onChange={(e) => setBorrador({ ...borrador, descripcion: e.target.value })} placeholder="Qué hace, cuánto cura, cuánto daño…" /></Etiqueta>
+      <Etiqueta texto="Descripción"><Texto multilinea filas={5} valor={borrador.descripcion} set={(v) => setBorrador((b) => b && { ...b, descripcion: v })} placeholder="Qué hace, cuánto cura, cuánto daño…" /></Etiqueta>
     </Modal>
   );
 
@@ -265,7 +342,13 @@ function Monedas() {
   const { p, upd } = useFicha();
   const [sumar, setSumar] = useState<{ m: Moneda; signo: 1 | -1 } | null>(null);
   const [conv, setConv] = useState(false);
-  const totalPO = MONEDAS.reduce((s, m) => s + p.monedas[m] * VALOR_PC[m], 0) / 100;
+  const bolsas = [...p.mochila, ...p.cinturon.items].filter((it) => it.bolsa);
+  const totalPO = (MONEDAS.reduce((s, m) => s + p.monedas[m] * VALOR_PC[m], 0) + bolsas.reduce((s, it) => s + it.bolsa!.cantidad * VALOR_PC[it.bolsa!.moneda], 0)) / 100;
+  const [aviso, setAviso] = useState('');
+  // Si ya había más de 500 (personajes antiguos), lo pasamos a bolsas en la mochila.
+  useEffect(() => {
+    if (MONEDAS.some((m) => p.monedas[m] > MAX_MONEDAS)) { upd((x) => { embolsarExceso(x); }); setAviso('Lo que pasaba de 500 se ha guardado en bolsas en la mochila.'); }
+  }, [p.monedas, upd]);
   return (
     <Seccion titulo="Bolsas de monedas" extra={<button className="btn enlace pequeno" onClick={() => setConv(true)}>⇄ Convertir</button>}>
       <ul className="monedas">
@@ -282,8 +365,9 @@ function Monedas() {
           );
         })}
       </ul>
-      {MONEDAS.some((m) => p.monedas[m] > MAX_MONEDAS) && <p className="error">⚠ Alguna bolsa pasa de {MAX_MONEDAS} monedas. Convierte o reparte.</p>}
-      <p className="nota">Valor total: {totalPO.toLocaleString('es', { maximumFractionDigits: 2 })} po.</p>
+      {aviso && <p className="exito">💰 {aviso}</p>}
+      {bolsas.length > 0 && <p className="nota">Además llevas {bolsas.length} bolsa{bolsas.length > 1 ? 's' : ''} llena{bolsas.length > 1 ? 's' : ''}: {bolsas.map((it) => `${it.bolsa!.cantidad} ${it.bolsa!.moneda}`).join(', ')}. Tócala en la mochila para sacar monedas.</p>}
+      <p className="nota">Valor total{bolsas.length ? ' (con bolsas)' : ''}: {totalPO.toLocaleString('es', { maximumFractionDigits: 2 })} po.</p>
       {sumar && <ModalSumar m={sumar.m} signo={sumar.signo} onClose={() => setSumar(null)} />}
       {conv && <ModalConvertir onClose={() => setConv(false)} />}
     </Seccion>
@@ -296,7 +380,7 @@ function ModalSumar({ m, signo, onClose }: { m: Moneda; signo: 1 | -1; onClose: 
   const v = parseInt(n, 10);
   const nuevo = isNaN(v) ? p.monedas[m] : p.monedas[m] + signo * v;
   const ok = !isNaN(v) && v > 0 && nuevo >= 0;
-  const aplicar = () => { if (!ok) return; upd((x) => { x.monedas[m] = nuevo; }); onClose(); };
+  const aplicar = () => { if (!ok) return; upd((x) => { x.monedas[m] = nuevo; embolsarExceso(x); }); onClose(); };
   return (
     <Modal titulo={`${signo > 0 ? 'Añadir' : 'Gastar'} ${NOMBRE_MONEDA[m].toLowerCase()} (${m})`} onClose={onClose}
       pie={<button className="btn primario" disabled={!ok} onClick={aplicar}>{signo > 0 ? 'Añadir' : 'Gastar'}</button>}>
@@ -305,7 +389,7 @@ function ModalSumar({ m, signo, onClose }: { m: Moneda; signo: 1 | -1; onClose: 
       </form>
       <p className="formula-grande">{p.monedas[m]} {signo > 0 ? '+' : '−'} {isNaN(v) ? 0 : v} = <strong>{nuevo}</strong></p>
       {nuevo < 0 && <p className="error">No tienes tantas.</p>}
-      {nuevo > MAX_MONEDAS && <p className="error">⚠ Pasarás de {MAX_MONEDAS} {m} en la bolsa.</p>}
+      {nuevo > MAX_MONEDAS && <p className="nota">Pasas de {MAX_MONEDAS}: {Math.floor((nuevo - 1) / MAX_MONEDAS)} bolsa{nuevo > 2 * MAX_MONEDAS + 1 ? 's' : ''} de {MAX_MONEDAS} {m} irá{nuevo > 2 * MAX_MONEDAS + 1 ? 'n' : ''} a la mochila y te quedarán {nuevo - Math.floor((nuevo - 1) / MAX_MONEDAS) * MAX_MONEDAS} en la bolsa.</p>}
     </Modal>
   );
 }
@@ -318,7 +402,7 @@ function ModalConvertir({ onClose }: { onClose: () => void }) {
   const r = convertir(p.monedas, desde, hacia, parseInt(n, 10));
   return (
     <Modal titulo="Convertir monedas" onClose={onClose}
-      pie={<button className="btn primario" disabled={!r.ok} onClick={() => { if (r.monedas) upd((x) => { x.monedas = r.monedas!; }); onClose(); }}>Convertir</button>}>
+      pie={<button className="btn primario" disabled={!r.ok} onClick={() => { if (r.monedas) upd((x) => { x.monedas = r.monedas!; embolsarExceso(x); }); onClose(); }}>Convertir</button>}>
       <div className="conversion">
         <Etiqueta texto="De"><select className="campo" value={desde} onChange={(e) => setDesde(e.target.value as Moneda)}>{MONEDAS.map((m) => <option key={m} value={m}>{m} · {NOMBRE_MONEDA[m]} ({p.monedas[m]})</option>)}</select></Etiqueta>
         <Etiqueta texto="Cantidad"><input className="campo" inputMode="numeric" value={n} onChange={(e) => setN(e.target.value.replace(/\D/g, ''))} placeholder="0" /></Etiqueta>
@@ -328,7 +412,7 @@ function ModalConvertir({ onClose }: { onClose: () => void }) {
       {n && (r.ok ? (
         <p className="exito">Recibes <strong>{r.monedas![hacia] - p.monedas[hacia]} {hacia}</strong>{r.resto ? `; ${r.resto} ${desde} sobran y se quedan en la bolsa` : ''}.</p>
       ) : <p className="error">{r.error}</p>)}
-      {r.ok && r.monedas![hacia] > MAX_MONEDAS && <p className="error">⚠ La bolsa de {hacia} pasará de {MAX_MONEDAS}.</p>}
+      {r.ok && r.monedas![hacia] > MAX_MONEDAS && <p className="nota">Lo que pase de {MAX_MONEDAS} {hacia} irá a la mochila en una bolsa de monedas.</p>}
     </Modal>
   );
 }

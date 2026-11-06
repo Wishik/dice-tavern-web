@@ -38,10 +38,63 @@ export function BotonAnadir({ onClick, aviso, children = 'Añadir' }: { onClick:
   );
 }
 
-export function Texto({ valor, set, placeholder, multilinea, filas = 3, className = '' }: { valor: string; set: (s: string) => void; placeholder?: string; multilinea?: boolean; filas?: number; className?: string }) {
-  return multilinea
+type Reconocedor = { lang: string; continuous: boolean; interimResults: boolean; start(): void; stop(): void; onresult: ((e: { resultIndex: number; results: ArrayLike<ArrayLike<{ transcript: string }> & { isFinal: boolean }> }) => void) | null; onend: (() => void) | null; onerror: ((e: { error: string }) => void) | null };
+const ClaseReconocedor = typeof window !== 'undefined'
+  ? ((window as unknown as Record<string, unknown>).SpeechRecognition ?? (window as unknown as Record<string, unknown>).webkitSpeechRecognition) as (new () => Reconocedor) | undefined
+  : undefined;
+export const dictadoDisponible = !!ClaseReconocedor;
+
+/** Botón de micrófono: escucha en español y entrega cada frase reconocida. */
+export function Microfono({ alTexto }: { alTexto: (frase: string) => void }) {
+  const [activo, setActivo] = useState(false);
+  const [error, setError] = useState('');
+  const rec = useRef<Reconocedor | null>(null);
+  const cb = useRef(alTexto); cb.current = alTexto;
+  useEffect(() => () => rec.current?.stop(), []);
+  if (!ClaseReconocedor) return null;
+  const alternar = () => {
+    if (activo) { rec.current?.stop(); return; }
+    const r = new ClaseReconocedor!();
+    r.lang = 'es-ES'; r.continuous = true; r.interimResults = false;
+    r.onresult = (e) => {
+      for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) cb.current(e.results[i][0].transcript.trim());
+    };
+    r.onend = () => setActivo(false);
+    r.onerror = (e) => { setActivo(false); setError(e.error === 'not-allowed' ? 'Permite el micrófono en el navegador.' : 'No se pudo escuchar.'); };
+    rec.current = r; setError(''); setActivo(true);
+    try { r.start(); } catch { setActivo(false); }
+  };
+  return (
+    <span className="microfono-envoltura">
+      <button type="button" className={`microfono ${activo ? 'escuchando' : ''}`} onClick={alternar} aria-label={activo ? 'Parar dictado' : 'Dictar por voz'} title={activo ? 'Parar' : 'Dictar por voz'}>
+        {activo ? '■' : '🎙'}
+      </button>
+      {error && <small className="error-mic">{error}</small>}
+    </span>
+  );
+}
+
+/** Añade una frase dictada al final de un texto, con espacio o salto de línea. */
+export const anadirFrase = (texto: string, frase: string, multilinea: boolean) => {
+  if (!frase) return texto;
+  const f = frase[0].toUpperCase() + frase.slice(1);
+  if (!texto.trim()) return f;
+  return texto.replace(/\s+$/, '') + (multilinea ? '\n' : ' ') + f;
+};
+
+export function Texto({ valor, set, placeholder, multilinea, filas = 3, className = '', voz }: { valor: string; set: (s: string) => void; placeholder?: string; multilinea?: boolean; filas?: number; className?: string; voz?: boolean }) {
+  const actual = useRef(valor); actual.current = valor;
+  const conVoz = (voz ?? multilinea) && dictadoDisponible;
+  const campo = multilinea
     ? <textarea className={`campo ${className}`} value={valor} placeholder={placeholder} rows={filas} onChange={(e) => set(e.target.value)} />
     : <input className={`campo ${className}`} value={valor} placeholder={placeholder} onChange={(e) => set(e.target.value)} />;
+  if (!conVoz) return campo;
+  return (
+    <div className={`con-voz ${multilinea ? 'multi' : ''}`}>
+      {campo}
+      <Microfono alTexto={(f) => set(anadirFrase(actual.current, f, !!multilinea))} />
+    </div>
+  );
 }
 
 export function Numero({ valor, set, min, max, className = '', ancho }: { valor: number; set: (n: number) => void; min?: number; max?: number; className?: string; ancho?: number }) {

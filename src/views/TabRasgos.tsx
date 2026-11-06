@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useFicha } from './Ficha';
-import { BotonAnadir, Buscador, Modal, PuntoRojo, Seccion, TextoLargo } from '../ui';
+import { BotonAnadir, Buscador, Modal, PuntoRojo, Seccion, Texto, TextoLargo } from '../ui';
 import { buscarClase, buscarRaza } from '../avisos';
 import type { Dote, RasgoDef } from '../data';
 import type { EntradaTexto } from '../types';
@@ -101,7 +101,7 @@ export function TabRasgos() {
             <button className="btn primario" onClick={() => setEditar(null)}>Listo</button>
           </>}>
           <label className="etiqueta"><span>Nombre</span><input className="campo" value={editar.e.nombre} onChange={(ev) => { const v = ev.target.value; setEditar({ ...editar, e: { ...editar.e, nombre: v } }); upd((x) => { x[editar.lista][editar.i].nombre = v; }); }} /></label>
-          <label className="etiqueta"><span>Descripción</span><textarea className="campo" rows={10} value={editar.e.texto} onChange={(ev) => { const v = ev.target.value; setEditar({ ...editar, e: { ...editar.e, texto: v } }); upd((x) => { x[editar.lista][editar.i].texto = v; }); }} /></label>
+          <label className="etiqueta"><span>Descripción</span><Texto multilinea filas={10} valor={editar.e.texto} set={(v) => { setEditar((ed) => ed && { ...ed, e: { ...ed.e, texto: v } }); upd((x) => { x[editar.lista][editar.i].texto = v; }); }} /></label>
         </Modal>
       )}
     </div>

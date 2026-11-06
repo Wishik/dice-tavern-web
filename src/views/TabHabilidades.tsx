@@ -13,14 +13,31 @@ export function TabHabilidades() {
   const clase = buscarClase(clases, p.clase);
   const sugeridas = new Set<string>();
   if (clase) (clase.atributos.habilidades.includes('*') ? HABILIDADES.map((h) => h.id) : clase.atributos.habilidades.map((h) => idHabilidad(h)).filter(Boolean) as string[]).forEach((x) => sugeridas.add(x));
+  const nComp = Object.values(p.habilidades).filter((h) => h.comp).length;
+  const nPericia = Object.values(p.habilidades).filter((h) => h.pericia).length;
+  const esperadas = (clase?.atributos.habilidadesN ?? 0) + (trasfondos?.find((t) => t.nombre === p.trasfondoEstilo)?.habilidades.length ?? 0);
+  const periciasEsperadas = clase ? clase.tabla.filter((f) => f.nivel <= p.nivel && /\bPericia\b/.test(f.rasgos)).length * 2 : 0;
   const deTrasfondo = new Set((trasfondos?.find((t) => t.nombre === p.trasfondoEstilo)?.habilidades ?? []).map((h) => idHabilidad(h)));
 
   return (
     <div className="tab">
-      {avisos.habilidades > 0 && (
-        <p className="aviso-rojo"><PuntoRojo /> Puedes elegir {avisos.habilidades} competencia{avisos.habilidades > 1 ? 's' : ''} más
-          {clase && <> ({clase.atributos.habilidadesN} de {p.clase}{deTrasfondo.size ? ' + 2 del trasfondo' : ''})</>}. Las sugeridas por tu clase están marcadas con ◆.</p>
-      )}
+      <Seccion titulo="Límites">
+        {!clase ? <p className="nota">Elige tu clase en la pestaña Personaje para ver cuántas competencias te tocan.</p> : (
+          <ul className="limites">
+            <li className={nComp > esperadas ? 'pasado' : nComp < esperadas ? 'falta' : 'ok'}>
+              <span>Competencias</span><strong>{nComp} / {esperadas}</strong>
+              <small>{clase.atributos.habilidadesN} de {p.clase}{deTrasfondo.size ? ` + ${deTrasfondo.size} del trasfondo` : ''}{avisos.habilidades > 0 && <> · <PuntoRojo /> te faltan {avisos.habilidades}</>}</small>
+            </li>
+            {periciasEsperadas > 0 && (
+              <li className={nPericia > periciasEsperadas ? 'pasado' : nPericia < periciasEsperadas ? 'falta' : 'ok'}>
+                <span>Pericias</span><strong>{nPericia} / {periciasEsperadas}</strong>
+                <small>Por el rasgo «Pericia» de {p.clase} hasta nivel {p.nivel}{nPericia < periciasEsperadas && <> · <PuntoRojo /> te faltan {periciasEsperadas - nPericia}</>}</small>
+              </li>
+            )}
+          </ul>
+        )}
+        {clase && <p className="nota pequena">◆ = habilidades que ofrece tu clase. Las razas y dotes pueden darte más: puedes marcar de más, solo se avisa.</p>}
+      </Seccion>
       <div className="fila-2-tarjetas">
         <div>
           {GRUPOS.slice(0, 1).map(([g, t]) => <Grupo key={g} grupo={g} titulo={t} sugeridas={sugeridas} />)}
@@ -41,10 +58,10 @@ export function TabHabilidades() {
             <div className="muerte">
               <span>Contra muerte</span>
               <div className="fila-muerte">
-                {[0, 1, 2].map((i) => <button key={'e' + i} className={`corazon ${p.muerte.exitos > i ? 'on' : ''}`} onClick={() => upd((x) => { x.muerte.exitos = x.muerte.exitos > i ? i : i + 1; })}>♥</button>)}
+                {[0, 1, 2].map((i) => <button key={'e' + i} className={`corazon ${p.muerte.exitos > i ? 'on' : ''}`} onClick={() => upd((x) => { x.muerte.exitos = x.muerte.exitos > i ? i : i + 1; })}>{'\u2665\uFE0E'}</button>)}
               </div>
               <div className="fila-muerte">
-                {[0, 1, 2].map((i) => <button key={'f' + i} className={`calavera ${p.muerte.fallos > i ? 'on' : ''}`} onClick={() => upd((x) => { x.muerte.fallos = x.muerte.fallos > i ? i : i + 1; })}>☠</button>)}
+                {[0, 1, 2].map((i) => <button key={'f' + i} className={`calavera ${p.muerte.fallos > i ? 'on' : ''}`} onClick={() => upd((x) => { x.muerte.fallos = x.muerte.fallos > i ? i : i + 1; })}>{'\u2620\uFE0E'}</button>)}
               </div>
               <button className="btn" onClick={() => tirarD20('Salvación contra muerte', 0)}>Tirar</button>
             </div>

@@ -191,3 +191,43 @@ export function parseFormula(f: string): { dados: { n: number; caras: number }[]
   }
   return { dados, mod };
 }
+
+// ---------------------------------------------------------------- Experiencia y nivel
+/** PX totales para alcanzar cada nivel (tabla «Progreso de los personajes»). Índice = nivel. */
+export const PX_NIVEL = [0, 0, 300, 900, 2700, 6500, 14000, 23000, 34000, 48000, 64000, 85000, 100000, 120000, 140000, 165000, 195000, 225000, 265000, 305000, 355000];
+/** PX que hacen falta para pasar de `nivel` a `nivel + 1` (null en nivel 20). */
+export function pxParaSubir(nivel: number): number | null {
+  return nivel >= 20 || nivel < 1 ? null : PX_NIVEL[nivel + 1] - PX_NIVEL[nivel];
+}
+/** Sube de nivel mientras los PX alcancen; el resto se queda como PX. */
+export function aplicarExperiencia(nivel: number, exp: number): { nivel: number; exp: number; subidos: number } {
+  let n = nivel, e = Math.max(0, exp), subidos = 0;
+  for (let c = pxParaSubir(n); c !== null && e >= c; c = pxParaSubir(n)) { e -= c; n++; subidos++; }
+  return { nivel: n, exp: e, subidos };
+}
+
+// ---------------------------------------------------------------- Bolsas llenas y ventas
+/** Saca a la mochila una bolsa de 500 por cada vez que una moneda pasa de 500. Devuelve cuántas bolsas creó. */
+export function embolsarExceso(p: Personaje): number {
+  let n = 0;
+  for (const m of Object.keys(p.monedas) as Moneda[]) {
+    while (p.monedas[m] > MAX_MONEDAS) {
+      p.monedas[m] -= MAX_MONEDAS;
+      p.mochila.push(bolsaMonedas(m, MAX_MONEDAS));
+      n++;
+    }
+  }
+  return n;
+}
+export function bolsaMonedas(m: Moneda, cantidad: number): Item {
+  return {
+    id: uid(), nombre: `Bolsa de ${NOMBRE_MONEDA[m].toLowerCase()} (${cantidad} ${m})`, tipo: 'monedas', cantidad: 1,
+    precio: '', descripcion: `Una bolsa llena con ${cantidad} ${m}. Ocupa un espacio en la mochila.`, bolsa: { moneda: m, cantidad },
+  };
+}
+/** Lee un precio libre como «50po», «155 pc» o «1,5 po». */
+export function leerPrecio(s: string): { cantidad: number; moneda: Moneda } | null {
+  const m = s.replace(',', '.').match(/(\d+(?:\.\d+)?)\s*(pm|pl|po|pe|pp|pc)\b/i);
+  if (!m) return null;
+  return { cantidad: parseFloat(m[1]), moneda: m[2].toUpperCase() as Moneda };
+}

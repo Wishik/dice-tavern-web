@@ -1,7 +1,7 @@
 import { Fragment, useRef, useState } from 'react';
 import { useFicha } from './Ficha';
 import { Etiqueta, Modal, Numero, PuntoRojo, Seccion, Texto, TextoLargo, comprimirFoto } from '../ui';
-import { HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, huecoDisponible, idHabilidad } from '../rules';
+import { HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, aplicarExperiencia, huecoDisponible, idHabilidad, pxParaSubir } from '../rules';
 import { ATRIBUTOS, type Atributo, type Personaje } from '../types';
 import { buscarClase, buscarRaza } from '../avisos';
 
@@ -10,6 +10,7 @@ const ABREV: Record<string, Atributo> = { FUE: 'FUE', DES: 'DES', CON: 'CON', IN
 export function TabPersonaje() {
   const { p, upd, clases, razas, trasfondos, avisos } = useFicha();
   const [info, setInfo] = useState<'raza' | 'clase' | 'trasfondo' | null>(null);
+  const [verExp, setVerExp] = useState(false);
   const [errFoto, setErrFoto] = useState('');
   const inputFoto = useRef<HTMLInputElement>(null);
   const clase = buscarClase(clases, p.clase);
@@ -56,10 +57,12 @@ export function TabPersonaje() {
             <Etiqueta texto="Nombre"><Texto valor={p.nombre} set={(s) => upd((x) => { x.nombre = s; })} /></Etiqueta>
             <div className="fila-2">
               <Etiqueta texto="Nivel"><Numero valor={p.nivel} min={1} max={20} set={(n) => upd((x) => { x.nivel = n; })} /></Etiqueta>
-              <Etiqueta texto="Exp."><Texto valor={p.exp} set={(s) => upd((x) => { x.exp = s; })} /></Etiqueta>
+              <Etiqueta texto="Exp."><button type="button" className="campo boton-exp" onClick={() => setVerExp(true)}>{p.exp}{pxParaSubir(p.nivel) !== null && <small> / {pxParaSubir(p.nivel)}</small>}</button></Etiqueta>
             </div>
+            {pxParaSubir(p.nivel) !== null && <div className="barra-exp"><div style={{ width: `${Math.min(100, (p.exp / pxParaSubir(p.nivel)!) * 100)}%` }} /></div>}
           </div>
         </div>
+        {verExp && <ModalExperiencia onClose={() => setVerExp(false)} />}
         {p.foto && <button className="btn enlace pequeno" onClick={() => upd((x) => { x.foto = ''; })}>Quitar foto</button>}
         {errFoto && <p className="error">{errFoto}</p>}
         <div className="rejilla-campos">
@@ -222,5 +225,32 @@ function Huecos({ huecos, valores, set, p }: { huecos: readonly { id: string; et
         );
       })}
     </ul>
+  );
+}
+
+function ModalExperiencia({ onClose }: { onClose: () => void }) {
+  const { p, upd } = useFicha();
+  const [txt, setTxt] = useState('');
+  const n = parseInt(txt, 10) || 0;
+  const r = aplicarExperiencia(p.nivel, p.exp + n);
+  const necesita = pxParaSubir(p.nivel);
+  const aplicar = () => { if (!n) return; upd((x) => { const q = aplicarExperiencia(x.nivel, x.exp + n); x.nivel = q.nivel; x.exp = q.exp; }); onClose(); };
+  return (
+    <Modal titulo="Experiencia" onClose={onClose}
+      pie={<button className="btn primario" disabled={!n} onClick={aplicar}>Añadir PX</button>}>
+      <p className="nota">Nivel {p.nivel}: llevas <strong>{p.exp}</strong>{necesita !== null ? <> de <strong>{necesita}</strong> PX para subir a nivel {p.nivel + 1}.</> : ' PX (nivel máximo).'} Al subir, lo que sobra se queda como experiencia.</p>
+      <form onSubmit={(e) => { e.preventDefault(); aplicar(); }}>
+        <input className="campo grande" autoFocus inputMode="numeric" value={txt} onChange={(e) => setTxt(e.target.value.replace(/\D/g, ''))} placeholder="PX ganados" />
+      </form>
+      {n > 0 && <p className="formula-grande">{p.exp} + {n} = <strong>{p.exp + n}</strong></p>}
+      {n > 0 && r.subidos > 0 && <p className="exito">¡Subes a nivel {r.nivel}! Te quedan {r.exp} PX{pxParaSubir(r.nivel) !== null ? ` de ${pxParaSubir(r.nivel)}` : ''}. Recuerda subir PG y lo demás.</p>}
+      <details className="corregir">
+        <summary>Corregir a mano</summary>
+        <div className="fila-2">
+          <Etiqueta texto="Nivel"><Numero valor={p.nivel} min={1} max={20} set={(v) => upd((x) => { x.nivel = v; })} /></Etiqueta>
+          <Etiqueta texto="PX actuales"><Numero valor={p.exp} min={0} set={(v) => upd((x) => { x.exp = v; })} /></Etiqueta>
+        </div>
+      </details>
+    </Modal>
   );
 }

@@ -1,0 +1,17 @@
+{
+  "name": "Dice Tavern",
+  "short_name": "Dice Tavern",
+  "description": "Hoja de personaje y dados para D&D",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1a120c",
+  "theme_color": "#1a120c",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

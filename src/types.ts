@@ -16,7 +16,9 @@ export interface Item {
   cantidad: number;
   /** Máximo de unidades por espacio (flechas/virotes: 20). Sin valor: la pila ocupa 1 espacio. */
   maxPorEspacio?: number;
-  tipo: 'pocion' | 'arma' | 'armadura' | 'escudo' | 'herramienta' | 'consumible' | 'otro';
+  tipo: 'pocion' | 'arma' | 'armadura' | 'escudo' | 'herramienta' | 'consumible' | 'monedas' | 'otro';
+  /** Bolsa llena de monedas que sale de las bolsas de monedas al pasar de 500. */
+  bolsa?: { moneda: Moneda; cantidad: number };
   /** Datos extra mostrados en la ficha del objeto (daño, CA, propiedades...). */
   detalles?: Record<string, string>;
 }
@@ -65,7 +67,8 @@ export interface Personaje {
   clase: string;
   subclase: string;
   nivel: number;
-  exp: string;
+  /** PX acumulados hacia el siguiente nivel (al subir se resta lo gastado). */
+  exp: number;
   trasfondoEstilo: string;
   trasfondo: string;
   personalidad: string;
