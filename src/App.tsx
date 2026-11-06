@@ -10,9 +10,15 @@ export default function App() {
   const [abierto, setAbierto] = useState<string | null>(() => new URLSearchParams(location.search).get('p'));
 
   useEffect(() => {
-    backend.usuario().then(setUsuario).catch(() => setUsuario(null));
-    const sub = supabase?.auth.onAuthStateChange(() => backend.usuario().then(setUsuario));
-    return () => sub?.data.subscription.unsubscribe();
+    let listo = false;
+    backend.usuario().then((u) => { listo = true; setUsuario(u); }).catch(() => { listo = true; setUsuario(null); });
+    // Si la sesión tarda demasiado, mostramos la pantalla de entrada en vez de quedarnos colgados.
+    const t = setTimeout(() => { if (!listo) setUsuario((u) => (u === undefined ? null : u)); }, 8000);
+    // Importante: no llamar a Supabase dentro de este callback (provoca un bloqueo); usar la sesión que llega.
+    const sub = supabase?.auth.onAuthStateChange((_ev, s) => {
+      setUsuario(s?.user ? { id: s.user.id, email: s.user.email ?? '' } : null);
+    });
+    return () => { clearTimeout(t); sub?.data.subscription.unsubscribe(); };
   }, []);
 
   useEffect(() => {

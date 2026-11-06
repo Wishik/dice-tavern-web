@@ -41,7 +41,8 @@ export const backendLocal: Backend = {
 function backendNube(sb: SupabaseClient): Backend {
   return {
     modo: 'nube',
-    async usuario() { const { data } = await sb.auth.getUser(); return data.user ? { id: data.user.id, email: data.user.email ?? '' } : null; },
+    // getSession lee la sesión guardada en el navegador (sin red); getUser podía quedarse colgado.
+    async usuario() { const { data } = await sb.auth.getSession(); const u = data.session?.user; return u ? { id: u.id, email: u.email ?? '' } : null; },
     async entrar(email, clave) { const { error } = await sb.auth.signInWithPassword({ email, password: clave }); if (error) throw new Error(traducir(error.message)); },
     async registrar(email, clave) {
       const { data, error } = await sb.auth.signUp({ email, password: clave, options: { emailRedirectTo: location.origin } });
@@ -60,9 +61,8 @@ function backendNube(sb: SupabaseClient): Backend {
       return data ? normalizar(data.datos as Personaje) : null;
     },
     async guardar(p) {
-      const { data: u } = await sb.auth.getUser();
-      if (!u.user) throw new Error('La sesión ha caducado. Sal y vuelve a entrar.');
-      const { error } = await sb.from('personajes').upsert({ id: p.id, propietario: u.user!.id, datos: p, actualizado: p.actualizado });
+      // propietario lo rellena la base de datos (default auth.uid()).
+      const { error } = await sb.from('personajes').upsert({ id: p.id, datos: p, actualizado: p.actualizado });
       if (error) throw new Error(error.message);
     },
     async borrar(id) { const { error } = await sb.from('personajes').delete().eq('id', id); if (error) throw new Error(error.message); },
