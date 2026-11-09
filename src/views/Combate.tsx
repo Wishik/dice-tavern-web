@@ -209,7 +209,7 @@ function ModalAnadirEnemigos({ monstruos, onClose, onAnadir, onVer }: { monstruo
   const [propio, setPropio] = useState({ nombre: '', ca: 12, pg: 10, bono: 0 });
   const lista = useMemo(() => {
     const t = q.trim().toLowerCase();
-    return monstruos.filter((m) => !t || [m.es, m.ru, m.en].some((s) => s.toLowerCase().includes(t))).sort((a, b) => a.vd - b.vd || nombreM(a).localeCompare(nombreM(b))).slice(0, 80);
+    return monstruos.filter((m) => !t || [m.es, m.ru, m.en].some((s) => s.toLowerCase().includes(t))).sort((a, b) => a.vd - b.vd || nombreM(a).localeCompare(nombreM(b)));
   }, [q, monstruos]);
   const tirarPg = (dg: string) => {
     const m = dg.replace(/\s/g, '').match(/^(\d+)d(\d+)([+-]\d+)?$/);
@@ -233,6 +233,7 @@ function ModalAnadirEnemigos({ monstruos, onClose, onAnadir, onVer }: { monstruo
           : crear({ id: null, nombre: propio.nombre.trim(), ca: propio.ca, pg: propio.pg, bono: propio.bono }))}>{L('Añadir', 'Добавить')}</button>
       </>}>
       <input className="campo" autoFocus placeholder={L('Buscar: goblin, lobo, dragón…', 'Поиск: гоблин, волк, дракон…')} value={q} onChange={(e) => { setQ(e.target.value); setSel(null); }} />
+      <p className="nota">{L(`${lista.length} de ${monstruos.length} monstruos`, `${lista.length} из ${monstruos.length} монстров`)}</p>
       <ul className="lista-monstruos">
         {lista.map((m) => (
           <li key={m.id} className={sel?.id === m.id ? 'sel' : ''}>
