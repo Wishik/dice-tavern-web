@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { backend, supabase, type Resumen, type Usuario } from './store';
 import { nuevoPersonaje } from './personaje';
+import { cargarRu } from './datosRu';
 import { DiceProvider, PanelDados, DadoIcono } from './dice';
 import { Ficha } from './views/Ficha';
 import { Modal } from './ui';
@@ -11,6 +12,9 @@ export default function App() {
   const [usuario, setUsuario] = useState<Usuario | null | undefined>(undefined);
   const [recuperando, setRecuperando] = useState(false);
   const [abierto, setAbierto] = useState<string | null>(() => new URLSearchParams(location.search).get('p'));
+  // En ruso hay que cargar antes las traducciones del manual; la clave de DiceProvider fuerza a repintar todo.
+  const [ruListo, setRuListo] = useState(false);
+  useEffect(() => { if (idioma === 'ru') cargarRu().then(() => setRuListo(true)); }, [idioma]);
 
   useEffect(() => {
     let listo = false;
@@ -33,7 +37,7 @@ export default function App() {
 
   if (usuario === undefined) return <div className="cargando">{L('Cargando la taberna…', 'Открываем таверну…')}</div>;
   return (
-    <DiceProvider key={idioma}>
+    <DiceProvider key={idioma + (ruListo ? '1' : '0')}>
       {recuperando && usuario ? <NuevaClave onListo={() => setRecuperando(false)} />
         : !usuario ? <Entrada onOk={setUsuario} /> : abierto
         ? <Ficha id={abierto} onVolver={() => setAbierto(null)} />

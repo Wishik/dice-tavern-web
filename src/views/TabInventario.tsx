@@ -9,6 +9,7 @@ import {
 import { MONEDAS, RANURAS_EQUIPO, type Item, type Moneda, type Personaje, type RanuraEquipo, type TamanoCinturon } from '../types';
 import { L, T, idioma, RU_MONEDAS } from '../i18n';
 import { tr } from '../ru';
+import { td } from '../datosRu';
 
 type Lugar = { zona: 'mochila' | 'cinturon'; i: number } | { zona: 'equipo'; r: RanuraEquipo };
 type Destino = { zona: 'mochila' | 'cinturon' } | { zona: 'equipo'; r: RanuraEquipo };
@@ -59,7 +60,7 @@ export function TabInventario() {
                 <span className="ranura-icono">{r.icono}</span>
                 <div className="ranura-cuerpo">
                   <small>{tr(r.nombre)}</small>
-                  {it ? <button className="item-boton" onClick={() => setAbierto({ zona: 'equipo', r: r.id })}>{it.nombre}{resumenItem(it)}</button>
+                  {it ? <button className="item-boton" onClick={() => setAbierto({ zona: 'equipo', r: r.id })}>{td(it.nombre)}{resumenItem(it)}</button>
                     : <button className="btn enlace" onClick={() => setAnadir({ zona: 'equipo', r: r.id })}>+ {L('Equipar', 'Надеть')}</button>}
                 </div>
               </li>
@@ -130,7 +131,7 @@ function ListaItems({ items, libres, onAbrir, mostrarTramos }: { items: Item[]; 
         return (
           <li key={it.id} className={tramo >= 0 ? `sobre t${tramo}` : desde > libres ? 'sobre' : ''}>
             <span className="num">{n > 1 ? `${desde}-${pos}` : desde}</span>
-            <button className="item-boton" onClick={() => onAbrir(i)}>{it.nombre}{resumenItem(it)}</button>
+            <button className="item-boton" onClick={() => onAbrir(i)}>{td(it.nombre)}{resumenItem(it)}</button>
             {tramo >= 0 && <span className="etq-penal">{TRAMOS_SOBRECARGA[tramo].velocidad}p</span>}
           </li>
         );
@@ -149,7 +150,7 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
   const [vender, setVender] = useState(false);
   if (it.bolsa) return <ModalBolsa lugar={lugar} onClose={onClose} />;
   return (
-    <Modal titulo={it.nombre} onClose={onClose}
+    <Modal titulo={td(it.nombre)} onClose={onClose}
       pie={<div className="acciones-item">
         {usable && <button className="btn primario" onClick={() => {
           if (it.cantidad <= 1) { upd((x) => { quitar(x, lugar); }); onClose(); } else set((y) => { y.cantidad -= 1; });
@@ -212,7 +213,7 @@ function ModalVender({ lugar, onClose, onVendido }: { lugar: Lugar; onClose: () 
     onClose(); onVendido();
   };
   return (
-    <Modal titulo={`${L('Vender', 'Продать')} ${it.nombre}`} onClose={onClose}
+    <Modal titulo={`${L('Vender', 'Продать')} ${td(it.nombre)}`} onClose={onClose}
       pie={<button className="btn primario" disabled={!ok} onClick={vender}>{L('Vender', 'Продать')}{ok ? L(` por ${total} ${moneda}`, ` за ${total} ${moneda}`) : ''}</button>}>
       <div className="rejilla-campos">
         {it.cantidad > 1 && <Etiqueta texto={L(`Cuántos (tienes ${it.cantidad})`, `Сколько (есть ${it.cantidad})`)}><Numero valor={cant} min={1} max={it.cantidad} set={cambiarCant} /></Etiqueta>}
@@ -248,7 +249,7 @@ function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
     onClose();
   };
   return (
-    <Modal titulo={it.nombre} onClose={onClose}
+    <Modal titulo={td(it.nombre)} onClose={onClose}
       pie={<div className="acciones-item">
         <button className="btn primario" disabled={!ok} onClick={sacar}>{L('Pasar a mis monedas', 'Переложить в мои монеты')}</button>
         {lugar.zona === 'mochila' && <button className="btn" onClick={() => { upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'cinturon' }); }); onClose(); }}>{L('Al cinturón', 'На пояс')}</button>}
@@ -304,7 +305,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
         <>
           <h4>{L('De tu inventario', 'Из инвентаря')}</h4>
           <div className="lista-opciones">
-            {sueltos.map(({ it, l }) => <button key={it.id} className="btn" onClick={() => { if (!cabe(p, it, destino, l)) return; upd((x) => { const y = quitar(x, l); if (y) poner(x, y, destino); }); onClose(); }}>{it.nombre} <small>({l.zona === 'mochila' ? L('mochila', 'рюкзак') : L('cinturón', 'пояс')})</small></button>)}
+            {sueltos.map(({ it, l }) => <button key={it.id} className="btn" onClick={() => { if (!cabe(p, it, destino, l)) return; upd((x) => { const y = quitar(x, l); if (y) poner(x, y, destino); }); onClose(); }}>{td(it.nombre)} <small>({l.zona === 'mochila' ? L('mochila', 'рюкзак') : L('cinturón', 'пояс')})</small></button>)}
           </div>
           <h4>{L('Nuevo objeto', 'Новый предмет')}</h4>
         </>
@@ -313,7 +314,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
         <Buscador<ObjetoBase>
           items={base} texto={(o) => o.nombre} placeholder="Escribe el nombre del objeto…"
           filtro={(o) => destino.zona !== 'equipo' || !['yelmo', 'amuleto', 'capa'].includes(destino.r) || o.tipo === 'otro'}
-          render={(o) => <span className="res-conjuro"><strong>{o.nombre}</strong><small>{o.categoria}{o.precio ? ` · ${o.precio}` : ''}{o.detalles?.['Daño'] ? ` · ${o.detalles['Daño']}` : ''}{o.detalles?.['Clase de armadura'] ? ` · ${L('CA', 'КД')} ${o.detalles['Clase de armadura']}` : ''}</small></span>}
+          render={(o) => <span className="res-conjuro"><strong>{td(o.nombre)}</strong><small>{td(o.categoria)}{o.precio ? ` · ${o.precio}` : ''}{o.detalles?.['Daño'] ? ` · ${o.detalles['Daño']}` : ''}{o.detalles?.['Clase de armadura'] ? ` · ${L('CA', 'КД')} ${o.detalles['Clase de armadura']}` : ''}</small></span>}
           onElegir={(o) => setBorrador(typeof o === 'string'
             ? { id: uid(), nombre: o, descripcion: '', precio: '', cantidad: 1, tipo: 'otro' }
             : { id: uid(), nombre: o.nombre, descripcion: o.descripcion, precio: o.precio, cantidad: o.maxPorEspacio ? 20 : 1, tipo: o.tipo, detalles: o.detalles, maxPorEspacio: o.maxPorEspacio })}

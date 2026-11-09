@@ -1,4 +1,5 @@
 import { idioma } from './i18n';
+import { td } from './datosRu';
 
 /** Traducciones al ruso de títulos, etiquetas y textos de ayuda que pasan por los componentes de ui.tsx. */
 const RU: Record<string, string> = {
@@ -50,6 +51,6 @@ const RU: Record<string, string> = {
 };
 
 /** Traduce un texto fijo de la interfaz si hay traducción; si no, lo deja igual. */
-export const tr = (s: string) => (idioma() === 'ru' ? RU[s] ?? s : s);
+export const tr = (s: string) => (idioma() === 'ru' ? RU[s] ?? td(s) : s);
 /** Como tr, pero deja pasar lo que no sea texto (elementos de React). */
 export const trN = <T,>(x: T): T => (typeof x === 'string' ? (tr(x) as unknown as T) : x);

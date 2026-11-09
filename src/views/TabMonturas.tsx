@@ -8,6 +8,7 @@ import { nuevaMontura } from '../personaje';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Item, type Montura } from '../types';
 import { L, T, RU_NOMBRE_ATRIBUTO } from '../i18n';
 import { tr } from '../ru';
+import { td } from '../datosRu';
 
 type Zona = 'equipo' | 'carga';
 interface MonturaBase { nombre: string; tamano: string; ca: number; pg: number; dadosPG: string; precio: string;
@@ -45,7 +46,7 @@ export function TabMonturas() {
         <Modal titulo="Añadir montura" onClose={() => setElegir(false)}>
           {!base ? <p>{L('Cargando monturas…', 'Загружаю скакунов…')}</p> : (
             <Buscador<MonturaBase> items={base} texto={(b) => b.nombre} placeholder="Caballo, grifo, poni…"
-              render={(b) => <span className="res-conjuro"><strong>{b.nombre}</strong><small>{b.tamano} · {L('CA', 'КД')} {b.ca} · {L('PG', 'Хиты')} {b.pg} · {b.velocidad.andando} {L('pies', 'фт')}{b.velocidad.volando ? L(`, vuela ${b.velocidad.volando}`, `, полёт ${b.velocidad.volando}`) : ''}{b.velocidad.nadando ? L(`, nada ${b.velocidad.nadando}`, `, плавание ${b.velocidad.nadando}`) : ''}{b.precio ? ` · ${b.precio}` : ''}</small></span>}
+              render={(b) => <span className="res-conjuro"><strong>{td(b.nombre)}</strong><small>{td(b.tamano)} · {L('CA', 'КД')} {b.ca} · {L('PG', 'Хиты')} {b.pg} · {b.velocidad.andando} {L('pies', 'фт')}{b.velocidad.volando ? L(`, vuela ${b.velocidad.volando}`, `, полёт ${b.velocidad.volando}`) : ''}{b.velocidad.nadando ? L(`, nada ${b.velocidad.nadando}`, `, плавание ${b.velocidad.nadando}`) : ''}{b.precio ? ` · ${b.precio}` : ''}</small></span>}
               onElegir={(b) => typeof b === 'string' ? (() => { crear(); })() : crear(b)} />
           )}
           <button className="btn" onClick={() => crear()}>{L('Montura vacía (rellenar a mano)', 'Пустой скакун (заполнить вручную)')}</button>
@@ -180,7 +181,7 @@ function ListaMontura({ items, onAbrir }: { items: Item[]; onAbrir: (i: number) 
       {items.map((it, i) => (
         <li key={it.id}>
           <span className="num">{espaciosItem(it)}</span>
-          <button className="item-boton" onClick={() => onAbrir(i)}>{it.nombre}{it.cantidad > 1 && <span className="cant"> ×{it.cantidad}</span>}{it.precio && <span className="precio">{it.precio}</span>}</button>
+          <button className="item-boton" onClick={() => onAbrir(i)}>{td(it.nombre)}{it.cantidad > 1 && <span className="cant"> ×{it.cantidad}</span>}{it.precio && <span className="precio">{it.precio}</span>}</button>
         </li>
       ))}
     </ol>
@@ -198,7 +199,7 @@ function ModalAnadirMontura({ m, zona, onClose }: { m: Montura; zona: Zona; onCl
         <>
           <h4>{L('De tu mochila', 'Из рюкзака')}</h4>
           <div className="lista-opciones">
-            {p.mochila.map((it, i) => <button key={it.id} className="btn" onClick={() => { upd((x) => { const [y] = x.mochila.splice(i, 1); if (y) x.monturas.find((z) => z.id === m.id)?.[zona].push(y); }); onClose(); }}>{it.nombre}{it.cantidad > 1 ? ` ×${it.cantidad}` : ''}</button>)}
+            {p.mochila.map((it, i) => <button key={it.id} className="btn" onClick={() => { upd((x) => { const [y] = x.mochila.splice(i, 1); if (y) x.monturas.find((z) => z.id === m.id)?.[zona].push(y); }); onClose(); }}>{td(it.nombre)}{it.cantidad > 1 ? ` ×${it.cantidad}` : ''}</button>)}
           </div>
           <h4>{L('Nuevo objeto', 'Новый предмет')}</h4>
         </>
@@ -206,7 +207,7 @@ function ModalAnadirMontura({ m, zona, onClose }: { m: Montura; zona: Zona; onCl
       {!base ? <p>{L('Cargando base de objetos…', 'Загружаю базу предметов…')}</p> : (
         <Buscador<ObjetoBase>
           items={base} texto={(o) => o.nombre} placeholder={zona === 'equipo' ? L('Barda, silla, bolsas laterales…', 'Бард, седло, седельные сумки…') : L('Escribe el nombre del objeto…', 'Напиши название предмета…')}
-          render={(o) => <span className="res-conjuro"><strong>{o.nombre}</strong><small>{o.categoria}{o.precio ? ` · ${o.precio}` : ''}</small></span>}
+          render={(o) => <span className="res-conjuro"><strong>{td(o.nombre)}</strong><small>{td(o.categoria)}{o.precio ? ` · ${o.precio}` : ''}</small></span>}
           onElegir={(o) => {
             poner(typeof o === 'string'
               ? { id: uid(), nombre: o, descripcion: '', precio: '', cantidad: 1, tipo: 'otro' }
@@ -229,7 +230,7 @@ function ModalItemMontura({ m, zona, i, onClose }: { m: Montura; zona: Zona; i: 
   };
   const otra: Zona = zona === 'equipo' ? 'carga' : 'equipo';
   return (
-    <Modal titulo={it.nombre} onClose={onClose}
+    <Modal titulo={td(it.nombre)} onClose={onClose}
       pie={<div className="acciones-item">
         <button className="btn" onClick={() => sacar((x, y) => { x.monturas.find((z) => z.id === m.id)?.[otra].push(y); })}>{otra === 'equipo' ? L('Equipar', 'Надеть') : L('A las bolsas', 'В сумки')}</button>
         <button className="btn" onClick={() => { if (!cabeEnMochila(p, it)) { alert(L(`Tu mochila está llena (máx. ${MOCHILA_MAX} espacios).`, `Рюкзак полон (макс. ${MOCHILA_MAX} ячеек).`)); return; } sacar((x, y) => { x.mochila.push(y); }); }}>{L('A tu mochila', 'В свой рюкзак')}</button>

@@ -5,6 +5,7 @@ import { CARACTERISTICA_CONJUROS, MAX_MUNICION, ataqueConjuros, avisosTirada, bo
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo, type Item, type Personaje } from '../types';
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
 import { tr } from '../ru';
+import { td } from '../datosRu';
 
 type ArmaLlevada = { it: Item; donde: string; ref: (x: Personaje) => Item | null | undefined };
 /** Armas que llevas en las manos o en el cinturón: salen solas en Combate. */
@@ -45,7 +46,7 @@ export function TabCombate() {
             const sinMunicion = municion && !(it.municion ?? 0);
             return (
               <li key={it.id} className="ataque auto">
-                <div className="ataque-titulo"><strong>{it.nombre}</strong><small>{tr(donde)}{tipo ? ` · ${tipo}` : ''}</small></div>
+                <div className="ataque-titulo"><strong>{td(it.nombre)}</strong><small>{tr(donde)}{tipo ? ` · ${tipo}` : ''}</small></div>
                 <div className="ataque-fila">
                   <button className="btn primario" disabled={sinMunicion} onClick={() => {
                     if (municion) upd((x) => { const y = ref(x); if (y) y.municion = Math.max(0, (y.municion ?? 0) - 1); });

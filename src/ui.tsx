@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { L, idioma } from './i18n';
 import { tr, trN } from './ru';
+import { td } from './datosRu';
 
 /** Parte de la pantalla que no tapa el teclado del móvil (visualViewport). */
 function useZonaVisible() {
@@ -144,12 +145,12 @@ export function Buscador<T>({ items, texto, onElegir, placeholder, render, filtr
   const [q, setQ] = useState('');
   const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
   const nq = norm(q.trim());
-  const res = items.filter((i) => (!filtro || filtro(i)) && (!nq || norm(texto(i)).includes(nq))).slice(0, 60);
+  const res = items.filter((i) => (!filtro || filtro(i)) && (!nq || norm(texto(i)).includes(nq) || norm(td(texto(i))).includes(nq))).slice(0, 60);
   return (
     <div className="buscador">
       <input className="campo" autoFocus value={q} placeholder={tr(placeholder)} onChange={(e) => setQ(e.target.value)} />
       <ul className="resultados">
-        {res.map((i, k) => <li key={k}><button onClick={() => onElegir(i)}>{render ? render(i) : texto(i)}</button></li>)}
+        {res.map((i, k) => <li key={k}><button onClick={() => onElegir(i)}>{render ? render(i) : td(texto(i))}</button></li>)}
         {q.trim() && !res.some((i) => norm(texto(i)) === nq) && (
           <li><button className="nuevo" onClick={() => onElegir(q.trim())}>➕ {L(`Crear «${q.trim()}» (no está en la base)`, `Создать «${q.trim()}» (нет в базе)`)}</button></li>
         )}
@@ -162,11 +163,11 @@ export function Buscador<T>({ items, texto, onElegir, placeholder, render, filtr
 export function ListaDatos({ datos }: { datos: Record<string, string> }) {
   const e = Object.entries(datos).filter(([, v]) => v && v !== '--');
   if (!e.length) return null;
-  return <dl className="lista-datos">{e.map(([k, v]) => <div key={k} className="par"><dt>{tr(k)}</dt><dd>{v}</dd></div>)}</dl>;
+  return <dl className="lista-datos">{e.map(([k, v]) => <div key={k} className="par"><dt>{tr(k)}</dt><dd>{td(v)}</dd></div>)}</dl>;
 }
 
 export function TextoLargo({ texto }: { texto: string }) {
-  return <div className="texto-largo">{texto.split('\n').map((p, i) => <p key={i}>{p}</p>)}</div>;
+  return <div className="texto-largo">{td(texto).split('\n').map((p, i) => <p key={i}>{p}</p>)}</div>;
 }
 
 /** Comprime una foto a JPEG de como mucho `lado` px para guardarla dentro del personaje. */

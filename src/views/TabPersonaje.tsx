@@ -6,6 +6,7 @@ import { ATRIBUTOS, type Atributo, type Personaje } from '../types';
 import { buscarClase, buscarRaza } from '../avisos';
 import { L, T, idioma, RU_ATRIBUTOS, RU_CLASES, RU_RAZAS } from '../i18n';
 import { tr } from '../ru';
+import { td } from '../datosRu';
 
 const ABREV: Record<string, Atributo> = { FUE: 'FUE', DES: 'DES', CON: 'CON', INT: 'INT', SAB: 'SAB', CAR: 'CAR' };
 
@@ -105,7 +106,7 @@ export function TabPersonaje() {
               <div className="con-boton">
                 <select className="campo" value={p.subclase} onChange={(e) => upd((x) => { x.subclase = e.target.value; })}>
                   <option value="">{L('— Ninguna —', '— Нет —')}</option>
-                  {clase.subclases.map((s) => <option key={s.nombre}>{s.nombre}</option>)}
+                  {clase.subclases.map((s) => <option key={s.nombre} value={s.nombre}>{td(s.nombre)}</option>)}
                 </select>
                 {avisos.subclase && <PuntoRojo titulo="A nivel 3 eliges subclase" />}
               </div>
@@ -121,12 +122,12 @@ export function TabPersonaje() {
           <div className="con-boton">
             <select className="campo" value={p.trasfondoEstilo} onChange={(e) => elegirTrasfondo(e.target.value)}>
               <option value="">{L('— Ninguno —', '— Нет —')}</option>
-              {trasfondos?.map((t) => <option key={t.nombre}>{t.nombre}</option>)}
+              {trasfondos?.map((t) => <option key={t.nombre} value={t.nombre}>{td(t.nombre)}</option>)}
             </select>
             {tras && <button className="btn icono" onClick={() => setInfo('trasfondo')}>ⓘ</button>}
           </div>
         </Etiqueta>
-        {tras && <p className="nota">{L('Competencia en', 'Владение:')} {tras.habilidades.join(L(' y ', ' и '))}. {L('Dote de origen a elegir:', 'Черта происхождения на выбор:')} {tras.dotes.join(', ')}.</p>}
+        {tras && <p className="nota">{L('Competencia en', 'Владение:')} {tras.habilidades.map(td).join(L(' y ', ' и '))}. {L('Dote de origen a elegir:', 'Черта происхождения на выбор:')} {tras.dotes.map(td).join(', ')}.</p>}
         <Etiqueta texto="Resumen"><Texto multilinea filas={5} valor={p.trasfondo} set={(s) => upd((x) => { x.trasfondo = s; })} placeholder="¿Quién te crió? ¿Qué te llevó a la aventura?" /></Etiqueta>
       </Seccion>
 
@@ -149,7 +150,7 @@ export function TabPersonaje() {
       <Seccion titulo="Idiomas" aviso={avisos.idiomas}>
         {idiomasFijos.length > 0 && (
           <ul className="idiomas-fijos">
-            {idiomasFijos.map((i) => <li key={i.nombre} className="chip-idioma" title={i.origen}>{i.nombre}<small>{i.origen}</small></li>)}
+            {idiomasFijos.map((i) => <li key={i.nombre} className="chip-idioma" title={i.origen}>{td(i.nombre)}<small>{i.origen}</small></li>)}
           </ul>
         )}
         <Huecos huecos={HUECOS_IDIOMAS} valores={p.idiomas} set={(k, v) => upd((x) => { x.idiomas[k] = v; })} p={p} />
@@ -167,32 +168,32 @@ export function TabPersonaje() {
       {info === 'raza' && raza && (
         <Modal titulo={T(RU_RAZAS, raza.nombre)} onClose={() => setInfo(null)}>
           <TextoLargo texto={raza.descripcion} />
-          <dl className="lista-datos"><dt>{L('Características', 'Характеристики')}</dt><dd>{raza.caracteristicas}</dd><dt>{L('Tamaño', 'Размер')}</dt><dd>{raza.tamano}</dd><dt>{L('Velocidad', 'Скорость')}</dt><dd>{raza.velocidad}</dd><dt>{L('Idiomas', 'Языки')}</dt><dd>{raza.idiomas}</dd></dl>
+          <dl className="lista-datos"><dt>{L('Características', 'Характеристики')}</dt><dd>{td(raza.caracteristicas)}</dd><dt>{L('Tamaño', 'Размер')}</dt><dd>{td(raza.tamano)}</dd><dt>{L('Velocidad', 'Скорость')}</dt><dd>{td(raza.velocidad)}</dd><dt>{L('Idiomas', 'Языки')}</dt><dd>{td(raza.idiomas)}</dd></dl>
           <h4>{L('Rasgos fijos', 'Постоянные особенности')}</h4>
-          {raza.rasgosFijos.map((r) => <div key={r.nombre} className="rasgo"><strong>{r.nombre}.</strong> {r.texto}</div>)}
-          <p className="nota">{raza.rasgosAdicionales}</p>
+          {raza.rasgosFijos.map((r) => <div key={r.nombre} className="rasgo"><strong>{td(r.nombre)}.</strong> {td(r.texto)}</div>)}
+          <p className="nota">{td(raza.rasgosAdicionales)}</p>
         </Modal>
       )}
       {info === 'clase' && clase && (
         <Modal titulo={T(RU_CLASES, clase.nombre)} onClose={() => setInfo(null)}>
           <TextoLargo texto={clase.descripcion} />
           <dl className="lista-datos">
-            <dt>{L('Característica principal', 'Основная характеристика')}</dt><dd>{clase.atributos.caracteristicaPrincipal}</dd>
+            <dt>{L('Característica principal', 'Основная характеристика')}</dt><dd>{td(clase.atributos.caracteristicaPrincipal)}</dd>
             <dt>{L('Dado de golpe', 'Кость хитов')}</dt><dd>1{clase.atributos.dadoGolpe} {L('por nivel', 'за уровень')}</dd>
             <dt>{L('Salvaciones', 'Спасброски')}</dt><dd>{clase.atributos.salvaciones.map((s) => T(RU_ATRIBUTOS, ABREV[s])).join(', ')}</dd>
             <dt>{L('Habilidades', 'Навыки')} ({clase.atributos.habilidadesN})</dt><dd>{clase.atributos.habilidades.includes('*') ? L('Cualquiera', 'Любые') : clase.atributos.habilidades.join(', ')}</dd>
-            <dt>{L('Armas', 'Оружие')}</dt><dd>{clase.atributos.armas}</dd><dt>{L('Armaduras', 'Доспехи')}</dt><dd>{clase.atributos.armaduras}</dd>
-            {clase.atributos.herramientas && <><dt>{L('Herramientas', 'Инструменты')}</dt><dd>{clase.atributos.herramientas}</dd></>}
-            <dt>{L('Equipo inicial', 'Стартовое снаряжение')}</dt><dd>{clase.atributos.equipo}</dd>
+            <dt>{L('Armas', 'Оружие')}</dt><dd>{td(clase.atributos.armas)}</dd><dt>{L('Armaduras', 'Доспехи')}</dt><dd>{td(clase.atributos.armaduras)}</dd>
+            {clase.atributos.herramientas && <><dt>{L('Herramientas', 'Инструменты')}</dt><dd>{td(clase.atributos.herramientas)}</dd></>}
+            <dt>{L('Equipo inicial', 'Стартовое снаряжение')}</dt><dd>{td(clase.atributos.equipo)}</dd>
           </dl>
           <TablaClase clase={clase} nivel={p.nivel} />
         </Modal>
       )}
       {info === 'trasfondo' && tras && (
-        <Modal titulo={tras.nombre} onClose={() => setInfo(null)}>
+        <Modal titulo={td(tras.nombre)} onClose={() => setInfo(null)}>
           <TextoLargo texto={tras.descripcion} />
-          <p>{L('Competencia en', 'Владение:')} <strong>{tras.habilidades.join(L(' y ', ' и '))}</strong>.</p>
-          <p>{L('Dote de origen a elegir:', 'Черта происхождения на выбор:')} {tras.dotes.join(', ')}.</p>
+          <p>{L('Competencia en', 'Владение:')} <strong>{tras.habilidades.map(td).join(L(' y ', ' и '))}</strong>.</p>
+          <p>{L('Dote de origen a elegir:', 'Черта происхождения на выбор:')} {tras.dotes.map(td).join(', ')}.</p>
         </Modal>
       )}
     </div>
@@ -205,7 +206,7 @@ export function TablaClase({ clase, nivel }: { clase: NonNullable<ReturnType<typ
       <table className="tabla">
         <thead><tr><th>{L('Nv', 'Ур')}</th><th>{L('Rasgos', 'Умения')}</th>{clase.columnas.map((c) => <th key={c}>{c}</th>)}</tr></thead>
         <tbody>{clase.tabla.map((f) => (
-          <tr key={f.nivel} className={f.nivel === nivel ? 'actual' : ''}><td>{f.nivel}</td><td>{f.rasgos}</td>{clase.columnas.map((c) => <td key={c}>{String(f[c] ?? '')}</td>)}</tr>
+          <tr key={f.nivel} className={f.nivel === nivel ? 'actual' : ''}><td>{f.nivel}</td><td>{td(f.rasgos)}</td>{clase.columnas.map((c) => <td key={c}>{String(f[c] ?? '')}</td>)}</tr>
         ))}</tbody>
       </table>
     </div>

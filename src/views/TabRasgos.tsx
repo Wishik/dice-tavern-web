@@ -6,6 +6,7 @@ import type { Dote, RasgoDef } from '../data';
 import type { EntradaTexto } from '../types';
 import { RASGOS_IDIOMA, RASGOS_RECOMENDADOS } from '../rules';
 import { L, T, RU_CLASES, RU_RAZAS } from '../i18n';
+import { td } from '../datosRu';
 
 export function TabRasgos() {
   const { p, upd, razas, clases, dotes, trasfondos, avisos } = useFicha();
@@ -27,7 +28,7 @@ export function TabRasgos() {
   ];
   const tieneExcl = p.rasgosRaza.some((n) => excl.some((e) => e.nombre === n));
   const tras = trasfondos?.find((t) => t.nombre === p.trasfondoEstilo);
-  const rasgosClase = [...(clase?.rasgos ?? []), ...(sub?.rasgos ?? []).map((r) => ({ ...r, nombre: `${r.nombre} (${sub!.nombre})` }))]
+  const rasgosClase = [...(clase?.rasgos ?? []), ...(sub?.rasgos ?? []).map((r) => ({ ...r, nombre: `${td(r.nombre)} (${td(sub!.nombre)})` }))]
     .filter((r) => r.nivel <= p.nivel && !RASGOS_IDIOMA[r.nombre]).sort((a, b) => a.nivel - b.nivel);
 
   return (
@@ -35,16 +36,16 @@ export function TabRasgos() {
       <Seccion titulo="Dotes" aviso={avisos.dotes}>
         {p.dotes.length === 0 && <p className="vacio">{L('Sin dotes.', 'Нет черт.')}</p>}
         <ul className="lista-rasgos">
-          {p.dotes.map((d, i) => <li key={i}><button onClick={() => setEditar({ lista: 'dotes', i, e: d })}><strong>{d.nombre}</strong><span>{d.texto.slice(0, 120)}{d.texto.length > 120 ? '…' : ''}</span></button></li>)}
+          {p.dotes.map((d, i) => <li key={i}><button onClick={() => setEditar({ lista: 'dotes', i, e: d })}><strong>{td(d.nombre)}</strong><span>{td(d.texto).slice(0, 120)}{d.texto.length > 120 ? '…' : ''}</span></button></li>)}
         </ul>
         <BotonAnadir aviso={avisos.dotes > 0} onClick={() => setModal('dote')}>Añadir dote</BotonAnadir>
-        {avisos.dotes > 0 && <p className="nota">{L(`Te ${avisos.dotes > 1 ? `faltan ${avisos.dotes} dotes` : 'falta 1 dote'}`, `Не хватает черт: ${avisos.dotes}`)}{tras ? L(` (de origen por ${tras.nombre}: ${tras.dotes.join(', ')})`, ` (черта происхождения от «${tras.nombre}»: ${tras.dotes.join(', ')})`) : ''}{clase ? L('; las «Mejora de característica» de tu clase también cuentan', '; «Увеличение характеристик» класса тоже считается') : ''}.</p>}
+        {avisos.dotes > 0 && <p className="nota">{L(`Te ${avisos.dotes > 1 ? `faltan ${avisos.dotes} dotes` : 'falta 1 dote'}`, `Не хватает черт: ${avisos.dotes}`)}{tras ? L(` (de origen por ${tras.nombre}: ${tras.dotes.map(td).join(', ')})`, ` (черта происхождения от «${tras.nombre}»: ${tras.dotes.map(td).join(', ')})`) : ''}{clase ? L('; las «Mejora de característica» de tu clase también cuentan', '; «Увеличение характеристик» класса тоже считается') : ''}.</p>}
       </Seccion>
 
       {raza && (
         <Seccion titulo={L(`Rasgos de ${raza.nombre}`, `Особенности: ${T(RU_RAZAS, raza.nombre)}`)} aviso={avisos.rasgosRaza}>
           <ul className="lista-rasgos">
-            {raza.rasgosFijos.map((r) => <li key={r.nombre}><button onClick={() => setVer({ titulo: r.nombre, texto: r.texto })}><strong>{r.nombre}</strong><small className="etq-fijo">{L('fijo', 'постоянная')}</small></button></li>)}
+            {raza.rasgosFijos.map((r) => <li key={r.nombre}><button onClick={() => setVer({ titulo: r.nombre, texto: r.texto })}><strong>{td(r.nombre)}</strong><small className="etq-fijo">{L('fijo', 'постоянная')}</small></button></li>)}
             {p.rasgosRaza.map((n) => {
               const r = opciones.find((o) => o.nombre === n);
               return <li key={n}><button onClick={() => setVer({ titulo: n, texto: r?.texto ?? '', quitar: () => upd((x) => { x.rasgosRaza = x.rasgosRaza.filter((y) => y !== n); }) })}><strong>{n}</strong><small>{L('elegido', 'выбрана')}</small></button></li>;
@@ -55,9 +56,9 @@ export function TabRasgos() {
       )}
 
       {clase && (
-        <Seccion titulo={`${L(`Rasgos de ${clase.nombre}`, `Умения: ${T(RU_CLASES, clase.nombre)}`)}${sub ? ` · ${sub.nombre}` : ''}`}>
+        <Seccion titulo={`${L(`Rasgos de ${clase.nombre}`, `Умения: ${T(RU_CLASES, clase.nombre)}`)}${sub ? ` · ${td(sub.nombre)}` : ''}`}>
           <ul className="lista-rasgos">
-            {rasgosClase.map((r, i) => <li key={i}><button onClick={() => setVer({ titulo: r.nombre, texto: r.texto })}><strong>{r.nombre}</strong><small>{L('Nivel', 'Уровень')} {r.nivel}</small></button></li>)}
+            {rasgosClase.map((r, i) => <li key={i}><button onClick={() => setVer({ titulo: r.nombre, texto: r.texto })}><strong>{td(r.nombre)}</strong><small>{L('Nivel', 'Уровень')} {r.nivel}</small></button></li>)}
           </ul>
           {avisos.subclase && <p className="aviso-rojo"><PuntoRojo /> {L('A nivel 3 eliges subclase (en «Personaje»).', 'На 3 уровне выбираешь подкласс (во вкладке «Персонаж»).')}</p>}
         </Seccion>
@@ -65,7 +66,7 @@ export function TabRasgos() {
 
       <Seccion titulo="Otros rasgos">
         <ul className="lista-rasgos">
-          {p.rasgos.map((d, i) => <li key={i}><button onClick={() => setEditar({ lista: 'rasgos', i, e: d })}><strong>{d.nombre}</strong><span>{d.texto.slice(0, 120)}</span></button></li>)}
+          {p.rasgos.map((d, i) => <li key={i}><button onClick={() => setEditar({ lista: 'rasgos', i, e: d })}><strong>{td(d.nombre)}</strong><span>{td(d.texto).slice(0, 120)}</span></button></li>)}
         </ul>
         <BotonAnadir onClick={() => { upd((x) => { x.rasgos.push({ nombre: L('Nuevo rasgo', 'Новая особенность'), texto: '' }); }); setEditar({ lista: 'rasgos', i: p.rasgos.length, e: { nombre: L('Nuevo rasgo', 'Новая особенность'), texto: '' } }); }}>Añadir rasgo</BotonAnadir>
       </Seccion>
@@ -76,7 +77,7 @@ export function TabRasgos() {
           <Buscador<(typeof opciones)[number]>
             items={opciones} texto={(r) => r.nombre} placeholder="Busca un rasgo…"
             filtro={(r) => !p.rasgosRaza.includes(r.nombre) && !(tieneExcl && r.grupo.includes('excluyentes'))}
-            render={(r) => <span className={`res-conjuro ${r.deRaza ? 'de-raza' : ''}`}><strong>{r.deRaza ? '★ ' : ''}{r.nombre}{r.recomendado ? ' 👍' : ''}</strong><small>{r.deRaza ? L(r.grupo, `Уникальные: ${T(RU_RAZAS, raza?.nombre ?? '')}`) : r.grupo.includes('excluyentes') ? L(r.grupo, 'Общие взаимоисключающие (только одна)') : L(r.grupo, 'Общие')} · {r.texto.slice(0, 90)}…</small></span>}
+            render={(r) => <span className={`res-conjuro ${r.deRaza ? 'de-raza' : ''}`}><strong>{r.deRaza ? '★ ' : ''}{td(r.nombre)}{r.recomendado ? ' 👍' : ''}</strong><small>{r.deRaza ? L(r.grupo, `Уникальные: ${T(RU_RAZAS, raza?.nombre ?? '')}`) : r.grupo.includes('excluyentes') ? L(r.grupo, 'Общие взаимоисключающие (только одна)') : L(r.grupo, 'Общие')} · {td(r.texto).slice(0, 90)}…</small></span>}
             onElegir={(r) => { const n = typeof r === 'string' ? r : r.nombre; upd((x) => { x.rasgosRaza.push(n); }); setModal(null); }}
           />
         </Modal>
@@ -86,7 +87,7 @@ export function TabRasgos() {
           <Buscador<Dote>
             items={dotes ?? []} texto={(d) => d.nombre} placeholder="Busca una dote…"
             filtro={(d) => !p.dotes.some((x) => x.nombre === d.nombre) || d.nombre === 'Mejora de Característica'}
-            render={(d) => <span className="res-conjuro"><strong>{d.nombre}{tras?.dotes.includes(d.nombre) ? ' ★' : ''}</strong><small>{L('Dote', 'Черта')} {d.categoria} · {d.descripcion.slice(0, 80)}…</small></span>}
+            render={(d) => <span className="res-conjuro"><strong>{td(d.nombre)}{tras?.dotes.includes(d.nombre) ? ' ★' : ''}</strong><small>{L('Dote', 'Черта')} {td(d.categoria)} · {td(d.descripcion).slice(0, 80)}…</small></span>}
             onElegir={(d) => {
               const e = typeof d === 'string' ? { nombre: d, texto: '' } : { nombre: d.nombre, texto: d.descripcion, origen: d.categoria };
               upd((x) => { x.dotes.push(e); }); setModal(null);

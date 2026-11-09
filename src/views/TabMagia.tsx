@@ -7,6 +7,7 @@ import { useDados } from '../dice';
 import { ataqueConjuros, cdConjuros, conSigno, dadosConjuro, multiplicadorTruco } from '../rules';
 import { L } from '../i18n';
 import { tr } from '../ru';
+import { td } from '../datosRu';
 
 const nombreNivel = (i: number) => i === 0 ? L('Trucos', 'Заговоры') : `${L('Nivel', 'Уровень')} ${i}`;
 const NIVELES = Array.from({ length: 10 }, (_, i) => i);
@@ -39,9 +40,9 @@ export function TabMagia() {
               upd((x) => { x.conjuros[idx].preparado = b; });
             }} titulo="Preparado" />}
             <button className="conjuro-nombre" onClick={() => setVer({ c, def: d })}>
-              <strong>{c.nombre}{c.adicional ? <small className="etq-nivel"> · {c.nivel ? `${L('Nv', 'Ур')} ${c.nivel}` : L('Truco', 'Заговор')}</small> : null}</strong>
-              {c.base && <small>{L('Propio, basado en', 'Своё, на основе')} {c.base}</small>}
-              {d && <small>{d.escuela} · {d.tiempo} · {d.alcance}{/concentración/i.test(d.duracion) ? L(' · Conc.', ' · Конц.') : ''}</small>}
+              <strong>{td(c.nombre)}{c.adicional ? <small className="etq-nivel"> · {c.nivel ? `${L('Nv', 'Ур')} ${c.nivel}` : L('Truco', 'Заговор')}</small> : null}</strong>
+              {c.base && <small>{L('Propio, basado en', 'Своё, на основе')} {td(c.base)}</small>}
+              {d && <small>{td(d.escuela)} · {td(d.tiempo)} · {td(d.alcance)}{/concentración/i.test(d.duracion) ? L(' · Conc.', ' · Конц.') : ''}</small>}
             </button>
           </li>
         );
@@ -92,7 +93,7 @@ export function TabMagia() {
               filtro={(c) => (anadir === 'adicional' || (anadir === 'truco' ? c.nivel === 0 : c.nivel > 0))
                 && (anadir === 'adicional' || todasClases || !claseMin || c.clases.includes(claseMin))
                 && !p.conjuros.some((x) => x.nombre === c.nombre)}
-              render={(c) => <span className="res-conjuro"><strong>{c.nombre}</strong><small>{c.nivel ? `${L('Nivel', 'Уровень')} ${c.nivel}` : L('Truco', 'Заговор')} · {c.escuela} · {c.clases.join(', ')}</small></span>}
+              render={(c) => <span className="res-conjuro"><strong>{td(c.nombre)}</strong><small>{c.nivel ? `${L('Nivel', 'Уровень')} ${c.nivel}` : L('Truco', 'Заговор')} · {td(c.escuela)} · {c.clases.join(', ')}</small></span>}
               onElegir={(c) => {
                 if (typeof c === 'string') { setNuevo({ nombre: c, nivel: anadir === 'truco' ? 0 : 1, adicional: anadir === 'adicional', descripcion: '' }); setAnadir(null); return; }
                 upd((x) => { x.conjuros.push({ nombre: c.nombre, nivel: c.nivel, ...(anadir === 'adicional' ? { adicional: true } : {}) }); });
@@ -114,7 +115,7 @@ export function TabMagia() {
             <input className="campo" value={nuevo.nombre} placeholder={tr('p. ej. Bola de hielo de Wishik')} onChange={(e) => setNuevo({ ...nuevo, nombre: e.target.value })} />
           </label>
           <label className="etiqueta"><span>{L('Basado en (opcional)', 'На основе (по желанию)')}</span>
-            <button type="button" className="campo boton-exp" onClick={() => setElegirBase(true)}>{nuevo.base ? nuevo.base.nombre : L('Elegir un conjuro base…', 'Выбрать базовое заклинание…')}</button>
+            <button type="button" className="campo boton-exp" onClick={() => setElegirBase(true)}>{nuevo.base ? td(nuevo.base.nombre) : L('Elegir un conjuro base…', 'Выбрать базовое заклинание…')}</button>
           </label>
           <label className="etiqueta"><span>{L('Nivel', 'Уровень')}</span>
             <select className="campo" value={nuevo.nivel} onChange={(e) => setNuevo({ ...nuevo, nivel: +e.target.value })}>{NIVELES.map((i) => <option key={i} value={i}>{i === 0 ? L('Truco', 'Заговор') : nombreNivel(i)}</option>)}</select>
@@ -125,9 +126,9 @@ export function TabMagia() {
           {elegirBase && todos && (
             <Modal titulo="Conjuro base" onClose={() => setElegirBase(false)}>
               <Buscador<Conjuro> items={todos} texto={(c) => c.nombre} placeholder="Busca el conjuro base…"
-                render={(c) => <span className="res-conjuro"><strong>{c.nombre}</strong><small>{c.nivel ? `${L('Nivel', 'Уровень')} ${c.nivel}` : L('Truco', 'Заговор')} · {c.escuela}</small></span>}
+                render={(c) => <span className="res-conjuro"><strong>{td(c.nombre)}</strong><small>{c.nivel ? `${L('Nivel', 'Уровень')} ${c.nivel}` : L('Truco', 'Заговор')} · {td(c.escuela)}</small></span>}
                 onElegir={(c) => {
-                  if (typeof c !== 'string') setNuevo((n) => n && { ...n, base: c, nivel: c.nivel, descripcion: `${c.tiempo} · ${c.alcance} · ${c.componentes} · ${c.duracion}\n\n${c.descripcion}` });
+                  if (typeof c !== 'string') setNuevo((n) => n && { ...n, base: c, nivel: c.nivel, descripcion: `${td(c.tiempo)} · ${td(c.alcance)} · ${td(c.componentes)} · ${td(c.duracion)}\n\n${td(c.descripcion)}` });
                   setElegirBase(false);
                 }} />
             </Modal>
@@ -135,7 +136,7 @@ export function TabMagia() {
         </Modal>
       )}
       {ver && (
-        <Modal titulo={ver.c.nombre} onClose={() => setVer(null)}
+        <Modal titulo={td(ver.c.nombre)} onClose={() => setVer(null)}
           pie={<button className="btn peligro" onClick={() => { upd((x) => { const i = x.conjuros.findIndex((c) => c.nombre === ver.c.nombre && c.nivel === ver.c.nivel); if (i >= 0) x.conjuros.splice(i, 1); }); setVer(null); }}>{L('Quitar de la lista', 'Убрать из списка')}</button>}>
           {(() => {
             const mio = p.conjuros.find((c) => c.nombre === ver.c.nombre);
@@ -164,10 +165,10 @@ export function TabMagia() {
 export function FichaConjuro({ c }: { c: Conjuro }) {
   return (
     <>
-      <p className="subtitulo">{c.nivel ? L(`${c.escuela[0].toUpperCase() + c.escuela.slice(1)} de nivel ${c.nivel}`, `${c.escuela[0].toUpperCase() + c.escuela.slice(1)}, ${c.nivel} уровень`) : L(`Truco de ${c.escuela}`, `Заговор (${c.escuela})`)} ({c.clases.join(', ')})</p>
+      <p className="subtitulo">{c.nivel ? L(`${c.escuela[0].toUpperCase() + c.escuela.slice(1)} de nivel ${c.nivel}`, `${td(c.escuela)}, ${c.nivel} уровень`) : L(`Truco de ${c.escuela}`, `Заговор (${td(c.escuela)})`)} ({c.clases.join(', ')})</p>
       <dl className="lista-datos">
-        <dt>{tr('Tiempo de lanzamiento')}</dt><dd>{c.tiempo}</dd><dt>{tr('Alcance')}</dt><dd>{c.alcance}</dd>
-        <dt>{tr('Componentes')}</dt><dd>{c.componentes}</dd><dt>{tr('Duración')}</dt><dd>{c.duracion}</dd>
+        <dt>{tr('Tiempo de lanzamiento')}</dt><dd>{td(c.tiempo)}</dd><dt>{tr('Alcance')}</dt><dd>{td(c.alcance)}</dd>
+        <dt>{tr('Componentes')}</dt><dd>{td(c.componentes)}</dd><dt>{tr('Duración')}</dt><dd>{td(c.duracion)}</dd>
       </dl>
       <TextoLargo texto={c.descripcion} />
     </>
