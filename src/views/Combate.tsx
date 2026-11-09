@@ -116,7 +116,7 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
                   <button className="btn enlace nombre-comb" onClick={() => onAbrirPj?.(f.m.personaje!)}>{f.m.pj!.nombre || f.m.alias}</button>
                   <span className="nota">@{f.m.alias} · 🛡 {f.m.pj!.ca}</span>
                 </div>
-                <VidaFila pg={f.m.pj!.pg.actual} max={f.m.pj!.pg.max} set={(pg) => jugador(f.m, { pg: { ...f.m.pj!.pg, actual: pg } })} />
+                <VidaFila pg={f.m.pj!.pg.actual} max={f.m.pj!.pg.max} temp={f.m.pj!.pg.temp ?? 0} set={(pg, temp) => jugador(f.m, { pg: { ...f.m.pj!.pg, actual: pg, temp } })} />
                 <ChipsEstados estados={f.m.pj!.estados} agotamiento={f.m.pj!.agotamiento} vacio set={(e, a) => jugador(f.m, { estados: e, agotamiento: a })} />
               </div>
             ) : (
@@ -130,7 +130,7 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
                         <span className="nota">🛡 {e.ca}</span>
                         <button className="btn enlace quitar-enemigo" title={L('Quitar', 'Убрать')} onClick={() => setEnemigos((es) => es.filter((x) => x.id !== e.id))}>✕</button>
                       </div>
-                      <VidaFila pg={e.pg} max={e.pgMax} set={(pg) => cambiarEnemigo(e.id, (x) => ({ ...x, pg, estados: pg <= 0 && !x.estados.includes('inconsciente') ? [...x.estados, 'inconsciente'] : x.estados }))} />
+                      <VidaFila pg={e.pg} max={e.pgMax} temp={e.temp ?? 0} set={(pg, temp) => cambiarEnemigo(e.id, (x) => ({ ...x, pg, temp, estados: pg <= 0 && !x.estados.includes('inconsciente') ? [...x.estados, 'inconsciente'] : x.estados }))} />
                       <ChipsEstados estados={e.estados} agotamiento={0} vacio set={(es) => cambiarEnemigo(e.id, (x) => ({ ...x, estados: es }))} />
                     </div>
                   );
@@ -149,15 +149,26 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
 }
 
 /** Vida con barra y botones de daño / curación. */
-function VidaFila({ pg, max, set }: { pg: number; max: number; set: (n: number) => void }) {
+/** Vida con barra, PG temporales y botones de daño / curación. El daño gasta primero los temporales. */
+function VidaFila({ pg, max, temp, set }: { pg: number; max: number; temp: number; set: (pg: number, temp: number) => void }) {
   const [n, setN] = useState(0);
+  const [editTemp, setEditTemp] = useState(false);
+  const danar = () => { const t = Math.min(temp, n); set(Math.max(0, pg - (n - t)), temp - t); setN(0); };
   return (
     <div className="vida-fila">
       <span className="vida-num">❤️ <strong>{pg}</strong>/{max}</span>
-      <div className="barra-vida mini"><div style={{ width: `${max ? Math.max(0, Math.min(100, (100 * pg) / max)) : 0}%` }} /></div>
+      <div className="barra-vida mini con-temp">
+        <div style={{ width: `${max ? Math.max(0, Math.min(100, (100 * pg) / max)) : 0}%` }} />
+        {temp > 0 && <div className="temp" style={{ width: `${max ? Math.min(100, (100 * temp) / max) : 0}%` }} />}
+      </div>
       <Numero valor={n} min={0} ancho={56} set={setN} />
-      <button className="btn peligro pequeno" disabled={!n} onClick={() => { set(Math.max(0, pg - n)); setN(0); }}>−</button>
-      <button className="btn primario pequeno" disabled={!n} onClick={() => { set(Math.min(max, pg + n)); setN(0); }}>+</button>
+      <button className="btn peligro pequeno" disabled={!n} onClick={danar} title={L('Daño', 'Урон')}>−</button>
+      <button className="btn primario pequeno" disabled={!n} onClick={() => { set(Math.min(max, pg + n), temp); setN(0); }} title={L('Curar', 'Лечение')}>+</button>
+      <span className="temp-fila">
+        {editTemp
+          ? <><span>🛡️ {L('PG temporales', 'Временные хиты')}:</span> <Numero valor={temp} min={0} ancho={56} set={(t) => set(pg, t)} /> <button className="btn enlace pequeno" onClick={() => setEditTemp(false)}>✓</button></>
+          : <button className={`chip-temp ${temp > 0 ? 'hay' : ''}`} onClick={() => setEditTemp(true)}>{temp > 0 ? `+${temp} ${L('temp.', 'врем.')}` : `＋ ${L('PG temporales', 'Временные хиты')}`}</button>}
+      </span>
     </div>
   );
 }
@@ -183,7 +194,7 @@ function ModalAnadirEnemigos({ monstruos, onClose, onAnadir, onVer }: { monstruo
     const g = cant > 1 && grupo ? uid() : null;
     return Array.from({ length: cant }, (_, i) => {
       const pg = pgTirados && base.dg ? tirarPg(base.dg) ?? base.pg : base.pg;
-      return { id: uid(), monstruo: base.id, nombre: cant > 1 ? `${base.nombre} ${i + 1}` : base.nombre, grupo: g, ini: null, bonoIni: base.bono, pg, pgMax: pg, ca: base.ca, estados: [] } as Enemigo;
+      return { id: uid(), monstruo: base.id, nombre: cant > 1 ? `${base.nombre} ${i + 1}` : base.nombre, grupo: g, ini: null, bonoIni: base.bono, pg, pgMax: pg, temp: 0, ca: base.ca, estados: [] } as Enemigo;
     });
   };
   return (

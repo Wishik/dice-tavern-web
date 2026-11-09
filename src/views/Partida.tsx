@@ -108,7 +108,7 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
                     <strong>{esMaster ? L('Máster', 'Мастер') : m.pj ? (m.pj.nombre || L('Sin nombre', 'Без имени')) : L('Sin personaje', 'Без персонажа')}</strong>
                     <span>@{m.alias}{m.usuario === usuario.id ? ` (${L('tú', 'ты')})` : ''}</span>
                     {m.pj && <span>{linea(m.pj)}</span>}
-                    {m.pj && <span className="nivel">❤️ {m.pj.pg?.actual ?? 0}/{m.pj.pg?.max ?? 0} · 🛡 {m.pj.ca}{m.pj.pm?.max ? ` · 🔷 ${m.pj.pm.actual}/${m.pj.pm.max}` : ''}</span>}
+                    {m.pj && <span className="nivel">❤️ {m.pj.pg?.actual ?? 0}/{m.pj.pg?.max ?? 0}{m.pj.pg?.temp ? ` (+${m.pj.pg.temp} ${L('temp.', 'врем.')})` : ''} · 🛡 {m.pj.ca}{m.pj.pm?.max ? ` · 🔷 ${m.pj.pm.actual}/${m.pj.pm.max}` : ''}</span>}
                     {m.pj && <ChipsEstados estados={m.pj.estados} agotamiento={m.pj.agotamiento} />}
                     {m.pj && m.pj.pg?.max > 0 && <div className="barra-vida mini"><div style={{ width: `${Math.max(0, Math.min(100, (100 * m.pj.pg.actual) / m.pj.pg.max))}%` }} /></div>}
                   </div>

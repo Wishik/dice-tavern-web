@@ -601,3 +601,8 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .bm-car small { font-size: 11px; }
 .bm-seccion h4 { margin: 12px 0 4px; font-family: var(--fuente-titulo); color: #7a1f17; border-bottom: 1px solid #c9b182; }
 .tp-texto .chip-estado { color: #fde6d8; font-size: 12px; }
+.barra-vida.con-temp { display: flex; }
+.barra-vida.con-temp .temp { background: linear-gradient(90deg, #4f7fb8, #79a6d9); }
+.vida-fila .temp-fila { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; font-size: 13px; }
+.chip-temp { border: 1px dashed #4f7fb8; background: transparent; color: #2d4f7a; border-radius: 99px; padding: 2px 10px; font-size: 13px; }
+.chip-temp.hay { background: #2d4f7a; color: #e6f0fb; border-style: solid; }

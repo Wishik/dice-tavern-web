@@ -7,7 +7,7 @@ import { calcularCA, iniciativa } from './rules';
 export interface Partida { id: string; nombre: string; codigo: string; master: string; creada: string; combate?: Combate | null }
 
 /** Enemigo en el combate. Los de un mismo grupo comparten iniciativa. */
-export interface Enemigo { id: string; monstruo: string | null; nombre: string; grupo: string | null; ini: number | null; bonoIni: number; pg: number; pgMax: number; ca: number; estados: string[] }
+export interface Enemigo { id: string; monstruo: string | null; nombre: string; grupo: string | null; ini: number | null; bonoIni: number; pg: number; pgMax: number; temp?: number; ca: number; estados: string[] }
 export interface Combate { ronda: number; turno: string | null; enemigos: Enemigo[] }
 export interface Miembro {
   usuario: string;
