@@ -2,15 +2,19 @@ import { supabase } from './store';
 import { L } from './i18n';
 import type { Personaje } from './types';
 import { normalizar } from './personaje';
-import { calcularCA } from './rules';
+import { calcularCA, iniciativa } from './rules';
 
-export interface Partida { id: string; nombre: string; codigo: string; master: string; creada: string }
+export interface Partida { id: string; nombre: string; codigo: string; master: string; creada: string; combate?: Combate | null }
+
+/** Enemigo en el combate. Los de un mismo grupo comparten iniciativa. */
+export interface Enemigo { id: string; monstruo: string | null; nombre: string; grupo: string | null; ini: number | null; bonoIni: number; pg: number; pgMax: number; ca: number; estados: string[] }
+export interface Combate { ronda: number; turno: string | null; enemigos: Enemigo[] }
 export interface Miembro {
   usuario: string;
   alias: string;
   personaje: string | null;
   /** Resumen del personaje elegido (null si aún no ha elegido o no se puede ver). */
-  pj: (Pick<Personaje, 'nombre' | 'raza' | 'clase' | 'nivel' | 'foto' | 'pg' | 'pm'> & { ca: number }) | null;
+  pj: (Pick<Personaje, 'nombre' | 'raza' | 'clase' | 'nivel' | 'foto' | 'pg' | 'pm' | 'estados' | 'agotamiento' | 'iniciativaActual'> & { ca: number; bonoIni: number }) | null;
 }
 
 // Sin 0/O ni 1/I/L para que el código se pueda dictar sin errores.
@@ -74,7 +78,7 @@ export async function cargarPartida(id: string): Promise<{ partida: Partida; mie
   const res = new Map(((pj.data ?? []) as { id: string; datos: Personaje }[]).map((x) => {
     const p = normalizar(x.datos);
     let ca = 10; try { ca = calcularCA(p).total; } catch { /* datos antiguos */ }
-    return [x.id, { nombre: p.nombre, raza: p.raza, clase: p.clase, nivel: p.nivel, foto: p.foto, pg: p.pg, pm: p.pm, ca }];
+    return [x.id, { nombre: p.nombre, raza: p.raza, clase: p.clase, nivel: p.nivel, foto: p.foto, pg: p.pg, pm: p.pm, ca, estados: p.estados ?? [], agotamiento: p.agotamiento ?? 0, iniciativaActual: p.iniciativaActual ?? null, bonoIni: iniciativa(p) }];
   }));
   return {
     partida: p.data as Partida,
@@ -95,3 +99,14 @@ export async function borrarPartida(id: string) {
   if (error) throw err(error.message);
 }
 export const enlaceInvitacion = (codigo: string) => `${location.origin}/?unirse=${codigo}`;
+
+/** Guarda el estado del combate (solo el máster puede cambiar su partida). */
+export async function guardarCombate(partida: string, combate: Combate | null) {
+  const { error } = await sb().from('partidas').update({ combate }).eq('id', partida);
+  if (error) throw err(error.message);
+}
+/** El máster cambia campos permitidos de un jugador (vida, estados, iniciativa…) sin cargar toda la hoja. */
+export async function cambiarJugador(pj: string, cambios: Record<string, unknown>) {
+  const { error } = await sb().rpc('master_guardar', { pj, cambios: { ...cambios, actualizado: new Date().toISOString() } });
+  if (error) throw err(error.message);
+}

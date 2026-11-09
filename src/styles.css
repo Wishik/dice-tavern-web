@@ -537,3 +537,67 @@ details.corregir summary { cursor: pointer; color: var(--tinta-suave); font-size
 .panel-vacio span { font-size: 56px; }
 .panel-vacio p { max-width: 340px; margin: 8px auto 0; }
 .miembro .tp-texto { flex: 1; }
+.acciones-tarjeta { position: absolute; top: 6px; right: 6px; display: flex; gap: 4px; }
+.btn-icono { background: rgba(255,255,255,.45); border: 1px solid #c9b182; border-radius: 10px; width: 36px; height: 36px; display: grid; place-items: center; font-size: 17px; padding: 0; }
+.btn-icono.activo { background: var(--oro); border-color: #8c5f17; }
+.tarjeta-personaje.miembro .miembro-cuerpo { padding-right: 52px; }
+
+/* ------------------------------------------------ bloqueo, estados, combate */
+fieldset.bloq { border: 0; padding: 0; margin: 0; min-width: 0; display: contents; }
+fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9ccb2; color: #7d6a55; cursor: not-allowed; }
+.franja-estados { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 16px; background: #2a1b11; border-bottom: 1px solid var(--madera-borde); }
+.chips-estados { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+.chips-estados.editable { cursor: pointer; }
+.chip-estado { display: inline-flex; align-items: center; gap: 4px; font-size: 13px; padding: 2px 9px; border-radius: 99px; background: #7a1f17; color: #fde6d8; border: 1px solid #4d110c; white-space: nowrap; }
+.chip-estado.vacio { background: transparent; color: var(--tinta-suave); border: 1px dashed #a3865a; }
+.chip-estado.e-concentrado, .chip-estado.e-invisible { background: #2d4f7a; border-color: #1d3452; }
+.chip-estado.iniciativa { background: var(--oro); color: #2a1a0b; border-color: #8c5f17; }
+.franja-estados .chip-estado.vacio { color: #c9b38e; }
+.lista-estados { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lista-estados li > button, .fila-agotamiento { width: 100%; display: grid; grid-template-columns: 34px 1fr auto; gap: 8px; align-items: center; text-align: left; padding: 8px; border-radius: 10px; border: 1px solid #c9b182; background: rgba(255,255,255,.35); color: var(--tinta); }
+.lista-estados li.activo > button, .lista-estados li.activo .fila-agotamiento { background: #f3d9cf; border-color: #a52a1f; }
+.lista-estados strong { display: block; }
+.lista-estados small { display: block; color: var(--tinta-suave); font-size: 12px; line-height: 1.3; }
+.icono-estado { font-size: 22px; text-align: center; }
+.lista-estados .marca { font-weight: 700; color: #a52a1f; font-size: 18px; }
+.seccion-estados { margin-bottom: 12px; }
+.fila-dano { display: flex; gap: 6px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.resumen-master { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 15px; }
+.insignia-ini { position: absolute; left: -6px; top: -6px; z-index: 1; min-width: 28px; height: 28px; padding: 0 6px; border-radius: 99px; background: var(--oro); color: #2a1a0b; font-weight: 700; display: grid; place-items: center; border: 2px solid #8c5f17; font-size: 14px; }
+.vista-partida { margin-bottom: 14px; }
+.panel-combate { display: flex; flex-direction: column; gap: 10px; }
+.cabecera-combate { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; color: var(--oro-claro); }
+.cabecera-combate .etq-pequena { color: #c9b38e; }
+.cabecera-combate .ronda { font-size: 26px; font-family: var(--fuente-titulo); }
+.cabecera-combate .fila-botones { margin-top: 0; }
+.panel-combate > .nota { color: #bfa884; }
+.orden-combate { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.fila-combate { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 10px; border-radius: var(--radio); background: linear-gradient(180deg, var(--pergamino), var(--pergamino-2)); color: var(--tinta); border: 1px solid #c9b182; }
+.fila-combate.grupo { background: linear-gradient(180deg, #f1d9cf, #e2c3b4); }
+.fila-combate.turno { outline: 3px solid var(--oro); box-shadow: 0 0 18px rgba(240,201,106,.45); }
+.ini-caja { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.ini-caja .campo { font-size: 20px; font-weight: 700; text-align: center; }
+.combatiente { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.enemigo + .enemigo { border-top: 1px dashed rgba(106,86,67,.4); padding-top: 8px; }
+.enemigo.caido { opacity: .55; }
+.comb-cab { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.nombre-comb { font-family: var(--fuente-titulo); font-size: 16px; padding: 0; color: #3a2717 !important; text-decoration: none; }
+.quitar-enemigo { margin-left: auto; text-decoration: none; }
+.vida-fila { display: grid; grid-template-columns: auto 1fr auto auto auto; gap: 6px; align-items: center; }
+.vida-fila .barra-vida.mini { margin: 0; }
+.vida-fila .btn { min-height: 34px; padding: 4px 12px; }
+.lista-monstruos { list-style: none; margin: 8px 0; padding: 0; max-height: 46vh; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.lista-monstruos li { display: flex; align-items: center; border: 1px solid #c9b182; border-radius: 8px; background: rgba(255,255,255,.35); }
+.lista-monstruos li.sel { background: #3a2717; color: var(--pergamino); border-color: var(--oro); }
+.lista-monstruos li > button:first-child { flex: 1; text-align: left; background: none; border: none; padding: 6px 10px; color: inherit; display: flex; flex-direction: column; }
+.lista-monstruos small { opacity: .75; font-size: 12px; }
+.contador-enemigos { display: inline-flex; align-items: center; gap: 4px; margin-right: auto; }
+.enemigo-propio summary { cursor: pointer; margin: 8px 0; }
+.enemigo-propio .fila-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 8px; }
+.bloque-monstruo p { margin: 6px 0; line-height: 1.4; }
+.bm-linea { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 8px 0; }
+.bm-car { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; margin: 8px 0; }
+.bm-car button { display: flex; flex-direction: column; align-items: center; padding: 4px 0; border: 1px solid #c9b182; border-radius: 8px; background: rgba(255,255,255,.4); color: var(--tinta); }
+.bm-car small { font-size: 11px; }
+.bm-seccion h4 { margin: 12px 0 4px; font-family: var(--fuente-titulo); color: #7a1f17; border-bottom: 1px solid #c9b182; }
+.tp-texto .chip-estado { color: #fde6d8; font-size: 12px; }

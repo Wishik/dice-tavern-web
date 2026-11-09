@@ -209,6 +209,18 @@ function Lista({ usuario, onUsuario, onAbrir, onPartida, onSalir }: { usuario: U
   const recargar = () => backend.listar().then(setLista).catch((e) => setError(e.message));
   useEffect(() => { recargar(); }, []);
   const [creando, setCreando] = useState(false);
+  const alternarBloqueo = async (r: Resumen) => {
+    if (r.bloqueado && !confirm(L('¿Desbloquear la hoja? Podrás cambiar raza, clase, nivel, características y PG máximos. Hazlo solo si el máster está de acuerdo.', 'Разблокировать лист? Можно будет менять расу, класс, уровень, характеристики и максимум хитов. Делай это, только если мастер согласен.'))) return;
+    try {
+      const x = await backend.cargar(r.id); if (!x) return;
+      await backend.guardar({ ...x, bloqueado: !r.bloqueado, actualizado: new Date().toISOString() });
+      setLista((l) => l?.map((y) => (y.id === r.id ? { ...y, bloqueado: !r.bloqueado } : y)) ?? l);
+    } catch (e) { setError((e as Error).message); }
+  };
+  const borrarPj = async (r: Resumen) => {
+    if (!confirm(L(`¿Borrar a ${r.nombre || 'este personaje'} para siempre?`, `Удалить ${r.nombre || 'этого персонажа'} навсегда?`))) return;
+    try { await backend.borrar(r.id); setLista((l) => l?.filter((x) => x.id !== r.id) ?? l); } catch (e) { setError((e as Error).message); }
+  };
   const crear = async () => {
     if (creando) return;
     setCreando(true); setError('');
@@ -237,10 +249,16 @@ function Lista({ usuario, onUsuario, onAbrir, onPartida, onSalir }: { usuario: U
         {!lista && !error && <p className="vacio">{L('Cargando…', 'Загрузка…')}</p>}
         <div className="rejilla-personajes">
           {lista?.map((r) => (
-            <button key={r.id} className="tarjeta-personaje" onClick={() => onAbrir(r.id)}>
-              <div className="retrato">{r.foto ? <img src={r.foto} alt="" /> : <span>{(r.nombre || '?')[0]}</span>}</div>
-              <div className="tp-texto"><strong>{r.nombre || L('Sin nombre', 'Без имени')}</strong><span>{[T(RU_RAZAS, r.raza), T(RU_CLASES, r.clase)].filter(Boolean).join(' · ') || L('Sin raza ni clase', 'Без расы и класса')}</span><span className="nivel">{L('Nivel', 'Уровень')} {r.nivel}</span></div>
-            </button>
+            <div key={r.id} className="tarjeta-personaje miembro">
+              <button className="miembro-cuerpo" onClick={() => onAbrir(r.id)}>
+                <div className="retrato">{r.foto ? <img src={r.foto} alt="" /> : <span>{(r.nombre || '?')[0]}</span>}</div>
+                <div className="tp-texto"><strong>{r.nombre || L('Sin nombre', 'Без имени')}</strong><span>{[T(RU_RAZAS, r.raza), T(RU_CLASES, r.clase)].filter(Boolean).join(' · ') || L('Sin raza ni clase', 'Без расы и класса')}</span><span className="nivel">{L('Nivel', 'Уровень')} {r.nivel}</span></div>
+              </button>
+              <div className="acciones-tarjeta">
+                <button className="btn-icono" title={r.bloqueado ? L('Desbloquear para editar raza, clase, características…', 'Разблокировать правку расы, класса, характеристик…') : L('Terminar la creación y bloquear raza, clase, características…', 'Закончить создание и заблокировать расу, класс, характеристики…')} onClick={() => alternarBloqueo(r)}>{r.bloqueado ? '✏️' : '🔒'}</button>
+                <button className="btn-icono" title={L('Borrar personaje', 'Удалить персонажа')} aria-label={L('Borrar personaje', 'Удалить персонажа')} onClick={() => borrarPj(r)}>🗑️</button>
+              </div>
+            </div>
           ))}
           <button type="button" className="tarjeta-personaje nuevo" onClick={crear} disabled={creando}><span className="mas-grande">+</span><span>{creando ? L('Creando…', 'Создаём…') : L('Nuevo personaje', 'Новый персонаж')}</span></button>
         </div>

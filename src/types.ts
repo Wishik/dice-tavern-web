@@ -127,6 +127,15 @@ export interface Personaje {
   monedas: Record<Moneda, number>;
   monturas: Montura[];
   notas: string;
+  // Partida
+  /** Estados (condiciones) activos: claves de ESTADOS en src/estados.tsx. */
+  estados: string[];
+  /** Nivel de agotamiento 0-6. */
+  agotamiento: number;
+  /** Última tirada de iniciativa (para el orden del combate); null si no hay combate. */
+  iniciativaActual: number | null;
+  /** En partida los datos de creación (raza, clase, características, PG máx…) quedan bloqueados; el lápiz de la lista los desbloquea. */
+  bloqueado: boolean;
 }
 
 /** Montura del personaje: una mini ficha con vida, CA, velocidad, características, rasgos e inventario propio. */

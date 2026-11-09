@@ -4,7 +4,7 @@ import { normalizar } from './personaje';
 import { L } from './i18n';
 
 export interface Usuario { id: string; email: string; alias: string }
-export interface Resumen { id: string; nombre: string; raza: string; clase: string; nivel: number; foto: string; actualizado: string }
+export interface Resumen { id: string; nombre: string; raza: string; clase: string; nivel: number; foto: string; actualizado: string; bloqueado?: boolean }
 
 export interface Backend {
   modo: 'local' | 'nube';
@@ -21,10 +21,15 @@ export interface Backend {
   listar(): Promise<Resumen[]>;
   cargar(id: string): Promise<Personaje | null>;
   guardar(p: Personaje): Promise<void>;
+  /** El máster guarda la hoja de un jugador: solo se copian vida, estados, iniciativa e inventario. */
+  guardarMaster(p: Personaje): Promise<void>;
   borrar(id: string): Promise<void>;
 }
 
-const resumen = (p: Personaje): Resumen => ({ id: p.id, nombre: p.nombre, raza: p.raza, clase: p.clase, nivel: p.nivel, foto: p.foto, actualizado: p.actualizado });
+const resumen = (p: Personaje): Resumen => ({ id: p.id, nombre: p.nombre, raza: p.raza, clase: p.clase, nivel: p.nivel, foto: p.foto, actualizado: p.actualizado, bloqueado: !!p.bloqueado });
+
+/** Campos de la hoja que el máster puede cambiar (igual que la lista de la función master_guardar en schema.sql). */
+export const CAMPOS_MASTER = ['pg', 'equipo', 'mochila', 'cinturon', 'viaje', 'monedas', 'estados', 'agotamiento', 'iniciativaActual', 'actualizado'] as const;
 
 // ------------------------------------------------------------ Local (sin cuenta)
 const CLAVE = 'dicetavern.personajes.v1';
@@ -44,6 +49,7 @@ export const backendLocal: Backend = {
   async cargar(id) { const p = leerLocal()[id]; return p ? normalizar(p) : null; },
   async guardar(p) { const d = leerLocal(); d[p.id] = p; escribirLocal(d); },
   async borrar(id) { const d = leerLocal(); delete d[id]; escribirLocal(d); },
+  async guardarMaster(p) { await this.guardar(p); },
 };
 
 // ------------------------------------------------------------ Supabase (con cuenta)
@@ -80,9 +86,9 @@ function backendNube(sb: SupabaseClient): Backend {
     async listar() {
       // Solo los míos: con las partidas también se ven los personajes de los compañeros.
       const { data: s } = await sb.auth.getSession();
-      const { data, error } = await sb.from('personajes').select('id, datos->nombre, datos->raza, datos->clase, datos->nivel, datos->foto, actualizado').eq('propietario', s.session?.user.id ?? '').order('actualizado', { ascending: false });
+      const { data, error } = await sb.from('personajes').select('id, datos->nombre, datos->raza, datos->clase, datos->nivel, datos->foto, datos->bloqueado, actualizado').eq('propietario', s.session?.user.id ?? '').order('actualizado', { ascending: false });
       if (error) throw new Error(error.message);
-      return (data ?? []).map((r: Record<string, unknown>) => ({ id: r.id as string, nombre: (r.nombre as string) ?? '', raza: (r.raza as string) ?? '', clase: (r.clase as string) ?? '', nivel: (r.nivel as number) ?? 1, foto: (r.foto as string) ?? '', actualizado: r.actualizado as string }));
+      return (data ?? []).map((r: Record<string, unknown>) => ({ id: r.id as string, nombre: (r.nombre as string) ?? '', raza: (r.raza as string) ?? '', clase: (r.clase as string) ?? '', nivel: (r.nivel as number) ?? 1, foto: (r.foto as string) ?? '', actualizado: r.actualizado as string, bloqueado: !!r.bloqueado }));
     },
     async cargar(id) {
       const { data, error } = await sb.from('personajes').select('datos').eq('id', id).maybeSingle();
@@ -99,6 +105,11 @@ function backendNube(sb: SupabaseClient): Backend {
       if (r.error) throw new Error(r.error.message);
     },
     async borrar(id) { const { error } = await sb.from('personajes').delete().eq('id', id); if (error) throw new Error(error.message); },
+    async guardarMaster(p) {
+      const cambios = Object.fromEntries(CAMPOS_MASTER.map((k) => [k, p[k]]));
+      const { error } = await sb.rpc('master_guardar', { pj: p.id, cambios });
+      if (error) throw new Error(error.message);
+    },
   };
 }
 

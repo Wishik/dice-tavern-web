@@ -56,6 +56,7 @@ create table if not exists public.partidas (
   master uuid not null references auth.users(id) on delete cascade default auth.uid(),
   creada timestamptz not null default now()
 );
+alter table if exists public.partidas add column if not exists combate jsonb;
 create table if not exists public.miembros (
   partida uuid not null references public.partidas(id) on delete cascade,
   usuario uuid not null references auth.users(id) on delete cascade default auth.uid(),
@@ -123,4 +124,16 @@ grant execute on function public.unirse(text) to authenticated;
 drop policy if exists "ver los de mi partida" on public.personajes;
 drop policy if exists "máster edita" on public.personajes;
 create policy "ver los de mi partida" on public.personajes for select to authenticated using (public.personaje_en_mi_partida(id, false));
-create policy "máster edita" on public.personajes for update to authenticated using (public.personaje_en_mi_partida(id, true));
+
+-- El máster solo puede cambiar vida, estados, iniciativa e inventario de sus jugadores (no raza, clase, características…).
+create or replace function public.master_guardar(pj text, cambios jsonb) returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  if not public.personaje_en_mi_partida(pj, true) then raise exception 'no eres el máster de este personaje'; end if;
+  update public.personajes
+     set datos = datos || coalesce((select jsonb_object_agg(key, value) from jsonb_each(cambios)
+                                    where key in ('pg','equipo','mochila','cinturon','viaje','monedas','estados','agotamiento','iniciativaActual','actualizado')), '{}'::jsonb),
+         actualizado = now()
+   where id = pj;
+end $$;
+grant execute on function public.master_guardar(text, jsonb) to authenticated;

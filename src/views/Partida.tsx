@@ -4,6 +4,8 @@ import { borrarPartida, cargarPartida, crearPartida, elegirPersonaje, enlaceInvi
 import { L, RU_CLASES, RU_RAZAS, T } from '../i18n';
 import { Modal } from '../ui';
 import { Ficha } from './Ficha';
+import { ChipsEstados } from '../estados';
+import { PanelCombate } from './Combate';
 
 /** true en pantallas anchas (portátil del máster): la hoja se abre al lado de la lista de jugadores. */
 function useAncho(min = 1000) {
@@ -13,6 +15,8 @@ function useAncho(min = 1000) {
   return a;
 }
 
+/** Con combate (alguien tiene iniciativa), los jugadores se ordenan por iniciativa. */
+const ordenar = (ms: Miembro[]): Miembro[] => [...ms].sort((a, b) => (b.pj?.iniciativaActual ?? -1000) - (a.pj?.iniciativaActual ?? -1000));
 const linea = (pj: NonNullable<Miembro['pj']>) => [T(RU_RAZAS, pj.raza), pj.clase && `${T(RU_CLASES, pj.clase)} ${pj.nivel}`].filter(Boolean).join(' · ');
 
 /** Pantalla de una partida: código para invitar, jugadores y sus personajes. */
@@ -23,6 +27,7 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
   const [copiado, setCopiado] = useState(false);
   const ancho = useAncho();
   const [sel, setSel] = useState<string | null>(null);
+  const [combate, setCombate] = useState(false);
   const recargar = () => cargarPartida(id).then((x) => { setD(x); setError(''); }).catch((e) => setError(e.message));
   useEffect(() => { recargar(); backend.listar().then(setMios).catch(() => {}); }, [id]);
   // Los cambios de los demás (PG, nivel…) se ven al volver a la pantalla o cada 20 s.
@@ -59,6 +64,13 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
       <div className="partida-cuerpo">
       <main className="contenido partida-lado">
         {error && <p className="error">{error}</p>}
+        {soyMaster && (
+          <div className="segmentado vista-partida">
+            <button className={!combate ? 'activo' : ''} onClick={() => { setCombate(false); }}>👥 {L('Jugadores', 'Игроки')}</button>
+            <button className={combate ? 'activo' : ''} onClick={() => { setCombate(true); setSel(null); }}>⚔️ {L('Combate', 'Бой')}</button>
+          </div>
+        )}
+        {combate && !ancho ? <PanelCombate partida={partida} miembros={miembros} onRecargar={recargar} onAbrirPj={onAbrirFicha} /> : <>
         <section className="tarjeta invitacion">
           <span className="etq-pequena">{L('Código de invitación', 'Код приглашения')}</span>
           <div className="codigo-partida">{partida.codigo}</div>
@@ -69,7 +81,12 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
         {yo && !soyMaster && (
           <section className="tarjeta">
             <label className="etiqueta"><span>{L('Tu personaje en esta partida', 'Твой персонаж в этой партии')}</span>
-              <select className="campo" value={yo.personaje ?? ''} onChange={(e) => accion(() => elegirPersonaje(partida.id, e.target.value || null))}>
+              <select className="campo" value={yo.personaje ?? ''} onChange={(e) => accion(async () => {
+                const pj = e.target.value || null;
+                await elegirPersonaje(partida.id, pj);
+                // Al entrar en juego, los datos de creación quedan bloqueados (el lápiz de la lista los desbloquea).
+                if (pj) { const x = await backend.cargar(pj); if (x && !x.bloqueado) await backend.guardar({ ...x, bloqueado: true, actualizado: new Date().toISOString() }); }
+              })}>
                 <option value="">{L('— Elige —', '— Выбери —')}</option>
                 {mios.map((r) => <option key={r.id} value={r.id}>{r.nombre || L('Sin nombre', 'Без имени')} ({T(RU_CLASES, r.clase)} {r.nivel})</option>)}
               </select>
@@ -79,18 +96,20 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
 
         <h2 className="titulo-seccion espacio-arriba">{L('Jugadores', 'Игроки')} ({miembros.filter((m) => m.usuario !== partida.master).length})</h2>
         <div className="rejilla-personajes">
-          {miembros.map((m) => {
+          {ordenar(miembros).map((m) => {
             const esMaster = m.usuario === partida.master;
             const puedeAbrir = !!m.pj && !!m.personaje && (soyMaster || m.usuario === usuario.id);
             return (
               <div key={m.usuario} className={`tarjeta-personaje miembro ${ancho && sel && sel === m.personaje ? 'elegido' : ''}`}>
                 <button className="miembro-cuerpo" disabled={!puedeAbrir} onClick={() => m.personaje && (ancho ? setSel(m.personaje) : onAbrirFicha(m.personaje))}>
+                  {m.pj?.iniciativaActual != null && <span className="insignia-ini" title={L('Iniciativa', 'Инициатива')}>{m.pj.iniciativaActual}</span>}
                   <div className="retrato">{m.pj?.foto ? <img src={m.pj.foto} alt="" /> : <span>{esMaster ? '👑' : (m.pj?.nombre || m.alias || '?')[0]}</span>}</div>
                   <div className="tp-texto">
                     <strong>{esMaster ? L('Máster', 'Мастер') : m.pj ? (m.pj.nombre || L('Sin nombre', 'Без имени')) : L('Sin personaje', 'Без персонажа')}</strong>
                     <span>@{m.alias}{m.usuario === usuario.id ? ` (${L('tú', 'ты')})` : ''}</span>
                     {m.pj && <span>{linea(m.pj)}</span>}
                     {m.pj && <span className="nivel">❤️ {m.pj.pg?.actual ?? 0}/{m.pj.pg?.max ?? 0} · 🛡 {m.pj.ca}{m.pj.pm?.max ? ` · 🔷 ${m.pj.pm.actual}/${m.pj.pm.max}` : ''}</span>}
+                    {m.pj && <ChipsEstados estados={m.pj.estados} agotamiento={m.pj.agotamiento} />}
                     {m.pj && m.pj.pg?.max > 0 && <div className="barra-vida mini"><div style={{ width: `${Math.max(0, Math.min(100, (100 * m.pj.pg.actual) / m.pj.pg.max))}%` }} /></div>}
                   </div>
                 </button>
@@ -108,10 +127,12 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
             ? <button className="btn peligro" onClick={async () => { if (confirm(L(`¿Borrar la partida «${partida.nombre}»? Los personajes no se borran.`, `Удалить партию «${partida.nombre}»? Персонажи останутся.`))) { try { await borrarPartida(partida.id); onVolver(); } catch (e) { alert((e as Error).message); } } }}>{L('Borrar partida', 'Удалить партию')}</button>
             : <button className="btn peligro" onClick={async () => { if (confirm(L('¿Salir de esta partida?', 'Выйти из этой партии?'))) { try { await quitarMiembro(partida.id, usuario.id); onVolver(); } catch (e) { alert((e as Error).message); } } }}>{L('Salir de la partida', 'Выйти из партии')}</button>}
         </div>
+        </>}
       </main>
       {ancho && (
         <section className="partida-panel">
-          {sel ? <Ficha key={sel} id={sel} ajeno={miembros.find((m) => m.personaje === sel)?.usuario !== usuario.id} volverTexto={L('Cerrar', 'Закрыть')} onVolver={() => { setSel(null); recargar(); }} />
+          {!sel && combate ? <div className="contenido"><PanelCombate partida={partida} miembros={miembros} onRecargar={recargar} onAbrirPj={setSel} /></div>
+            : sel ? <Ficha key={sel} id={sel} ajeno={miembros.find((m) => m.personaje === sel)?.usuario !== usuario.id} volverTexto={L('Cerrar', 'Закрыть')} onVolver={() => { setSel(null); recargar(); }} />
             : <div className="panel-vacio"><span>📜</span><p>{soyMaster ? L('Elige a un jugador de la lista para ver y editar su hoja aquí.', 'Выбери игрока слева, чтобы открыть и править его лист здесь.') : L('Elige tu personaje de la lista para abrir su hoja aquí.', 'Выбери своего персонажа слева, чтобы открыть его лист здесь.')}</p></div>}
         </section>
       )}

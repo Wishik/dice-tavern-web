@@ -1,5 +1,5 @@
 import { Fragment, useRef, useState } from 'react';
-import { useFicha } from './Ficha';
+import { Bloq, useFicha } from './Ficha';
 import { Etiqueta, Modal, Numero, PuntoRojo, Seccion, Texto, TextoLargo, comprimirFoto } from '../ui';
 import { HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, aplicarConjuntoEstandar, aplicarExperiencia, caracteristicasSinTocar, huecoDisponible, idHabilidad, cambiarNivel, idiomasDeTexto, pgPorDefecto, pxParaSubir, RASGOS_IDIOMA } from '../rules';
 import { ATRIBUTOS, type Atributo, type Personaje } from '../types';
@@ -72,7 +72,7 @@ export function TabPersonaje() {
           <div className="datos-basicos">
             <Etiqueta texto="Nombre"><Texto valor={p.nombre} set={(s) => upd((x) => { x.nombre = s; })} /></Etiqueta>
             <div className="fila-2">
-              <Etiqueta texto="Nivel"><Numero valor={p.nivel} min={1} max={20} set={(n) => upd((x) => { cambiarNivel(x, n); })} /></Etiqueta>
+              <Etiqueta texto="Nivel"><Bloq><Numero valor={p.nivel} min={1} max={20} set={(n) => upd((x) => { cambiarNivel(x, n); })} /></Bloq></Etiqueta>
               <Etiqueta texto="Exp."><button type="button" className="campo boton-exp" onClick={() => setVerExp(true)}>{p.exp}{pxParaSubir(p.nivel) !== null && <small> / {pxParaSubir(p.nivel)}</small>}</button></Etiqueta>
             </div>
             {pxParaSubir(p.nivel) !== null && <div className="barra-exp"><div style={{ width: `${Math.min(100, (p.exp / pxParaSubir(p.nivel)!) * 100)}%` }} /></div>}
@@ -84,35 +84,35 @@ export function TabPersonaje() {
         <div className="rejilla-campos">
           <Etiqueta texto="Raza">
             <div className="con-boton">
-              <select className="campo" value={razas?.razas.some((r) => r.nombre === p.raza) ? p.raza : p.raza ? '__otra' : ''} onChange={(e) => e.target.value !== '__otra' && elegirRaza(e.target.value)}>
+              <Bloq><select className="campo" value={razas?.razas.some((r) => r.nombre === p.raza) ? p.raza : p.raza ? '__otra' : ''} onChange={(e) => e.target.value !== '__otra' && elegirRaza(e.target.value)}>
                 <option value="">{L('— Elige —', '— Выбери —')}</option>
                 {razas?.razas.map((r) => <option key={r.nombre} value={r.nombre}>{T(RU_RAZAS, r.nombre)}</option>)}
                 {p.raza && !raza && <option value="__otra">{p.raza}</option>}
-              </select>
+              </select></Bloq>
               {raza && <button className="btn icono" onClick={() => setInfo('raza')} title={L('Ver raza', 'О расе')}>ⓘ</button>}
             </div>
           </Etiqueta>
           <Etiqueta texto="Clase">
             <div className="con-boton">
-              <select className="campo" value={p.clase} onChange={(e) => elegirClase(e.target.value)}>
+              <Bloq><select className="campo" value={p.clase} onChange={(e) => elegirClase(e.target.value)}>
                 <option value="">{L('— Elige —', '— Выбери —')}</option>
                 {clases?.map((c) => <option key={c.nombre} value={c.nombre}>{T(RU_CLASES, c.nombre)}</option>)}
-              </select>
+              </select></Bloq>
               {clase && <button className="btn icono" onClick={() => setInfo('clase')} title={L('Ver clase', 'О классе')}>ⓘ</button>}
             </div>
           </Etiqueta>
           {clase && (
             <Etiqueta texto={L(`Subclase${p.nivel < 3 ? ' (nivel 3)' : ''}`, `Подкласс${p.nivel < 3 ? ' (3 уровень)' : ''}`)}>
               <div className="con-boton">
-                <select className="campo" value={p.subclase} onChange={(e) => upd((x) => { x.subclase = e.target.value; })}>
+                <Bloq si={!!p.subclase}><select className="campo" value={p.subclase} onChange={(e) => upd((x) => { x.subclase = e.target.value; })}>
                   <option value="">{L('— Ninguna —', '— Нет —')}</option>
                   {clase.subclases.map((s) => <option key={s.nombre} value={s.nombre}>{td(s.nombre)}</option>)}
-                </select>
+                </select></Bloq>
                 {avisos.subclase && <PuntoRojo titulo="A nivel 3 eliges subclase" />}
               </div>
             </Etiqueta>
           )}
-          <Etiqueta texto="Tamaño"><Texto valor={p.tamano} set={(s) => upd((x) => { x.tamano = s; })} /></Etiqueta>
+          <Etiqueta texto="Tamaño"><Bloq><Texto valor={p.tamano} set={(s) => upd((x) => { x.tamano = s; })} /></Bloq></Etiqueta>
           <Etiqueta texto="Edad"><Texto valor={p.edad} set={(s) => upd((x) => { x.edad = s; })} /></Etiqueta>
         </div>
       </Seccion>
@@ -120,10 +120,10 @@ export function TabPersonaje() {
       <Seccion titulo="Trasfondo">
         <Etiqueta texto="Estilo de trasfondo (opcional)">
           <div className="con-boton">
-            <select className="campo" value={p.trasfondoEstilo} onChange={(e) => elegirTrasfondo(e.target.value)}>
+            <Bloq><select className="campo" value={p.trasfondoEstilo} onChange={(e) => elegirTrasfondo(e.target.value)}>
               <option value="">{L('— Ninguno —', '— Нет —')}</option>
               {trasfondos?.map((t) => <option key={t.nombre} value={t.nombre}>{td(t.nombre)}</option>)}
-            </select>
+            </select></Bloq>
             {tras && <button className="btn icono" onClick={() => setInfo('trasfondo')}>ⓘ</button>}
           </div>
         </Etiqueta>
@@ -290,7 +290,7 @@ function ModalExperiencia({ onClose }: { onClose: () => void }) {
       <details className="corregir">
         <summary>{L('Corregir a mano', 'Исправить вручную')}</summary>
         <div className="fila-2">
-          <Etiqueta texto="Nivel"><Numero valor={p.nivel} min={1} max={20} set={(v) => upd((x) => { cambiarNivel(x, v); })} /></Etiqueta>
+          <Etiqueta texto="Nivel"><Bloq><Numero valor={p.nivel} min={1} max={20} set={(v) => upd((x) => { cambiarNivel(x, v); })} /></Bloq></Etiqueta>
           <Etiqueta texto="PX actuales"><Numero valor={p.exp} min={0} set={(v) => upd((x) => { x.exp = v; })} /></Etiqueta>
         </div>
       </details>

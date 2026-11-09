@@ -18,7 +18,7 @@ const RU: Record<string, string> = {
   'Espacios de equipo': 'Места для снаряжения', 'Estilo de trasfondo (opcional)': 'Предыстория (по желанию)', 'Estándar': 'Стандарт',
   'Exp.': 'Опыт', 'Experiencia': 'Опыт', 'Furias, puntos de ki, usos por descanso…': 'Ярость, очки ци, использования за отдых…',
   'Habilidad de la montura': 'Способность скакуна', 'Habilidades y rasgos': 'Способности и особенности', 'Hoja de personaje': 'Лист персонажа',
-  'Idiomas': 'Языки', 'Iniciativa': 'Инициатива', 'Inspiración': 'Вдохновение', 'Límites': 'Лимиты', 'Mano hábil': 'Ведущая рука',
+  'Idiomas': 'Языки', 'Iniciativa': 'Инициатива', 'Estados': 'Состояния', 'Inspiración': 'Вдохновение', 'Límites': 'Лимиты', 'Mano hábil': 'Ведущая рука',
   'Mano torpe': 'Вторая рука', 'Maná': 'Мана', 'Mochila': 'Рюкзак', 'Moneda': 'Монета', 'Montura': 'Скакун', 'Máx. por espacio': 'Макс. в ячейке',
   'Máximos': 'Максимум', 'Nivel': 'Уровень', 'Nombre': 'Имя', 'Nombre (p. ej. Espada corta c/c)': 'Название (напр. Короткий меч)',
   'Nombres de PNJ, pistas, misiones… (🎙 para dictar)': 'Имена NPC, зацепки, задания… (🎙 — диктовка)', 'Notas': 'Заметки',

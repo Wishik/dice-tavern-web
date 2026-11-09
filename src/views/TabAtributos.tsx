@@ -1,4 +1,5 @@
-import { useFicha } from './Ficha';
+import { Bloq, useFicha } from './Ficha';
+import { ChipsEstados } from '../estados';
 import { useState } from 'react';
 import { Etiqueta, Modal, Numero, Seccion, Texto } from '../ui';
 import { Contador, useDados } from '../dice';
@@ -9,7 +10,7 @@ import { buscarClase } from '../avisos';
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
 
 export function TabAtributos() {
-  const { p, upd, clases } = useFicha();
+  const { p, upd, clases, bloqueado } = useFicha();
   const { tirarD20, tirar } = useDados();
   const carga = estadoCarga(p);
   const bc = bonoCompetencia(p.nivel);
@@ -27,11 +28,14 @@ export function TabAtributos() {
 
   return (
     <div className="tab">
+      <Seccion titulo="Estados" className="seccion-estados">
+        <ChipsEstados estados={p.estados} agotamiento={p.agotamiento} vacio set={(e, a) => upd((x) => { x.estados = e; x.agotamiento = a; })} />
+      </Seccion>
       <div className="fila-3-tarjetas">
         <Seccion titulo="PG (vida)" className="pg">
           <div className="pg-actual">
             <Contador valor={p.pg.actual} set={(n) => upd((x) => { x.pg.actual = Math.min(n, x.pg.max); })} min={-99} max={p.pg.max} />
-            <button className="de enlace-max" onClick={() => setCorregir(true)} title={L('Corregir máximo', 'Исправить максимум')}>/ {p.pg.max}</button>
+            <button className="de enlace-max" disabled={bloqueado} onClick={() => setCorregir(true)} title={L('Corregir máximo', 'Исправить максимум')}>/ {p.pg.max}</button>
           </div>
           <Etiqueta texto="Temporales"><Numero valor={p.pg.temp} min={0} set={(n) => upd((x) => { x.pg.temp = n; })} /></Etiqueta>
           {corregir && (
@@ -40,7 +44,7 @@ export function TabAtributos() {
               <Etiqueta texto="PG máximos"><Numero valor={p.pg.max} min={1} set={(n) => upd((x) => { x.pg.max = n; x.pg.actual = Math.min(x.pg.actual, n); })} /></Etiqueta>
             </Modal>
           )}
-          {pgDef > 0 && p.nivel === 1 && p.pg.max !== pgDef && (
+          {!bloqueado && pgDef > 0 && p.nivel === 1 && p.pg.max !== pgDef && (
             <button className="btn enlace pequeno" onClick={() => upd((x) => { const sube = x.pg.actual === x.pg.max || x.pg.actual === 0; x.pg.max = pgDef; if (sube) x.pg.actual = pgDef; })}>↺ {L('Por defecto', 'По умолчанию')}: {pgDef}</button>
           )}
           <div className="barra-vida"><div style={{ width: `${p.pg.max ? Math.max(0, Math.min(100, (p.pg.actual / p.pg.max) * 100)) : 0}%` }} /></div>
@@ -82,7 +86,7 @@ export function TabAtributos() {
           return (
             <div key={a} className="caracteristica">
               <div className="car-nombre">{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}</div>
-              <Numero valor={p.caracteristicas[a]} min={1} max={30} set={(n) => upd((x) => { x.caracteristicas[a] = n; })} className="car-valor" />
+              <Bloq><Numero valor={p.caracteristicas[a]} min={1} max={30} set={(n) => upd((x) => { x.caracteristicas[a] = n; })} className="car-valor" /></Bloq>
               <button className="car-mod" onClick={() => tirarD20(L(`Prueba de ${NOMBRE_ATRIBUTO[a]}`, `Проверка: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}`), valorPrueba(p, a), avisosTirada(p, 'prueba', a))} title={L('Tirar prueba', 'Бросить проверку')}>{conSigno(m)}{valorPrueba(p, a) !== m && <small className="extra-rasgo">{conSigno(valorPrueba(p, a) - m)}</small>}</button>
             </div>
           );
@@ -90,12 +94,13 @@ export function TabAtributos() {
       </div>
       <p className="nota centro">{L('Toca el modificador para tirar 1d20.', 'Нажми на модификатор, чтобы бросить 1d20.')}</p>
       {CONJUNTO_ESTANDAR[p.clase] && (
-        <p className="nota centro"><button className="btn enlace pequeno" onClick={() => { if (confirm(L(`¿Poner el conjunto estándar de ${p.clase} (${CONJUNTO_ESTANDAR[p.clase].join(', ')})?`, `Поставить стандартный набор для класса ${T(RU_CLASES, p.clase)} (${CONJUNTO_ESTANDAR[p.clase].join(', ')})?`))) upd((x) => { aplicarConjuntoEstandar(x, x.clase); }); }}>↺ {L(`Conjunto estándar de ${p.clase}`, `Стандартный набор: ${T(RU_CLASES, p.clase)}`)}</button></p>
+        <p className="nota centro"><button className="btn enlace pequeno" disabled={bloqueado} onClick={() => { if (confirm(L(`¿Poner el conjunto estándar de ${p.clase} (${CONJUNTO_ESTANDAR[p.clase].join(', ')})?`, `Поставить стандартный набор для класса ${T(RU_CLASES, p.clase)} (${CONJUNTO_ESTANDAR[p.clase].join(', ')})?`))) upd((x) => { aplicarConjuntoEstandar(x, x.clase); }); }}>↺ {L(`Conjunto estándar de ${p.clase}`, `Стандартный набор: ${T(RU_CLASES, p.clase)}`)}</button></p>
       )}
 
       <div className="fila-3-tarjetas">
         <Seccion titulo="Iniciativa">
-          <button className="valor-grande tirable" onClick={() => tirarD20(L('Iniciativa', 'Инициатива'), iniciativa(p), avisosTirada(p, 'prueba', 'DES'))}>{conSigno(iniciativa(p))}</button>
+          <button className="valor-grande tirable" onClick={() => tirarD20(L('Iniciativa', 'Инициатива'), iniciativa(p), avisosTirada(p, 'prueba', 'DES'), (t) => upd((x) => { x.iniciativaActual = t; }))}>{conSigno(iniciativa(p))}</button>
+          {p.iniciativaActual !== null && <p className="nota centro">{L('En este combate', 'В этом бою')}: <strong>{p.iniciativaActual}</strong> <button className="btn enlace pequeno" onClick={() => upd((x) => { x.iniciativaActual = null; })}>✕</button></p>}
           <Etiqueta texto="Bonus extra"><Numero valor={p.bonusIniciativa} set={(n) => upd((x) => { x.bonusIniciativa = n; })} /></Etiqueta>
         </Seccion>
         <Seccion titulo="Competencia">

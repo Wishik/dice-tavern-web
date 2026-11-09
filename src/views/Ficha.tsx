@@ -15,6 +15,8 @@ import { TabRasgos } from './TabRasgos';
 import { TabInventario } from './TabInventario';
 import { TabNotas } from './TabNotas';
 import { TabMonturas } from './TabMonturas';
+import { TabMaster } from './TabMaster';
+import { ChipsEstados } from '../estados';
 import { L, T, RU_ATRIBUTOS, RU_CLASES, RU_RAZAS, } from '../i18n';
 
 interface FichaCtx {
@@ -25,9 +27,22 @@ interface FichaCtx {
   trasfondos: Trasfondo[] | null;
   dotes: Dote[] | null;
   avisos: Avisos;
+  /** Datos de creación bloqueados (personaje en partida). */
+  bloqueado: boolean;
 }
 const Ctx = createContext<FichaCtx | null>(null);
 export const useFicha = () => useContext(Ctx)!;
+
+/** Envuelve campos que no se pueden cambiar durante la partida (raza, clase, características…). si=false lo deja libre. */
+export function Bloq({ children, si = true }: { children: React.ReactNode; si?: boolean }) {
+  const { bloqueado } = useFicha();
+  return <fieldset className="bloq" disabled={bloqueado && si} title={bloqueado && si ? L('Bloqueado durante la partida (lápiz en la lista de personajes para editar)', 'Заблокировано во время игры (карандаш в списке персонажей — чтобы править)') : undefined}>{children}</fieldset>;
+}
+
+const TABS_MASTER = [
+  { id: 'master', nombre: () => L('Vida y estados', 'Хиты и состояния'), C: TabMaster, aviso: () => 0 },
+  { id: 'inventario', nombre: () => L('Inventario', 'Инвентарь'), C: TabInventario, aviso: () => 0 },
+] as const;
 
 const TABS = [
   { id: 'personaje', nombre: () => L('Personaje', 'Персонаж'), C: TabPersonaje, aviso: (a: Avisos) => a.total.general },
@@ -56,13 +71,27 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
   const ultimo = useRef<Personaje | null>(null);
 
   useEffect(() => { backend.cargar(id).then((x) => x ? setP(x) : setError(L('No se encontró el personaje.', 'Персонаж не найден.'))).catch((e) => setError(e.message)); }, [id]);
+  // En partida, el máster (o el jugador) puede cambiar la hoja desde otro dispositivo: se recarga si no hay cambios pendientes.
+  const estadoRef = useRef(estado); estadoRef.current = estado;
+  useEffect(() => {
+    if (backend.modo !== 'nube') return;
+    const t = setInterval(async () => {
+      if (document.visibilityState !== 'visible' || estadoRef.current !== 'guardado' || ultimo.current) return;
+      try {
+        const x = await backend.cargar(id);
+        if (x && !ultimo.current && estadoRef.current === 'guardado') setP((prev) => (prev && x.actualizado !== prev.actualizado ? x : prev));
+      } catch { /* sin red: se intentará luego */ }
+    }, 12000);
+    return () => clearInterval(t);
+  }, [id]);
   useEffect(() => { try { localStorage.setItem('dicetavern.tab', tab); } catch { /* sin almacenamiento */ } }, [tab]);
 
   const guardar = useCallback(async () => {
     if (!ultimo.current) return;
     setEstado('guardando');
-    try { await backend.guardar(ultimo.current); setEstado('guardado'); } catch { setEstado('error'); }
-  }, []);
+    const enviado = ultimo.current;
+    try { await (ajeno ? backend.guardarMaster(enviado) : backend.guardar(enviado)); if (ultimo.current === enviado) { ultimo.current = null; setEstado('guardado'); } } catch { setEstado('error'); }
+  }, [ajeno]);
 
   const upd = useCallback((f: (p: Personaje) => void) => {
     setP((prev) => {
@@ -79,7 +108,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
   }, [guardar]);
 
   useEffect(() => {
-    const f = () => { if (ultimo.current) backend.guardar(ultimo.current); };
+    const f = () => { if (ultimo.current) (ajeno ? backend.guardarMaster(ultimo.current) : backend.guardar(ultimo.current)); };
     window.addEventListener('pagehide', f);
     return () => { window.removeEventListener('pagehide', f); clearTimeout(timer.current); f(); };
   }, []);
@@ -88,7 +117,9 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
 
   if (error) return <div className="contenido"><p className="error">{error}</p><button className="btn" onClick={onVolver}>{L('Volver', 'Назад')}</button></div>;
   if (!p || !avisos) return <div className="cargando">{L('Abriendo el cuaderno…', 'Открываю тетрадь…')}</div>;
-  const Tab = TABS.find((t) => t.id === tab) ?? TABS[0];
+  const tabs = ajeno ? TABS_MASTER : TABS;
+  const Tab = tabs.find((t) => t.id === tab) ?? tabs[0];
+  const bloqueado = !ajeno && !!p.bloqueado;
 
   const borrar = async () => {
     if (!confirm(L(`¿Borrar a ${p.nombre || 'este personaje'} para siempre?`, `Удалить ${p.nombre || 'этого персонажа'} навсегда?`))) return;
@@ -97,7 +128,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
   };
 
   return (
-    <Ctx.Provider value={{ p, upd, clases, razas, trasfondos, dotes, avisos }}>
+    <Ctx.Provider value={{ p, upd, clases, razas, trasfondos, dotes, avisos, bloqueado }}>
       <div className="pantalla-ficha">
         <div className="cabecera-fija">
         <header className="barra">
@@ -109,10 +140,16 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
           {ajeno && <span className="sello-master">👑</span>}
           <span className={`estado-guardado ${estado}`}>{estado === 'guardado' ? L('✓ Guardado', '✓ Сохранено') : estado === 'error' ? L('⚠ Sin guardar', '⚠ Не сохранено') : '…'}</span>
         </header>
+        {(p.estados?.length > 0 || p.agotamiento > 0 || p.iniciativaActual !== null) && (
+          <div className="franja-estados">
+            <ChipsEstados estados={p.estados} agotamiento={p.agotamiento} set={(e, a) => upd((x) => { x.estados = e; x.agotamiento = a; })} />
+            {p.iniciativaActual !== null && <span className="chip-estado iniciativa">⚔️ {L('Iniciativa', 'Инициатива')} {p.iniciativaActual}</span>}
+          </div>
+        )}
         <nav className="pestanas">
-          {TABS.map((t) => {
+          {tabs.map((t) => {
             const n = t.aviso(avisos);
-            return <button key={t.id} className={tab === t.id ? 'activa' : ''} onClick={() => setTab(t.id)}>{t.nombre()}{n > 0 && <PuntoRojo n={n} />}</button>;
+            return <button key={t.id} className={Tab.id === t.id ? 'activa' : ''} onClick={() => setTab(t.id)}>{t.nombre()}{n > 0 && <PuntoRojo n={n} />}</button>;
           })}
         </nav>
         </div>
