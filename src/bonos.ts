@@ -1,3 +1,4 @@
+import { L } from './i18n';
 import type { Atributo, Personaje } from './types';
 import { RASGOS_FIJOS } from './fijos';
 
@@ -95,7 +96,7 @@ export function bonoHabilidad(p: Personaje, id: string, compMarcada: boolean): {
   for (const { origen: o, b } of l) {
     if (b.competencia?.includes(id)) {
       if (compMarcada && b.competenciaO2) { bono += 2; origen.push(`${o} +2`); }
-      else { comp = true; origen.push(`${o} (competencia)`); }
+      else { comp = true; origen.push(`${o} (${L("competencia", "владение")})`); }
     }
     const h = b.habilidad?.[id]; if (h) { bono += h; origen.push(`${o} ${h > 0 ? '+' : ''}${h}`); }
     if (b.nota?.[id]) notas.push(b.nota[id]);

@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { L, idioma } from './i18n';
+import { tr, trN } from './ru';
 
 /** Parte de la pantalla que no tapa el teclado del móvil (visualViewport). */
 function useZonaVisible() {
@@ -23,7 +25,7 @@ export function Modal({ titulo, onClose, children, pie }: { titulo: ReactNode; o
   return (
     <div className="modal-fondo" onClick={onClose} style={vv ? { top: vv.top, height: vv.alto, bottom: 'auto' } : undefined}>
       <div className="modal hoja" onClick={(e) => e.stopPropagation()} role="dialog">
-        <div className="modal-cabecera"><h3>{titulo}</h3><button className="cerrar" onClick={onClose} aria-label="Cerrar">✕</button></div>
+        <div className="modal-cabecera"><h3>{trN(titulo)}</h3><button className="cerrar" onClick={onClose} aria-label={tr('Cerrar')}>✕</button></div>
         <div className="modal-cuerpo">{children}</div>
         {pie && <div className="modal-pie">{pie}</div>}
       </div>
@@ -34,20 +36,20 @@ export function Modal({ titulo, onClose, children, pie }: { titulo: ReactNode; o
 export function Seccion({ titulo, aviso, children, extra, className = '' }: { titulo: ReactNode; aviso?: number | boolean; children: ReactNode; extra?: ReactNode; className?: string }) {
   return (
     <section className={`tarjeta ${className}`}>
-      <div className="cinta"><span>{titulo}</span>{aviso ? <PuntoRojo n={typeof aviso === 'number' ? aviso : undefined} /> : null}{extra && <span className="cinta-extra">{extra}</span>}</div>
+      <div className="cinta"><span>{trN(titulo)}</span>{aviso ? <PuntoRojo n={typeof aviso === 'number' ? aviso : undefined} /> : null}{extra && <span className="cinta-extra">{extra}</span>}</div>
       {children}
     </section>
   );
 }
 
 export function PuntoRojo({ n, titulo }: { n?: number; titulo?: string }) {
-  return <span className="punto-rojo" title={titulo ?? 'Puedes añadir algo aquí'}>{n && n > 1 ? n : ''}</span>;
+  return <span className="punto-rojo" title={tr(titulo ?? 'Puedes añadir algo aquí')}>{n && n > 1 ? n : ''}</span>;
 }
 
 export function BotonAnadir({ onClick, aviso, children = 'Añadir' }: { onClick: () => void; aviso?: boolean; children?: ReactNode }) {
   return (
     <button className={`btn anadir ${aviso ? 'con-aviso' : ''}`} onClick={onClick}>
-      <span className="mas">+</span> {children}{aviso && <PuntoRojo />}
+      <span className="mas">+</span> {trN(children)}{aviso && <PuntoRojo />}
     </button>
   );
 }
@@ -69,18 +71,18 @@ export function Microfono({ alTexto }: { alTexto: (frase: string) => void }) {
   const alternar = () => {
     if (activo) { rec.current?.stop(); return; }
     const r = new ClaseReconocedor!();
-    r.lang = 'es-ES'; r.continuous = true; r.interimResults = false;
+    r.lang = idioma() === 'ru' ? 'ru-RU' : 'es-ES'; r.continuous = true; r.interimResults = false;
     r.onresult = (e) => {
       for (let i = e.resultIndex; i < e.results.length; i++) if (e.results[i].isFinal) cb.current(e.results[i][0].transcript.trim());
     };
     r.onend = () => setActivo(false);
-    r.onerror = (e) => { setActivo(false); setError(e.error === 'not-allowed' ? 'Permite el micrófono en el navegador.' : 'No se pudo escuchar.'); };
+    r.onerror = (e) => { setActivo(false); setError(e.error === 'not-allowed' ? L('Permite el micrófono en el navegador.', 'Разреши микрофон в браузере.') : L('No se pudo escuchar.', 'Не удалось распознать речь.')); };
     rec.current = r; setError(''); setActivo(true);
     try { r.start(); } catch { setActivo(false); }
   };
   return (
     <span className="microfono-envoltura">
-      <button type="button" className={`microfono ${activo ? 'escuchando' : ''}`} onClick={alternar} aria-label={activo ? 'Parar dictado' : 'Dictar por voz'} title={activo ? 'Parar' : 'Dictar por voz'}>
+      <button type="button" className={`microfono ${activo ? 'escuchando' : ''}`} onClick={alternar} aria-label={activo ? L('Parar dictado', 'Остановить диктовку') : L('Dictar por voz', 'Диктовать голосом')} title={activo ? L('Parar', 'Стоп') : L('Dictar por voz', 'Диктовать голосом')}>
         {activo ? '■' : '🎙'}
       </button>
       {error && <small className="error-mic">{error}</small>}
@@ -100,8 +102,8 @@ export function Texto({ valor, set, placeholder, multilinea, filas = 3, classNam
   const actual = useRef(valor); actual.current = valor;
   const conVoz = (voz ?? multilinea) && dictadoDisponible;
   const campo = multilinea
-    ? <textarea className={`campo ${className}`} value={valor} placeholder={placeholder} rows={filas} onChange={(e) => set(e.target.value)} />
-    : <input className={`campo ${className}`} value={valor} placeholder={placeholder} onChange={(e) => set(e.target.value)} />;
+    ? <textarea className={`campo ${className}`} value={valor} placeholder={placeholder && tr(placeholder)} rows={filas} onChange={(e) => set(e.target.value)} />
+    : <input className={`campo ${className}`} value={valor} placeholder={placeholder && tr(placeholder)} onChange={(e) => set(e.target.value)} />;
   if (!conVoz) return campo;
   return (
     <div className={`con-voz ${multilinea ? 'multi' : ''}`}>
@@ -129,11 +131,11 @@ export function Numero({ valor, set, min, max, className = '', ancho }: { valor:
 }
 
 export function Etiqueta({ texto, children }: { texto: string; children: ReactNode }) {
-  return <label className="etiqueta"><span>{texto}</span>{children}</label>;
+  return <label className="etiqueta"><span>{tr(texto)}</span>{children}</label>;
 }
 
 export function Check({ valor, set, titulo }: { valor: boolean; set: (b: boolean) => void; titulo?: string }) {
-  return <button type="button" className={`check ${valor ? 'marcado' : ''}`} title={titulo} onClick={() => set(!valor)} aria-pressed={valor} />;
+  return <button type="button" className={`check ${valor ? 'marcado' : ''}`} title={titulo && tr(titulo)} onClick={() => set(!valor)} aria-pressed={valor} />;
 }
 
 export function Buscador<T>({ items, texto, onElegir, placeholder, render, filtro, vacio }: {
@@ -145,13 +147,13 @@ export function Buscador<T>({ items, texto, onElegir, placeholder, render, filtr
   const res = items.filter((i) => (!filtro || filtro(i)) && (!nq || norm(texto(i)).includes(nq))).slice(0, 60);
   return (
     <div className="buscador">
-      <input className="campo" autoFocus value={q} placeholder={placeholder} onChange={(e) => setQ(e.target.value)} />
+      <input className="campo" autoFocus value={q} placeholder={tr(placeholder)} onChange={(e) => setQ(e.target.value)} />
       <ul className="resultados">
         {res.map((i, k) => <li key={k}><button onClick={() => onElegir(i)}>{render ? render(i) : texto(i)}</button></li>)}
         {q.trim() && !res.some((i) => norm(texto(i)) === nq) && (
-          <li><button className="nuevo" onClick={() => onElegir(q.trim())}>➕ Crear «{q.trim()}» (no está en la base)</button></li>
+          <li><button className="nuevo" onClick={() => onElegir(q.trim())}>➕ {L(`Crear «${q.trim()}» (no está en la base)`, `Создать «${q.trim()}» (нет в базе)`)}</button></li>
         )}
-        {!q.trim() && res.length === 0 && <li className="vacio">{vacio ?? 'Nada que mostrar.'}</li>}
+        {!q.trim() && res.length === 0 && <li className="vacio">{tr(vacio ?? 'Nada que mostrar.')}</li>}
       </ul>
     </div>
   );
@@ -160,7 +162,7 @@ export function Buscador<T>({ items, texto, onElegir, placeholder, render, filtr
 export function ListaDatos({ datos }: { datos: Record<string, string> }) {
   const e = Object.entries(datos).filter(([, v]) => v && v !== '--');
   if (!e.length) return null;
-  return <dl className="lista-datos">{e.map(([k, v]) => <div key={k} className="par"><dt>{k}</dt><dd>{v}</dd></div>)}</dl>;
+  return <dl className="lista-datos">{e.map(([k, v]) => <div key={k} className="par"><dt>{tr(k)}</dt><dd>{v}</dd></div>)}</dl>;
 }
 
 export function TextoLargo({ texto }: { texto: string }) {
@@ -180,7 +182,7 @@ export function comprimirFoto(file: File, lado = 480): Promise<string> {
       URL.revokeObjectURL(url);
       ok(c.toDataURL('image/jpeg', 0.82));
     };
-    img.onerror = () => mal(new Error('No se pudo leer la imagen.'));
+    img.onerror = () => mal(new Error(L('No se pudo leer la imagen.', 'Не удалось прочитать картинку.')));
     img.src = url;
   });
 }

@@ -1,5 +1,7 @@
 import type { Atributo, Item, Moneda, Personaje } from './types';
 import { bonoAtaqueArma, bonoAtaqueConjuro, bonoCdConjuro, bonoFuerzaCarga, bonoHabilidad, bonoPrueba, bonoSalvacion, bonosCA } from './bonos';
+import { L } from './i18n';
+import { tr } from './ru';
 
 export const modificador = (valor: number) => Math.floor((valor - 10) / 2);
 export const conSigno = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
@@ -110,7 +112,7 @@ export function estadoCarga(p: Personaje): EstadoCarga {
   let penalizacion = 0, efecto = '';
   if (exceso > 0) {
     const t = TRAMOS_SOBRECARGA.find((t) => exceso <= t.hasta) ?? TRAMOS_SOBRECARGA[TRAMOS_SOBRECARGA.length - 1];
-    penalizacion = t.velocidad; efecto = t.efecto;
+    penalizacion = t.velocidad; efecto = tr(t.efecto);
   }
   return { usados, libres, capacidad: Math.min(MOCHILA_MAX, libres + max), exceso, penalizacion, efecto, sobreMaximo: usados > MOCHILA_MAX };
 }
@@ -132,8 +134,8 @@ export interface ResultadoConversion { ok: boolean; error?: string; monedas?: Re
  * en la moneda de origen (no se pierde nada).
  */
 export function convertir(m: Record<Moneda, number>, desde: Moneda, hacia: Moneda, cantidad: number): ResultadoConversion {
-  if (!Number.isInteger(cantidad) || cantidad <= 0) return { ok: false, error: 'Indica una cantidad válida.' };
-  if (desde === hacia) return { ok: false, error: 'Elige dos monedas distintas.' };
+  if (!Number.isInteger(cantidad) || cantidad <= 0) return { ok: false, error: L('Indica una cantidad válida.', 'Укажи правильное количество.') };
+  if (desde === hacia) return { ok: false, error: L('Elige dos monedas distintas.', 'Выбери две разные монеты.') };
   if ((m[desde] ?? 0) < cantidad) return { ok: false, error: `No tienes ${cantidad} ${desde}.` };
   const totalPC = cantidad * VALOR_PC[desde];
   const obtenidas = Math.floor(totalPC / VALOR_PC[hacia]);
@@ -300,15 +302,15 @@ export function calcularCA(p: Personaje): DesgloseCA {
     if (/Destreza/i.test(f)) {
       const tope = f.match(/m[aá]x\.?\s*(\d+)/i);
       const d = tope ? Math.min(desEf, parseInt(tope[1], 10)) : desEf;
-      base = n + d; partes.push(`${arm.nombre} ${n} ${conSigno(d)} DES`);
+      base = n + d; partes.push(`${arm.nombre} ${n} ${conSigno(d)} ${L('DES', 'ЛОВ')}`);
     } else { base = n; partes.push(`${arm.nombre} ${n}`); }
     if (/desventaja/i.test(arm.detalles?.['Sigilo'] ?? '')) sigiloDesventaja.push(arm.nombre);
     fuerzaMinima = Math.max(fuerzaMinima, parseInt(arm.detalles?.['Fuerza'] ?? '', 10) || 0);
   } else if (p.clase === 'Bárbaro') {
-    const c = modificador(p.caracteristicas.CON); base = 10 + desEf + c; partes.push(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(c)} CON`);
+    const c = modificador(p.caracteristicas.CON); base = 10 + desEf + c; partes.push(L(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(c)} CON`, `Защита без доспехов 10 ${conSigno(desEf)} ЛОВ ${conSigno(c)} ТЕЛ`));
   } else if (p.clase === 'Monje' && !escudo) {
-    const s = modificador(p.caracteristicas.SAB); base = 10 + desEf + s; partes.push(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(s)} SAB`);
-  } else partes.push(`10 ${conSigno(desEf)} DES`);
+    const s = modificador(p.caracteristicas.SAB); base = 10 + desEf + s; partes.push(L(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(s)} SAB`, `Защита без доспехов 10 ${conSigno(desEf)} ЛОВ ${conSigno(s)} МДР`));
+  } else partes.push(`10 ${conSigno(desEf)} ${L('DES', 'ЛОВ')}`);
   let total = base;
   for (const it of [p.equipo.manoHabil, p.equipo.manoTorpe]) {
     if (it?.tipo !== 'escudo') continue;
@@ -318,7 +320,7 @@ export function calcularCA(p: Personaje): DesgloseCA {
     fuerzaMinima = Math.max(fuerzaMinima, parseInt(it.detalles?.['Fuerza'] ?? '', 10) || 0);
   }
   if (extra.total) { total += extra.total; partes.push(...extra.partes); }
-  if (p.bonusCA) { total += p.bonusCA; partes.push(`ajuste ${conSigno(p.bonusCA)}`); }
+  if (p.bonusCA) { total += p.bonusCA; partes.push(`${L('ajuste', 'поправка')} ${conSigno(p.bonusCA)}`); }
   return { total, partes, sigiloDesventaja, fuerzaMinima };
 }
 
@@ -365,11 +367,11 @@ export function avisosTirada(p: Personaje, tipo: TipoTirada, atr: Atributo | nul
   const carga = estadoCarga(p);
   const tramo = carga.exceso > 0 ? TRAMOS_SOBRECARGA.findIndex((t) => carga.exceso <= t.hasta) : -1;
   const fisica = atr === 'FUE' || atr === 'DES';
-  if (fisica && (tramo === 2 || carga.sobreMaximo)) out.push(`Desventaja: mochila muy sobrecargada (${carga.usados} espacios), todas las tiradas de Fuerza y Destreza.`);
-  else if (fisica && tramo === 1 && (tipo === 'salvacion' || tipo === 'habilidad')) out.push(`Desventaja: mochila sobrecargada (${carga.usados} espacios), TS y habilidades de Fuerza y Destreza.`);
+  if (fisica && (tramo === 2 || carga.sobreMaximo)) out.push(L(`Desventaja: mochila muy sobrecargada (${carga.usados} espacios), todas las tiradas de Fuerza y Destreza.`, `Помеха: рюкзак сильно перегружен (${carga.usados} ячеек), все броски Силы и Ловкости.`));
+  else if (fisica && tramo === 1 && (tipo === 'salvacion' || tipo === 'habilidad')) out.push(L(`Desventaja: mochila sobrecargada (${carga.usados} espacios), TS y habilidades de Fuerza y Destreza.`, `Помеха: рюкзак перегружен (${carga.usados} ячеек), спасброски и навыки Силы и Ловкости.`));
   const ca = calcularCA(p);
-  if (habilidad === 'sigilo' && ca.sigiloDesventaja.length) out.push(`Desventaja en Sigilo por ${ca.sigiloDesventaja.join(' y ')}.`);
-  if (ca.fuerzaMinima && p.caracteristicas.FUE < ca.fuerzaMinima && fisica) out.push(`Tu armadura pide Fuerza ${ca.fuerzaMinima}: pregunta al DM si te penaliza.`);
+  if (habilidad === 'sigilo' && ca.sigiloDesventaja.length) out.push(L(`Desventaja en Sigilo por ${ca.sigiloDesventaja.join(' y ')}.`, `Помеха на Скрытность из-за: ${ca.sigiloDesventaja.join(', ')}.`));
+  if (ca.fuerzaMinima && p.caracteristicas.FUE < ca.fuerzaMinima && fisica) out.push(L(`Tu armadura pide Fuerza ${ca.fuerzaMinima}: pregunta al DM si te penaliza.`, `Доспех требует Силу ${ca.fuerzaMinima}: спроси мастера о штрафе.`));
   return out;
 }
 

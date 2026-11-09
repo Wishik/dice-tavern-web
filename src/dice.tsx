@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { conSigno, parseFormula } from './rules';
+import { L } from './i18n';
 
 export type Modo = 'normal' | 'ventaja' | 'desventaja';
 export interface Tirada {
@@ -66,9 +67,9 @@ export function DiceProvider({ children }: { children: ReactNode }) {
             {pendiente.avisos.map((a, i) => <p key={i} className="aviso-tirada">⚠️ {a}</p>)}
             <div className="fila-botones">
               {(['desventaja', 'normal', 'ventaja'] as Modo[]).map((m) => (
-                <button key={m} className={`${m === 'normal' ? 'btn primario' : 'btn'}${m !== 'normal' && pendiente.avisos.some((a) => a.toLowerCase().startsWith(m)) ? ' sugerido' : ''}`}
+                <button key={m} className={`${m === 'normal' ? 'btn primario' : 'btn'}${m !== 'normal' && pendiente.avisos.some((a) => (m === 'ventaja' ? /^(ventaja|преимущество)/i : /^(desventaja|помеха)/i).test(a)) ? ' sugerido' : ''}`}
                   onClick={() => { tirar(pendiente.etiqueta, `1d20${conSigno(pendiente.mod)}`, m); setPendiente(null); }}>
-                  {m === 'normal' ? 'Tirar' : m === 'ventaja' ? 'Ventaja' : 'Desventaja'}
+                  {m === 'normal' ? L('Tirar', 'Бросить') : m === 'ventaja' ? L('Ventaja', 'Преимущество') : L('Desventaja', 'Помеха')}
                 </button>
               ))}
             </div>
@@ -102,12 +103,12 @@ function ResultadoTirada({ t, onClose }: { t: Tirada; onClose: () => void }) {
               {t.dados.map((x, i) => <span key={i} className={`chip-dado ${x.descartado ? 'descartado' : ''}`}>d{x.caras}: {x.valor}</span>)}
               {t.mod !== 0 && <span className="chip-dado mod">{conSigno(t.mod)}</span>}
             </div>
-            {t.modo !== 'normal' && <div className="nota">{t.modo === 'ventaja' ? 'Con ventaja' : 'Con desventaja'}</div>}
-            {t.critico === 'exito' && <div className="critico-texto">¡CRÍTICO!</div>}
-            {t.critico === 'fallo' && <div className="critico-texto">Pifia…</div>}
+            {t.modo !== 'normal' && <div className="nota">{t.modo === 'ventaja' ? L('Con ventaja', 'С преимуществом') : L('Con desventaja', 'С помехой')}</div>}
+            {t.critico === 'exito' && <div className="critico-texto">{L('¡CRÍTICO!', 'КРИТ!')}</div>}
+            {t.critico === 'fallo' && <div className="critico-texto">{L('Pifia…', 'Провал…')}</div>}
           </>
         )}
-        <div className="nota pequena">Toca para cerrar</div>
+        <div className="nota pequena">{L('Toca para cerrar', 'Нажми, чтобы закрыть')}</div>
       </div>
     </div>
   );
@@ -122,7 +123,7 @@ export function PanelDados() {
   return (
     <div className="panel-dados">
       <div className="tarjeta">
-        <h2 className="titulo-seccion">Mesa de dados</h2>
+        <h2 className="titulo-seccion">{L('Mesa de dados', 'Стол для кубиков')}</h2>
         <div className="rejilla-dados">
           {CARAS.map((c) => (
             <button key={c} className="boton-dado" onClick={() => tirar(`${cant}d${c}${mod ? conSigno(mod) : ''}`, `${cant}d${c}${mod ? conSigno(mod) : ''}`, c === 20 && cant === 1 ? modo : 'normal')}>
@@ -131,19 +132,19 @@ export function PanelDados() {
           ))}
         </div>
         <div className="fila-controles">
-          <label>Cantidad <Contador valor={cant} set={setCant} min={1} max={20} /></label>
-          <label>Modificador <Contador valor={mod} set={setMod} min={-20} max={20} signo /></label>
+          <label>{L('Cantidad', 'Сколько')} <Contador valor={cant} set={setCant} min={1} max={20} /></label>
+          <label>{L('Modificador', 'Модификатор')} <Contador valor={mod} set={setMod} min={-20} max={20} signo /></label>
         </div>
         <div className="segmentado">
           {(['desventaja', 'normal', 'ventaja'] as Modo[]).map((m) => (
-            <button key={m} className={modo === m ? 'activo' : ''} onClick={() => setModo(m)}>{m === 'normal' ? 'Normal' : m === 'ventaja' ? 'Ventaja' : 'Desventaja'}</button>
+            <button key={m} className={modo === m ? 'activo' : ''} onClick={() => setModo(m)}>{m === 'normal' ? L('Normal', 'Обычно') : m === 'ventaja' ? L('Ventaja', 'Преимущество') : L('Desventaja', 'Помеха')}</button>
           ))}
         </div>
-        <p className="nota pequena">Ventaja y desventaja se aplican a 1d20.</p>
+        <p className="nota pequena">{L('Ventaja y desventaja se aplican a 1d20.', 'Преимущество и помеха действуют на 1d20.')}</p>
       </div>
       <div className="tarjeta">
-        <div className="cabecera-fila"><h3>Historial</h3>{historial.length > 0 && <button className="btn enlace" onClick={limpiar}>Borrar</button>}</div>
-        {historial.length === 0 && <p className="vacio">Aún no has tirado nada.</p>}
+        <div className="cabecera-fila"><h3>{L('Historial', 'История бросков')}</h3>{historial.length > 0 && <button className="btn enlace" onClick={limpiar}>{L('Borrar', 'Очистить')}</button>}</div>
+        {historial.length === 0 && <p className="vacio">{L('Aún no has tirado nada.', 'Ещё ничего не бросал.')}</p>}
         <ul className="historial">
           {historial.map((t) => (
             <li key={t.id}><span className="h-etiqueta">{t.etiqueta}</span><span className="h-detalle">{t.dados.filter((x) => !x.descartado).map((x) => x.valor).join(' + ')}{t.mod ? ` ${conSigno(t.mod)}` : ''}</span><strong className={t.critico ? 'crit-' + t.critico : ''}>{t.total}</strong></li>

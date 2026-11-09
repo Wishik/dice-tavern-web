@@ -1,15 +1,22 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import type { Personaje } from './types';
 import { normalizar } from './personaje';
+import { L } from './i18n';
 
-export interface Usuario { id: string; email: string }
+export interface Usuario { id: string; email: string; alias: string }
 export interface Resumen { id: string; nombre: string; raza: string; clase: string; nivel: number; foto: string; actualizado: string }
 
 export interface Backend {
   modo: 'local' | 'nube';
   usuario(): Promise<Usuario | null>;
   entrar(email: string, clave: string): Promise<void>;
-  registrar(email: string, clave: string): Promise<'ok' | 'confirmar'>;
+  registrar(email: string, clave: string, alias: string): Promise<'ok' | 'confirmar'>;
+  /** true si nadie usa ese alias (sin distinguir mayúsculas). */
+  aliasLibre(alias: string): Promise<boolean>;
+  ponerAlias(alias: string): Promise<void>;
+  /** Envía el correo para cambiar la contraseña. */
+  recuperar(email: string): Promise<void>;
+  nuevaClave(clave: string): Promise<void>;
   salir(): Promise<void>;
   listar(): Promise<Resumen[]>;
   cargar(id: string): Promise<Personaje | null>;
@@ -25,12 +32,14 @@ function leerLocal(): Record<string, Personaje> {
   try { return JSON.parse(localStorage.getItem(CLAVE) || '{}'); } catch { return {}; }
 }
 function escribirLocal(d: Record<string, Personaje>) {
-  try { localStorage.setItem(CLAVE, JSON.stringify(d)); } catch (e) { throw new Error('No se pudo guardar en este dispositivo (¿memoria llena?).'); }
+  try { localStorage.setItem(CLAVE, JSON.stringify(d)); } catch (e) { throw new Error(L('No se pudo guardar en este dispositivo (¿memoria llena?).', 'Не удалось сохранить на этом устройстве (память заполнена?).')); }
 }
 export const backendLocal: Backend = {
   modo: 'local',
-  async usuario() { return { id: 'local', email: 'Este dispositivo' }; },
+  async usuario() { let alias = ''; try { alias = localStorage.getItem('dicetavern.alias') ?? ''; } catch { /* nada */ } return { id: 'local', email: L('Este dispositivo', 'Это устройство'), alias }; },
   async entrar() {}, async registrar() { return 'ok'; }, async salir() {},
+  async aliasLibre() { return true; }, async ponerAlias(a) { try { localStorage.setItem('dicetavern.alias', a); } catch { /* nada */ } },
+  async recuperar() {}, async nuevaClave() {},
   async listar() { return Object.values(leerLocal()).map(resumen).sort((a, b) => b.actualizado.localeCompare(a.actualizado)); },
   async cargar(id) { const p = leerLocal()[id]; return p ? normalizar(p) : null; },
   async guardar(p) { const d = leerLocal(); d[p.id] = p; escribirLocal(d); },
@@ -42,14 +51,32 @@ function backendNube(sb: SupabaseClient): Backend {
   return {
     modo: 'nube',
     // getSession lee la sesión guardada en el navegador (sin red); getUser podía quedarse colgado.
-    async usuario() { const { data } = await sb.auth.getSession(); const u = data.session?.user; return u ? { id: u.id, email: u.email ?? '' } : null; },
+    async usuario() { const { data } = await sb.auth.getSession(); const u = data.session?.user; return u ? { id: u.id, email: u.email ?? '', alias: (u.user_metadata?.alias as string) ?? '' } : null; },
     async entrar(email, clave) { const { error } = await sb.auth.signInWithPassword({ email, password: clave }); if (error) throw new Error(traducir(error.message)); },
-    async registrar(email, clave) {
-      const { data, error } = await sb.auth.signUp({ email, password: clave, options: { emailRedirectTo: location.origin } });
+    async registrar(email, clave, alias) {
+      if (!(await this.aliasLibre(alias))) throw new Error(L('Ese alias ya lo usa otro jugador. Elige otro.', 'Этот ник уже занят другим игроком. Выбери другой.'));
+      const { data, error } = await sb.auth.signUp({ email, password: clave, options: { emailRedirectTo: location.origin, data: { alias: alias.trim() } } });
       if (error) throw new Error(traducir(error.message));
       return data.session ? 'ok' : 'confirmar';
     },
     async salir() { await sb.auth.signOut(); },
+    async aliasLibre(alias) {
+      const { data, error } = await sb.rpc('alias_libre', { a: alias.trim() });
+      if (error) throw new Error(L('No se pudo comprobar el alias. ¿Has ejecutado el SQL de perfiles en Supabase?', 'Не удалось проверить ник. Выполнен ли SQL с профилями в Supabase?'));
+      return !!data;
+    },
+    async ponerAlias(alias) {
+      if (!(await this.aliasLibre(alias))) throw new Error(L('Ese alias ya lo usa otro jugador. Elige otro.', 'Этот ник уже занят другим игроком. Выбери другой.'));
+      const { data: s } = await sb.auth.getSession();
+      const { error } = await sb.from('perfiles').insert({ id: s.session?.user.id, alias: alias.trim() });
+      if (error) throw new Error(/duplicate|unique/i.test(error.message) ? L('Ese alias ya lo usa otro jugador. Elige otro.', 'Этот ник уже занят другим игроком. Выбери другой.') : error.message);
+      await sb.auth.updateUser({ data: { alias: alias.trim() } });
+    },
+    async recuperar(email) {
+      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin });
+      if (error) throw new Error(traducir(error.message));
+    },
+    async nuevaClave(clave) { const { error } = await sb.auth.updateUser({ password: clave }); if (error) throw new Error(traducir(error.message)); },
     async listar() {
       const { data, error } = await sb.from('personajes').select('id, datos->nombre, datos->raza, datos->clase, datos->nivel, datos->foto, actualizado').order('actualizado', { ascending: false });
       if (error) throw new Error(error.message);
@@ -70,10 +97,13 @@ function backendNube(sb: SupabaseClient): Backend {
 }
 
 function traducir(m: string) {
-  if (/invalid login/i.test(m)) return 'Correo o contraseña incorrectos.';
-  if (/already registered/i.test(m)) return 'Ese correo ya tiene cuenta. Inicia sesión.';
-  if (/password should be/i.test(m)) return 'La contraseña debe tener al menos 6 caracteres.';
-  if (/email not confirmed/i.test(m)) return 'Confirma tu correo antes de entrar (revisa tu bandeja de entrada).';
+  if (/invalid login/i.test(m)) return L('Correo o contraseña incorrectos.', 'Неверная почта или пароль.');
+  if (/already registered/i.test(m)) return L('Ese correo ya tiene cuenta. Inicia sesión.', 'На эту почту уже есть аккаунт. Войди.');
+  if (/password should be/i.test(m)) return L('La contraseña debe tener al menos 6 caracteres.', 'Пароль должен быть не короче 6 символов.');
+  if (/email not confirmed/i.test(m)) return L('Confirma tu correo antes de entrar (revisa tu bandeja de entrada).', 'Сначала подтверди почту (проверь входящие).');
+  if (/database error saving new user/i.test(m)) return L('Ese alias ya lo usa otro jugador. Elige otro.', 'Этот ник уже занят другим игроком. Выбери другой.');
+  if (/same.*password|different from the old/i.test(m)) return L('La nueva contraseña debe ser distinta de la anterior.', 'Новый пароль должен отличаться от старого.');
+  if (/rate limit|security purposes/i.test(m)) return L('Demasiados intentos. Espera un minuto y prueba otra vez.', 'Слишком много попыток. Подожди минуту и попробуй снова.');
   return m;
 }
 

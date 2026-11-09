@@ -6,6 +6,8 @@ import { cargarObjetos, useDatos, type ObjetoBase } from '../data';
 import { MOCHILA_MAX, cabeEnMochila, conSigno, espaciosItem, espaciosUsados, modificador, uid } from '../rules';
 import { nuevaMontura } from '../personaje';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Item, type Montura } from '../types';
+import { L, T, RU_NOMBRE_ATRIBUTO } from '../i18n';
+import { tr } from '../ru';
 
 type Zona = 'equipo' | 'carga';
 interface MonturaBase { nombre: string; tamano: string; ca: number; pg: number; dadosPG: string; precio: string;
@@ -19,7 +21,7 @@ export function TabMonturas() {
   const [elegir, setElegir] = useState(false);
   const base = useDatos<MonturaBase[]>('monturas');
   const crear = (b?: MonturaBase) => {
-    const n = nuevaMontura(b ? b.nombre : `Montura ${p.monturas.length + 1}`);
+    const n = nuevaMontura(b ? b.nombre : `${L('Montura', 'Скакун')} ${p.monturas.length + 1}`);
     if (b) {
       n.tipo = b.nombre; n.ca = String(b.ca); n.pg = { max: b.pg, actual: b.pg };
       n.velocidad = { ...b.velocidad }; n.caracteristicas = { ...b.caracteristicas };
@@ -34,23 +36,23 @@ export function TabMonturas() {
       {p.monturas.length > 0 && (
         <div className="chips-monturas">
           {p.monturas.map((x) => (
-            <button key={x.id} className={`chip ${m?.id === x.id ? 'activo' : ''}`} onClick={() => setSel(x.id)}>🐎 {x.nombre || 'Sin nombre'}</button>
+            <button key={x.id} className={`chip ${m?.id === x.id ? 'activo' : ''}`} onClick={() => setSel(x.id)}>🐎 {x.nombre || L('Sin nombre', 'Без имени')}</button>
           ))}
         </div>
       )}
       <BotonAnadir onClick={() => setElegir(true)}>Añadir montura</BotonAnadir>
       {elegir && (
         <Modal titulo="Añadir montura" onClose={() => setElegir(false)}>
-          {!base ? <p>Cargando monturas…</p> : (
+          {!base ? <p>{L('Cargando monturas…', 'Загружаю скакунов…')}</p> : (
             <Buscador<MonturaBase> items={base} texto={(b) => b.nombre} placeholder="Caballo, grifo, poni…"
-              render={(b) => <span className="res-conjuro"><strong>{b.nombre}</strong><small>{b.tamano} · CA {b.ca} · PG {b.pg} · {b.velocidad.andando} pies{b.velocidad.volando ? `, vuela ${b.velocidad.volando}` : ''}{b.velocidad.nadando ? `, nada ${b.velocidad.nadando}` : ''}{b.precio ? ` · ${b.precio}` : ''}</small></span>}
+              render={(b) => <span className="res-conjuro"><strong>{b.nombre}</strong><small>{b.tamano} · {L('CA', 'КД')} {b.ca} · {L('PG', 'Хиты')} {b.pg} · {b.velocidad.andando} {L('pies', 'фт')}{b.velocidad.volando ? L(`, vuela ${b.velocidad.volando}`, `, полёт ${b.velocidad.volando}`) : ''}{b.velocidad.nadando ? L(`, nada ${b.velocidad.nadando}`, `, плавание ${b.velocidad.nadando}`) : ''}{b.precio ? ` · ${b.precio}` : ''}</small></span>}
               onElegir={(b) => typeof b === 'string' ? (() => { crear(); })() : crear(b)} />
           )}
-          <button className="btn" onClick={() => crear()}>Montura vacía (rellenar a mano)</button>
-          <p className="nota pequena">Datos del SRD 5.2 (parte gratuita del Manual de monstruos 2024, CC-BY-4.0). Puedes cambiarlos en la ficha.</p>
+          <button className="btn" onClick={() => crear()}>{L('Montura vacía (rellenar a mano)', 'Пустой скакун (заполнить вручную)')}</button>
+          <p className="nota pequena">{L('Datos del SRD 5.2 (parte gratuita del Manual de monstruos 2024, CC-BY-4.0). Puedes cambiarlos en la ficha.', 'Данные из SRD 5.2 (бесплатная часть Бестиария 2024, CC-BY-4.0). Их можно поменять в листе.')}</p>
         </Modal>
       )}
-      {!m && <p className="vacio">Aún no tienes monturas. Caballos, ponis, grifos… cada uno con su vida, armadura, velocidad, habilidades e inventario.</p>}
+      {!m && <p className="vacio">{L('Aún no tienes monturas. Caballos, ponis, grifos… cada uno con su vida, armadura, velocidad, habilidades e inventario.', 'Пока нет скакунов. Кони, пони, грифоны… у каждого свои хиты, КД, скорость, способности и инвентарь.')}</p>}
       {m && <FichaMontura key={m.id} m={m} onBorrada={() => setSel(null)} />}
     </div>
   );
@@ -71,8 +73,8 @@ function FichaMontura({ m, onBorrada }: { m: Montura; onBorrada: () => void }) {
     <>
       <Seccion titulo="Montura">
         <div className="cabecera-personaje">
-          <button className="retrato grande" onClick={() => inputFoto.current?.click()} aria-label="Foto">
-            {m.foto ? <img src={m.foto} alt="" /> : <span className="sin-foto">🐎<small>Añadir foto</small></span>}
+          <button className="retrato grande" onClick={() => inputFoto.current?.click()} aria-label={L('Foto', 'Фото')}>
+            {m.foto ? <img src={m.foto} alt="" /> : <span className="sin-foto">🐎<small>{L('Añadir foto', 'Добавить фото')}</small></span>}
           </button>
           <input ref={inputFoto} type="file" accept="image/*" hidden onChange={async (e) => {
             const f = e.target.files?.[0]; if (!f) return;
@@ -100,10 +102,10 @@ function FichaMontura({ m, onBorrada }: { m: Montura; onBorrada: () => void }) {
         </Seccion>
         <Seccion titulo="Velocidad">
           <ul className="velocidades">
-            <li><span>Andando</span><Numero valor={m.velocidad.andando} min={0} set={(n) => set((x) => { x.velocidad.andando = n; })} ancho={64} /><span className="pies">pies</span></li>
-            <li><span>Volando</span><Texto valor={m.velocidad.volando} set={(s) => set((x) => { x.velocidad.volando = s; })} /></li>
-            <li><span>Nadando</span><Texto valor={m.velocidad.nadando} set={(s) => set((x) => { x.velocidad.nadando = s; })} /></li>
-            <li><span>Trepando</span><Texto valor={m.velocidad.trepando} set={(s) => set((x) => { x.velocidad.trepando = s; })} /></li>
+            <li><span>{L('Andando', 'Шагом')}</span><Numero valor={m.velocidad.andando} min={0} set={(n) => set((x) => { x.velocidad.andando = n; })} ancho={64} /><span className="pies">{L('pies', 'фт')}</span></li>
+            <li><span>{L('Volando', 'Летая')}</span><Texto valor={m.velocidad.volando} set={(s) => set((x) => { x.velocidad.volando = s; })} /></li>
+            <li><span>{L('Nadando', 'Плавая')}</span><Texto valor={m.velocidad.nadando} set={(s) => set((x) => { x.velocidad.nadando = s; })} /></li>
+            <li><span>{L('Trepando', 'Лазая')}</span><Texto valor={m.velocidad.trepando} set={(s) => set((x) => { x.velocidad.trepando = s; })} /></li>
           </ul>
         </Seccion>
       </div>
@@ -113,9 +115,9 @@ function FichaMontura({ m, onBorrada }: { m: Montura; onBorrada: () => void }) {
           const mod = modificador(m.caracteristicas[a]);
           return (
             <div key={a} className="caracteristica">
-              <div className="car-nombre">{NOMBRE_ATRIBUTO[a]}</div>
+              <div className="car-nombre">{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}</div>
               <Numero valor={m.caracteristicas[a]} min={1} max={30} set={(n) => set((x) => { x.caracteristicas[a] = n; })} className="car-valor" />
-              <button className="car-mod" onClick={() => tirarD20(`${m.nombre || 'Montura'}: ${NOMBRE_ATRIBUTO[a]}`, mod)}>{conSigno(mod)}</button>
+              <button className="car-mod" onClick={() => tirarD20(`${m.nombre || L('Montura', 'Скакун')}: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}`, mod)}>{conSigno(mod)}</button>
             </div>
           );
         })}
@@ -123,26 +125,26 @@ function FichaMontura({ m, onBorrada }: { m: Montura; onBorrada: () => void }) {
 
       <Seccion titulo="Habilidades y rasgos">
         <BotonAnadir onClick={() => { set((x) => { x.rasgos.push({ nombre: '', texto: '' }); }); setRasgo(m.rasgos.length); }}>Añadir habilidad</BotonAnadir>
-        {m.rasgos.length === 0 ? <p className="vacio">Sin habilidades (p. ej. «Embestida», «Paso seguro»).</p> : (
+        {m.rasgos.length === 0 ? <p className="vacio">{L('Sin habilidades (p. ej. «Embestida», «Paso seguro»).', 'Нет способностей (напр. «Таран», «Уверенный шаг»).')}</p> : (
           <ul className="lista-conjuros">
             {m.rasgos.map((r, i) => (
-              <li key={i}><button className="conjuro-nombre" onClick={() => setRasgo(i)}><strong>{r.nombre || 'Sin nombre'}</strong>{r.texto && <small>{r.texto.slice(0, 90)}{r.texto.length > 90 ? '…' : ''}</small>}</button></li>
+              <li key={i}><button className="conjuro-nombre" onClick={() => setRasgo(i)}><strong>{r.nombre || L('Sin nombre', 'Без названия')}</strong>{r.texto && <small>{r.texto.slice(0, 90)}{r.texto.length > 90 ? '…' : ''}</small>}</button></li>
             ))}
           </ul>
         )}
       </Seccion>
 
       <Seccion titulo="Equipo de la montura" extra={<span className={`contador-limite ${usadosEq > m.espaciosEquipo ? 'malo' : ''}`}>{usadosEq}/{m.espaciosEquipo}</span>}>
-        <p className="nota">Lo que lleva puesto: barda, silla, bolsas laterales…</p>
+        <p className="nota">{L('Lo que lleva puesto: barda, silla, bolsas laterales…', 'Что на нём: бард, седло, седельные сумки…')}</p>
         <ListaMontura items={m.equipo} onAbrir={(i) => setAbierto({ zona: 'equipo', i })} />
-        {usadosEq > m.espaciosEquipo && <p className="error">No le caben tantas cosas.</p>}
+        {usadosEq > m.espaciosEquipo && <p className="error">{L('No le caben tantas cosas.', 'Столько не поместится.')}</p>}
         <BotonAnadir onClick={() => setAnadir('equipo')}>Equipar a la montura</BotonAnadir>
         <Etiqueta texto="Espacios de equipo"><Numero valor={m.espaciosEquipo} min={0} max={20} set={(n) => set((x) => { x.espaciosEquipo = n; })} /></Etiqueta>
       </Seccion>
 
       <Seccion titulo="Carga (bolsas laterales)" extra={<span className={`contador-limite ${usadosCarga > m.espaciosCarga ? 'malo' : ''}`}>{usadosCarga}/{m.espaciosCarga}</span>}>
         <ListaMontura items={m.carga} onAbrir={(i) => setAbierto({ zona: 'carga', i })} />
-        {usadosCarga > m.espaciosCarga && <p className="error">{m.espaciosCarga === 0 ? 'Ponle bolsas laterales y escribe cuántos espacios dan.' : 'Las bolsas están llenas.'}</p>}
+        {usadosCarga > m.espaciosCarga && <p className="error">{m.espaciosCarga === 0 ? L('Ponle bolsas laterales y escribe cuántos espacios dan.', 'Надень седельные сумки и впиши, сколько ячеек они дают.') : L('Las bolsas están llenas.', 'Сумки полны.')}</p>}
         <BotonAnadir onClick={() => setAnadir('carga')}>Guardar en las bolsas</BotonAnadir>
         <Etiqueta texto="Espacios de carga"><Numero valor={m.espaciosCarga} min={0} max={50} set={(n) => set((x) => { x.espaciosCarga = n; })} /></Etiqueta>
       </Seccion>
@@ -152,14 +154,14 @@ function FichaMontura({ m, onBorrada }: { m: Montura; onBorrada: () => void }) {
       </Seccion>
 
       <div className="pie-borrar">
-        <button className="btn peligro" onClick={() => { if (confirm(`¿Borrar a ${m.nombre || 'esta montura'}? Su inventario se perderá.`)) { upd((p) => { p.monturas = p.monturas.filter((x) => x.id !== m.id); }); onBorrada(); } }}>Borrar montura</button>
+        <button className="btn peligro" onClick={() => { if (confirm(L(`¿Borrar a ${m.nombre || 'esta montura'}? Su inventario se perderá.`, `Удалить ${m.nombre || 'этого скакуна'}? Его инвентарь пропадёт.`))) { upd((p) => { p.monturas = p.monturas.filter((x) => x.id !== m.id); }); onBorrada(); } }}>{L('Borrar montura', 'Удалить скакуна')}</button>
       </div>
 
       {rasgo !== null && m.rasgos[rasgo] && (
         <Modal titulo="Habilidad de la montura" onClose={() => setRasgo(null)}
           pie={<>
-            <button className="btn peligro" onClick={() => { set((x) => { x.rasgos.splice(rasgo, 1); }); setRasgo(null); }}>Quitar</button>
-            <button className="btn primario" onClick={() => setRasgo(null)}>Listo</button>
+            <button className="btn peligro" onClick={() => { set((x) => { x.rasgos.splice(rasgo, 1); }); setRasgo(null); }}>{L('Quitar', 'Убрать')}</button>
+            <button className="btn primario" onClick={() => setRasgo(null)}>{L('Listo', 'Готово')}</button>
           </>}>
           <Etiqueta texto="Nombre"><Texto valor={m.rasgos[rasgo].nombre} set={(s) => set((x) => { x.rasgos[rasgo].nombre = s; })} /></Etiqueta>
           <Etiqueta texto="Descripción"><Texto multilinea filas={6} valor={m.rasgos[rasgo].texto} set={(s) => set((x) => { x.rasgos[rasgo].texto = s; })} /></Etiqueta>
@@ -172,7 +174,7 @@ function FichaMontura({ m, onBorrada }: { m: Montura; onBorrada: () => void }) {
 }
 
 function ListaMontura({ items, onAbrir }: { items: Item[]; onAbrir: (i: number) => void }) {
-  if (items.length === 0) return <p className="vacio">Vacío.</p>;
+  if (items.length === 0) return <p className="vacio">{L('Vacío.', 'Пусто.')}</p>;
   return (
     <ol className="lista-items">
       {items.map((it, i) => (
@@ -191,19 +193,19 @@ function ModalAnadirMontura({ m, zona, onClose }: { m: Montura; zona: Zona; onCl
   useEffect(() => { cargarObjetos().then(setBase); }, []);
   const poner = (it: Item) => upd((x) => { x.monturas.find((y) => y.id === m.id)?.[zona].push(it); });
   return (
-    <Modal titulo={zona === 'equipo' ? 'Equipar a la montura' : 'Guardar en las bolsas'} onClose={onClose}>
+    <Modal titulo={tr(zona === 'equipo' ? 'Equipar a la montura' : 'Guardar en las bolsas')} onClose={onClose}>
       {p.mochila.length > 0 && (
         <>
-          <h4>De tu mochila</h4>
+          <h4>{L('De tu mochila', 'Из рюкзака')}</h4>
           <div className="lista-opciones">
             {p.mochila.map((it, i) => <button key={it.id} className="btn" onClick={() => { upd((x) => { const [y] = x.mochila.splice(i, 1); if (y) x.monturas.find((z) => z.id === m.id)?.[zona].push(y); }); onClose(); }}>{it.nombre}{it.cantidad > 1 ? ` ×${it.cantidad}` : ''}</button>)}
           </div>
-          <h4>Nuevo objeto</h4>
+          <h4>{L('Nuevo objeto', 'Новый предмет')}</h4>
         </>
       )}
-      {!base ? <p>Cargando base de objetos…</p> : (
+      {!base ? <p>{L('Cargando base de objetos…', 'Загружаю базу предметов…')}</p> : (
         <Buscador<ObjetoBase>
-          items={base} texto={(o) => o.nombre} placeholder={zona === 'equipo' ? 'Barda, silla, bolsas laterales…' : 'Escribe el nombre del objeto…'}
+          items={base} texto={(o) => o.nombre} placeholder={zona === 'equipo' ? L('Barda, silla, bolsas laterales…', 'Бард, седло, седельные сумки…') : L('Escribe el nombre del objeto…', 'Напиши название предмета…')}
           render={(o) => <span className="res-conjuro"><strong>{o.nombre}</strong><small>{o.categoria}{o.precio ? ` · ${o.precio}` : ''}</small></span>}
           onElegir={(o) => {
             poner(typeof o === 'string'
@@ -229,9 +231,9 @@ function ModalItemMontura({ m, zona, i, onClose }: { m: Montura; zona: Zona; i: 
   return (
     <Modal titulo={it.nombre} onClose={onClose}
       pie={<div className="acciones-item">
-        <button className="btn" onClick={() => sacar((x, y) => { x.monturas.find((z) => z.id === m.id)?.[otra].push(y); })}>{otra === 'equipo' ? 'Equipar' : 'A las bolsas'}</button>
-        <button className="btn" onClick={() => { if (!cabeEnMochila(p, it)) { alert(`Tu mochila está llena (máx. ${MOCHILA_MAX} espacios).`); return; } sacar((x, y) => { x.mochila.push(y); }); }}>A tu mochila</button>
-        <button className="btn peligro" onClick={() => { if (confirm(`¿Tirar ${it.nombre}?`)) sacar(() => {}); }}>Tirar</button>
+        <button className="btn" onClick={() => sacar((x, y) => { x.monturas.find((z) => z.id === m.id)?.[otra].push(y); })}>{otra === 'equipo' ? L('Equipar', 'Надеть') : L('A las bolsas', 'В сумки')}</button>
+        <button className="btn" onClick={() => { if (!cabeEnMochila(p, it)) { alert(L(`Tu mochila está llena (máx. ${MOCHILA_MAX} espacios).`, `Рюкзак полон (макс. ${MOCHILA_MAX} ячеек).`)); return; } sacar((x, y) => { x.mochila.push(y); }); }}>{L('A tu mochila', 'В свой рюкзак')}</button>
+        <button className="btn peligro" onClick={() => { if (confirm(L(`¿Tirar ${it.nombre}?`, `Выбросить «${it.nombre}»?`))) sacar(() => {}); }}>{L('Tirar', 'Выбросить')}</button>
       </div>}>
       {it.detalles && <ListaDatos datos={it.detalles} />}
       {it.descripcion && <TextoLargo texto={it.descripcion} />}

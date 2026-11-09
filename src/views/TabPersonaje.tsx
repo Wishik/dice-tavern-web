@@ -4,6 +4,8 @@ import { Etiqueta, Modal, Numero, PuntoRojo, Seccion, Texto, TextoLargo, comprim
 import { HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, aplicarConjuntoEstandar, aplicarExperiencia, caracteristicasSinTocar, huecoDisponible, idHabilidad, cambiarNivel, idiomasDeTexto, pgPorDefecto, pxParaSubir, RASGOS_IDIOMA } from '../rules';
 import { ATRIBUTOS, type Atributo, type Personaje } from '../types';
 import { buscarClase, buscarRaza } from '../avisos';
+import { L, T, idioma, RU_ATRIBUTOS, RU_CLASES, RU_RAZAS } from '../i18n';
+import { tr } from '../ru';
 
 const ABREV: Record<string, Atributo> = { FUE: 'FUE', DES: 'DES', CON: 'CON', INT: 'INT', SAB: 'SAB', CAR: 'CAR' };
 
@@ -58,8 +60,8 @@ export function TabPersonaje() {
     <div className="tab">
       <Seccion titulo="Hoja de personaje">
         <div className="cabecera-personaje">
-          <button className="retrato grande" onClick={() => inputFoto.current?.click()} title="Cambiar foto">
-            {p.foto ? <img src={p.foto} alt="Retrato" /> : <span className="sin-foto">📷<small>Añadir foto</small></span>}
+          <button className="retrato grande" onClick={() => inputFoto.current?.click()} title={L('Cambiar foto', 'Сменить фото')}>
+            {p.foto ? <img src={p.foto} alt="Retrato" /> : <span className="sin-foto">📷<small>{L('Añadir foto', 'Добавить фото')}</small></span>}
           </button>
           <input ref={inputFoto} type="file" accept="image/*" hidden onChange={async (e) => {
             const f = e.target.files?.[0]; if (!f) return;
@@ -76,33 +78,33 @@ export function TabPersonaje() {
           </div>
         </div>
         {verExp && <ModalExperiencia onClose={() => setVerExp(false)} />}
-        {p.foto && <button className="btn enlace pequeno" onClick={() => upd((x) => { x.foto = ''; })}>Quitar foto</button>}
+        {p.foto && <button className="btn enlace pequeno" onClick={() => upd((x) => { x.foto = ''; })}>{L('Quitar foto', 'Убрать фото')}</button>}
         {errFoto && <p className="error">{errFoto}</p>}
         <div className="rejilla-campos">
           <Etiqueta texto="Raza">
             <div className="con-boton">
               <select className="campo" value={razas?.razas.some((r) => r.nombre === p.raza) ? p.raza : p.raza ? '__otra' : ''} onChange={(e) => e.target.value !== '__otra' && elegirRaza(e.target.value)}>
-                <option value="">— Elige —</option>
-                {razas?.razas.map((r) => <option key={r.nombre}>{r.nombre}</option>)}
+                <option value="">{L('— Elige —', '— Выбери —')}</option>
+                {razas?.razas.map((r) => <option key={r.nombre} value={r.nombre}>{T(RU_RAZAS, r.nombre)}</option>)}
                 {p.raza && !raza && <option value="__otra">{p.raza}</option>}
               </select>
-              {raza && <button className="btn icono" onClick={() => setInfo('raza')} title="Ver raza">ⓘ</button>}
+              {raza && <button className="btn icono" onClick={() => setInfo('raza')} title={L('Ver raza', 'О расе')}>ⓘ</button>}
             </div>
           </Etiqueta>
           <Etiqueta texto="Clase">
             <div className="con-boton">
               <select className="campo" value={p.clase} onChange={(e) => elegirClase(e.target.value)}>
-                <option value="">— Elige —</option>
-                {clases?.map((c) => <option key={c.nombre}>{c.nombre}</option>)}
+                <option value="">{L('— Elige —', '— Выбери —')}</option>
+                {clases?.map((c) => <option key={c.nombre} value={c.nombre}>{T(RU_CLASES, c.nombre)}</option>)}
               </select>
-              {clase && <button className="btn icono" onClick={() => setInfo('clase')} title="Ver clase">ⓘ</button>}
+              {clase && <button className="btn icono" onClick={() => setInfo('clase')} title={L('Ver clase', 'О классе')}>ⓘ</button>}
             </div>
           </Etiqueta>
           {clase && (
-            <Etiqueta texto={`Subclase${p.nivel < 3 ? ' (nivel 3)' : ''}`}>
+            <Etiqueta texto={L(`Subclase${p.nivel < 3 ? ' (nivel 3)' : ''}`, `Подкласс${p.nivel < 3 ? ' (3 уровень)' : ''}`)}>
               <div className="con-boton">
                 <select className="campo" value={p.subclase} onChange={(e) => upd((x) => { x.subclase = e.target.value; })}>
-                  <option value="">— Ninguna —</option>
+                  <option value="">{L('— Ninguna —', '— Нет —')}</option>
                   {clase.subclases.map((s) => <option key={s.nombre}>{s.nombre}</option>)}
                 </select>
                 {avisos.subclase && <PuntoRojo titulo="A nivel 3 eliges subclase" />}
@@ -118,13 +120,13 @@ export function TabPersonaje() {
         <Etiqueta texto="Estilo de trasfondo (opcional)">
           <div className="con-boton">
             <select className="campo" value={p.trasfondoEstilo} onChange={(e) => elegirTrasfondo(e.target.value)}>
-              <option value="">— Ninguno —</option>
+              <option value="">{L('— Ninguno —', '— Нет —')}</option>
               {trasfondos?.map((t) => <option key={t.nombre}>{t.nombre}</option>)}
             </select>
             {tras && <button className="btn icono" onClick={() => setInfo('trasfondo')}>ⓘ</button>}
           </div>
         </Etiqueta>
-        {tras && <p className="nota">Competencia en {tras.habilidades.join(' y ')}. Dote de origen a elegir: {tras.dotes.join(', ')}.</p>}
+        {tras && <p className="nota">{L('Competencia en', 'Владение:')} {tras.habilidades.join(L(' y ', ' и '))}. {L('Dote de origen a elegir:', 'Черта происхождения на выбор:')} {tras.dotes.join(', ')}.</p>}
         <Etiqueta texto="Resumen"><Texto multilinea filas={5} valor={p.trasfondo} set={(s) => upd((x) => { x.trasfondo = s; })} placeholder="¿Quién te crió? ¿Qué te llevó a la aventura?" /></Etiqueta>
       </Seccion>
 
@@ -137,7 +139,7 @@ export function TabPersonaje() {
         {clase && <button className="btn enlace pequeno" onClick={() => upd((x) => {
           const a = clase.atributos;
           x.competencias = [`Armas: ${a.armas}`, `Armaduras: ${a.armaduras}`, a.herramientas && `Herramientas: ${a.herramientas}`].filter(Boolean).join('\n');
-        })}>Rellenar desde la clase</button>}
+        })}>{L('Rellenar desde la clase', 'Заполнить по классу')}</button>}
       </Seccion>
 
       <Seccion titulo="Alineamiento">
@@ -151,7 +153,7 @@ export function TabPersonaje() {
           </ul>
         )}
         <Huecos huecos={HUECOS_IDIOMAS} valores={p.idiomas} set={(k, v) => upd((x) => { x.idiomas[k] = v; })} p={p} />
-        {raza && /elecci[oó]n/i.test(raza.idiomas) && <p className="nota">Tu raza te da además un idioma a tu elección: escríbelo en un hueco.</p>}
+        {raza && /elecci[oó]n/i.test(raza.idiomas) && <p className="nota">{L('Tu raza te da además un idioma a tu elección: escríbelo en un hueco.', 'Раса даёт ещё один язык на выбор: впиши его в свободную строку.')}</p>}
       </Seccion>
       <div className="fila-2-tarjetas">
         <Seccion titulo="Oficios" aviso={avisos.oficios}>
@@ -163,25 +165,25 @@ export function TabPersonaje() {
       </div>
 
       {info === 'raza' && raza && (
-        <Modal titulo={raza.nombre} onClose={() => setInfo(null)}>
+        <Modal titulo={T(RU_RAZAS, raza.nombre)} onClose={() => setInfo(null)}>
           <TextoLargo texto={raza.descripcion} />
-          <dl className="lista-datos"><dt>Características</dt><dd>{raza.caracteristicas}</dd><dt>Tamaño</dt><dd>{raza.tamano}</dd><dt>Velocidad</dt><dd>{raza.velocidad}</dd><dt>Idiomas</dt><dd>{raza.idiomas}</dd></dl>
-          <h4>Rasgos fijos</h4>
+          <dl className="lista-datos"><dt>{L('Características', 'Характеристики')}</dt><dd>{raza.caracteristicas}</dd><dt>{L('Tamaño', 'Размер')}</dt><dd>{raza.tamano}</dd><dt>{L('Velocidad', 'Скорость')}</dt><dd>{raza.velocidad}</dd><dt>{L('Idiomas', 'Языки')}</dt><dd>{raza.idiomas}</dd></dl>
+          <h4>{L('Rasgos fijos', 'Постоянные особенности')}</h4>
           {raza.rasgosFijos.map((r) => <div key={r.nombre} className="rasgo"><strong>{r.nombre}.</strong> {r.texto}</div>)}
           <p className="nota">{raza.rasgosAdicionales}</p>
         </Modal>
       )}
       {info === 'clase' && clase && (
-        <Modal titulo={clase.nombre} onClose={() => setInfo(null)}>
+        <Modal titulo={T(RU_CLASES, clase.nombre)} onClose={() => setInfo(null)}>
           <TextoLargo texto={clase.descripcion} />
           <dl className="lista-datos">
-            <dt>Característica principal</dt><dd>{clase.atributos.caracteristicaPrincipal}</dd>
-            <dt>Dado de golpe</dt><dd>1{clase.atributos.dadoGolpe} por nivel</dd>
-            <dt>Salvaciones</dt><dd>{clase.atributos.salvaciones.map((s) => ABREV[s]).join(', ')}</dd>
-            <dt>Habilidades ({clase.atributos.habilidadesN})</dt><dd>{clase.atributos.habilidades.includes('*') ? 'Cualquiera' : clase.atributos.habilidades.join(', ')}</dd>
-            <dt>Armas</dt><dd>{clase.atributos.armas}</dd><dt>Armaduras</dt><dd>{clase.atributos.armaduras}</dd>
-            {clase.atributos.herramientas && <><dt>Herramientas</dt><dd>{clase.atributos.herramientas}</dd></>}
-            <dt>Equipo inicial</dt><dd>{clase.atributos.equipo}</dd>
+            <dt>{L('Característica principal', 'Основная характеристика')}</dt><dd>{clase.atributos.caracteristicaPrincipal}</dd>
+            <dt>{L('Dado de golpe', 'Кость хитов')}</dt><dd>1{clase.atributos.dadoGolpe} {L('por nivel', 'за уровень')}</dd>
+            <dt>{L('Salvaciones', 'Спасброски')}</dt><dd>{clase.atributos.salvaciones.map((s) => T(RU_ATRIBUTOS, ABREV[s])).join(', ')}</dd>
+            <dt>{L('Habilidades', 'Навыки')} ({clase.atributos.habilidadesN})</dt><dd>{clase.atributos.habilidades.includes('*') ? L('Cualquiera', 'Любые') : clase.atributos.habilidades.join(', ')}</dd>
+            <dt>{L('Armas', 'Оружие')}</dt><dd>{clase.atributos.armas}</dd><dt>{L('Armaduras', 'Доспехи')}</dt><dd>{clase.atributos.armaduras}</dd>
+            {clase.atributos.herramientas && <><dt>{L('Herramientas', 'Инструменты')}</dt><dd>{clase.atributos.herramientas}</dd></>}
+            <dt>{L('Equipo inicial', 'Стартовое снаряжение')}</dt><dd>{clase.atributos.equipo}</dd>
           </dl>
           <TablaClase clase={clase} nivel={p.nivel} />
         </Modal>
@@ -189,8 +191,8 @@ export function TabPersonaje() {
       {info === 'trasfondo' && tras && (
         <Modal titulo={tras.nombre} onClose={() => setInfo(null)}>
           <TextoLargo texto={tras.descripcion} />
-          <p>Competencia en <strong>{tras.habilidades.join(' y ')}</strong>.</p>
-          <p>Dote de origen a elegir: {tras.dotes.join(', ')}.</p>
+          <p>{L('Competencia en', 'Владение:')} <strong>{tras.habilidades.join(L(' y ', ' и '))}</strong>.</p>
+          <p>{L('Dote de origen a elegir:', 'Черта происхождения на выбор:')} {tras.dotes.join(', ')}.</p>
         </Modal>
       )}
     </div>
@@ -201,7 +203,7 @@ export function TablaClase({ clase, nivel }: { clase: NonNullable<ReturnType<typ
   return (
     <div className="tabla-scroll">
       <table className="tabla">
-        <thead><tr><th>Nv</th><th>Rasgos</th>{clase.columnas.map((c) => <th key={c}>{c}</th>)}</tr></thead>
+        <thead><tr><th>{L('Nv', 'Ур')}</th><th>{L('Rasgos', 'Умения')}</th>{clase.columnas.map((c) => <th key={c}>{c}</th>)}</tr></thead>
         <tbody>{clase.tabla.map((f) => (
           <tr key={f.nivel} className={f.nivel === nivel ? 'actual' : ''}><td>{f.nivel}</td><td>{f.rasgos}</td>{clase.columnas.map((c) => <td key={c}>{String(f[c] ?? '')}</td>)}</tr>
         ))}</tbody>
@@ -212,6 +214,7 @@ export function TablaClase({ clase, nivel }: { clase: NonNullable<ReturnType<typ
 
 const ORDENES = [['legal', 'Legal'], ['neutral', 'Neutral'], ['caotico', 'Caótico']] as const;
 const MORALES = [['bueno', 'Bueno'], ['neutral', 'Neutral'], ['maligno', 'Maligno']] as const;
+const RU_AL: Record<string, string> = { Legal: 'Законный', Neutral: 'Нейтральный', 'Caótico': 'Хаотичный', Bueno: 'Добрый', Maligno: 'Злой' };
 /** Rejilla de 15×15: cada bloque de 5×5 es uno de los 9 alineamientos clásicos. */
 function Alineamiento({ p, set }: { p: Personaje; set: (a: Personaje['alineamiento']) => void }) {
   const a = p.alineamiento;
@@ -219,16 +222,17 @@ function Alineamiento({ p, set }: { p: Personaje; set: (a: Personaje['alineamien
   const x = a.x ?? (io >= 0 ? io * 5 + 2 : -1), y = a.y ?? (im >= 0 ? im * 5 + 2 : -1);
   const nombre = x >= 0 && y >= 0 ? (() => {
     const o = ORDENES[Math.floor(x / 5)][1], m = MORALES[Math.floor(y / 5)][1];
+    if (idioma() === 'ru') return o === 'Neutral' && m === 'Neutral' ? 'Истинно нейтральный' : `${RU_AL[o]} ${RU_AL[m].toLowerCase()}`;
     return o === 'Neutral' && m === 'Neutral' ? 'Neutral auténtico' : `${o} ${m.toLowerCase()}`;
   })() : '';
   return (
     <>
       <div className="alineamiento15">
         <div />
-        {ORDENES.map(([, n]) => <div key={n} className="al-cab" style={{ gridColumn: 'span 5' }}>{n}</div>)}
+        {ORDENES.map(([, n]) => <div key={n} className="al-cab" style={{ gridColumn: 'span 5' }}>{T(RU_AL, n)}</div>)}
         {Array.from({ length: 15 }, (_, fy) => (
           <Fragment key={fy}>
-            {fy % 5 === 0 && <div className="al-cab lateral" style={{ gridRow: 'span 5' }}><span>{MORALES[fy / 5][1]}</span></div>}
+            {fy % 5 === 0 && <div className="al-cab lateral" style={{ gridRow: 'span 5' }}><span>{T(RU_AL, MORALES[fy / 5][1])}</span></div>}
             {Array.from({ length: 15 }, (_, fx) => {
               const sel = fx === x && fy === y;
               const zona = (Math.floor(fx / 5) + Math.floor(fy / 5)) % 2 ? 'b' : 'a';
@@ -238,7 +242,7 @@ function Alineamiento({ p, set }: { p: Personaje; set: (a: Personaje['alineamien
           </Fragment>
         ))}
       </div>
-      <p className="nota centro">{nombre ? <>Alineamiento: <strong>{nombre}</strong></> : 'Toca una casilla.'}</p>
+      <p className="nota centro">{nombre ? <>{L('Alineamiento:', 'Мировоззрение:')} <strong>{nombre}</strong></> : L('Toca una casilla.', 'Нажми на клетку.')}</p>
     </>
   );
 }
@@ -251,8 +255,8 @@ function Huecos({ huecos, valores, set, p }: { huecos: readonly { id: string; et
         const vacio = !(valores[h.id] ?? '').trim();
         return (
           <li key={h.id} className={disp ? '' : 'bloqueado'}>
-            <span className="hueco-etq">{h.etiqueta}{disp && vacio && h.atr && <PuntoRojo />}</span>
-            <input className="campo" value={valores[h.id] ?? ''} placeholder={disp ? '' : `Necesitas ${h.atr} ${h.min}`} onChange={(e) => set(h.id, e.target.value)} />
+            <span className="hueco-etq">{tr(h.etiqueta)}{disp && vacio && h.atr && <PuntoRojo />}</span>
+            <input className="campo" value={valores[h.id] ?? ''} placeholder={disp ? '' : L(`Necesitas ${h.atr} ${h.min}`, `Нужно ${T(RU_ATRIBUTOS, h.atr ?? '')} ${h.min}`)} onChange={(e) => set(h.id, e.target.value)} />
           </li>
         );
       })}
@@ -273,15 +277,17 @@ function ModalExperiencia({ onClose }: { onClose: () => void }) {
   };
   return (
     <Modal titulo="Experiencia" onClose={onClose}
-      pie={<button className="btn primario" disabled={!n} onClick={aplicar}>Añadir PX</button>}>
-      <p className="nota">Nivel {p.nivel}: llevas <strong>{p.exp}</strong>{necesita !== null ? <> de <strong>{necesita}</strong> PX para subir a nivel {p.nivel + 1}.</> : ' PX (nivel máximo).'} Al subir, lo que sobra se queda como experiencia.</p>
+      pie={<button className="btn primario" disabled={!n} onClick={aplicar}>{L('Añadir PX', 'Добавить опыт')}</button>}>
+      {idioma() === 'ru'
+        ? <p className="nota">Уровень {p.nivel}: у тебя <strong>{p.exp}</strong>{necesita !== null ? <> из <strong>{necesita}</strong> опыта до {p.nivel + 1} уровня.</> : ' опыта (максимальный уровень).'} При повышении остаток сохраняется.</p>
+        : <p className="nota">Nivel {p.nivel}: llevas <strong>{p.exp}</strong>{necesita !== null ? <> de <strong>{necesita}</strong> PX para subir a nivel {p.nivel + 1}.</> : ' PX (nivel máximo).'} Al subir, lo que sobra se queda como experiencia.</p>}
       <form onSubmit={(e) => { e.preventDefault(); aplicar(); }}>
-        <input className="campo grande" autoFocus inputMode="numeric" value={txt} onChange={(e) => setTxt(e.target.value.replace(/\D/g, ''))} placeholder="PX ganados" />
+        <input className="campo grande" autoFocus inputMode="numeric" value={txt} onChange={(e) => setTxt(e.target.value.replace(/\D/g, ''))} placeholder={L('PX ganados', 'Полученный опыт')} />
       </form>
       {n > 0 && <p className="formula-grande">{p.exp} + {n} = <strong>{p.exp + n}</strong></p>}
-      {n > 0 && r.subidos > 0 && <p className="exito">¡Subes a nivel {r.nivel}! Te quedan {r.exp} PX{pxParaSubir(r.nivel) !== null ? ` de ${pxParaSubir(r.nivel)}` : ''}. Tendrás que tirar tu dado de golpe para subir los PG.</p>}
+      {n > 0 && r.subidos > 0 && <p className="exito">{L(`¡Subes a nivel ${r.nivel}! Te quedan ${r.exp} PX${pxParaSubir(r.nivel) !== null ? ` de ${pxParaSubir(r.nivel)}` : ''}. Tendrás que tirar tu dado de golpe para subir los PG.`, `Новый уровень: ${r.nivel}! Остаётся ${r.exp} опыта${pxParaSubir(r.nivel) !== null ? ` из ${pxParaSubir(r.nivel)}` : ''}. Нужно будет бросить кость хитов.`)}</p>}
       <details className="corregir">
-        <summary>Corregir a mano</summary>
+        <summary>{L('Corregir a mano', 'Исправить вручную')}</summary>
         <div className="fila-2">
           <Etiqueta texto="Nivel"><Numero valor={p.nivel} min={1} max={20} set={(v) => upd((x) => { cambiarNivel(x, v); })} /></Etiqueta>
           <Etiqueta texto="PX actuales"><Numero valor={p.exp} min={0} set={(v) => upd((x) => { x.exp = v; })} /></Etiqueta>

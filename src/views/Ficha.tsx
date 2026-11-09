@@ -15,6 +15,7 @@ import { TabRasgos } from './TabRasgos';
 import { TabInventario } from './TabInventario';
 import { TabNotas } from './TabNotas';
 import { TabMonturas } from './TabMonturas';
+import { L, T, RU_ATRIBUTOS, RU_CLASES, RU_RAZAS, } from '../i18n';
 
 interface FichaCtx {
   p: Personaje;
@@ -29,15 +30,15 @@ const Ctx = createContext<FichaCtx | null>(null);
 export const useFicha = () => useContext(Ctx)!;
 
 const TABS = [
-  { id: 'personaje', nombre: 'Personaje', C: TabPersonaje, aviso: (a: Avisos) => a.total.general },
-  { id: 'atributos', nombre: 'Atributos', C: TabAtributos, aviso: () => 0 },
-  { id: 'habilidades', nombre: 'Habilidades', C: TabHabilidades, aviso: (a: Avisos) => a.total.habilidades },
-  { id: 'combate', nombre: 'Combate', C: TabCombate, aviso: () => 0 },
-  { id: 'magia', nombre: 'Conjuros', C: TabMagia, aviso: (a: Avisos) => a.total.magia },
-  { id: 'rasgos', nombre: 'Rasgos y dotes', C: TabRasgos, aviso: (a: Avisos) => a.total.rasgos },
-  { id: 'inventario', nombre: 'Inventario', C: TabInventario, aviso: () => 0 },
-  { id: 'monturas', nombre: 'Monturas', C: TabMonturas, aviso: () => 0 },
-  { id: 'notas', nombre: 'Notas', C: TabNotas, aviso: () => 0 },
+  { id: 'personaje', nombre: () => L('Personaje', 'Персонаж'), C: TabPersonaje, aviso: (a: Avisos) => a.total.general },
+  { id: 'atributos', nombre: () => L('Atributos', 'Характеристики'), C: TabAtributos, aviso: () => 0 },
+  { id: 'habilidades', nombre: () => L('Habilidades', 'Навыки'), C: TabHabilidades, aviso: (a: Avisos) => a.total.habilidades },
+  { id: 'combate', nombre: () => L('Combate', 'Бой'), C: TabCombate, aviso: () => 0 },
+  { id: 'magia', nombre: () => L('Conjuros', 'Заклинания'), C: TabMagia, aviso: (a: Avisos) => a.total.magia },
+  { id: 'rasgos', nombre: () => L('Rasgos y dotes', 'Особенности и черты'), C: TabRasgos, aviso: (a: Avisos) => a.total.rasgos },
+  { id: 'inventario', nombre: () => L('Inventario', 'Инвентарь'), C: TabInventario, aviso: () => 0 },
+  { id: 'monturas', nombre: () => L('Monturas', 'Скакуны'), C: TabMonturas, aviso: () => 0 },
+  { id: 'notas', nombre: () => L('Notas', 'Заметки'), C: TabNotas, aviso: () => 0 },
 ] as const;
 
 export function Ficha({ id, onVolver }: { id: string; onVolver: () => void }) {
@@ -53,7 +54,7 @@ export function Ficha({ id, onVolver }: { id: string; onVolver: () => void }) {
   const timer = useRef<number>();
   const ultimo = useRef<Personaje | null>(null);
 
-  useEffect(() => { backend.cargar(id).then((x) => x ? setP(x) : setError('No se encontró el personaje.')).catch((e) => setError(e.message)); }, [id]);
+  useEffect(() => { backend.cargar(id).then((x) => x ? setP(x) : setError(L('No se encontró el personaje.', 'Персонаж не найден.'))).catch((e) => setError(e.message)); }, [id]);
   useEffect(() => { try { localStorage.setItem('dicetavern.tab', tab); } catch { /* sin almacenamiento */ } }, [tab]);
 
   const guardar = useCallback(async () => {
@@ -84,12 +85,12 @@ export function Ficha({ id, onVolver }: { id: string; onVolver: () => void }) {
 
   const avisos = useMemo(() => p ? calcularAvisos(p, clases, razas, trasfondos) : null, [p, clases, razas, trasfondos]);
 
-  if (error) return <div className="contenido"><p className="error">{error}</p><button className="btn" onClick={onVolver}>Volver</button></div>;
-  if (!p || !avisos) return <div className="cargando">Abriendo el cuaderno…</div>;
-  const T = TABS.find((t) => t.id === tab) ?? TABS[0];
+  if (error) return <div className="contenido"><p className="error">{error}</p><button className="btn" onClick={onVolver}>{L('Volver', 'Назад')}</button></div>;
+  if (!p || !avisos) return <div className="cargando">{L('Abriendo el cuaderno…', 'Открываю тетрадь…')}</div>;
+  const Tab = TABS.find((t) => t.id === tab) ?? TABS[0];
 
   const borrar = async () => {
-    if (!confirm(`¿Borrar a ${p.nombre || 'este personaje'} para siempre?`)) return;
+    if (!confirm(L(`¿Borrar a ${p.nombre || 'este personaje'} para siempre?`, `Удалить ${p.nombre || 'этого персонажа'} навсегда?`))) return;
     clearTimeout(timer.current); ultimo.current = null;
     await backend.borrar(p.id); onVolver();
   };
@@ -99,26 +100,26 @@ export function Ficha({ id, onVolver }: { id: string; onVolver: () => void }) {
       <div className="pantalla-ficha">
         <div className="cabecera-fija">
         <header className="barra">
-          <button className="btn enlace volver" onClick={onVolver}>‹ Personajes</button>
+          <button className="btn enlace volver" onClick={onVolver}>‹ {L('Personajes', 'Персонажи')}</button>
           <div className="titulo-ficha">
-            <strong>{p.nombre || 'Sin nombre'}</strong>
-            <span>{[p.raza, p.clase && `${p.clase} ${p.nivel}`].filter(Boolean).join(' · ')}</span>
+            <strong>{p.nombre || L('Sin nombre', 'Без имени')}</strong>
+            <span>{[T(RU_RAZAS, p.raza), p.clase && `${T(RU_CLASES, p.clase)} ${p.nivel}`].filter(Boolean).join(' · ')}</span>
           </div>
-          <span className={`estado-guardado ${estado}`}>{estado === 'guardado' ? '✓ Guardado' : estado === 'error' ? '⚠ Sin guardar' : '…'}</span>
+          <span className={`estado-guardado ${estado}`}>{estado === 'guardado' ? L('✓ Guardado', '✓ Сохранено') : estado === 'error' ? L('⚠ Sin guardar', '⚠ Не сохранено') : '…'}</span>
         </header>
         <nav className="pestanas">
           {TABS.map((t) => {
             const n = t.aviso(avisos);
-            return <button key={t.id} className={tab === t.id ? 'activa' : ''} onClick={() => setTab(t.id)}>{t.nombre}{n > 0 && <PuntoRojo n={n} />}</button>;
+            return <button key={t.id} className={tab === t.id ? 'activa' : ''} onClick={() => setTab(t.id)}>{t.nombre()}{n > 0 && <PuntoRojo n={n} />}</button>;
           })}
         </nav>
         </div>
-        <main className="contenido"><T.C /></main>
-        {T.id === 'notas' && <div className="pie-borrar"><button className="btn peligro" onClick={borrar}>Borrar personaje</button></div>}
-        <button className="fab" onClick={() => setDados(true)} aria-label="Dados"><DadoIcono caras={20} size={40} /></button>
+        <main className="contenido"><Tab.C /></main>
+        {Tab.id === 'notas' && <div className="pie-borrar"><button className="btn peligro" onClick={borrar}>{L('Borrar personaje', 'Удалить персонажа')}</button></div>}
+        <button className="fab" onClick={() => setDados(true)} aria-label={L('Dados', 'Кубики')}><DadoIcono caras={20} size={40} /></button>
         <SubidaNivel />
         <SincronizarMana />
-        {dados && <Modal titulo="Dados" onClose={() => setDados(false)}><PanelDados /></Modal>}
+        {dados && <Modal titulo={L('Dados', 'Кубики')} onClose={() => setDados(false)}><PanelDados /></Modal>}
       </div>
     </Ctx.Provider>
   );
@@ -135,16 +136,16 @@ function SubidaNivel() {
   return (
     <div className="modal-fondo">
       <div className="modal elegir-modo">
-        <h3>¡Subes a nivel {nivelDe}!</h3>
-        <p>Tira tu dado de golpe de {p.clase}: <strong>1{dado} +1 {conSigno(con)} CON</strong>. El total se suma a tus PG máximos y actuales.</p>
-        {p.subidasPendientes > 1 && <p className="nota">Te quedan {p.subidasPendientes} niveles por tirar.</p>}
+        <h3>{L(`¡Subes a nivel ${nivelDe}!`, `Новый уровень: ${nivelDe}!`)}</h3>
+        <p>{L(`Tira tu dado de golpe de ${p.clase}:`, `Брось кость хитов класса ${T(RU_CLASES, p.clase)}:`)} <strong>1{dado} +1 {conSigno(con)} {T(RU_ATRIBUTOS, 'CON')}</strong>. {L('El total se suma a tus PG máximos y actuales.', 'Сумма прибавится к максимуму и текущим хитам.')}</p>
+        {p.subidasPendientes > 1 && <p className="nota">{L(`Te quedan ${p.subidasPendientes} niveles por tirar.`, `Осталось бросков за уровни: ${p.subidasPendientes}.`)}</p>}
         <div className="fila-botones">
           <button className="btn primario" onClick={() => {
-            const t = tirar(`PG al subir a nivel ${nivelDe}`, `1${dado}+1${conSigno(con)}`);
+            const t = tirar(L(`PG al subir a nivel ${nivelDe}`, `Хиты за уровень ${nivelDe}`), `1${dado}+1${conSigno(con)}`);
             if (!t) return;
             const gana = Math.max(1, t.total); // ya incluye +1 y CON
             upd((x) => { x.pg.max += gana; x.pg.actual += gana; x.subidasPendientes = Math.max(0, x.subidasPendientes - 1); });
-          }}>🎲 Tirar 1{dado}</button>
+          }}>🎲 {L('Tirar', 'Бросить')} 1{dado}</button>
         </div>
       </div>
     </div>

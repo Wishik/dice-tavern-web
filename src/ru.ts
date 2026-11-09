@@ -1,0 +1,55 @@
+import { idioma } from './i18n';
+
+/** Traducciones al ruso de títulos, etiquetas y textos de ayuda que pasan por los componentes de ui.tsx. */
+const RU: Record<string, string> = {
+  'A nivel 3 eliges subclase': 'На 3 уровне выбираешь подкласс', 'Adicional': 'Дополнительное', 'Ajuste': 'Поправка', 'Alineamiento': 'Мировоззрение',
+  'Armas que llevas': 'Оружие при себе', 'Armas, armaduras, herramientas…': 'Оружие, доспехи, инструменты…', 'Ataques por turno': 'Атак за ход',
+  'Añadir dote': 'Добавить черту', 'Añadir montura': 'Добавить скакуна', 'Bolsas de monedas': 'Кошельки', 'Bonus extra': 'Доп. бонус',
+  'Busca el conjuro base…': 'Найди базовое заклинание…', 'Busca un rasgo…': 'Найди особенность…', 'Busca una dote…': 'Найди черту…',
+  'CA': 'КД', 'Caballo de guerra, poni…': 'Боевой конь, пони…', 'Caballo, grifo, poni…': 'Конь, грифон, пони…', 'Cantidad': 'Количество',
+  'Característica de conjuros': 'Заклинательная характеристика', 'Carga (bolsas laterales)': 'Груз (седельные сумки)',
+  'Carácter, adiestramiento, dónde se compró…': 'Характер, дрессировка, где куплен…', 'Cinturón (acceso rápido)': 'Пояс (быстрый доступ)',
+  'Clase': 'Класс', 'Competencia': 'Владение', 'Competencias': 'Владения', 'Conjuro base': 'Базовое заклинание', 'Conjuros': 'Заклинания',
+  'Conjuros adicionales': 'Дополнительные заклинания', 'Convertir monedas': 'Обменять монеты', 'Corregir PG máximos': 'Исправить максимум хитов',
+  'Crear conjuro propio': 'Создать своё заклинание', 'DG': 'КХ', 'De': 'Из', 'Descripción': 'Описание', 'Dotes': 'Черты', 'Edad': 'Возраст',
+  'Editar': 'Изменить', 'Elegir rasgo racial': 'Выбрать расовую особенность', 'Equipo': 'Снаряжение', 'Equipo de la montura': 'Снаряжение скакуна',
+  'Equipo de viaje': 'Походное снаряжение', 'Escribe el nombre del objeto…': 'Напиши название предмета…', 'Espacios de carga': 'Места для груза',
+  'Espacios de equipo': 'Места для снаряжения', 'Estilo de trasfondo (opcional)': 'Предыстория (по желанию)', 'Estándar': 'Стандарт',
+  'Exp.': 'Опыт', 'Experiencia': 'Опыт', 'Furias, puntos de ki, usos por descanso…': 'Ярость, очки ци, использования за отдых…',
+  'Habilidad de la montura': 'Способность скакуна', 'Habilidades y rasgos': 'Способности и особенности', 'Hoja de personaje': 'Лист персонажа',
+  'Idiomas': 'Языки', 'Iniciativa': 'Инициатива', 'Inspiración': 'Вдохновение', 'Límites': 'Лимиты', 'Mano hábil': 'Ведущая рука',
+  'Mano torpe': 'Вторая рука', 'Maná': 'Мана', 'Mochila': 'Рюкзак', 'Moneda': 'Монета', 'Montura': 'Скакун', 'Máx. por espacio': 'Макс. в ячейке',
+  'Máximos': 'Максимум', 'Nivel': 'Уровень', 'Nombre': 'Имя', 'Nombre (p. ej. Espada corta c/c)': 'Название (напр. Короткий меч)',
+  'Nombres de PNJ, pistas, misiones… (🎙 para dictar)': 'Имена NPC, зацепки, задания… (🎙 — диктовка)', 'Notas': 'Заметки',
+  'Notas y mapas': 'Заметки и карты', 'Oficios': 'Ремёсла', 'Otros ataques': 'Другие атаки', 'Otros rasgos': 'Другие особенности',
+  'PG (vida)': 'Хиты (жизнь)', 'PG máximos': 'Максимум хитов', 'PX actuales': 'Текущий опыт', 'PX ganados': 'Полученный опыт',
+  'Percepción pasiva': 'Пассивная внимательность', 'Pericia': 'Компетентность', 'Precio': 'Цена', 'Precio (si lo sabes)': 'Цена (если знаешь)',
+  'Preparado': 'Подготовлено', 'Profesiones': 'Профессии', 'Qué hace, cuánto cura, cuánto daño…': 'Что делает, сколько лечит, какой урон…',
+  'Qué hace, daño, alcance, duración…': 'Что делает, урон, дистанция, длительность…', 'Rasgos de personalidad': 'Черты характера', 'Raza': 'Раса',
+  'Recursos': 'Ресурсы', 'Resumen': 'Кратко', 'Salvaciones': 'Спасброски', 'Tamaño': 'Размер', 'Te pagan': 'Тебе платят', 'Temporales': 'Временные',
+  'Tipo': 'Тип', 'Trasfondo': 'Предыстория', 'Trucos': 'Заговоры', 'Velocidad': 'Скорость', 'p. ej. 25po': 'напр. 25po',
+  'p. ej. Bola de hielo de Wishik': 'напр. Ледяной шар Wishik', 'sin límite': 'без лимита', '¿Dónde lo equipas?': 'Куда экипируешь?',
+  '¿Quién te crió? ¿Qué te llevó a la aventura?': 'Кто тебя вырастил? Что привело к приключениям?',
+  'Añadir': 'Добавить', 'Añadir conjuro': 'Добавить заклинание', 'Añadir truco': 'Добавить заговор', 'Añadir a la mochila': 'Положить в рюкзак',
+  'Añadir conjuro adicional': 'Добавить доп. заклинание', 'Guardar en las bolsas': 'Положить в сумки', 'Equipar a la montura': 'Надеть на скакуна',
+  'Añadir al cinturón': 'Повесить на пояс', 'Añadir ataque': 'Добавить атаку', 'Añadir habilidad': 'Добавить способность', 'Añadir rasgo': 'Добавить особенность',
+  'Puedes añadir algo aquí': 'Здесь можно что-то добавить', 'Nada que mostrar.': 'Пусто.', 'Cerrar': 'Закрыть',
+  'Características': 'Характеристики', 'Personaje': 'Персонаж', 'Combate': 'Бой', 'Inventario': 'Инвентарь', 'Monedas': 'Монеты',
+  'Puntos de golpe': 'Хиты', 'Dados de golpe': 'Кости хитов', 'Ataques': 'Атаки', 'Rasgos': 'Особенности', 'Rasgos de clase': 'Классовые умения',
+  'Rasgos de raza': 'Расовые особенности', 'Habilidades': 'Навыки', 'Monturas': 'Скакуны', 'Dados': 'Кубики', 'Historial': 'История бросков',
+  'Tiempo de lanzamiento': 'Время накладывания', 'Alcance': 'Дистанция', 'Componentes': 'Компоненты', 'Duración': 'Длительность',
+  'Escuela': 'Школа', 'Clases': 'Классы', 'Daño': 'Урон', 'Propiedades': 'Свойства', 'Peso': 'Вес', 'Coste': 'Стоимость',
+  'Nombre del conjuro': 'Название заклинания', 'Ataque': 'Атака', 'Bonif. ataque': 'Бонус атаки', 'CD': 'Сл', 'Usos': 'Использования',
+  'INT 5+': 'ИНТ 5+', 'INT 10+': 'ИНТ 10+', 'INT 14+ (aprendido)': 'ИНТ 14+ (выучен)', 'INT 17+ (aprendido)': 'ИНТ 17+ (выучен)',
+  'INT 19+ (aprendido)': 'ИНТ 19+ (выучен)', 'SAB 5+': 'МДР 5+', 'SAB 12+ (aprendido)': 'МДР 12+ (выучено)', 'SAB 18+ (aprendido)': 'МДР 18+ (выучено)',
+  'INT 12+ (aprendida)': 'ИНТ 12+ (выучена)', 'INT 18+ (aprendida)': 'ИНТ 18+ (выучена)',
+  'Yelmo': 'Шлем', 'Amuleto': 'Амулет', 'Armadura': 'Доспех', 'Capa': 'Плащ', 'Cáñamo': 'Пенька', 'Seda': 'Шёлк', 'Seda de araña': 'Паучий шёлк',
+  'Clima templado': 'Умеренный климат', 'Clima frío': 'Холодный климат', 'Clima cálido': 'Жаркий климат',
+  'Desventaja en TS y habilidades de Fuerza y Destreza': 'Помеха на спасброски и навыки Силы и Ловкости',
+  'Desventaja en todas las tiradas de Fuerza y Destreza': 'Помеха на все броски Силы и Ловкости',
+};
+
+/** Traduce un texto fijo de la interfaz si hay traducción; si no, lo deja igual. */
+export const tr = (s: string) => (idioma() === 'ru' ? RU[s] ?? s : s);
+/** Como tr, pero deja pasar lo que no sea texto (elementos de React). */
+export const trN = <T,>(x: T): T => (typeof x === 'string' ? (tr(x) as unknown as T) : x);

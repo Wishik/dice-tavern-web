@@ -3,6 +3,8 @@ import { BotonAnadir, Etiqueta, Numero, Seccion, Texto } from '../ui';
 import { useDados } from '../dice';
 import { CARACTERISTICA_CONJUROS, MAX_MUNICION, ataqueConjuros, avisosTirada, bonoArma, cdConjuros, conSigno, parseFormula, usaMunicion } from '../rules';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo, type Item, type Personaje } from '../types';
+import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
+import { tr } from '../ru';
 
 type ArmaLlevada = { it: Item; donde: string; ref: (x: Personaje) => Item | null | undefined };
 /** Armas que llevas en las manos o en el cinturón: salen solas en Combate. */
@@ -30,7 +32,7 @@ export function TabCombate() {
       </Seccion>
 
       <Seccion titulo="Armas que llevas">
-        {llevadas.length === 0 && <p className="nota">Equipa un arma en la mano hábil o torpe, o ponla en el cinturón (Inventario), y aparecerá aquí con su ataque y daño.</p>}
+        {llevadas.length === 0 && <p className="nota">{L('Equipa un arma en la mano hábil o torpe, o ponla en el cinturón (Inventario), y aparecerá aquí con su ataque y daño.', 'Возьми оружие в ведущую или вторую руку или повесь на пояс (Инвентарь) — оно появится здесь с атакой и уроном.')}</p>}
         <ul className="lista-ataques">
           {llevadas.map(({ it, donde, ref }) => {
             const { ataque, mod, atr } = bonoArma(p, it);
@@ -43,26 +45,26 @@ export function TabCombate() {
             const sinMunicion = municion && !(it.municion ?? 0);
             return (
               <li key={it.id} className="ataque auto">
-                <div className="ataque-titulo"><strong>{it.nombre}</strong><small>{donde}{tipo ? ` · ${tipo}` : ''}</small></div>
+                <div className="ataque-titulo"><strong>{it.nombre}</strong><small>{tr(donde)}{tipo ? ` · ${tipo}` : ''}</small></div>
                 <div className="ataque-fila">
                   <button className="btn primario" disabled={sinMunicion} onClick={() => {
                     if (municion) upd((x) => { const y = ref(x); if (y) y.municion = Math.max(0, (y.municion ?? 0) - 1); });
-                    tirarD20(`Ataque: ${it.nombre}`, ataque, avisosTirada(p, 'ataque', atr));
-                  }}>🎲 Ataque {conSigno(ataque)}</button>
-                  {dado && <button className="btn" onClick={() => tirar(`Daño: ${it.nombre}`, formula(dado))}>🎲 {formula(dado)}</button>}
-                  {versatil && <button className="btn" onClick={() => tirar(`Daño a dos manos: ${it.nombre}`, formula(versatil))}>🎲 A dos manos {formula(versatil)}</button>}
+                    tirarD20(`${L('Ataque', 'Атака')}: ${it.nombre}`, ataque, avisosTirada(p, 'ataque', atr));
+                  }}>🎲 {L('Ataque', 'Атака')} {conSigno(ataque)}</button>
+                  {dado && <button className="btn" onClick={() => tirar(`${L('Daño', 'Урон')}: ${it.nombre}`, formula(dado))}>🎲 {formula(dado)}</button>}
+                  {versatil && <button className="btn" onClick={() => tirar(`${L('Daño a dos manos', 'Урон двумя руками')}: ${it.nombre}`, formula(versatil))}>🎲 {L('A dos manos', 'Двумя руками')} {formula(versatil)}</button>}
                 </div>
                 {municion && (
                   <div className="ataque-fila">
-                    <span className={sinMunicion ? 'error' : 'nota'}>🏹 Munición: {it.municion ?? 0}/{MAX_MUNICION}{sinMunicion ? ' · ¡sin munición!' : ''}</span>
-                    <button className="btn pequeno" onClick={() => upd((x) => { const y = ref(x); if (y) y.municion = MAX_MUNICION; })}>Llenar</button>
+                    <span className={sinMunicion ? 'error' : 'nota'}>🏹 {L('Munición', 'Боеприпасы')}: {it.municion ?? 0}/{MAX_MUNICION}{sinMunicion ? L(' · ¡sin munición!', ' · закончились!') : ''}</span>
+                    <button className="btn pequeno" onClick={() => upd((x) => { const y = ref(x); if (y) y.municion = MAX_MUNICION; })}>{L('Llenar', 'Пополнить')}</button>
                   </div>
                 )}
               </li>
             );
           })}
         </ul>
-        {llevadas.length > 0 && <p className="nota pequena">Ataque = competencia + FUE (DES si es a distancia; la mejor si es sutil). Daño = dado del arma + el mismo modificador. Cada ataque con arco o ballesta gasta 1 de munición.</p>}
+        {llevadas.length > 0 && <p className="nota pequena">{L('Ataque = competencia + FUE (DES si es a distancia; la mejor si es sutil). Daño = dado del arma + el mismo modificador. Cada ataque con arco o ballesta gasta 1 de munición.', 'Атака = бонус мастерства + СИЛ (ЛОВ для дальнобойного; лучшая для фехтовального). Урон = кость оружия + тот же модификатор. Каждый выстрел из лука или арбалета тратит 1 боеприпас.')}</p>}
       </Seccion>
 
       <Seccion titulo="Otros ataques">
@@ -74,16 +76,16 @@ export function TabCombate() {
               <li key={i} className="ataque">
                 <Texto valor={a.nombre} set={(s) => upd((x) => { x.ataques[i].nombre = s; })} placeholder="Nombre (p. ej. Espada corta c/c)" />
                 <div className="ataque-fila">
-                  <label>Ataque<span className="con-mas"><span>+</span><input className="campo" inputMode="numeric" value={isNaN(bon) ? '' : String(Math.abs(bon))} placeholder="0"
+                  <label>{L('Ataque', 'Атака')}<span className="con-mas"><span>+</span><input className="campo" inputMode="numeric" value={isNaN(bon) ? '' : String(Math.abs(bon))} placeholder="0"
                     onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); upd((x) => { x.ataques[i].ataque = v ? `+${v}` : ''; }); }} /></span></label>
-                  <button className="btn" disabled={isNaN(bon)} onClick={() => tirarD20(`Ataque: ${a.nombre || 'arma'}`, bon, avisosTirada(p, 'ataque', null))}>🎲 d20</button>
+                  <button className="btn" disabled={isNaN(bon)} onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${a.nombre || L('arma', 'оружие')}`, bon, avisosTirada(p, 'ataque', null))}>🎲 d20</button>
                 </div>
                 <div className="ataque-fila">
-                  <label>Daño<SelectorDano valor={a.dano} set={(v) => upd((x) => { x.ataques[i].dano = v; })} /></label>
-                  <button className="btn" disabled={!danoOk} onClick={() => tirar(`Daño: ${a.nombre || 'arma'}`, a.dano)}>🎲 Daño</button>
+                  <label>{L('Daño', 'Урон')}<SelectorDano valor={a.dano} set={(v) => upd((x) => { x.ataques[i].dano = v; })} /></label>
+                  <button className="btn" disabled={!danoOk} onClick={() => tirar(`${L('Daño', 'Урон')}: ${a.nombre || L('arma', 'оружие')}`, a.dano)}>🎲 {L('Daño', 'Урон')}</button>
                 </div>
                 <div className="ataque-fila derecha">
-                  <button className="btn icono peligro-suave" title="Quitar" onClick={() => upd((x) => { x.ataques.splice(i, 1); })}>✕ Quitar</button>
+                  <button className="btn icono peligro-suave" title={L('Quitar', 'Убрать')} onClick={() => upd((x) => { x.ataques.splice(i, 1); })}>✕ {L('Quitar', 'Убрать')}</button>
                 </div>
               </li>
             );
@@ -92,24 +94,24 @@ export function TabCombate() {
         <div className="fila-botones">
           <BotonAnadir onClick={() => upd((x) => { x.ataques.push({ nombre: '', ataque: '', dano: '1d6' }); })}>Añadir ataque</BotonAnadir>
         </div>
-        <p className="nota">Para ataques que no son de un arma que llevas (mordisco, arma improvisada…): pon tu bonificador y el dado de daño.</p>
+        <p className="nota">{L('Para ataques que no son de un arma que llevas (mordisco, arma improvisada…): pon tu bonificador y el dado de daño.', 'Для атак не тем оружием, что при тебе (укус, импровизированное оружие…): укажи бонус и кость урона.')}</p>
       </Seccion>
 
       <Seccion titulo="Conjuros">
         <Etiqueta texto="Característica de conjuros">
           <select className="campo" value={p.conjuroCaracteristica} onChange={(e) => upd((x) => { x.conjuroCaracteristica = e.target.value as Atributo | ''; })}>
-            <option value="">{auto ? `Automática: ${NOMBRE_ATRIBUTO[auto]} (${p.clase})` : '— Ninguna —'}</option>
-            {ATRIBUTOS.map((a) => <option key={a} value={a}>{NOMBRE_ATRIBUTO[a]}</option>)}
+            <option value="">{auto ? L(`Automática: ${NOMBRE_ATRIBUTO[auto]} (${p.clase})`, `Автоматически: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[auto])} (${T(RU_CLASES, p.clase)})`) : L('— Ninguna —', '— Нет —')}</option>
+            {ATRIBUTOS.map((a) => <option key={a} value={a}>{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}</option>)}
           </select>
         </Etiqueta>
-        <h4 className="subtitulo-campos">Conjuros por turno</h4>
+        <h4 className="subtitulo-campos">{L('Conjuros por turno', 'Заклинаний за ход')}</h4>
         <div className="fila-2 alineada">
           <Etiqueta texto="Estándar"><Texto valor={p.conjurosTurno.estandar} set={(s) => upd((x) => { x.conjurosTurno.estandar = s; })} /></Etiqueta>
           <Etiqueta texto="Adicional"><Texto valor={p.conjurosTurno.adicional} set={(s) => upd((x) => { x.conjurosTurno.adicional = s; })} /></Etiqueta>
         </div>
         <div className="fila-2 valores-conjuro">
-          <div><small>CD de conjuros</small><strong>{cd ?? '—'}</strong></div>
-          <div><small>Ataque de conjuro</small>{at !== null ? <button className="lt-valor" onClick={() => tirarD20('Ataque de conjuro', at)}>{conSigno(at)}</button> : <strong>—</strong>}</div>
+          <div><small>{L('CD de conjuros', 'Сл заклинаний')}</small><strong>{cd ?? '—'}</strong></div>
+          <div><small>{L('Ataque de conjuro', 'Атака заклинанием')}</small>{at !== null ? <button className="lt-valor" onClick={() => tirarD20(L('Ataque de conjuro', 'Атака заклинанием'), at)}>{conSigno(at)}</button> : <strong>—</strong>}</div>
         </div>
       </Seccion>
     </div>
@@ -124,7 +126,7 @@ function SelectorDano({ valor, set }: { valor: string; set: (v: string) => void 
     return (
       <span className="selector-dano libre">
         <input className="campo" value={valor} onChange={(e) => set(e.target.value)} />
-        <button type="button" className="btn pequeno" onClick={() => set('1d6')}>Usar selector</button>
+        <button type="button" className="btn pequeno" onClick={() => set('1d6')}>{L('Usar selector', 'Выбрать из списка')}</button>
       </span>
     );
   }
