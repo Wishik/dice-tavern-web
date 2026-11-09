@@ -27,7 +27,10 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
   const [copiado, setCopiado] = useState(false);
   const ancho = useAncho();
   const [sel, setSel] = useState<string | null>(null);
-  const [combate, setCombate] = useState(false);
+  // La pestaña elegida (Jugadores / Combate) se recuerda al recargar la página.
+  const claveVista = `dicetavern.vista.${id}`;
+  const [combate, setCombateE] = useState(() => { try { return localStorage.getItem(claveVista) === 'combate'; } catch { return false; } });
+  const setCombate = (b: boolean) => { setCombateE(b); try { localStorage.setItem(claveVista, b ? 'combate' : 'jugadores'); } catch { /* sin almacenamiento */ } };
   const recargar = () => cargarPartida(id).then((x) => { setD(x); setError(''); }).catch((e) => setError(e.message));
   useEffect(() => { recargar(); backend.listar().then(setMios).catch(() => {}); }, [id]);
   // Los cambios de los demás (PG, nivel…) se ven al volver a la pantalla o cada 20 s.

@@ -606,3 +606,11 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .vida-fila .temp-fila { grid-column: 1 / -1; display: flex; align-items: center; gap: 6px; font-size: 13px; }
 .chip-temp { border: 1px dashed #4f7fb8; background: transparent; color: #2d4f7a; border-radius: 99px; padding: 2px 10px; font-size: 13px; }
 .chip-temp.hay { background: #2d4f7a; color: #e6f0fb; border-style: solid; }
+.ataques-monstruo { display: flex; flex-direction: column; gap: 4px; padding-bottom: 8px; border-bottom: 1px dashed rgba(106,86,67,.4); }
+.ataque-m { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+.ataque-m .btn { min-height: 32px; padding: 3px 10px; font-size: 13px; }
+.ataque-m .btn.atq { background: #3a2717; color: var(--pergamino); border-color: var(--oro); }
+.ataque-m .btn.dano { background: #8f1f18; color: #fde6d8; border-color: #5d120d; }
+.ataque-m .btn.dano.extra { background: transparent; color: #8f1f18; border-style: dashed; }
+.ataque-m .btn small { opacity: .8; font-size: 11px; }
+.atq-cd { font-size: 13px; font-weight: 600; padding: 0 4px; }

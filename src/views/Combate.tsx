@@ -11,6 +11,33 @@ export interface Monstruo {
   ca: number; pg: number; dg: string; vel: Record<string, string>; car: number[]; vd: number; px: number; bc: number;
   sentidos: Record<string, string | number>; idiomas: string; res: string[]; inm: string[]; vul: string[]; inmEst: string[];
   rasgos: Accion[]; acciones: Accion[]; adicionales: Accion[]; reacciones: Accion[]; legendarias: Accion[];
+  /** Ataques y efectos con tirada: bono de ataque o CD de salvación, y dados de daño (el primero es el normal). */
+  atq?: { es: string; ru: string; bono?: number; cd?: number; sal?: number | null; dano: { d: string; t: [string, string] }[] }[];
+}
+
+/** Botones para tirar el ataque y el daño de un monstruo directamente desde el combate. */
+function AtaquesMonstruo({ m, quien }: { m: Monstruo; quien: string }) {
+  const { tirar, tirarD20 } = useDados();
+  const ru = idioma() === 'ru';
+  if (!m.atq?.length) return null;
+  return (
+    <div className="ataques-monstruo">
+      {m.atq.map((a, i) => {
+        const nombre = ru ? a.ru : a.es;
+        return (
+          <div key={i} className="ataque-m">
+            {a.bono !== undefined
+              ? <button className="btn pequeno atq" onClick={() => tirarD20(`${quien}: ${nombre}`, a.bono!)}>🎯 {nombre} <strong>{signo(a.bono)}</strong></button>
+              : <span className="atq-cd">✨ {nombre} · {L('CD', 'Сл')} {a.cd}{a.sal != null ? ` ${ATR()[a.sal]}` : ''}</span>}
+            {a.dano.map((d, j) => (
+              <button key={j} className={`btn pequeno dano ${j > 0 ? 'extra' : ''}`} title={j > 0 ? L('Daño adicional (según la descripción)', 'Доп. урон (см. описание)') : undefined}
+                onClick={() => tirar(`${quien}: ${nombre} — ${L('daño', 'урон')}`, d.d)}>💥 {d.d} <small>{ru ? d.t[1] : d.t[0]}</small></button>
+            ))}
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 interface Accion { n: string; d: string }
 
@@ -121,6 +148,7 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
               </div>
             ) : (
               <div className="combatiente">
+                {(() => { const mo = monstruos?.find((m) => m.id === f.enemigos[0].monstruo); return mo ? <AtaquesMonstruo m={mo} quien={f.enemigos.length > 1 ? nombreM(mo) : f.enemigos[0].nombre} /> : null; })()}
                 {f.enemigos.map((e) => {
                   const mo = monstruos?.find((m) => m.id === e.monstruo);
                   return (
