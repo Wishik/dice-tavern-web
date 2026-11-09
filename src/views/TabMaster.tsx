@@ -40,7 +40,7 @@ export function TabMaster() {
           <p className="nota">{L('Temporales', 'Временные')}: <Numero valor={p.pg.temp} min={0} ancho={60} set={(n) => upd((x) => { x.pg.temp = n; })} /></p>
         </Seccion>
         <Seccion titulo="Estados">
-          <ChipsEstados estados={p.estados} agotamiento={p.agotamiento} vacio set={(e, a) => upd((x) => { x.estados = e; x.agotamiento = a; })} />
+          <ChipsEstados estados={p.estados} agotamiento={p.agotamiento} detalles={p.estadosDetalle} quien={p.nombre} vacio set={(e, a, d) => upd((x) => { x.estados = e; x.agotamiento = a; x.estadosDetalle = d; })} />
         </Seccion>
         <Seccion titulo="Iniciativa">
           <p className="valor-grande">{p.iniciativaActual ?? '—'}</p>

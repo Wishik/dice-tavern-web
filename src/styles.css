@@ -615,3 +615,14 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .ataque-m .btn small { opacity: .8; font-size: 11px; }
 .atq-cd { font-size: 13px; font-weight: 600; padding: 0 4px; }
 .bm-ataques .ataques-monstruo { border-bottom: none; }
+/* Duración y daño de cada estado */
+.chip-estado .dur { font-size: 11px; opacity: .85; margin-left: 2px; }
+.extra-estado { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 6px 8px 8px 50px; }
+.extra-estado .etq-dur { font-size: 13px; color: var(--tinta-suave); }
+.contador.pequeno button { width: 32px; height: 32px; font-size: 18px; }
+.contador.pequeno span { min-width: 48px; font-size: 15px; }
+.dano-estado { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; width: 100%; }
+.dano-estado .segmentado { display: inline-flex; border: 1px solid #a3865a; border-radius: 10px; overflow: hidden; }
+.dano-estado .segmentado button { border: none; background: rgba(255,255,255,.4); padding: 6px 10px; font-size: 13px; color: var(--tinta); }
+.dano-estado .segmentado button.sel { background: #a52a1f; color: #fff; }
+.dano-estado .formula { width: 90px; padding: 6px 8px; }

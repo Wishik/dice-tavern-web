@@ -22,7 +22,7 @@ interface Ctx {
   historial: Tirada[];
   limpiar: () => void;
 }
-const DiceCtx = createContext<Ctx | null>(null);
+export const DiceCtx = createContext<Ctx | null>(null);
 export const useDados = () => useContext(DiceCtx)!;
 
 const d = (caras: number) => 1 + Math.floor(Math.random() * caras);

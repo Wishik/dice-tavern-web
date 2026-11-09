@@ -9,7 +9,7 @@ export function nuevoPersonaje(nombre = ''): Personaje {
     nombre, foto: '', tamano: '', edad: '', raza: '', clase: '', subclase: '', nivel: 1, exp: 0,
     trasfondoEstilo: '', trasfondo: '', personalidad: '',
     competencias: '', alineamiento: { orden: '', moral: '' }, idiomas: {}, oficios: {}, profesiones: {},
-    estados: [], agotamiento: 0, iniciativaActual: null, bloqueado: false,
+    estados: [], estadosDetalle: {}, agotamiento: 0, iniciativaActual: null, bloqueado: false,
     pg: { max: 0, actual: 0, temp: 0 }, pm: { max: 0, actual: 0 }, inspiracion: 0, dgUsados: 0, subidasPendientes: 0,
     caracteristicas: car, bonusIniciativa: 0,
     velocidad: { andando: 30, corriendo: 60, trepando: '', nadando: '', volando: '' },

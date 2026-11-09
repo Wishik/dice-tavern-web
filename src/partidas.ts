@@ -7,14 +7,14 @@ import { calcularCA, iniciativa } from './rules';
 export interface Partida { id: string; nombre: string; codigo: string; master: string; creada: string; combate?: Combate | null }
 
 /** Enemigo en el combate. Los de un mismo grupo comparten iniciativa. */
-export interface Enemigo { id: string; monstruo: string | null; nombre: string; grupo: string | null; ini: number | null; bonoIni: number; pg: number; pgMax: number; temp?: number; ca: number; estados: string[] }
+export interface Enemigo { id: string; monstruo: string | null; nombre: string; grupo: string | null; ini: number | null; bonoIni: number; pg: number; pgMax: number; temp?: number; ca: number; estados: string[]; agotamiento?: number; estadosDetalle?: Personaje['estadosDetalle'] }
 export interface Combate { ronda: number; turno: string | null; enemigos: Enemigo[] }
 export interface Miembro {
   usuario: string;
   alias: string;
   personaje: string | null;
   /** Resumen del personaje elegido (null si aún no ha elegido o no se puede ver). */
-  pj: (Pick<Personaje, 'nombre' | 'raza' | 'clase' | 'nivel' | 'foto' | 'pg' | 'pm' | 'estados' | 'agotamiento' | 'iniciativaActual'> & { ca: number; bonoIni: number }) | null;
+  pj: (Pick<Personaje, 'nombre' | 'raza' | 'clase' | 'nivel' | 'foto' | 'pg' | 'pm' | 'estados' | 'estadosDetalle' | 'agotamiento' | 'iniciativaActual'> & { ca: number; bonoIni: number }) | null;
 }
 
 // Sin 0/O ni 1/I/L para que el código se pueda dictar sin errores.
@@ -78,7 +78,7 @@ export async function cargarPartida(id: string): Promise<{ partida: Partida; mie
   const res = new Map(((pj.data ?? []) as { id: string; datos: Personaje }[]).map((x) => {
     const p = normalizar(x.datos);
     let ca = 10; try { ca = calcularCA(p).total; } catch { /* datos antiguos */ }
-    return [x.id, { nombre: p.nombre, raza: p.raza, clase: p.clase, nivel: p.nivel, foto: p.foto, pg: p.pg, pm: p.pm, ca, estados: p.estados ?? [], agotamiento: p.agotamiento ?? 0, iniciativaActual: p.iniciativaActual ?? null, bonoIni: iniciativa(p) }];
+    return [x.id, { nombre: p.nombre, raza: p.raza, clase: p.clase, nivel: p.nivel, foto: p.foto, pg: p.pg, pm: p.pm, ca, estados: p.estados ?? [], estadosDetalle: p.estadosDetalle ?? {}, agotamiento: p.agotamiento ?? 0, iniciativaActual: p.iniciativaActual ?? null, bonoIni: iniciativa(p) }];
   }));
   return {
     partida: p.data as Partida,

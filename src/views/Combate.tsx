@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useDatos } from '../data';
 import { L, idioma } from '../i18n';
 import { Modal, Numero } from '../ui';
-import { ChipsEstados } from '../estados';
+import { ChipsEstados, pasarRonda } from '../estados';
 import { useDados } from '../dice';
 import { cambiarJugador, guardarCombate, type Combate as CombateT, type Enemigo, type Miembro, type Partida } from '../partidas';
 
@@ -107,7 +107,16 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
     if (!vivas.length) return;
     const i = vivas.findIndex((f) => f.clave === c.turno);
     const sig = i < 0 ? 0 : (i + 1) % vivas.length;
-    setC((x) => ({ ...x, turno: vivas[sig].clave, ronda: i >= 0 && sig === 0 ? x.ronda + 1 : x.ronda }));
+    const nuevaRonda = i >= 0 && sig === 0;
+    setC((x) => ({
+      ...x, turno: vivas[sig].clave, ronda: nuevaRonda ? x.ronda + 1 : x.ronda,
+      // Al empezar una ronda nueva se descuenta la duración de los estados y se quitan los que terminan.
+      enemigos: nuevaRonda ? x.enemigos.map((e) => { const r = pasarRonda(e.estados, e.estadosDetalle); return r ? { ...e, estados: r.estados, estadosDetalle: r.detalles } : e; }) : x.enemigos,
+    }));
+    if (nuevaRonda) {
+      const cambios = jugadores.map((m) => [m, pasarRonda(m.pj!.estados, m.pj!.estadosDetalle)] as const).filter(([, r]) => r);
+      if (cambios.length) Promise.all(cambios.map(([m, r]) => cambiarJugador(m.personaje!, { estados: r!.estados, estadosDetalle: r!.detalles }))).then(onRecargar).catch((e) => setError(e.message));
+    }
   };
   const terminar = async () => {
     if (!confirm(L('¿Terminar el combate? Se quitan los enemigos y la iniciativa de todos.', 'Закончить бой? Враги и инициатива у всех будут сброшены.'))) return;
@@ -144,7 +153,7 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
                   <span className="nota">@{f.m.alias} · 🛡 {f.m.pj!.ca}</span>
                 </div>
                 <VidaFila pg={f.m.pj!.pg.actual} max={f.m.pj!.pg.max} temp={f.m.pj!.pg.temp ?? 0} set={(pg, temp) => jugador(f.m, { pg: { ...f.m.pj!.pg, actual: pg, temp } })} />
-                <ChipsEstados estados={f.m.pj!.estados} agotamiento={f.m.pj!.agotamiento} vacio set={(e, a) => jugador(f.m, { estados: e, agotamiento: a })} />
+                <ChipsEstados estados={f.m.pj!.estados} agotamiento={f.m.pj!.agotamiento} detalles={f.m.pj!.estadosDetalle} quien={f.m.pj!.nombre || f.m.alias} vacio set={(e, a, d) => jugador(f.m, { estados: e, agotamiento: a, estadosDetalle: d })} />
               </div>
             ) : (
               <div className="combatiente">
@@ -158,7 +167,7 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
                         <button className="btn enlace quitar-enemigo" title={L('Quitar', 'Убрать')} onClick={() => setEnemigos((es) => es.filter((x) => x.id !== e.id))}>✕</button>
                       </div>
                       <VidaFila pg={e.pg} max={e.pgMax} temp={e.temp ?? 0} set={(pg, temp) => cambiarEnemigo(e.id, (x) => ({ ...x, pg, temp, estados: pg <= 0 && !x.estados.includes('inconsciente') ? [...x.estados, 'inconsciente'] : x.estados }))} />
-                      <ChipsEstados estados={e.estados} agotamiento={0} vacio set={(es) => cambiarEnemigo(e.id, (x) => ({ ...x, estados: es }))} />
+                      <ChipsEstados estados={e.estados} agotamiento={e.agotamiento ?? 0} detalles={e.estadosDetalle} quien={e.nombre} vacio set={(es, a, d) => cambiarEnemigo(e.id, (x) => ({ ...x, estados: es, agotamiento: a, estadosDetalle: d }))} />
                     </div>
                   );
                 })}

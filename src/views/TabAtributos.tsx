@@ -29,7 +29,7 @@ export function TabAtributos() {
   return (
     <div className="tab">
       <Seccion titulo="Estados" className="seccion-estados">
-        <ChipsEstados estados={p.estados} agotamiento={p.agotamiento} vacio set={(e, a) => upd((x) => { x.estados = e; x.agotamiento = a; })} />
+        <ChipsEstados estados={p.estados} agotamiento={p.agotamiento} detalles={p.estadosDetalle} quien={p.nombre} vacio set={(e, a, d) => upd((x) => { x.estados = e; x.agotamiento = a; x.estadosDetalle = d; })} />
       </Seccion>
       <div className="fila-3-tarjetas">
         <Seccion titulo="PG (vida)" className="pg">

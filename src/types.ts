@@ -130,6 +130,8 @@ export interface Personaje {
   // Partida
   /** Estados (condiciones) activos: claves de ESTADOS en src/estados.tsx. */
   estados: string[];
+  /** Duración y daño personalizado de los estados activos (ver DetallesEstados en src/estados.tsx). */
+  estadosDetalle: Record<string, { dur?: number; dano?: string }>;
   /** Nivel de agotamiento 0-6. */
   agotamiento: number;
   /** Última tirada de iniciativa (para el orden del combate); null si no hay combate. */

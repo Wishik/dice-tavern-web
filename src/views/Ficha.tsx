@@ -142,7 +142,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
         </header>
         {(p.estados?.length > 0 || p.agotamiento > 0 || p.iniciativaActual !== null) && (
           <div className="franja-estados">
-            <ChipsEstados estados={p.estados} agotamiento={p.agotamiento} set={(e, a) => upd((x) => { x.estados = e; x.agotamiento = a; })} />
+            <ChipsEstados estados={p.estados} agotamiento={p.agotamiento} detalles={p.estadosDetalle} quien={p.nombre} set={(e, a, d) => upd((x) => { x.estados = e; x.agotamiento = a; x.estadosDetalle = d; })} />
             {p.iniciativaActual !== null && <span className="chip-estado iniciativa">⚔️ {L('Iniciativa', 'Инициатива')} {p.iniciativaActual}</span>}
           </div>
         )}
