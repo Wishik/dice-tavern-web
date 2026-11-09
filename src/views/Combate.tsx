@@ -65,7 +65,7 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
   const [c, setC] = useState<CombateT>(() => cacheCombate.get(partida.id) ?? partida.combate ?? { ronda: 1, turno: null, enemigos: [] });
   useEffect(() => { cacheCombate.set(partida.id, c); }, [c, partida.id]);
   const [anadir, setAnadir] = useState(false);
-  const [ficha, setFicha] = useState<Monstruo | null>(null);
+  const [ficha, setFicha] = useState<{ m: Monstruo; quien: string } | null>(null);
   const [error, setError] = useState('');
   const { tirar } = useDados();
   const primera = useRef(true);
@@ -148,13 +148,12 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
               </div>
             ) : (
               <div className="combatiente">
-                {(() => { const mo = monstruos?.find((m) => m.id === f.enemigos[0].monstruo); return mo ? <AtaquesMonstruo m={mo} quien={f.enemigos.length > 1 ? nombreM(mo) : f.enemigos[0].nombre} /> : null; })()}
                 {f.enemigos.map((e) => {
                   const mo = monstruos?.find((m) => m.id === e.monstruo);
                   return (
                     <div key={e.id} className={`enemigo ${e.pg <= 0 ? 'caido' : ''}`}>
                       <div className="comb-cab">
-                        <button className="btn enlace nombre-comb" disabled={!mo} onClick={() => mo && setFicha(mo)}>{e.nombre}{mo ? ' ⓘ' : ''}</button>
+                        <button className="btn enlace nombre-comb" disabled={!mo} onClick={() => mo && setFicha({ m: mo, quien: e.nombre })}>{e.nombre}{mo ? ' ⓘ' : ''}</button>
                         <span className="nota">🛡 {e.ca}</span>
                         <button className="btn enlace quitar-enemigo" title={L('Quitar', 'Убрать')} onClick={() => setEnemigos((es) => es.filter((x) => x.id !== e.id))}>✕</button>
                       </div>
@@ -170,8 +169,8 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
         {!filas.length && <p className="vacio">{L('Aún no hay nadie en el combate. Añade enemigos o pide a los jugadores que tiren iniciativa.', 'В бою пока никого. Добавь врагов или попроси игроков бросить инициативу.')}</p>}
       </ol>
 
-      {anadir && monstruos && <ModalAnadirEnemigos monstruos={monstruos} onClose={() => setAnadir(false)} onAnadir={(es) => { setEnemigos((x) => [...x, ...es]); setAnadir(false); }} onVer={setFicha} />}
-      {ficha && <Modal titulo={nombreM(ficha)} onClose={() => setFicha(null)}><BloqueMonstruo m={ficha} tirar={tirar} /></Modal>}
+      {anadir && monstruos && <ModalAnadirEnemigos monstruos={monstruos} onClose={() => setAnadir(false)} onAnadir={(es) => { setEnemigos((x) => [...x, ...es]); setAnadir(false); }} onVer={(m) => setFicha({ m, quien: nombreM(m) })} />}
+      {ficha && <Modal titulo={ficha.quien} onClose={() => setFicha(null)}><BloqueMonstruo m={ficha.m} quien={ficha.quien} tirar={tirar} /></Modal>}
     </div>
   );
 }
@@ -261,7 +260,7 @@ function ModalAnadirEnemigos({ monstruos, onClose, onAnadir, onVer }: { monstruo
 }
 
 /** Ficha completa de un monstruo (los textos de acciones están en inglés, del SRD 5.2). */
-export function BloqueMonstruo({ m, tirar }: { m: Monstruo; tirar?: (etq: string, formula: string) => unknown }) {
+export function BloqueMonstruo({ m, tirar, quien }: { m: Monstruo; tirar?: (etq: string, formula: string) => unknown; quien?: string }) {
   const ru = idioma() === 'ru';
   const lista = (t: string, xs: Accion[]) => xs.length > 0 && (
     <section className="bm-seccion"><h4>{t}</h4>{xs.map((a, i) => <p key={i}><strong>{a.n}.</strong> {a.d}</p>)}</section>
@@ -275,6 +274,9 @@ export function BloqueMonstruo({ m, tirar }: { m: Monstruo; tirar?: (etq: string
         <span>{L('VD', 'ПО')} <strong>{vdTexto(m.vd)}</strong> ({m.px} {L('PX', 'опыта')})</span>
         <span>{L('Velocidad', 'Скорость')}: {Object.entries(m.vel).map(([k, v]) => `${(VEL[k]?.[ru ? 1 : 0] ?? k)} ${pies(v)}`.trim()).join(', ')}</span>
       </div>
+      {m.atq && m.atq.length > 0 && (
+        <section className="bm-seccion bm-ataques"><h4>⚔️ {L('Ataques (pulsa para tirar)', 'Атаки (нажми, чтобы бросить)')}</h4><AtaquesMonstruo m={m} quien={quien ?? nombreM(m)} /></section>
+      )}
       <div className="bm-car">
         {m.car.map((v, i) => (
           <button key={i} type="button" onClick={() => tirar?.(`${ATR()[i]} — ${nombreM(m)}`, `1d20${signo(mod(v))}`)}>

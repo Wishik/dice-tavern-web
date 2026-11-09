@@ -614,3 +614,4 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .ataque-m .btn.dano.extra { background: transparent; color: #8f1f18; border-style: dashed; }
 .ataque-m .btn small { opacity: .8; font-size: 11px; }
 .atq-cd { font-size: 13px; font-weight: 600; padding: 0 4px; }
+.bm-ataques .ataques-monstruo { border-bottom: none; }
