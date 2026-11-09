@@ -508,3 +508,16 @@ details.corregir summary { cursor: pointer; color: var(--tinta-suave); font-size
 .selector-idioma button.activo { background: #d9a441; color: #2a1a0e; }
 .pantalla-entrada > .selector-idioma { align-self: flex-end; margin: 10px 10px 0 0; }
 .formulario .btn.enlace { margin-top: 8px; align-self: center; }
+
+/* ------------------------------------------------ partidas */
+.espacio-arriba { margin-top: 24px; }
+.invitacion { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 18px; }
+.etq-pequena { font-family: var(--fuente-titulo); font-size: 12px; text-transform: uppercase; color: var(--tinta-suave); letter-spacing: .05em; }
+.codigo-partida { font-family: var(--fuente-titulo); font-size: 38px; letter-spacing: .18em; color: #3a2717; font-weight: 700; user-select: all; }
+.codigo-entrada { font-size: 26px; text-align: center; letter-spacing: .2em; text-transform: uppercase; }
+.tarjeta-personaje.miembro { padding: 0; position: relative; }
+.miembro-cuerpo { display: flex; gap: 12px; align-items: center; text-align: left; padding: 12px; background: none; border: none; color: inherit; width: 100%; font: inherit; }
+.miembro-cuerpo:disabled { opacity: 1; cursor: default; }
+.miembro .quitar { position: absolute; top: 4px; right: 6px; font-size: 18px; color: var(--tinta-suave); padding: 6px 10px; }
+.pie-partida { margin-top: 32px; padding-bottom: 100px; }
+.sello-master { font-size: 18px; }

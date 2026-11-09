@@ -78,7 +78,9 @@ function backendNube(sb: SupabaseClient): Backend {
     },
     async nuevaClave(clave) { const { error } = await sb.auth.updateUser({ password: clave }); if (error) throw new Error(traducir(error.message)); },
     async listar() {
-      const { data, error } = await sb.from('personajes').select('id, datos->nombre, datos->raza, datos->clase, datos->nivel, datos->foto, actualizado').order('actualizado', { ascending: false });
+      // Solo los míos: con las partidas también se ven los personajes de los compañeros.
+      const { data: s } = await sb.auth.getSession();
+      const { data, error } = await sb.from('personajes').select('id, datos->nombre, datos->raza, datos->clase, datos->nivel, datos->foto, actualizado').eq('propietario', s.session?.user.id ?? '').order('actualizado', { ascending: false });
       if (error) throw new Error(error.message);
       return (data ?? []).map((r: Record<string, unknown>) => ({ id: r.id as string, nombre: (r.nombre as string) ?? '', raza: (r.raza as string) ?? '', clase: (r.clase as string) ?? '', nivel: (r.nivel as number) ?? 1, foto: (r.foto as string) ?? '', actualizado: r.actualizado as string }));
     },
@@ -88,9 +90,13 @@ function backendNube(sb: SupabaseClient): Backend {
       return data ? normalizar(data.datos as Personaje) : null;
     },
     async guardar(p) {
-      // propietario lo rellena la base de datos (default auth.uid()).
-      const { error } = await sb.from('personajes').upsert({ id: p.id, datos: p, actualizado: p.actualizado });
+      // Primero se intenta actualizar (así el máster puede guardar el personaje de un jugador sin cambiar su dueño);
+      // si no existía, se crea. propietario lo rellena la base de datos (default auth.uid()).
+      const { data, error } = await sb.from('personajes').update({ datos: p, actualizado: p.actualizado }).eq('id', p.id).select('id');
       if (error) throw new Error(error.message);
+      if (data && data.length) return;
+      const r = await sb.from('personajes').insert({ id: p.id, datos: p, actualizado: p.actualizado });
+      if (r.error) throw new Error(r.error.message);
     },
     async borrar(id) { const { error } = await sb.from('personajes').delete().eq('id', id); if (error) throw new Error(error.message); },
   };

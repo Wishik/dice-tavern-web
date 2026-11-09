@@ -41,7 +41,8 @@ const TABS = [
   { id: 'notas', nombre: () => L('Notas', 'Заметки'), C: TabNotas, aviso: () => 0 },
 ] as const;
 
-export function Ficha({ id, onVolver }: { id: string; onVolver: () => void }) {
+/** volverTexto: texto del botón de volver; ajeno: el máster abre la hoja de otro jugador (no se puede borrar). */
+export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolver: () => void; volverTexto?: string; ajeno?: boolean }) {
   const [p, setP] = useState<Personaje | null>(null);
   const [error, setError] = useState('');
   const [estado, setEstado] = useState<'guardado' | 'pendiente' | 'guardando' | 'error'>('guardado');
@@ -100,11 +101,12 @@ export function Ficha({ id, onVolver }: { id: string; onVolver: () => void }) {
       <div className="pantalla-ficha">
         <div className="cabecera-fija">
         <header className="barra">
-          <button className="btn enlace volver" onClick={onVolver}>‹ {L('Personajes', 'Персонажи')}</button>
+          <button className="btn enlace volver" onClick={onVolver}>‹ {volverTexto ?? L('Personajes', 'Персонажи')}</button>
           <div className="titulo-ficha">
             <strong>{p.nombre || L('Sin nombre', 'Без имени')}</strong>
             <span>{[T(RU_RAZAS, p.raza), p.clase && `${T(RU_CLASES, p.clase)} ${p.nivel}`].filter(Boolean).join(' · ')}</span>
           </div>
+          {ajeno && <span className="sello-master">👑</span>}
           <span className={`estado-guardado ${estado}`}>{estado === 'guardado' ? L('✓ Guardado', '✓ Сохранено') : estado === 'error' ? L('⚠ Sin guardar', '⚠ Не сохранено') : '…'}</span>
         </header>
         <nav className="pestanas">
@@ -115,7 +117,7 @@ export function Ficha({ id, onVolver }: { id: string; onVolver: () => void }) {
         </nav>
         </div>
         <main className="contenido"><Tab.C /></main>
-        {Tab.id === 'notas' && <div className="pie-borrar"><button className="btn peligro" onClick={borrar}>{L('Borrar personaje', 'Удалить персонажа')}</button></div>}
+        {Tab.id === 'notas' && !ajeno && <div className="pie-borrar"><button className="btn peligro" onClick={borrar}>{L('Borrar personaje', 'Удалить персонажа')}</button></div>}
         <button className="fab" onClick={() => setDados(true)} aria-label={L('Dados', 'Кубики')}><DadoIcono caras={20} size={40} /></button>
         <SubidaNivel />
         <SincronizarMana />

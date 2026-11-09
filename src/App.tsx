@@ -5,13 +5,21 @@ import { cargarRu } from './datosRu';
 import { DiceProvider, PanelDados, DadoIcono } from './dice';
 import { Ficha } from './views/Ficha';
 import { Modal } from './ui';
+import { misPartidas, type Partida } from './partidas';
+import { ModalCrearPartida, ModalUnirse, PantallaPartida } from './views/Partida';
 import { L, RU_CLASES, RU_RAZAS, T, cambiarIdioma, useIdioma } from './i18n';
+
+// Código del enlace de invitación (?unirse=…). Se lee una sola vez al cargar: la pantalla puede montarse varias veces
+// (al cambiar de idioma), y hasta entrar en la cuenta hay que conservarlo.
+let codigoInvitacion: string | null = new URLSearchParams(location.search).get('unirse');
 
 export default function App() {
   const idioma = useIdioma();
   const [usuario, setUsuario] = useState<Usuario | null | undefined>(undefined);
   const [recuperando, setRecuperando] = useState(false);
   const [abierto, setAbierto] = useState<string | null>(() => new URLSearchParams(location.search).get('p'));
+  // Partida abierta (?g=…). Si además hay una ficha abierta desde ella, «volver» regresa a la partida.
+  const [partida, setPartida] = useState<string | null>(() => new URLSearchParams(location.search).get('g'));
   // En ruso hay que cargar antes las traducciones del manual; la clave de DiceProvider fuerza a repintar todo.
   const [ruListo, setRuListo] = useState(false);
   useEffect(() => { if (idioma === 'ru') cargarRu().then(() => setRuListo(true)); }, [idioma]);
@@ -32,16 +40,24 @@ export default function App() {
   useEffect(() => {
     const url = new URL(location.href);
     if (abierto) url.searchParams.set('p', abierto); else url.searchParams.delete('p');
+    if (partida) url.searchParams.set('g', partida); else url.searchParams.delete('g');
+    url.searchParams.delete('unirse');
     history.replaceState(null, '', url);
-  }, [abierto]);
+  }, [abierto, partida]);
+  const [ajeno, setAjeno] = useState(false);
+  useEffect(() => {
+    if (!abierto || !usuario || backend.modo !== 'nube') { setAjeno(false); return; }
+    backend.listar().then((l) => setAjeno(!l.some((r) => r.id === abierto))).catch(() => setAjeno(false));
+  }, [abierto, usuario?.id]);
 
   if (usuario === undefined) return <div className="cargando">{L('Cargando la taberna…', 'Открываем таверну…')}</div>;
   return (
     <DiceProvider key={idioma + (ruListo ? '1' : '0')}>
       {recuperando && usuario ? <NuevaClave onListo={() => setRecuperando(false)} />
         : !usuario ? <Entrada onOk={setUsuario} /> : abierto
-        ? <Ficha id={abierto} onVolver={() => setAbierto(null)} />
-        : <Lista usuario={usuario} onUsuario={setUsuario} onAbrir={setAbierto} onSalir={async () => { await backend.salir(); setUsuario(null); }} />}
+        ? <Ficha key={abierto} id={abierto} ajeno={ajeno} volverTexto={partida ? L('Partida', 'Партия') : undefined} onVolver={() => setAbierto(null)} />
+        : partida ? <PantallaPartida id={partida} usuario={usuario} onVolver={() => setPartida(null)} onAbrirFicha={setAbierto} />
+        : <Lista usuario={usuario} onUsuario={setUsuario} onAbrir={setAbierto} onPartida={setPartida} onSalir={async () => { await backend.salir(); setUsuario(null); }} />}
     </DiceProvider>
   );
 }
@@ -176,7 +192,16 @@ function ModalAlias({ onListo }: { onListo: (a: string) => void }) {
   );
 }
 
-function Lista({ usuario, onUsuario, onAbrir, onSalir }: { usuario: Usuario; onUsuario: (u: Usuario) => void; onAbrir: (id: string) => void; onSalir: () => void }) {
+function Lista({ usuario, onUsuario, onAbrir, onPartida, onSalir }: { usuario: Usuario; onUsuario: (u: Usuario) => void; onAbrir: (id: string) => void; onPartida: (id: string) => void; onSalir: () => void }) {
+  const [partidas, setPartidas] = useState<Partida[] | null>(null);
+  const [errPartidas, setErrPartidas] = useState('');
+  const [crearP, setCrearP] = useState(false);
+  // Enlace de invitación: ?unirse=CÓDIGO abre directamente la ventana para entrar.
+  const [unirseCod, setUnirseCod] = useState<string | null>(codigoInvitacion);
+  useEffect(() => {
+    if (backend.modo === 'nube') misPartidas().then(setPartidas).catch((e) => setErrPartidas(e.message));
+  }, []);
+  const cerrarUnirse = () => { codigoInvitacion = null; setUnirseCod(null); };
   const [lista, setLista] = useState<Resumen[] | null>(null);
   const [error, setError] = useState('');
   const [dados, setDados] = useState(false);
@@ -219,9 +244,28 @@ function Lista({ usuario, onUsuario, onAbrir, onSalir }: { usuario: Usuario; onU
           ))}
           <button type="button" className="tarjeta-personaje nuevo" onClick={crear} disabled={creando}><span className="mas-grande">+</span><span>{creando ? L('Creando…', 'Создаём…') : L('Nuevo personaje', 'Новый персонаж')}</span></button>
         </div>
+
+        <h2 className="titulo-seccion espacio-arriba">{L('Partidas', 'Партии')}</h2>
+        {backend.modo === 'local' ? <p className="nota">{L('Para jugar en partida con amigos necesitas una cuenta.', 'Чтобы играть с друзьями в партии, нужен аккаунт.')}</p> : <>
+          {errPartidas && <p className="error">{errPartidas}</p>}
+          <div className="rejilla-personajes">
+            {partidas?.map((g) => (
+              <button key={g.id} className="tarjeta-personaje" onClick={() => onPartida(g.id)}>
+                <div className="retrato"><span>{g.master === usuario.id ? '👑' : '⚔️'}</span></div>
+                <div className="tp-texto"><strong>{g.nombre}</strong><span>{g.master === usuario.id ? L('Eres el máster', 'Ты мастер') : L('Juegas como jugador', 'Ты игрок')}</span><span className="nivel">{L('Código', 'Код')}: {g.codigo}</span></div>
+              </button>
+            ))}
+          </div>
+          <div className="fila-botones espacio-arriba">
+            <button className="btn primario" onClick={() => setCrearP(true)}>👑 {L('Crear partida', 'Создать партию')}</button>
+            <button className="btn" onClick={() => setUnirseCod('')}>🔑 {L('Unirse a una partida', 'Войти в партию')}</button>
+          </div>
+        </>}
       </main>
       <button className="fab" onClick={() => setDados(true)} aria-label={L('Dados', 'Кубики')}><DadoIcono caras={20} size={40} /></button>
       {dados && <Modal titulo={L('Dados', 'Кубики')} onClose={() => setDados(false)}><PanelDados /></Modal>}
+      {crearP && <ModalCrearPartida onClose={() => setCrearP(false)} onCreada={(id) => { setCrearP(false); onPartida(id); }} />}
+      {unirseCod !== null && backend.modo === 'nube' && !pedirAlias && <ModalUnirse codigoInicial={unirseCod} onClose={cerrarUnirse} onUnido={(id) => { cerrarUnirse(); onPartida(id); }} />}
       {pedirAlias && <ModalAlias onListo={(a) => { setPedirAlias(false); if (a) onUsuario({ ...usuario, alias: a }); }} />}
     </div>
   );
