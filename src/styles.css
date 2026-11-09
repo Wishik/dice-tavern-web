@@ -328,7 +328,7 @@ select.campo { appearance: none; background-image: linear-gradient(45deg, transp
 .lista-opciones .btn { justify-content: flex-start; }
 .viaje { list-style: none; margin: 0; padding: 0; }
 .viaje li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px; padding: 7px 0; border-bottom: 1px dashed rgba(106,86,67,.35); }
-.viaje li.bloque { flex-direction: column; align-items: stretch; }
+.viaje li.bloque { display: grid; grid-template-columns: 100%; gap: 6px; }
 .v-nombre { font-family: var(--fuente-titulo); font-size: 13px; display: flex; align-items: center; gap: 6px; }
 .v-nombre small { font-family: var(--fuente); color: var(--tinta-suave); }
 .v-nombre input { width: 18px; height: 18px; accent-color: #3a2717; }
@@ -521,3 +521,19 @@ details.corregir summary { cursor: pointer; color: var(--tinta-suave); font-size
 .miembro .quitar { position: absolute; top: 4px; right: 6px; font-size: 18px; color: var(--tinta-suave); padding: 6px 10px; }
 .pie-partida { margin-top: 32px; padding-bottom: 100px; }
 .sello-master { font-size: 18px; }
+
+/* ------------------------------------------------ partida en pantalla ancha: lista a la izquierda, hoja a la derecha */
+.barra-vida.mini { height: 5px; margin-top: 6px; width: 100%; }
+.partida-escritorio { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+.partida-escritorio .partida-cuerpo { flex: 1; min-height: 0; display: grid; grid-template-columns: 380px 1fr; }
+.partida-escritorio .partida-lado { overflow-y: auto; margin: 0; max-width: none; width: 100%; padding-bottom: 24px; border-right: 2px solid var(--madera-borde); }
+.partida-escritorio .partida-lado .rejilla-personajes { grid-template-columns: 1fr; }
+.partida-escritorio .partida-lado .codigo-partida { font-size: 30px; }
+.partida-escritorio .pie-partida { padding-bottom: 0; }
+.partida-panel { overflow-y: auto; min-width: 0; position: relative; }
+.partida-panel .pantalla-ficha .fab { right: 24px; }
+.tarjeta-personaje.miembro.elegido { outline: 3px solid var(--oro); outline-offset: 1px; }
+.panel-vacio { height: 100%; display: grid; place-content: center; text-align: center; color: #c9b38e; padding: 24px; }
+.panel-vacio span { font-size: 56px; }
+.panel-vacio p { max-width: 340px; margin: 8px auto 0; }
+.miembro .tp-texto { flex: 1; }

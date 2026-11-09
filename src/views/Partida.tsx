@@ -3,6 +3,15 @@ import { backend, type Resumen, type Usuario } from '../store';
 import { borrarPartida, cargarPartida, crearPartida, elegirPersonaje, enlaceInvitacion, quitarMiembro, unirse, type Miembro, type Partida } from '../partidas';
 import { L, RU_CLASES, RU_RAZAS, T } from '../i18n';
 import { Modal } from '../ui';
+import { Ficha } from './Ficha';
+
+/** true en pantallas anchas (portátil del máster): la hoja se abre al lado de la lista de jugadores. */
+function useAncho(min = 1000) {
+  const q = `(min-width: ${min}px)`;
+  const [a, setA] = useState(() => typeof matchMedia !== 'undefined' && matchMedia(q).matches);
+  useEffect(() => { const m = matchMedia(q); const f = () => setA(m.matches); m.addEventListener('change', f); return () => m.removeEventListener('change', f); }, [q]);
+  return a;
+}
 
 const linea = (pj: NonNullable<Miembro['pj']>) => [T(RU_RAZAS, pj.raza), pj.clase && `${T(RU_CLASES, pj.clase)} ${pj.nivel}`].filter(Boolean).join(' · ');
 
@@ -12,6 +21,8 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
   const [error, setError] = useState('');
   const [mios, setMios] = useState<Resumen[]>([]);
   const [copiado, setCopiado] = useState(false);
+  const ancho = useAncho();
+  const [sel, setSel] = useState<string | null>(null);
   const recargar = () => cargarPartida(id).then((x) => { setD(x); setError(''); }).catch((e) => setError(e.message));
   useEffect(() => { recargar(); backend.listar().then(setMios).catch(() => {}); }, [id]);
   // Los cambios de los demás (PG, nivel…) se ven al volver a la pantalla o cada 20 s.
@@ -40,12 +51,13 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
   const accion = async (f: () => Promise<unknown>) => { try { await f(); await recargar(); } catch (e) { alert((e as Error).message); } };
 
   return (
-    <div className="pantalla-lista">
+    <div className={`pantalla-lista ${ancho ? 'partida-escritorio' : ''}`}>
       <header className="barra">
         <button className="btn enlace volver" onClick={onVolver}>‹ {L('Inicio', 'Главная')}</button>
         <div className="titulo-ficha"><strong>{partida.nombre}</strong><span>{soyMaster ? L('Eres el máster', 'Ты мастер') : L('Partida', 'Партия')}</span></div>
       </header>
-      <main className="contenido">
+      <div className="partida-cuerpo">
+      <main className="contenido partida-lado">
         {error && <p className="error">{error}</p>}
         <section className="tarjeta invitacion">
           <span className="etq-pequena">{L('Código de invitación', 'Код приглашения')}</span>
@@ -71,14 +83,15 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
             const esMaster = m.usuario === partida.master;
             const puedeAbrir = !!m.pj && !!m.personaje && (soyMaster || m.usuario === usuario.id);
             return (
-              <div key={m.usuario} className="tarjeta-personaje miembro">
-                <button className="miembro-cuerpo" disabled={!puedeAbrir} onClick={() => m.personaje && onAbrirFicha(m.personaje)}>
+              <div key={m.usuario} className={`tarjeta-personaje miembro ${ancho && sel && sel === m.personaje ? 'elegido' : ''}`}>
+                <button className="miembro-cuerpo" disabled={!puedeAbrir} onClick={() => m.personaje && (ancho ? setSel(m.personaje) : onAbrirFicha(m.personaje))}>
                   <div className="retrato">{m.pj?.foto ? <img src={m.pj.foto} alt="" /> : <span>{esMaster ? '👑' : (m.pj?.nombre || m.alias || '?')[0]}</span>}</div>
                   <div className="tp-texto">
                     <strong>{esMaster ? L('Máster', 'Мастер') : m.pj ? (m.pj.nombre || L('Sin nombre', 'Без имени')) : L('Sin personaje', 'Без персонажа')}</strong>
                     <span>@{m.alias}{m.usuario === usuario.id ? ` (${L('tú', 'ты')})` : ''}</span>
                     {m.pj && <span>{linea(m.pj)}</span>}
-                    {m.pj && <span className="nivel">❤️ {m.pj.pg?.actual ?? 0}/{m.pj.pg?.max ?? 0}{m.pj.pm?.max ? ` · 🔷 ${m.pj.pm.actual}/${m.pj.pm.max}` : ''}</span>}
+                    {m.pj && <span className="nivel">❤️ {m.pj.pg?.actual ?? 0}/{m.pj.pg?.max ?? 0} · 🛡 {m.pj.ca}{m.pj.pm?.max ? ` · 🔷 ${m.pj.pm.actual}/${m.pj.pm.max}` : ''}</span>}
+                    {m.pj && m.pj.pg?.max > 0 && <div className="barra-vida mini"><div style={{ width: `${Math.max(0, Math.min(100, (100 * m.pj.pg.actual) / m.pj.pg.max))}%` }} /></div>}
                   </div>
                 </button>
                 {soyMaster && !esMaster && (
@@ -96,6 +109,13 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
             : <button className="btn peligro" onClick={async () => { if (confirm(L('¿Salir de esta partida?', 'Выйти из этой партии?'))) { try { await quitarMiembro(partida.id, usuario.id); onVolver(); } catch (e) { alert((e as Error).message); } } }}>{L('Salir de la partida', 'Выйти из партии')}</button>}
         </div>
       </main>
+      {ancho && (
+        <section className="partida-panel">
+          {sel ? <Ficha key={sel} id={sel} ajeno={miembros.find((m) => m.personaje === sel)?.usuario !== usuario.id} volverTexto={L('Cerrar', 'Закрыть')} onVolver={() => { setSel(null); recargar(); }} />
+            : <div className="panel-vacio"><span>📜</span><p>{soyMaster ? L('Elige a un jugador de la lista para ver y editar su hoja aquí.', 'Выбери игрока слева, чтобы открыть и править его лист здесь.') : L('Elige tu personaje de la lista para abrir su hoja aquí.', 'Выбери своего персонажа слева, чтобы открыть его лист здесь.')}</p></div>}
+        </section>
+      )}
+      </div>
     </div>
   );
 }

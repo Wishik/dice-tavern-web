@@ -1,6 +1,8 @@
 import { supabase } from './store';
 import { L } from './i18n';
 import type { Personaje } from './types';
+import { normalizar } from './personaje';
+import { calcularCA } from './rules';
 
 export interface Partida { id: string; nombre: string; codigo: string; master: string; creada: string }
 export interface Miembro {
@@ -8,7 +10,7 @@ export interface Miembro {
   alias: string;
   personaje: string | null;
   /** Resumen del personaje elegido (null si aún no ha elegido o no se puede ver). */
-  pj: Pick<Personaje, 'nombre' | 'raza' | 'clase' | 'nivel' | 'foto' | 'pg' | 'pm'> | null;
+  pj: (Pick<Personaje, 'nombre' | 'raza' | 'clase' | 'nivel' | 'foto' | 'pg' | 'pm'> & { ca: number }) | null;
 }
 
 // Sin 0/O ni 1/I/L para que el código se pueda dictar sin errores.
@@ -66,10 +68,14 @@ export async function cargarPartida(id: string): Promise<{ partida: Partida; mie
   const pjs = filas.map((f) => f.personaje).filter(Boolean) as string[];
   const [al, pj] = await Promise.all([
     ids.length ? c.from('perfiles').select('id, alias').in('id', ids) : Promise.resolve({ data: [], error: null }),
-    pjs.length ? c.from('personajes').select('id, datos->nombre, datos->raza, datos->clase, datos->nivel, datos->foto, datos->pg, datos->pm').in('id', pjs) : Promise.resolve({ data: [], error: null }),
+    pjs.length ? c.from('personajes').select('id, datos').in('id', pjs) : Promise.resolve({ data: [], error: null }),
   ]);
   const alias = new Map(((al.data ?? []) as { id: string; alias: string }[]).map((x) => [x.id, x.alias]));
-  const res = new Map(((pj.data ?? []) as (Miembro['pj'] & { id: string })[]).map((x) => [x.id, x]));
+  const res = new Map(((pj.data ?? []) as { id: string; datos: Personaje }[]).map((x) => {
+    const p = normalizar(x.datos);
+    let ca = 10; try { ca = calcularCA(p).total; } catch { /* datos antiguos */ }
+    return [x.id, { nombre: p.nombre, raza: p.raza, clase: p.clase, nivel: p.nivel, foto: p.foto, pg: p.pg, pm: p.pm, ca }];
+  }));
   return {
     partida: p.data as Partida,
     miembros: filas.map((f) => ({ usuario: f.usuario, personaje: f.personaje, alias: alias.get(f.usuario) ?? '?', pj: f.personaje ? res.get(f.personaje) ?? null : null })),
