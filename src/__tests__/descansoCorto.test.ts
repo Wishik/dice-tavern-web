@@ -39,7 +39,7 @@ describe('recursos añadidos a mano', () => {
     expect(recursosPersonaje(p, null).some((r) => r.id === 'dadosSupremacia' && r.extra)).toBe(true);
     p.recursosUsados = { dadosSupremacia: 3 };
     descansoCorto(p, null);
-    expect(p.recursosUsados.dadosSupremacia).toBe(0);
+    expect(p.recursosUsados.dadosSupremacia).toBe(3); // los añadidos no se recuperan solos
     expect(recordatoriosCorto(p, null, null, false).some((t) => t.startsWith('Dados de supremacía'))).toBe(false);
     expect(catalogoRecursos(p, null).some((r) => r.id === 'dadosSupremacia')).toBe(false);
   });
@@ -57,19 +57,14 @@ describe('límites de habilidades', () => {
   });
 });
 
-describe('recupera de recursos propios', () => {
-  it('corto, largo o ambos', () => {
+describe('recursos propios', () => {
+  it('no se recuperan solos con ningún descanso', () => {
     const p = nuevoPersonaje();
-    p.recursosExtra = [
-      { id: 'a', es: 'A', ru: 'A', max: 2, recupera: 'corto' },
-      { id: 'b', es: 'B', ru: 'B', max: 2, recupera: 'largo' },
-      { id: 'c', es: 'C', ru: 'C', max: 2, recupera: 'ambos' },
-    ];
-    p.recursosUsados = { a: 2, b: 2, c: 2 };
-    descansoLargo(p);
-    expect(p.recursosUsados).toEqual({ a: 2 });
-    p.recursosUsados = { a: 2, b: 2, c: 2 };
+    p.recursosExtra = [{ id: 'a', es: 'A', ru: 'A', max: 2, recupera: 'corto' }, { id: 'b', es: 'B', ru: 'B', max: 2, recupera: 'largo' }];
+    p.recursosUsados = { a: 2, b: 2 };
     descansoCorto(p, null);
-    expect(p.recursosUsados).toEqual({ a: 0, b: 2, c: 0 });
+    expect(p.recursosUsados).toEqual({ a: 2, b: 2 });
+    descansoLargo(p);
+    expect(p.recursosUsados).toEqual({ a: 2, b: 2 });
   });
 });

@@ -89,8 +89,8 @@ export function TabAtributos() {
             <button className="btn" disabled={!cortosQuedan} title={cortosQuedan ? '' : L('Ya no quedan descansos cortos: haz un descanso largo.', 'Короткие отдыхи закончились: нужен долгий отдых.')}
               onClick={() => setCorto(true)}>☀️ {L('Descanso corto', 'Короткий отдых')} ({cortosQuedan}/{MAX_DESCANSOS_CORTOS})</button>
             <button className="btn" onClick={() => {
-              const notas = (p.recursosExtra ?? []).filter((r) => r.notas && recuperaExtra(r) !== 'corto').map((r) => `\n• ${L(r.es, r.ru)}: ${r.notas}`).join('');
-              if (confirm(L(`¿Descanso largo? Recuperas todos los PG y el maná, ${dgRecuperados(p.nivel)} DG, todos los recursos de clase y quitas 1 nivel de agotamiento.`, `Долгий отдых? Восстановятся все хиты и мана, ${dgRecuperados(p.nivel)} КХ, все ресурсы класса, и снимется 1 уровень истощения.`) + (notas ? L('\n\nTus notas:', '\n\nТвои заметки:') + notas : ''))) upd(descansoLargo);
+              const notas = (p.recursosExtra ?? []).filter((r) => recuperaExtra(r) === 'largo').map((r) => `\n• ${L(r.es, r.ru)}${r.notas ? `: ${r.notas}` : ''}`).join('');
+              if (confirm(L(`¿Descanso largo? Recuperas todos los PG y el maná, ${dgRecuperados(p.nivel)} DG, todos los recursos de clase y quitas 1 nivel de agotamiento.`, `Долгий отдых? Восстановятся все хиты и мана, ${dgRecuperados(p.nivel)} КХ, все ресурсы класса, и снимется 1 уровень истощения.`) + (notas ? L('\n\nTus recursos (recupéralos a mano con +):', '\n\nТвои ресурсы (восстанавливай вручную кнопкой +):') + notas : ''))) upd(descansoLargo);
             }}>🌙 {L('Descanso largo', 'Долгий отдых')}</button>
           </div>
         </Seccion>
@@ -99,7 +99,7 @@ export function TabAtributos() {
         const ru = idioma() === 'ru';
         const auto = resumenCorto(p, clase, ru);
         const extra = recordatoriosCorto(p, razas, todosConjuros, ru);
-        const notas = (p.recursosExtra ?? []).filter((r) => r.notas && recuperaExtra(r) !== 'largo');
+        const notas = (p.recursosExtra ?? []).filter((r) => recuperaExtra(r) === 'corto');
         return (
           <Modal titulo={L('Descanso corto', 'Короткий отдых')} onClose={() => setCorto(false)}
             pie={<button className="btn primario" onClick={() => { upd((x) => { descansoCorto(x, clase); }); setCorto(false); }}>☀️ {L('Descansar', 'Отдохнуть')}</button>}>
@@ -108,8 +108,9 @@ export function TabAtributos() {
             {auto.length ? <ul>{auto.map((t) => <li key={t}>{t}</li>)}</ul> : <p className="nota">{L('Nada de tu clase o raza.', 'Ничего от класса или расы.')}</p>}
             <p className="nota">{L('Para curarte, toca el dado de golpe (DG).', 'Чтобы лечиться, нажимай на кость хитов (КХ).')}</p>
             {notas.length > 0 && <>
-              <h4>{L('Tus notas', 'Твои заметки')}</h4>
-              <ul>{notas.map((r) => <li key={r.id}><b>{L(r.es, r.ru)}:</b> {r.notas}</li>)}</ul>
+              <h4>{L('Tus recursos', 'Твои ресурсы')}</h4>
+              <p className="nota">{L('No se recuperan solos: súbelos a mano con + si te toca.', 'Сами не восстанавливаются: прибавь кнопкой +, если положено.')}</p>
+              <ul>{notas.map((r) => <li key={r.id}><b>{L(r.es, r.ru)}</b> ({Math.max(0, r.max - (p.recursosUsados?.[r.id] ?? 0))}/{r.max}){r.notas ? `: ${r.notas}` : ''}</li>)}</ul>
             </>}
             {extra.length > 0 && <>
               <h4>{L('También puedes recuperar', 'Также можно восстановить')}</h4>
@@ -206,11 +207,9 @@ export function TabAtributos() {
 }
 
 const OPCIONES_RECUPERA = [
-  ['ambos', 'Descanso corto y largo: se recupera todo', 'Короткий и долгий отдых: всё восстанавливается'],
-  ['corto', 'Descanso corto: se recupera todo', 'Короткий отдых: всё восстанавливается'],
-  ['largo', 'Descanso largo: se recupera todo', 'Долгий отдых: всё восстанавливается'],
+  ['corto', 'Descanso corto', 'Короткий отдых'],
+  ['largo', 'Descanso largo', 'Долгий отдых'],
 ] as const;
-const textoRecupera = (r: 'corto' | 'largo' | 'ambos') => (r === 'ambos' ? L('corto y largo', 'короткий и долгий') : r === 'corto' ? L('solo corto', 'только короткий') : L('solo largo', 'только долгий'));
 
 function ModalRecurso({ onClose, editar }: { onClose: () => void; editar?: RecursoExtra }) {
   const { p, upd, razas } = useFicha();
@@ -229,8 +228,8 @@ function ModalRecurso({ onClose, editar }: { onClose: () => void; editar?: Recur
     onClose();
   };
   const fila = (r: (typeof cat)[number]) => (
-    <li key={r.id}><button type="button" className="btn fila-recurso" onClick={() => setForm({ id: r.id, es: r.es, ru: r.ru, max: r.max, recupera: 'ambos', notas: '' })}>
-      <span>{L(r.es, r.ru)}</span><small>{r.max} · {textoRecupera('ambos')}</small></button></li>
+    <li key={r.id}><button type="button" className="btn fila-recurso" onClick={() => setForm({ id: r.id, es: r.es, ru: r.ru, max: r.max, recupera: r.corto ? 'corto' : 'largo', notas: '' })}>
+      <span>{L(r.es, r.ru)}</span><small>{r.max}</small></button></li>
   );
   if (form) {
     const propio = form.id.startsWith('propio-');
@@ -243,7 +242,7 @@ function ModalRecurso({ onClose, editar }: { onClose: () => void; editar?: Recur
             <input className="campo" value={propio ? form.es : L(form.es, form.ru)} onChange={(e) => setForm({ ...form, es: e.target.value, ru: e.target.value })} placeholder={L('Nombre', 'Название')} />
           </Etiqueta>
           <Etiqueta texto={L('Usos', 'Использований')}><Numero valor={form.max} min={1} set={(n) => setForm({ ...form, max: n })} /></Etiqueta>
-          <Etiqueta texto={L('Se recupera con', 'Восстанавливается')}>
+          <Etiqueta texto={L('Se recupera con (a mano)', 'Восстанавливается (вручную)')}>
             <select className="campo" value={form.recupera} onChange={(e) => setForm({ ...form, recupera: e.target.value as RecursoExtra['recupera'] })}>
               {OPCIONES_RECUPERA.map(([v, es, ru]) => <option key={v} value={v}>{L(es, ru)}</option>)}
             </select>
@@ -255,12 +254,11 @@ function ModalRecurso({ onClose, editar }: { onClose: () => void; editar?: Recur
       </Modal>
     );
   }
-  const tuyos = cat.filter((r) => r.tuyo), otros = cat.filter((r) => !r.tuyo);
+  const tuyos = cat.filter((r) => r.tuyo);
   return (
     <Modal titulo={L('Añadir recurso', 'Добавить ресурс')} onClose={onClose}>
       <BotonAnadir onClick={() => setForm(nuevo())}>{L('Recurso propio', 'Свой ресурс')}</BotonAnadir>
       {tuyos.length > 0 && <><h4>{L('De tu clase, raza y dotes', 'От твоего класса, расы и черт')}</h4><ul className="lista-recursos">{tuyos.map(fila)}</ul></>}
-      {otros.length > 0 && <><h4>{L('Otros', 'Другие')}</h4><ul className="lista-recursos">{otros.map(fila)}</ul></>}
     </Modal>
   );
 }

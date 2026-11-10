@@ -6,7 +6,7 @@ import { bonoCompetencia, modificador } from './rules';
  * Recurso de clase o raza con usos limitados. Todos se recuperan con un descanso largo;
  * `corto` dice qué devuelve un descanso corto (uno o todos). `acumula`: cuenta lo que se acumula (p. ej. estrés) en vez de lo que queda.
  */
-export interface Recurso { id: string; es: string; ru: string; max: number; corto?: 'uno' | 'todos'; acumula?: boolean; /** Añadido a mano por el jugador. */ extra?: boolean; /** No se recupera con el descanso largo. */ soloCorto?: boolean; notas?: string }
+export interface Recurso { id: string; es: string; ru: string; max: number; corto?: 'uno' | 'todos'; acumula?: boolean; /** Añadido a mano por el jugador. */ extra?: boolean; notas?: string }
 
 /** Columnas de la tabla de cada clase que son usos (Furias, Puntos de ki…). */
 // Qué recupera el descanso corto, según el manual: Furia, Canalizar divinidad, Forma salvaje y Tomar aliento recuperan uno; el ki, todos.
@@ -41,12 +41,12 @@ export function recursosRaza(p: Personaje): Recurso[] {
 export const recursosPersonaje = (p: Personaje, clase: Clase | null | undefined): Recurso[] => [...recursosClase(p, clase), ...recursosRaza(p), ...(p.recursosExtra ?? []).map(recursoDeExtra)];
 
 export function recursoDeExtra(r: RecursoExtra): Recurso {
-  const rec = r.recupera ?? (r.corto ? 'ambos' : 'largo');
-  return { id: r.id, es: r.es, ru: r.ru, max: r.max, extra: true, notas: r.notas, corto: rec === 'largo' ? undefined : 'todos', soloCorto: rec === 'corto' };
+  // Los recursos añadidos no se recuperan solos: el descanso solo los recuerda.
+  return { id: r.id, es: r.es, ru: r.ru, max: r.max, extra: true, notas: r.notas };
 }
 
 /** Recupera de un recurso añadido (las fichas antiguas no lo tienen). */
-export const recuperaExtra = (r: RecursoExtra) => r.recupera ?? (r.corto ? 'ambos' : 'largo');
+export const recuperaExtra = (r: RecursoExtra): 'corto' | 'largo' => (r.recupera === 'largo' || (!r.recupera && !r.corto) ? 'largo' : 'corto');
 
 /** Recursos de la clase del personaje a su nivel actual, sacados de la tabla de la clase del manual. */
 export function recursosClase(p: Personaje, clase: Clase | null | undefined): Recurso[] {
@@ -72,9 +72,9 @@ export function descansoLargo(x: Personaje) {
   x.pg.temp = 0;
   x.pm.actual = x.pm.max;
   x.dgUsados = Math.max(0, x.dgUsados - dgRecuperados(x.nivel));
-  // Los recursos añadidos que solo vuelven con el descanso corto conservan lo gastado.
+  // Los recursos añadidos a mano conservan lo gastado: se recuperan a mano.
   const usados: Record<string, number> = {};
-  for (const r of x.recursosExtra ?? []) if (recuperaExtra(r) === 'corto' && x.recursosUsados?.[r.id]) usados[r.id] = x.recursosUsados[r.id];
+  for (const r of x.recursosExtra ?? []) if (x.recursosUsados?.[r.id]) usados[r.id] = x.recursosUsados[r.id];
   x.recursosUsados = usados;
   x.descansosCortos = 0;
   x.agotamiento = Math.max(0, (x.agotamiento ?? 0) - 1);
