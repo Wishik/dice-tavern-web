@@ -8,10 +8,11 @@ import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
 import { tr } from '../ru';
 import { td } from '../datosRu';
 import { buscarClase } from '../avisos';
+import { armasNaturales } from '../armasNaturales';
 import { recursosPersonaje } from '../recursos';
 import { alternarPotenciador, apagarDeUnGolpe, aplicaArma, potenciadoresDisponibles, sumarDano, type Potenciador } from '../potenciadores';
 
-type ArmaLlevada = { it: Item; donde: string; ref: (x: Personaje) => Item | null | undefined };
+type ArmaLlevada = { it: Item; donde: string; ref: (x: Personaje) => Item | null | undefined; extra?: string; natural?: boolean };
 /** Armas que llevas en las manos o en el cinturón: salen solas en Combate. */
 function armasLlevadas(p: Personaje): ArmaLlevada[] {
   const out: ArmaLlevada[] = [];
@@ -40,7 +41,8 @@ export function TabCombate() {
   }} />;
   const { tirar, tirarD20 } = useDados();
   const cd = cdConjuros(p), at = ataqueConjuros(p);
-  const llevadas = armasLlevadas(p);
+  const objetos = armasLlevadas(p);
+  const llevadas: ArmaLlevada[] = [...objetos, ...armasNaturales(p, buscarClase(clases, p.clase)).map((n) => ({ ...n, ref: () => null, natural: true }))];
   const auto = CARACTERISTICA_CONJUROS[p.clase];
   return (
     <div className="tab">
@@ -52,9 +54,9 @@ export function TabCombate() {
       </Seccion>
 
       <Seccion titulo="Armas que llevas">
-        {llevadas.length === 0 && <p className="nota">{L('Equipa un arma en la mano hábil o torpe, o ponla en el cinturón (Inventario), y aparecerá aquí con su ataque y daño.', 'Возьми оружие в ведущую или вторую руку или повесь на пояс (Инвентарь) — оно появится здесь с атакой и уроном.')}</p>}
+        {objetos.length === 0 && <p className="nota">{L('Equipa un arma en la mano hábil o torpe, o ponla en el cinturón (Inventario), y aparecerá aquí con su ataque y daño.', 'Возьми оружие в ведущую или вторую руку или повесь на пояс (Инвентарь) — оно появится здесь с атакой и уроном.')}</p>}
         <ul className="lista-ataques">
-          {llevadas.map(({ it, donde, ref }) => {
+          {llevadas.map(({ it, donde, ref, extra, natural }) => {
             const { ataque: ataqueBase, mod, atr, distancia } = bonoArma(p, it);
             const pots = disponibles.filter((pt) => aplicaArma(pt, it, atr, distancia));
             const act = pots.filter((pt) => activos.has(pt.id));
@@ -63,13 +65,14 @@ export function TabCombate() {
             const dado = danoTxt.match(/^\s*(\d+d\d+|\d+)/i)?.[1] ?? '';
             const tipo = danoTxt.replace(/^\s*(\d+d\d+|\d+)\s*/i, '');
             const versatil = (it.detalles?.['Propiedades'] ?? '').match(/vers[aá]til\s*\((\d+d\d+)\)/i)?.[1];
-            const formula = (d: string) => sumarDano(/d/.test(d) ? `${d}${mod ? conSigno(mod) : ''}` : `${Math.max(1, parseInt(d, 10) + mod)}`, extrasDano(act));
+            const formula = (d: string) => sumarDano(/d/.test(d) ? `${d}${mod ? conSigno(mod) : ''}` : `${Math.max(1, parseInt(d, 10) + mod)}`, [...(extra ? [extra] : []), ...extrasDano(act)]);
             const tirarDano = (titulo: string, f: string) => { tirar(`${titulo}: ${td(it.nombre)}${nombres(act)}`, f); upd((x) => apagarDeUnGolpe(x, act)); };
             const municion = usaMunicion(it);
             const sinMunicion = municion && !(it.municion ?? 0);
             return (
               <li key={it.id} className="ataque auto">
-                <div className="ataque-titulo"><strong>{td(it.nombre)}</strong><small>{tr(donde)}{tipo ? ` · ${tipo}` : ''}</small></div>
+                <div className="ataque-titulo"><strong>{natural ? it.nombre : td(it.nombre)}</strong><small>{natural ? donde : tr(donde)}{tipo ? ` · ${tipo}` : ''}</small></div>
+                {natural && it.descripcion && <p className="nota pequena">{it.descripcion}</p>}
                 <div className="ataque-fila">
                   <button className="btn primario" disabled={sinMunicion} onClick={() => {
                     if (municion) upd((x) => { const y = ref(x); if (y) y.municion = Math.max(0, (y.municion ?? 0) - 1); });

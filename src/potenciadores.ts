@@ -91,6 +91,8 @@ export function potenciadoresDisponibles(p: Personaje, clase: Clase | null | und
 /** ¿Este potenciador vale para esta arma? */
 export function aplicaArma(pt: Potenciador, it: Item, atr: 'FUE' | 'DES' | string, distancia: boolean): boolean {
   const props = it.detalles?.['Propiedades'] ?? '';
+  // El golpe sin armas no es un arma: ni furtivo, ni Duelo, ni dotes de armas pesadas o arrojadizas.
+  if (it.id === 'nat:sinArmas' && (pt.id === 'duelo' || pt.armas === 'sutilODistancia' || pt.armas === 'pesada' || pt.armas === 'arrojadiza')) return false;
   switch (pt.armas) {
     case 'cac': return !distancia;
     case 'distancia': return distancia;
