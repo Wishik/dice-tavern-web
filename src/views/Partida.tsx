@@ -1,3 +1,5 @@
+import { useBotin } from '../botin';
+import { td } from '../datosRu';
 import { tiradasPartida, type TiradaPartida } from '../tiradasPartida';
 import { useEffect, useState } from 'react';
 import { backend, type Resumen, type Usuario } from '../store';
@@ -129,6 +131,7 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
           })}
         </div>
         {soyMaster && <p className="nota">{L('Como máster puedes abrir y editar la hoja de cualquier jugador.', 'Как мастер ты можешь открыть и править лист любого игрока.')}</p>}
+        {soyMaster && <PanelBotin />}
 
         <div className="pie-partida">
           {soyMaster
@@ -149,6 +152,23 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
   );
 }
 
+/** Botín del máster: lo robado a los jugadores. Se da desde «Añadir» en el inventario de un jugador. */
+function PanelBotin() {
+  const { items, error, recargar, cambiar } = useBotin();
+  useEffect(() => { const t = setInterval(() => { if (document.visibilityState === 'visible') recargar(); }, 8000); return () => clearInterval(t); }, [recargar]);
+  return (
+    <section className="tarjeta botin-master">
+      <h3>👑 {L("Botín del máster", "Добыча мастера")}</h3>
+      {error ? <p className="error">{error}</p> : !items ? <p className="nota">{L('Cargando…', 'Загрузка…')}</p>
+        : items.length === 0 ? <p className="nota">{L('Vacío. Abre el inventario de un jugador, toca un objeto y pulsa «Robar».', 'Пусто. Открой инвентарь игрока, нажми на предмет и выбери «Украсть».')}</p>
+        : <ul className="lista-botin">{items.map((it) => (
+          <li key={it.id}><span>{td(it.nombre)}{it.cantidad > 1 ? ` ×${it.cantidad}` : ''}</span>
+            <button className="quitar-recurso" title={L('Eliminar', 'Удалить')} onClick={() => confirm(L(`¿Eliminar ${it.nombre} del botín?`, `Удалить «${it.nombre}» из добычи?`)) && cambiar((l) => l.filter((x) => x.id !== it.id))}>✕</button></li>))}</ul>}
+      {items && items.length > 0 && <p className="nota pequena">{L('Para dárselo a un jugador: abre su inventario, pulsa «Añadir» y elige el objeto de tu botín.', 'Чтобы отдать игроку: открой его инвентарь, нажми «Добавить» и выбери предмет из добычи.')}</p>}
+    </section>
+  );
+}
+
 /** Historial de tiradas de los jugadores (solo lo ve el máster). Se recarga cada 4 s. */
 function HistorialTiradas({ partida }: { partida: string }) {
   const [l, setL] = useState<TiradaPartida[] | null>(null);
@@ -161,7 +181,7 @@ function HistorialTiradas({ partida }: { partida: string }) {
   const hora = (s: string) => new Date(s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   return (
     <section className="tarjeta historial-partida">
-      <h2 className="titulo-seccion">{L('Historial de tiradas', 'История бросков')}</h2>
+      <h3>{L("Historial de tiradas", "История бросков")}</h3>
       {error && <p className="error">{error}</p>}
       {!l ? <p className="nota">{L('Cargando…', 'Загрузка…')}</p> : l.length === 0
         ? <p className="nota">{L('Aún no hay tiradas. Aparecen aquí cuando un jugador tira desde su hoja.', 'Бросков пока нет. Они появятся, когда игрок бросит кубики из своего листа.')}</p>

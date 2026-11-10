@@ -32,6 +32,8 @@ interface FichaCtx {
   avisos: Avisos;
   /** Datos de creación bloqueados (personaje en partida). */
   bloqueado: boolean;
+  /** El máster tiene abierta la hoja de otro jugador. */
+  ajeno?: boolean;
 }
 const Ctx = createContext<FichaCtx | null>(null);
 export const useFicha = () => useContext(Ctx)!;
@@ -146,7 +148,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
   };
 
   return (
-    <Ctx.Provider value={{ p, upd, clases, razas, trasfondos, dotes, avisos, bloqueado }}>
+    <Ctx.Provider value={{ p, upd, clases, razas, trasfondos, dotes, avisos, bloqueado, ajeno }}>
       <div className="pantalla-ficha">
         <div className="cabecera-fija">
         <header className="barra">

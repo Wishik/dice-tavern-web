@@ -10,6 +10,7 @@ import { MONEDAS, RANURAS_EQUIPO, type Item, type Moneda, type Personaje, type R
 import { L, T, idioma, RU_MONEDAS } from '../i18n';
 import { tr } from '../ru';
 import { td } from '../datosRu';
+import { useBotin } from '../botin';
 
 type Lugar = { zona: 'mochila' | 'cinturon'; i: number } | { zona: 'equipo'; r: RanuraEquipo };
 type Destino = { zona: 'mochila' | 'cinturon' } | { zona: 'equipo'; r: RanuraEquipo };
@@ -141,7 +142,22 @@ function ListaItems({ items, libres, onAbrir, mostrarTramos }: { items: Item[]; 
 }
 
 function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
-  const { p, upd } = useFicha();
+  const { p, upd, ajeno } = useFicha();
+  const botin = useBotin(false);
+  /** El máster se lleva el objeto (o parte del montón) a su botín. */
+  const robar = async () => {
+    let n = it.cantidad;
+    if (it.cantidad > 1) {
+      const r = prompt(L(`¿Cuántos robas? (1–${it.cantidad})`, `Сколько украсть? (1–${it.cantidad})`), String(it.cantidad));
+      if (r === null) return;
+      n = Math.max(1, Math.min(it.cantidad, parseInt(r, 10) || 0));
+      if (!n) return;
+    }
+    const robado: Item = { ...structuredClone(it), id: uid(), cantidad: n };
+    if (!(await botin.cambiar((l) => [...l, robado]))) return;
+    upd((x) => { const y = leer(x, lugar); if (!y) return; if (n >= y.cantidad) quitar(x, lugar); else y.cantidad -= n; });
+    onClose();
+  };
   const it = leer(p, lugar)!;
   const [equipar, setEquipar] = useState(false);
   const set = (f: (it: Item) => void) => upd((x) => { const y = leer(x, lugar); if (y) f(y); });
@@ -159,6 +175,7 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
         {lugar.zona === 'equipo' && <button className="btn" onClick={() => mover({ zona: 'mochila' })}>{L('Quitar del equipo', 'Снять')}</button>}
         {lugar.zona === 'mochila' && <button className="btn" onClick={() => mover({ zona: 'cinturon' })}>{L('Al cinturón', 'На пояс')}</button>}
         {lugar.zona === 'cinturon' && <button className="btn" onClick={() => mover({ zona: 'mochila' })}>{L('A la mochila', 'В рюкзак')}</button>}
+        {ajeno && <button className="btn robar" onClick={robar}>🫳 {L('Robar', 'Украсть')}</button>}
         <button className="btn vender" onClick={() => setVender(true)}>{L('Vender', 'Продать')}</button>
         <button className="btn peligro" onClick={() => { if (confirm(L(`¿Tirar ${it.nombre}?`, `Выбросить «${it.nombre}»?`))) { upd((x) => { quitar(x, lugar); }); onClose(); } }}>{L('Tirar', 'Выбросить')}</button>
       </div>}>
@@ -273,7 +290,15 @@ function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
 }
 
 function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => void }) {
-  const { p, upd } = useFicha();
+  const { p, upd, ajeno } = useFicha();
+  const botin = useBotin(!!ajeno);
+  /** El máster da un objeto de su botín al jugador. */
+  const dar = async (it: Item) => {
+    if (!cabe(p, it, destino)) return;
+    if (!(await botin.cambiar((l) => l.filter((x) => x.id !== it.id)))) return;
+    upd((x) => poner(x, { ...it, id: uid() }, destino));
+    onClose();
+  };
   const [base, setBase] = useState<ObjetoBase[] | null>(null);
   const [borrador, setBorrador] = useState<Item | null>(null);
   useEffect(() => { cargarObjetos().then(setBase); }, []);
@@ -301,6 +326,15 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
 
   return (
     <Modal titulo={L(`Añadir a ${nombreDestino}`, `Добавить: ${nombreDestino}`)} onClose={onClose}>
+      {ajeno && (
+        <>
+          <h4>👑 {L('Tu botín de máster', 'Твоя добыча мастера')}</h4>
+          {botin.error ? <p className="error">{botin.error}</p> : !botin.items ? <p className="nota">{L('Cargando…', 'Загрузка…')}</p>
+            : botin.items.length === 0 ? <p className="nota">{L('Vacío. Roba algo desde el inventario de un jugador (botón «Robar»).', 'Пусто. Укради что-нибудь из инвентаря игрока (кнопка «Украсть»).')}</p>
+            : <div className="lista-opciones">{botin.items.map((it) => <button key={it.id} className="btn" onClick={() => dar(it)}>{td(it.nombre)}{it.cantidad > 1 ? ` ×${it.cantidad}` : ''}</button>)}</div>}
+          {sueltos.length === 0 && <h4>{L('Nuevo objeto', 'Новый предмет')}</h4>}
+        </>
+      )}
       {sueltos.length > 0 && (
         <>
           <h4>{L('De tu inventario', 'Из инвентаря')}</h4>

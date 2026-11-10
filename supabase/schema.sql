@@ -175,3 +175,14 @@ begin
   end loop;
 end $$;
 grant execute on function public.registrar_tirada(text, text, text, integer, text, text, text) to authenticated;
+
+-- Botín del máster: objetos que roba a los jugadores para dárselos luego a otro (uno por cuenta).
+create table if not exists public.botin (
+  usuario uuid primary key references auth.users(id) on delete cascade default auth.uid(),
+  items jsonb not null default '[]'::jsonb,
+  actualizado timestamptz not null default now()
+);
+alter table public.botin enable row level security;
+grant select, insert, update, delete on public.botin to authenticated;
+drop policy if exists "mi botín" on public.botin;
+create policy "mi botín" on public.botin for all to authenticated using (usuario = auth.uid()) with check (usuario = auth.uid());
