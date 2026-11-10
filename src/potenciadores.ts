@@ -61,7 +61,7 @@ const DEFS: Record<string, Def> = {
   jinetes: { rasgo: 'Pequeños Jinetes', crear: () => ({ es: 'Pequeños jinetes', ru: 'Маленькие всадники', ataque: 1, nota_es: 'Montando una criatura pequeña, lobo o huargo.', nota_ru: 'Верхом на маленьком существе, волке или варге.' }) },
   arremetida: { rasgo: 'Arremetida Brutal', crear: () => ({ es: 'Arremetida brutal', ru: 'Жестокий натиск', dano: '+1d6', unaVez: true, nota_es: 'Tras moverte 20 pies en carga.', nota_ru: 'После рывка на 20 фт.' }) },
   venenos: { rasgo: 'Improvisador de Venenos', crear: () => ({ es: 'Arma envenenada', ru: 'Отравленное оружие', dano: '+1d4', unaVez: true, nota_es: 'Daño de veneno + TS de Constitución.', nota_ru: 'Урон ядом + спасбросок Телосложения.' }) },
-  golpePreciso: { rasgo: 'Golpe Preciso', crear: () => ({ es: 'Golpe preciso', ru: 'Точный удар', ataque: -1, dano: '+2', unaVez: true, armas: 'cac' }) },
+  golpePreciso: { rasgo: 'Golpe Preciso', crear: () => ({ es: 'Golpe preciso', ru: 'Точный удар', ataque: -1, dano: '+2', unaVez: true, armas: 'cac', nota_es: 'Cuerpo a cuerpo: −1 al ataque, +2 al daño.', nota_ru: 'Ближний бой: −1 к атаке, +2 к урону.' }) },
   iraControlada: { rasgo: 'Ira controlada', crear: () => ({ es: 'Ira controlada', ru: 'Сдержанный гнев', dano: '+2', unaVez: true, nota_es: 'Contra quien te acaba de dañar.', nota_ru: 'Против того, кто тебя только что ранил.' }) },
   // ---------- Dotes
   carga: { dote: 'Atacante a la carga', crear: () => ({ es: 'Atacante a la carga', ru: 'Атакующий с разбега', dano: '+1d8', unaVez: true, armas: 'cac', nota_es: 'Tras moverte 10 pies en línea recta.', nota_ru: 'После 10 фт по прямой.' }) },

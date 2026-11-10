@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useFicha } from './Ficha';
 import { BotonAnadir, Etiqueta, Numero, Seccion, Texto } from '../ui';
 import { useDados } from '../dice';
@@ -149,20 +150,30 @@ export function TabCombate() {
 
 /** Botones para encender Furia, Ataque furtivo… en un arma. Encendido = dorado. */
 function ChipsPotenciadores({ lista, activos, alternar }: { lista: Potenciador[]; activos: Set<string>; alternar: (pt: Potenciador) => void }) {
+  const [ver, setVer] = useState(false);
+  const nota = (pt: Potenciador) => [L(pt.nota_es ?? '', pt.nota_ru ?? ''), pt.unaVez ? L('Se apaga sola tras tirar el daño.', 'Выключится сама после броска урона.') : ''].filter(Boolean).join(' ');
+  // En el móvil no hay «title»: las condiciones se ven debajo (las encendidas siempre, todas con ⓘ).
+  const notas = lista.filter((pt) => (ver || activos.has(pt.id)) && nota(pt));
   return (
-    <div className="chips-potenciadores">
-      {lista.map((pt) => {
-        const on = activos.has(pt.id);
-        const efecto = [pt.ataque ? `${conSigno(pt.ataque)} ${L('at.', 'ат.')}` : '', pt.dano ? `${pt.dano.replace(/^(?=\d)/, '+')} ${L('daño', 'урон')}` : ''].filter(Boolean).join(' · ');
-        const nota = L(pt.nota_es ?? '', pt.nota_ru ?? '');
-        return (
-          <button key={pt.id} type="button" className={`chip pot${on ? ' activo' : ''}`} title={nota + (pt.unaVez ? L(' Se apaga sola tras tirar el daño.', ' Выключится сама после броска урона.') : '')}
-            onClick={() => alternar(pt)}>
-            {on ? '✓ ' : ''}{L(pt.es, pt.ru)}<small>{efecto}</small>
-          </button>
-        );
-      })}
-    </div>
+    <>
+      <div className="chips-potenciadores">
+        {lista.map((pt) => {
+          const on = activos.has(pt.id);
+          const efecto = [pt.ataque ? `${conSigno(pt.ataque)} ${L('at.', 'ат.')}` : '', pt.dano ? `${pt.dano.replace(/^(?=\d)/, '+')} ${L('daño', 'урон')}` : ''].filter(Boolean).join(' · ');
+          return (
+            <button key={pt.id} type="button" className={`chip pot${on ? ' activo' : ''}`} title={nota(pt)} onClick={() => alternar(pt)}>
+              {on ? '✓ ' : ''}{L(pt.es, pt.ru)}<small>{efecto}</small>
+            </button>
+          );
+        })}
+        <button type="button" className={`chip pot info${ver ? ' activo' : ''}`} aria-label={L('Condiciones', 'Условия')} onClick={() => setVer(!ver)}>ⓘ</button>
+      </div>
+      {notas.length > 0 && (
+        <ul className="notas-potenciadores">
+          {notas.map((pt) => <li key={pt.id}><strong>{L(pt.es, pt.ru)}:</strong> {nota(pt)}</li>)}
+        </ul>
+      )}
+    </>
   );
 }
 

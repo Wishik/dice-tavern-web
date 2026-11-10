@@ -679,6 +679,9 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .btn.robar { border-color: #7a4f9a; color: #5b2f7a; }
 
 .chips-potenciadores { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
-.chip.pot { padding: 5px 10px; font-size: 12px; }
+.chip.pot { padding: 5px 10px; font-size: 12px; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.chip.pot.info { padding: 5px 11px; font-size: 14px; }
+.notas-potenciadores { list-style: none; margin: 4px 0 0; padding: 0; font-size: 13px; color: #6b5440; }
+.notas-potenciadores li { margin: 3px 0; }
 .chip.pot small { opacity: .8; margin-left: 4px; font-family: inherit; }
 .pot-activos { font-size: 12px; color: var(--oro); }
