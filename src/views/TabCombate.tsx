@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useFicha } from './Ficha';
 import { BotonAnadir, Etiqueta, Numero, Seccion, Texto } from '../ui';
 import { useDados } from '../dice';
-import { CARACTERISTICA_CONJUROS, MAX_MUNICION, ataqueConjuros, avisosTirada, bonoArma, cdConjuros, conSigno, parseFormula, usaMunicion } from '../rules';
+import { CARACTERISTICA_CONJUROS, MAX_MUNICION, esArmaMonje, ataqueConjuros, avisosTirada, bonoArma, cdConjuros, conSigno, parseFormula, usaMunicion } from '../rules';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo, type Item, type Personaje } from '../types';
 import { L, T, RU_ATRIBUTOS, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
 import { tr } from '../ru';
 import { td } from '../datosRu';
 import { buscarClase } from '../avisos';
-import { armasNaturales } from '../armasNaturales';
+import { armasNaturales, dadoArtesMarciales, dadoMayor } from '../armasNaturales';
 import { recursosPersonaje } from '../recursos';
 import { alternarPotenciador, apagarDeUnGolpe, aplicaArma, potenciadoresDisponibles, sumarDano, type Potenciador } from '../potenciadores';
 
@@ -63,9 +63,13 @@ export function TabCombate() {
             const act = pots.filter((pt) => activos.has(pt.id));
             const ataque = ataqueBase + bonoAt(act);
             const danoTxt = it.detalles?.['Daño'] ?? '';
-            const dado = danoTxt.match(/^\s*(\d+d\d+|\d+)/i)?.[1] ?? '';
+            // Monje con arma de monje: usa el dado de artes marciales si es mayor que el del arma.
+            const artes = !natural && esArmaMonje(it) ? dadoArtesMarciales(p, clase) : null;
+            const dadoArma = danoTxt.match(/^\s*(\d+d\d+|\d+)/i)?.[1] ?? '';
+            const dado = dadoArma ? dadoMayor(dadoArma, artes) : '';
             const tipo = danoTxt.replace(/^\s*(\d+d\d+|\d+)\s*/i, '');
-            const versatil = (it.detalles?.['Propiedades'] ?? '').match(/vers[aá]til\s*\((\d+d\d+)\)/i)?.[1];
+            const versatilArma = (it.detalles?.['Propiedades'] ?? '').match(/vers[aá]til\s*\((\d+d\d+)\)/i)?.[1];
+            const versatil = versatilArma && dadoMayor(versatilArma, artes) !== dado ? dadoMayor(versatilArma, artes) : undefined;
             const formula = (d: string) => sumarDano(/d/.test(d) ? `${d}${mod ? conSigno(mod) : ''}` : `${Math.max(1, parseInt(d, 10) + mod)}`, [...(extra ? [extra] : []), ...extrasDano(act)]);
             const tirarDano = (titulo: string, f: string) => { tirar(`${titulo}: ${td(it.nombre)}${nombres(act)}`, f); upd((x) => apagarDeUnGolpe(x, act)); };
             const municion = usaMunicion(it);
@@ -74,6 +78,7 @@ export function TabCombate() {
               <li key={it.id} className="ataque auto">
                 <div className="ataque-titulo"><strong>{natural ? it.nombre : td(it.nombre)}</strong><small>{natural ? donde : tr(donde)}{tipo ? ` · ${tipo}` : ''}</small></div>
                 {natural && it.descripcion && <p className="nota pequena">{it.descripcion}</p>}
+                {artes && <p className="nota pequena">🥋 {dado !== dadoArma ? L(`Arma de monje: usa tu dado de artes marciales (${artes}) en vez de ${dadoArma}.`, `Оружие монаха: кость боевых искусств (${artes}) вместо ${dadoArma}.`) : L('Arma de monje: puedes usar FUE o DES.', 'Оружие монаха: можно бить от СИЛ или ЛОВ.')}</p>}
                 <div className="atr-arma">
                   {(['ataque', 'dano'] as const).map((k) => (
                     <label key={k}>{k === 'ataque' ? L('Ataque con', 'Атака от') : L('Daño con', 'Урон от')}

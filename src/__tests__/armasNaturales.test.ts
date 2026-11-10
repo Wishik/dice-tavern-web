@@ -41,3 +41,23 @@ describe('característica elegida por arma', () => {
     expect(bonoArma(p, it).mod).toBe(4);
   });
 });
+
+import { esArmaMonje } from '../rules';
+import { dadoMayor } from '../armasNaturales';
+describe('armas de monje', () => {
+  const arma = (nombre: string, props: string) => ({ id: nombre, nombre, descripcion: '', precio: '', cantidad: 1, tipo: 'arma' as const, detalles: { 'Daño': '1d4 perforante', 'Propiedades': props } });
+  it('sencillas c/c y marciales ligeras sí; arcos y pesadas no', () => {
+    expect(esArmaMonje(arma('Daga', 'Arrojadiza (20/60), Ligera, Sutil'))).toBe(true);
+    expect(esArmaMonje(arma('Bastón +1', 'Versátil (1d8)'))).toBe(true);
+    expect(esArmaMonje(arma('Cimitarra', 'Ligera, Sutil'))).toBe(true);
+    expect(esArmaMonje(arma('Espadón', 'Pesada, Dos manos'))).toBe(false);
+    expect(esArmaMonje(arma('Arco corto', 'Munición (alcance 80/320), Dos manos'))).toBe(false);
+  });
+  it('daga de monje: dado de artes marciales, DES y +1 mágico', () => {
+    expect(dadoMayor('1d4', '1d8')).toBe('1d8');
+    expect(dadoMayor('1d10', '1d6')).toBe('1d10');
+    const p = nuevoPersonaje(); p.clase = 'Monje'; p.nivel = 1;
+    p.caracteristicas = { FUE: 10, DES: 16, CON: 10, INT: 10, SAB: 10, CAR: 10 };
+    expect(bonoArma(p, arma('Bastón +1', 'Versátil (1d8)'))).toMatchObject({ atr: 'DES', ataque: 6, mod: 4 });
+  });
+});

@@ -387,6 +387,17 @@ export function avisosTirada(p: Personaje, tipo: TipoTirada, atr: Atributo | nul
 export const usaMunicion = (it: Item | null | undefined) => !!it && it.tipo === 'arma' && /munici[oó]n/i.test(it.detalles?.['Propiedades'] ?? '');
 export const MAX_MUNICION = 20;
 /** Bonificador de ataque de un arma: competencia + FUE (o DES si es a distancia o sutil, la mejor). */
+/** Armas sencillas cuerpo a cuerpo (armas.json): todas son armas de monje. */
+const SENCILLAS_CAC = ['Bastón', 'Cestus', 'Daga', 'Garrote', 'Garrote grande', 'Hacha de mano', 'Hoz', 'Lanza', 'Lanza de caza', 'Martillo ligero', 'Maza', 'Nudillo de latón', 'Puñal'];
+/** «Daga +1» → 1: bonificador mágico escrito en el nombre del arma. */
+export const bonoMagicoArma = (it: Item) => parseInt(it.nombre.match(/\+\s*(\d)\b/)?.[1] ?? '0', 10);
+/** Arma de monje: sencilla cuerpo a cuerpo o marcial cuerpo a cuerpo con la propiedad «ligera». */
+export function esArmaMonje(it: Item): boolean {
+  if (it.tipo !== 'arma' || it.id.startsWith('nat:') || esDistancia(it)) return false;
+  const base = it.nombre.replace(/\s*\+\s*\d\b.*/, '').trim();
+  return SENCILLAS_CAC.some((n) => n.localeCompare(base, 'es', { sensitivity: 'base' }) === 0) || /\bliger[ao]\b/i.test(it.detalles?.['Propiedades'] ?? '');
+}
+
 /** Arma a distancia (arco, ballesta, honda…): las arrojadizas cuentan como cuerpo a cuerpo. */
 export function esDistancia(it: Item): boolean {
   const props = it.detalles?.['Propiedades'] ?? '';
@@ -397,12 +408,15 @@ export function bonoArma(p: Personaje, it: Item): { ataque: number; mod: number;
   const props = it.detalles?.['Propiedades'] ?? '';
   const fue = modificador(car(p, 'FUE')), des = modificador(car(p, 'DES'));
   const distancia = esDistancia(it);
-  const auto: Atributo = distancia || (/sutil/i.test(props) && des > fue) ? 'DES' : 'FUE';
+  // Ataques diestros del monje: con sus armas puede usar DES en vez de FUE.
+  const sutil = /sutil/i.test(props) || (p.clase === 'Monje' && esArmaMonje(it));
+  const auto: Atributo = distancia || (sutil && des > fue) ? 'DES' : 'FUE';
+  const magico = bonoMagicoArma(it);
   // El jugador puede elegir otra característica para el ataque y/o el daño de esta arma.
   const elegido = p.atrArmas?.[it.id];
   const atr: Atributo = elegido?.ataque ?? auto;
-  const mod = modificador(car(p, elegido?.dano ?? auto));
-  return { ataque: modificador(car(p, atr)) + bonoCompetencia(p.nivel) + bonoAtaqueArma(p, distancia), mod, atr, distancia, auto };
+  const mod = modificador(car(p, elegido?.dano ?? auto)) + magico;
+  return { ataque: modificador(car(p, atr)) + magico + bonoCompetencia(p.nivel) + bonoAtaqueArma(p, distancia), mod, atr, distancia, auto };
 }
 
 // ---------------------------------------------------------------- Rasgos raciales recomendados e idiomas

@@ -55,11 +55,22 @@ export function armasNaturales(p: Personaje, clase: Clase | null | undefined): A
   if (tiene('Matón de taberna')) { dano = '1d4'; fuente = 'Matón de taberna'; }
   if (tiene('Combate sin armas')) { dano = manosLibres ? '1d8' : '1d6'; fuente = 'Combate sin armas'; }
   if (p.clase === 'Monje') {
-    const dm = columna(clase, p, 'Artes marciales') || '1d6';
+    const dm = dadoArtesMarciales(p, clase) ?? '1d6';
     const caras = (x: string) => parseInt(x.split('d')[1] ?? '0', 10);
     if (caras(dm) >= caras(dano)) { dano = dm; fuente = L('Artes marciales', 'Боевые искусства'); }
     props = AMBAS; // Ataques diestros: FUE o DES.
   }
   out.push({ it: item('nat:sinArmas', L('Golpe sin armas', 'Безоружный удар'), dano, L('contundente', 'дробящий'), props), donde: fuente || L('Puños, patadas…', 'Кулаки, пинки…') });
   return out;
+}
+
+/** Dado de artes marciales del monje a su nivel (null si no es monje). */
+export const dadoArtesMarciales = (p: Personaje, clase: Clase | null | undefined): string | null =>
+  p.clase === 'Monje' ? columna(clase, p, 'Artes marciales') || '1d6' : null;
+
+/** El mayor de dos dados («1d4» vs «1d6» → «1d6»), comparando la media. */
+export function dadoMayor(a: string, b: string | null): string {
+  if (!b) return a;
+  const media = (d: string) => { const m = d.match(/^(\d*)d(\d+)$/i); return m ? (parseInt(m[1] || '1', 10) * (parseInt(m[2], 10) + 1)) / 2 : parseInt(d, 10) || 0; };
+  return media(b) > media(a) ? b : a;
 }
