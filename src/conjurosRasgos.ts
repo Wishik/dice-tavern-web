@@ -1,5 +1,6 @@
 import type { Conjuro, Razas } from './data';
 import type { ConjuroPersonaje, Personaje } from './types';
+import { bonoCompetencia } from './rules';
 
 /**
  * Conjuros que dan los rasgos de raza y las dotes del manual.
@@ -14,7 +15,13 @@ export interface Eleccion {
   nivelConjuro?: number;
   clases?: string[];
   escuelas?: string[];
+  /** Solo conjuros que se pueden lanzar como ritual. */
+  ritual?: boolean;
+  /** La cantidad es el bonificador por competencia (sube con el nivel). */
+  porBC?: boolean;
 }
+/** Cuántos conjuros se eligen ahora. */
+export const cantidadEleccion = (e: Eleccion, p: Personaje) => (e.porBC ? bonoCompetencia(p.nivel) : e.cantidad);
 export interface Concesion { id: string; nivel: number; conjuros?: string[]; elegir?: Eleccion }
 export interface Fuente { rasgo: string; razas?: string[]; dote?: boolean; concesiones: Concesion[] }
 
@@ -80,6 +87,7 @@ export const FUENTES: Fuente[] = [
     { id: 'sombria:fijo', nivel: 1, conjuros: ['Invisibilidad'] },
     { id: 'sombria:1', nivel: 1, elegir: { cantidad: 1, nivelConjuro: 1, escuelas: ['ilusionismo', 'nigromancia'] } },
   ] },
+  { rasgo: 'Lanzador ritual', dote: true, concesiones: [{ id: 'ritual', nivel: 1, elegir: { cantidad: 2, porBC: true, nivelConjuro: 1, ritual: true } }] },
   { rasgo: 'Telepático', dote: true, concesiones: [{ id: 'telepatico', nivel: 1, conjuros: ['Detectar pensamientos'] }] },
   { rasgo: 'Telequinético', dote: true, concesiones: [{ id: 'telequinetico', nivel: 1, conjuros: ['Mano de mago'] }] },
 ];
@@ -105,7 +113,7 @@ export function concesionesActivas(p: Personaje, razas: Razas | null): (Concesio
 
 /** Elecciones pendientes (hay que escoger conjuro). */
 export function eleccionesPendientes(p: Personaje, razas: Razas | null) {
-  return concesionesActivas(p, razas).filter((c) => c.elegir && (p.eleccionesConjuros?.[c.id]?.length ?? 0) < c.elegir.cantidad);
+  return concesionesActivas(p, razas).filter((c) => c.elegir && (p.eleccionesConjuros?.[c.id]?.length ?? 0) < cantidadEleccion(c.elegir, p));
 }
 
 /** Opciones posibles para una elección. */
@@ -113,7 +121,8 @@ export function opcionesEleccion(e: Eleccion, todos: Conjuro[]): { nombre: strin
   if (e.de) return e.de.map((n) => { const c = todos.find((x) => igual(x.nombre, n)); return { nombre: c?.nombre ?? n, nivel: c?.nivel ?? SIN_DATOS[n] ?? 1 }; });
   return todos.filter((c) => (e.nivelConjuro === undefined || c.nivel === e.nivelConjuro)
     && (!e.clases || e.clases.some((k) => c.clases.includes(k)))
-    && (!e.escuelas || e.escuelas.includes(c.escuela)))
+    && (!e.escuelas || e.escuelas.includes(c.escuela))
+    && (!e.ritual || /ritual/i.test(c.tiempo)))
     .map((c) => ({ nombre: c.nombre, nivel: c.nivel })).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
 }
 
@@ -124,7 +133,7 @@ export function opcionesEleccion(e: Eleccion, todos: Conjuro[]): { nombre: strin
 export function sincronizarConjuros(x: Personaje, razas: Razas | null, todos: Conjuro[]): boolean {
   const deseados: { nombre: string; nivel: number; origen: string }[] = [];
   for (const c of concesionesActivas(x, razas)) {
-    const nombres = c.conjuros ?? (x.eleccionesConjuros?.[c.id] ?? []).slice(0, c.elegir!.cantidad);
+    const nombres = c.conjuros ?? (x.eleccionesConjuros?.[c.id] ?? []).slice(0, cantidadEleccion(c.elegir!, x));
     for (const n of nombres) {
       const d = todos.find((s) => igual(s.nombre, n));
       deseados.push({ nombre: d?.nombre ?? n, nivel: d?.nivel ?? SIN_DATOS[n] ?? 1, origen: c.id });

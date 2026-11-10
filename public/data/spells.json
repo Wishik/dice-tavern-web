@@ -2184,6 +2184,20 @@
   "descripcion": "Haces que el terreno de una zona cuadrada de hasta 1,5 km de lado tenga el aspecto, los sonidos, los olores e incluso las sensaciones de otro tipo de terreno. Podrías hacer que un campo abierto o una carretera se parezcan a un pantano, una colina, una grieta u otro tipo de terreno difícil o infranqueable. Se puede hacer que un estanque parezca una pradera cubierta de hierba, que un precipicio se aparezca como una suave cuesta o que un barranco pedregoso y estrecho se presente como una carretera amplia y lisa. De forma similar, puedes alterar el aspecto de las estructuras o añadir algunas donde no las hay. El conjuro no disfraza, oculta ni añade criaturas. La ilusión incluye elementos sonoros, visuales, táctiles y olfativos, por lo que puede convertir un lugar despejado en un terreno difícil (o viceversa) o entorpecer de otra forma el movimiento por la zona. Cualquier parte del terreno ilusorio (como una piedra o un palo) que se saque de la zona desaparece de inmediato. Las criaturas con visión verdadera pueden ver a través de la ilusión y distinguir la verdadera forma del terreno. Sin embargo, todos los demás elementos de la ilusión permanecen, por lo que, aunque dichas criaturas serán conscientes de que se trata de una ilusión, podrán interactuar físicamente con ella."
  },
  {
+  "nombre": "Espíritu sanador",
+  "nivel": 2,
+  "escuela": "conjuración",
+  "clases": [
+   "druida",
+   "explorador"
+  ],
+  "tiempo": "Acción adicional",
+  "alcance": "18 m",
+  "componentes": "V, S",
+  "duracion": "Concentración, hasta 1 minuto",
+  "descripcion": "Invocas un espíritu sanador en un cubo de 1,5 m dentro del alcance. Hasta que termine el conjuro, cuando tú o una criatura que puedas ver entre por primera vez en un turno en su espacio o empiece allí su turno, puedes hacer que el espíritu le cure 1d6 puntos de golpe (no requiere acción). El espíritu puede curar un número de veces igual a 1 + tu modificador por tu característica de lanzamiento de conjuros (mínimo 2); después desaparece. Como acción adicional en tu turno puedes moverlo hasta 9 m a un espacio que puedas ver. Con un espacio de conjuro (o maná) de nivel superior: la curación aumenta en 1d6 por cada nivel por encima del 2."
+ },
+ {
   "nombre": "Espíritus guardianes",
   "nivel": 3,
   "escuela": "conjuración",

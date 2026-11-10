@@ -33,4 +33,16 @@ describe('conjuros de raza y dotes', () => {
     const p = nuevoPersonaje(); p.dotes = [{ nombre: 'Telepático', texto: '' }]; sincronizarConjuros(p, R, S);
     expect(p.conjuros).toMatchObject([{ nombre: 'Detectar pensamientos', adicional: true }]);
   });
+
+  it('Lanzador ritual: tantos rituales de nivel 1 como el BC', () => {
+    const p = nuevoPersonaje(); p.nivel = 5; p.dotes = [{ nombre: 'Lanzador ritual', texto: '' }];
+    expect(eleccionesPendientes(p, R).map((c) => c.id)).toEqual(['ritual']);
+    p.eleccionesConjuros = { ritual: ['Alarma', 'Identificar'] };
+    expect(eleccionesPendientes(p, R)).toHaveLength(1); // BC 3 a nivel 5
+    p.eleccionesConjuros.ritual.push('Detectar magia');
+    expect(eleccionesPendientes(p, R)).toHaveLength(0);
+  });
+  it('Espíritu sanador está en la lista', () => {
+    expect(S.find((s) => s.nombre === 'Espíritu sanador')).toMatchObject({ nivel: 2 });
+  });
 });

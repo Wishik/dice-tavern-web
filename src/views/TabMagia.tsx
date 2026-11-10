@@ -8,7 +8,7 @@ import { ataqueConjuros, cdConjuros, conSigno, dadosConjuro, multiplicadorTruco 
 import { L } from '../i18n';
 import { tr } from '../ru';
 import { td } from '../datosRu';
-import { FUENTES, eleccionesPendientes, opcionesEleccion, concesionesActivas, type Concesion, type Fuente } from '../conjurosRasgos';
+import { FUENTES, cantidadEleccion, eleccionesPendientes, opcionesEleccion, concesionesActivas, type Concesion, type Fuente } from '../conjurosRasgos';
 
 const nombreNivel = (i: number) => i === 0 ? L('Trucos', 'Заговоры') : `${L('Nivel', 'Уровень')} ${i}`;
 const NIVELES = Array.from({ length: 10 }, (_, i) => i);
@@ -81,7 +81,7 @@ export function TabMagia() {
         <p className="nota pequena">{L('De tu raza, dotes, objetos o rasgos. No cuentan para el límite de tu clase. Los de tu raza y tus dotes (✨) se añaden solos al llegar al nivel.', 'От расы, черт, предметов или умений. Не считаются в лимит класса. Заклинания от расы и черт (✨) добавляются сами, когда доходишь до нужного уровня.')}</p>
         {pendientes.map((c) => (
           <button key={c.id} className="aviso-rojo elegir-conjuro" onClick={() => setElegir(c)}>
-            <PuntoRojo /> {L(`«${td(c.fuente.rasgo)}» te deja elegir ${c.elegir!.cantidad > 1 ? `${c.elegir!.cantidad} conjuros` : 'un conjuro'}: toca para escoger`, `«${td(c.fuente.rasgo)}» даёт выбрать ${c.elegir!.cantidad > 1 ? `${c.elegir!.cantidad} заклинания` : 'заклинание'}: нажми, чтобы выбрать`)}
+            <PuntoRojo /> {L(`«${td(c.fuente.rasgo)}» te deja elegir ${cantidadEleccion(c.elegir!, p) > 1 ? `${cantidadEleccion(c.elegir!, p)} conjuros` : 'un conjuro'}: toca para escoger`, `«${td(c.fuente.rasgo)}» даёт выбрать ${cantidadEleccion(c.elegir!, p) > 1 ? `${cantidadEleccion(c.elegir!, p)} заклинания` : 'заклинание'}: нажми, чтобы выбрать`)}
           </button>
         ))}
         {trucosAd.length > 0 && <><h4 className="nivel-conjuro">{L('Trucos adicionales', 'Дополнительные заговоры')}</h4><ListaConjuros lista={trucosAd} preparar={false} /></>}
@@ -231,7 +231,7 @@ function origenTexto(id: string) {
 /** Ventana para escoger los conjuros que da un rasgo o una dote. */
 function ModalElegir({ c, todos, otras, onCambiar, onClose }: { c: Concesion & { fuente: Fuente }; todos: Conjuro[]; otras: (Concesion & { fuente: Fuente })[]; onCambiar: (c: Concesion & { fuente: Fuente }) => void; onClose: () => void }) {
   const { p, upd } = useFicha();
-  const e = c.elegir!;
+  const e = { ...c.elegir!, cantidad: cantidadEleccion(c.elegir!, p) };
   const [sel, setSel] = useState<string[]>(p.eleccionesConjuros?.[c.id] ?? []);
   const [q, setQ] = useState('');
   const ops = opcionesEleccion(e, todos);
@@ -246,7 +246,7 @@ function ModalElegir({ c, todos, otras, onCambiar, onClose }: { c: Concesion & {
           {otras.map((o) => <option key={o.id} value={o.id}>{td(o.fuente.rasgo)} · {L('nivel', 'уровень')} {o.nivel}</option>)}
         </select>
       )}
-      <p className="nota">{L(`Elige ${e.cantidad} ${que}${e.clases ? ` de la lista de ${e.clases.join(' / ')}` : ''}${e.escuelas ? ` de ${e.escuelas.join(' o ')}` : ''}. Irán a «adicionales» y no cuentan para el límite de tu clase.`, `Выбери: ${e.cantidad} — ${que}${e.clases ? ` из списка: ${e.clases.join(' / ')}` : ''}${e.escuelas ? ` (школы: ${e.escuelas.join(', ')})` : ''}. Они попадут в «дополнительные» и не считаются в лимит класса.`)}</p>
+      <p className="nota">{L(`Elige ${e.cantidad} ${que}${e.clases ? ` de la lista de ${e.clases.join(' / ')}` : ''}${e.escuelas ? ` de ${e.escuelas.join(' o ')}` : ''}${e.ritual ? ' de nivel 1 que se puedan lanzar como ritual' : ''}. Irán a «adicionales» y no cuentan para el límite de tu clase.`, `Выбери: ${e.cantidad} — ${que}${e.clases ? ` из списка: ${e.clases.join(' / ')}` : ''}${e.escuelas ? ` (школы: ${e.escuelas.join(', ')})` : ''}${e.ritual ? ' 1-го уровня, которые можно накладывать как ритуал' : ''}. Они попадут в «дополнительные» и не считаются в лимит класса.`)}</p>
       {ops.length > 8 && <input className="campo" placeholder={L('Buscar…', 'Поиск…')} value={q} onChange={(ev) => setQ(ev.target.value)} />}
       <ul className="lista-elegir-conjuro">
         {vis.map((o) => {
