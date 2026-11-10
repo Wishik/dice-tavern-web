@@ -4,13 +4,13 @@ import { BotonAnadir, Buscador, Etiqueta, ListaDatos, Modal, Numero, Seccion, Te
 import { cargarObjetos, type ObjetoBase } from '../data';
 import {
   CINTURON_ESPACIOS, MAX_MONEDAS, MAX_MUNICION, MOCHILA_BASE, MOCHILA_MAX, NOMBRE_MONEDA, TRAMOS_SOBRECARGA, UMBRALES_FUERZA, VALOR_PC,
-  cabeEnMochila, car, convertir, embolsarExceso, espaciosItem, espaciosLibresMochila, espaciosPorFuerza, espaciosUsados, estadoCarga, leerPrecio, uid, usaMunicion,
+  bolsaMonedas, cabeEnMochila, car, convertir, embolsarExceso, espaciosItem, espaciosLibresMochila, espaciosPorFuerza, espaciosUsados, estadoCarga, leerPrecio, uid, usaMunicion,
 } from '../rules';
 import { MONEDAS, RANURAS_EQUIPO, type Item, type Moneda, type Personaje, type RanuraEquipo, type TamanoCinturon } from '../types';
 import { L, T, idioma, RU_MONEDAS } from '../i18n';
 import { tr } from '../ru';
 import { td } from '../datosRu';
-import { useBotin } from '../botin';
+import { nombreBotin, useBotin } from '../botin';
 
 type Lugar = { zona: 'mochila' | 'cinturon'; i: number } | { zona: 'equipo'; r: RanuraEquipo };
 type Destino = { zona: 'mochila' | 'cinturon' } | { zona: 'equipo'; r: RanuraEquipo };
@@ -245,8 +245,14 @@ function ModalVender({ lugar, onClose, onVendido }: { lugar: Lugar; onClose: () 
 }
 
 function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
-  const { p, upd } = useFicha();
+  const { p, upd, ajeno } = useFicha();
+  const botin = useBotin(false);
   const it = leer(p, lugar)!;
+  const robarBolsa = async () => {
+    if (!(await botin.cambiar((l) => [...l, { ...structuredClone(it), id: uid() }]))) return;
+    upd((x) => { quitar(x, lugar); });
+    onClose();
+  };
   const b = it.bolsa!;
   const iguales = [...p.mochila, ...p.cinturon.items].filter((y) => y.bolsa?.moneda === b.moneda).length;
   const hueco = Math.max(0, MAX_MONEDAS - p.monedas[b.moneda]);
@@ -268,7 +274,8 @@ function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
   return (
     <Modal titulo={td(it.nombre)} onClose={onClose}
       pie={<div className="acciones-item">
-        <button className="btn primario" disabled={!ok} onClick={sacar}>{L('Pasar a mis monedas', 'Переложить в мои монеты')}</button>
+        {!ajeno && <button className="btn primario" disabled={!ok} onClick={sacar}>{L('Pasar a mis monedas', 'Переложить в мои монеты')}</button>}
+        {ajeno && <button className="btn robar" onClick={robarBolsa}>🫳 {L('Robar la bolsa', 'Украсть кошель')}</button>}
         {lugar.zona === 'mochila' && <button className="btn" onClick={() => { upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'cinturon' }); }); onClose(); }}>{L('Al cinturón', 'На пояс')}</button>}
         {lugar.zona === 'cinturon' && <button className="btn" onClick={() => { if (!cabe(p, it, { zona: 'mochila' }, lugar)) return; upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'mochila' }); }); onClose(); }}>{L('A la mochila', 'В рюкзак')}</button>}
         <button className="btn peligro" onClick={() => { if (confirm(L(`¿Eliminar esta bolsa con ${b.cantidad} ${b.moneda}?`, `Удалить кошель с ${b.cantidad} ${b.moneda}?`))) { upd((x) => { quitar(x, lugar); }); onClose(); } }}>{L('Eliminar bolsa', 'Удалить кошель')}</button>
@@ -331,7 +338,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
           <h4>👑 {L('Tu botín de máster', 'Твоя добыча мастера')}</h4>
           {botin.error ? <p className="error">{botin.error}</p> : !botin.items ? <p className="nota">{L('Cargando…', 'Загрузка…')}</p>
             : botin.items.length === 0 ? <p className="nota">{L('Vacío. Roba algo desde el inventario de un jugador (botón «Robar»).', 'Пусто. Укради что-нибудь из инвентаря игрока (кнопка «Украсть»).')}</p>
-            : <div className="lista-opciones">{botin.items.map((it) => <button key={it.id} className="btn" onClick={() => dar(it)}>{td(it.nombre)}{it.cantidad > 1 ? ` ×${it.cantidad}` : ''}</button>)}</div>}
+            : <div className="lista-opciones">{botin.items.map((it) => <button key={it.id} className="btn" onClick={() => dar(it)}>{nombreBotin(it)}</button>)}</div>}
           {sueltos.length === 0 && <h4>{L('Nuevo objeto', 'Новый предмет')}</h4>}
         </>
       )}
@@ -418,7 +425,8 @@ function EquipoViaje() {
 
 // ------------------------------------------------------------ Monedas
 function Monedas() {
-  const { p, upd } = useFicha();
+  const { p, upd, ajeno } = useFicha();
+  const [robar, setRobar] = useState(false);
   const [sumar, setSumar] = useState<{ m: Moneda; signo: 1 | -1 } | null>(null);
   const [conv, setConv] = useState(false);
   const bolsas = [...p.mochila, ...p.cinturon.items].filter((it) => it.bolsa);
@@ -447,9 +455,37 @@ function Monedas() {
       {aviso && <p className="exito">💰 {aviso}</p>}
       {bolsas.length > 0 && <p className="nota">{L(`Además llevas ${bolsas.length} bolsa${bolsas.length > 1 ? 's' : ''} llena${bolsas.length > 1 ? 's' : ''}:`, `Ещё полных кошелей: ${bolsas.length} —`)} {bolsas.map((it) => `${it.bolsa!.cantidad} ${it.bolsa!.moneda}`).join(', ')}. {L('Tócala en la mochila para sacar monedas.', 'Нажми на кошель в рюкзаке, чтобы достать монеты.')}</p>}
       <p className="nota">{L('Valor total', 'Всего')}{bolsas.length ? L(' (con bolsas)', ' (с кошелями)') : ''}: {totalPO.toLocaleString(idioma(), { maximumFractionDigits: 2 })} po.</p>
+      {ajeno && <button className="btn robar" onClick={() => setRobar(true)}>🫳 {L('Robar monedas', 'Украсть монеты')}</button>}
+      {robar && <ModalRobarMonedas onClose={() => setRobar(false)} />}
       {sumar && <ModalSumar m={sumar.m} signo={sumar.signo} onClose={() => setSumar(null)} />}
       {conv && <ModalConvertir onClose={() => setConv(false)} />}
     </Seccion>
+  );
+}
+
+/** El máster roba monedas: salen de la bolsa del jugador y van a su botín como una bolsita. */
+function ModalRobarMonedas({ onClose }: { onClose: () => void }) {
+  const { p, upd } = useFicha();
+  const botin = useBotin(false);
+  const [m, setM] = useState<Moneda>(MONEDAS.find((x) => p.monedas[x] > 0) ?? 'PO');
+  const [txt, setTxt] = useState('');
+  const n = parseInt(txt, 10);
+  const ok = !isNaN(n) && n > 0 && n <= p.monedas[m];
+  const robar = async () => {
+    if (!ok) return;
+    if (!(await botin.cambiar((l) => [...l, bolsaMonedas(m, n)]))) return;
+    upd((x) => { x.monedas[m] = Math.max(0, x.monedas[m] - n); });
+    onClose();
+  };
+  return (
+    <Modal titulo={L('Robar monedas', 'Украсть монеты')} onClose={onClose}
+      pie={<button className="btn primario" disabled={!ok} onClick={robar}>🫳 {L('Robar', 'Украсть')}{ok ? ` ${n} ${m}` : ''}</button>}>
+      <div className="segmentado">
+        {MONEDAS.map((x) => <button key={x} className={m === x ? 'activo' : ''} onClick={() => setM(x)}>{x} ({p.monedas[x]})</button>)}
+      </div>
+      <Etiqueta texto={L(`Cuántas (máx. ${p.monedas[m]})`, `Сколько (макс. ${p.monedas[m]})`)}><input className="campo" inputMode="numeric" value={txt} onChange={(e) => setTxt(e.target.value.replace(/\D/g, ''))} /></Etiqueta>
+      <p className="nota">{L('Irán a tu botín como una bolsita de monedas. Al dársela a un jugador, la abre desde su mochila.', 'Они попадут в твою добычу как мешочек с монетами. Игрок, которому его отдашь, откроет его из рюкзака.')}</p>
+    </Modal>
   );
 }
 

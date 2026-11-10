@@ -1,4 +1,4 @@
-import { useBotin } from '../botin';
+import { nombreBotin, useBotin } from '../botin';
 import { td } from '../datosRu';
 import { tiradasPartida, type TiradaPartida } from '../tiradasPartida';
 import { useEffect, useState } from 'react';
@@ -162,7 +162,7 @@ function PanelBotin() {
       {error ? <p className="error">{error}</p> : !items ? <p className="nota">{L('Cargando…', 'Загрузка…')}</p>
         : items.length === 0 ? <p className="nota">{L('Vacío. Abre el inventario de un jugador, toca un objeto y pulsa «Robar».', 'Пусто. Открой инвентарь игрока, нажми на предмет и выбери «Украсть».')}</p>
         : <ul className="lista-botin">{items.map((it) => (
-          <li key={it.id}><span>{td(it.nombre)}{it.cantidad > 1 ? ` ×${it.cantidad}` : ''}</span>
+          <li key={it.id}><span>{nombreBotin(it)}</span>
             <button className="quitar-recurso" title={L('Eliminar', 'Удалить')} onClick={() => confirm(L(`¿Eliminar ${it.nombre} del botín?`, `Удалить «${it.nombre}» из добычи?`)) && cambiar((l) => l.filter((x) => x.id !== it.id))}>✕</button></li>))}</ul>}
       {items && items.length > 0 && <p className="nota pequena">{L('Para dárselo a un jugador: abre su inventario, pulsa «Añadir» y elige el objeto de tu botín.', 'Чтобы отдать игроку: открой его инвентарь, нажми «Добавить» и выбери предмет из добычи.')}</p>}
     </section>

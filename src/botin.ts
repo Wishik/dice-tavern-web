@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from './store';
 import type { Item } from './types';
-import { L } from './i18n';
+import { L, T, RU_MONEDAS } from './i18n';
+import { NOMBRE_MONEDA } from './rules';
+import { td } from './datosRu';
 
 /** Botín del máster: lo que roba a los jugadores, guardado en su cuenta para dárselo luego a otro. */
 export async function cargarBotin(): Promise<Item[]> {
@@ -37,4 +39,10 @@ export function useBotin(activo = true) {
     try { setItems(await cambiarBotin(f)); setError(''); return true; } catch (e) { alert((e as Error).message); return false; }
   }, []);
   return { items, error, recargar, cambiar };
+}
+
+/** Nombre para mostrar en el botín: las monedas salen como bolsita con la cantidad. */
+export function nombreBotin(it: Item): string {
+  if (it.bolsa) return `💰 ${L(`Bolsa de ${NOMBRE_MONEDA[it.bolsa.moneda].toLowerCase()}`, `Мешочек: ${T(RU_MONEDAS, NOMBRE_MONEDA[it.bolsa.moneda]).toLowerCase()}`)} (${it.bolsa.cantidad} ${it.bolsa.moneda})`;
+  return `${td(it.nombre)}${it.cantidad > 1 ? ` ×${it.cantidad}` : ''}`;
 }
