@@ -89,7 +89,7 @@ export function TabAtributos() {
             <button className="btn" disabled={!cortosQuedan} title={cortosQuedan ? '' : L('Ya no quedan descansos cortos: haz un descanso largo.', 'Короткие отдыхи закончились: нужен долгий отдых.')}
               onClick={() => setCorto(true)}>☀️ {L('Descanso corto', 'Короткий отдых')} ({cortosQuedan}/{MAX_DESCANSOS_CORTOS})</button>
             <button className="btn" onClick={() => {
-              const notas = (p.recursosExtra ?? []).filter((r) => recuperaExtra(r) === 'largo').map((r) => `\n• ${L(r.es, r.ru)}${r.notas ? `: ${r.notas}` : ''}`).join('');
+              const notas = (p.recursosExtra ?? []).filter((r) => recuperaExtra(r) !== 'corto').map((r) => `\n• ${L(r.es, r.ru)}${r.notas ? `: ${r.notas}` : ''}`).join('');
               if (confirm(L(`¿Descanso largo? Recuperas todos los PG y el maná, ${dgRecuperados(p.nivel)} DG, todos los recursos de clase y quitas 1 nivel de agotamiento.`, `Долгий отдых? Восстановятся все хиты и мана, ${dgRecuperados(p.nivel)} КХ, все ресурсы класса, и снимется 1 уровень истощения.`) + (notas ? L('\n\nTus recursos (recupéralos a mano con +):', '\n\nТвои ресурсы (восстанавливай вручную кнопкой +):') + notas : ''))) upd(descansoLargo);
             }}>🌙 {L('Descanso largo', 'Долгий отдых')}</button>
           </div>
@@ -99,7 +99,7 @@ export function TabAtributos() {
         const ru = idioma() === 'ru';
         const auto = resumenCorto(p, clase, ru);
         const extra = recordatoriosCorto(p, razas, todosConjuros, ru);
-        const notas = (p.recursosExtra ?? []).filter((r) => recuperaExtra(r) === 'corto');
+        const notas = (p.recursosExtra ?? []).filter((r) => recuperaExtra(r) !== 'largo');
         return (
           <Modal titulo={L('Descanso corto', 'Короткий отдых')} onClose={() => setCorto(false)}
             pie={<button className="btn primario" onClick={() => { upd((x) => { descansoCorto(x, clase); }); setCorto(false); }}>☀️ {L('Descansar', 'Отдохнуть')}</button>}>
@@ -209,6 +209,7 @@ export function TabAtributos() {
 const OPCIONES_RECUPERA = [
   ['corto', 'Descanso corto', 'Короткий отдых'],
   ['largo', 'Descanso largo', 'Долгий отдых'],
+  ['ambos', 'Descanso corto y largo', 'Короткий и долгий отдых'],
 ] as const;
 
 function ModalRecurso({ onClose, editar }: { onClose: () => void; editar?: RecursoExtra }) {

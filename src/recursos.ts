@@ -46,7 +46,7 @@ export function recursoDeExtra(r: RecursoExtra): Recurso {
 }
 
 /** Recupera de un recurso añadido (las fichas antiguas no lo tienen). */
-export const recuperaExtra = (r: RecursoExtra): 'corto' | 'largo' => (r.recupera === 'largo' || (!r.recupera && !r.corto) ? 'largo' : 'corto');
+export const recuperaExtra = (r: RecursoExtra): 'corto' | 'largo' | 'ambos' => r.recupera ?? (r.corto ? 'ambos' : 'largo');
 
 /** Recursos de la clase del personaje a su nivel actual, sacados de la tabla de la clase del manual. */
 export function recursosClase(p: Personaje, clase: Clase | null | undefined): Recurso[] {
