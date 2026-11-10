@@ -248,9 +248,20 @@ function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
   const { p, upd, ajeno } = useFicha();
   const botin = useBotin(false);
   const it = leer(p, lugar)!;
+  const [txtRobo, setTxtRobo] = useState(String(it.bolsa!.cantidad));
+  const nRobo = parseInt(txtRobo, 10);
+  const okRobo = !isNaN(nRobo) && nRobo > 0 && nRobo <= it.bolsa!.cantidad;
+  /** El máster se lleva todo el saco o solo parte de las monedas. */
   const robarBolsa = async () => {
-    if (!(await botin.cambiar((l) => [...l, { ...structuredClone(it), id: uid() }]))) return;
-    upd((x) => { quitar(x, lugar); });
+    if (!okRobo) return;
+    const m = it.bolsa!.moneda;
+    if (!(await botin.cambiar((l) => [...l, bolsaMonedas(m, nRobo)]))) return;
+    upd((x) => {
+      const y = leer(x, lugar); if (!y?.bolsa) return;
+      y.bolsa.cantidad -= nRobo;
+      if (y.bolsa.cantidad <= 0) quitar(x, lugar);
+      else { y.nombre = `Bolsa de ${NOMBRE_MONEDA[m].toLowerCase()} (${y.bolsa.cantidad} ${m})`; y.descripcion = `Una bolsa con ${y.bolsa.cantidad} ${m}. Ocupa un espacio en la mochila.`; }
+    });
     onClose();
   };
   const b = it.bolsa!;
@@ -275,7 +286,7 @@ function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
     <Modal titulo={td(it.nombre)} onClose={onClose}
       pie={<div className="acciones-item">
         {!ajeno && <button className="btn primario" disabled={!ok} onClick={sacar}>{L('Pasar a mis monedas', 'Переложить в мои монеты')}</button>}
-        {ajeno && <button className="btn robar" onClick={robarBolsa}>🫳 {L('Robar la bolsa', 'Украсть кошель')}</button>}
+        {ajeno && <button className="btn robar" disabled={!okRobo} onClick={robarBolsa}>🫳 {okRobo && nRobo === b.cantidad ? L('Robar toda la bolsa', 'Украсть весь кошель') : L(`Robar ${okRobo ? nRobo : ''} ${b.moneda}`, `Украсть ${okRobo ? nRobo : ''} ${b.moneda}`)}</button>}
         {lugar.zona === 'mochila' && <button className="btn" onClick={() => { upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'cinturon' }); }); onClose(); }}>{L('Al cinturón', 'На пояс')}</button>}
         {lugar.zona === 'cinturon' && <button className="btn" onClick={() => { if (!cabe(p, it, { zona: 'mochila' }, lugar)) return; upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'mochila' }); }); onClose(); }}>{L('A la mochila', 'В рюкзак')}</button>}
         <button className="btn peligro" onClick={() => { if (confirm(L(`¿Eliminar esta bolsa con ${b.cantidad} ${b.moneda}?`, `Удалить кошель с ${b.cantidad} ${b.moneda}?`))) { upd((x) => { quitar(x, lugar); }); onClose(); } }}>{L('Eliminar bolsa', 'Удалить кошель')}</button>
@@ -286,7 +297,9 @@ function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
         }}>{L(`Eliminar las ${iguales} de ${b.moneda}`, `Удалить все ${iguales} (${b.moneda})`)}</button>}
       </div>}>
       <p>{L('Dentro hay', 'Внутри')} <strong>{b.cantidad} {b.moneda}</strong>. {L(`En tu bolsa de ${NOMBRE_MONEDA[b.moneda].toLowerCase()} tienes`, `В основном кошеле (${T(RU_MONEDAS, NOMBRE_MONEDA[b.moneda]).toLowerCase()}):`)} {p.monedas[b.moneda]}/{MAX_MONEDAS}.</p>
-      {maxSacar === 0 ? <p className="error">{L(`Tu bolsa de ${b.moneda} está llena. Gasta o convierte monedas primero.`, `Кошель ${b.moneda} полон. Сначала потрать или обменяй монеты.`)}</p> : (
+      {ajeno ? (
+        <Etiqueta texto={L(`Cuántas robas (máx. ${b.cantidad})`, `Сколько украсть (макс. ${b.cantidad})`)}><input className="campo" inputMode="numeric" value={txtRobo} onChange={(e) => setTxtRobo(e.target.value.replace(/\D/g, ''))} /></Etiqueta>
+      ) : maxSacar === 0 ? <p className="error">{L(`Tu bolsa de ${b.moneda} está llena. Gasta o convierte monedas primero.`, `Кошель ${b.moneda} полон. Сначала потрать или обменяй монеты.`)}</p> : (
         <>
           <Etiqueta texto={L(`Cuántas sacas (máx. ${maxSacar})`, `Сколько достать (макс. ${maxSacar})`)}><input className="campo" inputMode="numeric" value={txt} onChange={(e) => setTxt(e.target.value.replace(/\D/g, ''))} /></Etiqueta>
           {ok && <p className="formula-grande">{p.monedas[b.moneda]} + {n} = <strong>{p.monedas[b.moneda] + n} {b.moneda}</strong></p>}
