@@ -7,8 +7,8 @@ import { CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetenc
 import { bonoVelocidad } from '../bonos';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO } from '../types';
 import { buscarClase } from '../avisos';
-import { descansoLargo, dgRecuperados, recursosClase } from '../recursos';
-import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
+import { descansoCorto, descansoLargo, dgRecuperados, extraDadoGolpe, recursosPersonaje, resumenCorto } from '../recursos';
+import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO, idioma } from '../i18n';
 
 export function TabAtributos() {
   const { p, upd, clases, bloqueado } = useFicha();
@@ -17,7 +17,9 @@ export function TabAtributos() {
   const bc = bonoCompetencia(p.nivel);
   const clase = buscarClase(clases, p.clase);
   const dado = clase?.atributos.dadoGolpe ?? '';
-  const recursos = recursosClase(p, clase);
+  const recursos = recursosPersonaje(p, clase);
+  const dgQuedan = Math.max(0, p.nivel - p.dgUsados);
+  const extraDg = extraDadoGolpe(p);
   const pen = carga.penalizacion;
   const vel = bonoVelocidad(p);
   const ajusteVel = (base: number, mult: number) => {
@@ -72,11 +74,15 @@ export function TabAtributos() {
         </Seccion>
         <Seccion titulo="DG">
           <div className="dg">
-            <button className="btn dado-pequeno" disabled={!dado} onClick={() => dado && tirar(L(`Dado de golpe (${dado})`, `Кость хитов (${dado})`), `1${dado}`)}>{dado ? `1${dado}` : 'D'}</button>
-            <span>{Math.max(0, p.nivel - p.dgUsados)} / {p.nivel}</span>
+            <button className="btn dado-pequeno" disabled={!dado || !dgQuedan} title={L('Gastar un dado de golpe y tirarlo', 'Потратить кость хитов и бросить её')}
+              onClick={() => { if (!dado || !dgQuedan) return; tirar(L(`Dado de golpe (${dado})`, `Кость хитов (${dado})`), `1${dado}${extraDg ? `+${extraDg}` : ''}`); upd((x) => { x.dgUsados = Math.min(x.nivel, x.dgUsados + 1); }); }}>{dado ? `1${dado}` : 'D'}</button>
+            <span>{dgQuedan} / {p.nivel}</span>
           </div>
           <div className="fila-botones pequena">
-            <button className="btn" onClick={() => upd((x) => { x.dgUsados = Math.min(x.nivel, x.dgUsados + 1); })}>{L('Gastar', 'Потратить')}</button>
+            <button className="btn" onClick={() => {
+              const lista = resumenCorto(p, clase, idioma() === 'ru');
+              if (confirm(lista.length ? L(`¿Descanso corto? Recuperas: ${lista.join(', ')}.\nPara curarte, toca el dado de golpe.`, `Короткий отдых? Восстановится: ${lista.join(', ')}.\nЧтобы лечиться, нажимай на кость хитов.`) : L('¿Descanso corto? Tu clase y raza no recuperan nada automáticamente; para curarte, toca el dado de golpe.', 'Короткий отдых? У твоего класса и расы ничего не восстанавливается само; чтобы лечиться, нажимай на кость хитов.'))) upd((x) => { descansoCorto(x, clase); });
+            }}>☀️ {L('Descanso corto', 'Короткий отдых')}</button>
             <button className="btn" onClick={() => { if (confirm(L(`¿Descanso largo? Recuperas todos los PG y el maná, ${dgRecuperados(p.nivel)} DG, todos los recursos de clase y quitas 1 nivel de agotamiento.`, `Долгий отдых? Восстановятся все хиты и мана, ${dgRecuperados(p.nivel)} КХ, все ресурсы класса, и снимется 1 уровень истощения.`))) upd(descansoLargo); }}>🌙 {L('Descanso largo', 'Долгий отдых')}</button>
           </div>
         </Seccion>
@@ -139,8 +145,10 @@ export function TabAtributos() {
             {recursos.length > 0 && (
               <ul className="recursos-clase">
                 {recursos.map((r) => {
-                  const quedan = Math.max(0, r.max - (p.recursosUsados?.[r.id] ?? 0));
-                  const poner = (n: number) => upd((x) => { x.recursosUsados = { ...(x.recursosUsados ?? {}), [r.id]: Math.max(0, Math.min(r.max, r.max - n)) }; });
+                  // Para los que acumulan (estrés) se muestra lo acumulado; para el resto, lo que queda.
+                  const usados = p.recursosUsados?.[r.id] ?? 0;
+                  const quedan = r.acumula ? usados : Math.max(0, r.max - usados);
+                  const poner = (n: number) => upd((x) => { const v = Math.max(0, Math.min(r.max, n)); x.recursosUsados = { ...(x.recursosUsados ?? {}), [r.id]: r.acumula ? v : r.max - v }; });
                   return (
                     <li key={r.id}>
                       <span>{L(r.es, r.ru)}</span>
