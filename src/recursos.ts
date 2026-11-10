@@ -6,7 +6,7 @@ import { bonoCompetencia, modificador } from './rules';
  * Recurso de clase o raza con usos limitados. Todos se recuperan con un descanso largo;
  * `corto` dice qué devuelve un descanso corto (uno o todos). `acumula`: cuenta lo que se acumula (p. ej. estrés) en vez de lo que queda.
  */
-export interface Recurso { id: string; es: string; ru: string; max: number; corto?: 'uno' | 'todos'; acumula?: boolean }
+export interface Recurso { id: string; es: string; ru: string; max: number; corto?: 'uno' | 'todos'; acumula?: boolean; /** Añadido a mano por el jugador. */ extra?: boolean }
 
 /** Columnas de la tabla de cada clase que son usos (Furias, Puntos de ki…). */
 // Qué recupera el descanso corto, según el manual: Furia, Canalizar divinidad, Forma salvaje y Tomar aliento recuperan uno; el ki, todos.
@@ -38,7 +38,7 @@ export function recursosRaza(p: Personaje): Recurso[] {
 }
 
 /** Todos los recursos con usos del personaje: los de su clase y los de su raza. */
-export const recursosPersonaje = (p: Personaje, clase: Clase | null | undefined) => [...recursosClase(p, clase), ...recursosRaza(p)];
+export const recursosPersonaje = (p: Personaje, clase: Clase | null | undefined): Recurso[] => [...recursosClase(p, clase), ...recursosRaza(p), ...(p.recursosExtra ?? []).map((r) => ({ ...r, extra: true }))];
 
 /** Recursos de la clase del personaje a su nivel actual, sacados de la tabla de la clase del manual. */
 export function recursosClase(p: Personaje, clase: Clase | null | undefined): Recurso[] {

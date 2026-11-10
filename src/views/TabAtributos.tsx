@@ -1,7 +1,7 @@
 import { Bloq, useFicha } from './Ficha';
 import { ChipsEstados } from '../estados';
 import { useState } from 'react';
-import { Etiqueta, Modal, Numero, Seccion, Texto } from '../ui';
+import { BotonAnadir, Etiqueta, Modal, Numero, Seccion, Texto } from '../ui';
 import { Contador, useDados } from '../dice';
 import { CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetencia, calcularCA, conSigno, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto, valorPrueba } from '../rules';
 import { bonoVelocidad } from '../bonos';
@@ -9,13 +9,14 @@ import { ATRIBUTOS, NOMBRE_ATRIBUTO } from '../types';
 import { buscarClase } from '../avisos';
 import { descansoCorto, descansoLargo, dgRecuperados, extraDadoGolpe, recursosPersonaje, resumenCorto } from '../recursos';
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO, idioma } from '../i18n';
-import { MAX_DESCANSOS_CORTOS, recordatoriosCorto } from '../descansoCorto';
+import { MAX_DESCANSOS_CORTOS, catalogoRecursos, recordatoriosCorto } from '../descansoCorto';
 import { useDatos, type Conjuro } from '../data';
 
 export function TabAtributos() {
   const { p, upd, clases, razas, bloqueado } = useFicha();
   const todosConjuros = useDatos<Conjuro[]>('spells');
   const [corto, setCorto] = useState(false);
+  const [anadirRec, setAnadirRec] = useState(false);
   const cortosQuedan = Math.max(0, MAX_DESCANSOS_CORTOS - (p.descansosCortos ?? 0));
   const { tirarD20, tirar } = useDados();
   const carga = estadoCarga(p);
@@ -172,7 +173,7 @@ export function TabAtributos() {
                   const poner = (n: number) => upd((x) => { const v = Math.max(0, Math.min(r.max, n)); x.recursosUsados = { ...(x.recursosUsados ?? {}), [r.id]: r.acumula ? v : r.max - v }; });
                   return (
                     <li key={r.id}>
-                      <span>{L(r.es, r.ru)}</span>
+                      <span>{L(r.es, r.ru)}{r.extra && <button type="button" className="quitar-recurso" title={L('Quitar', 'Убрать')} onClick={() => { if (confirm(L(`¿Quitar «${r.es}»?`, `Убрать «${r.ru}»?`))) upd((x) => { x.recursosExtra = (x.recursosExtra ?? []).filter((e) => e.id !== r.id); const u = { ...(x.recursosUsados ?? {}) }; delete u[r.id]; x.recursosUsados = u; }); }}>✕</button>}</span>
                       <span className="contador pequeno">
                         <button type="button" onClick={() => poner(quedan - 1)} disabled={!quedan}>−</button>
                         <span>{quedan}/{r.max}</span>
@@ -183,10 +184,44 @@ export function TabAtributos() {
                 })}
               </ul>
             )}
+            <BotonAnadir onClick={() => setAnadirRec(true)}>{L('Añadir recurso', 'Добавить ресурс')}</BotonAnadir>
+            {anadirRec && <ModalRecurso onClose={() => setAnadirRec(false)} />}
             <Texto multilinea filas={4} valor={p.recursos} set={(s) => upd((x) => { x.recursos = s; })} placeholder={L('Otros recursos y notas…', 'Другие ресурсы и заметки…')} />
           </Seccion>
         </div>
       </div>
     </div>
+  );
+}
+
+function ModalRecurso({ onClose }: { onClose: () => void }) {
+  const { p, upd, razas } = useFicha();
+  const cat = catalogoRecursos(p, razas);
+  const [nombre, setNombre] = useState('');
+  const [max, setMax] = useState(1);
+  const [rec, setRec] = useState<'largo' | 'uno' | 'todos'>('largo');
+  const anadir = (r: { id: string; es: string; ru: string; max: number; corto?: 'uno' | 'todos' }) => { upd((x) => { x.recursosExtra = [...(x.recursosExtra ?? []), r]; }); onClose(); };
+  const recTexto = (c?: 'uno' | 'todos') => (c === 'todos' ? L('corto: todos', 'короткий: все') : c === 'uno' ? L('corto: +1', 'короткий: +1') : L('solo largo', 'только долгий'));
+  const fila = (r: (typeof cat)[number]) => (
+    <li key={r.id}><button type="button" className="btn fila-recurso" onClick={() => anadir({ id: r.id, es: r.es, ru: r.ru, max: r.max, corto: r.corto })}>
+      <span>{L(r.es, r.ru)}</span><small>{r.max} · {recTexto(r.corto)}</small></button></li>
+  );
+  const tuyos = cat.filter((r) => r.tuyo), otros = cat.filter((r) => !r.tuyo);
+  return (
+    <Modal titulo={L('Añadir recurso', 'Добавить ресурс')} onClose={onClose}>
+      {tuyos.length > 0 && <><h4>{L('De tu clase, raza y dotes', 'От твоего класса, расы и черт')}</h4><ul className="lista-recursos">{tuyos.map(fila)}</ul></>}
+      <h4>{L('Personalizado', 'Свой')}</h4>
+      <div className="form-recurso">
+        <input className="campo" value={nombre} onChange={(e) => setNombre(e.target.value)} placeholder={L('Nombre', 'Название')} />
+        <Etiqueta texto={L('Usos', 'Использований')}><Numero valor={max} min={1} set={setMax} /></Etiqueta>
+        <select className="campo" value={rec} onChange={(e) => setRec(e.target.value as typeof rec)}>
+          <option value="largo">{L('Se recupera con descanso largo', 'Восстанавливается долгим отдыхом')}</option>
+          <option value="uno">{L('Descanso corto: recupera 1', 'Короткий отдых: +1')}</option>
+          <option value="todos">{L('Descanso corto: recupera todos', 'Короткий отдых: все')}</option>
+        </select>
+        <button type="button" className="btn primario" disabled={!nombre.trim()} onClick={() => anadir({ id: `propio-${Date.now()}`, es: nombre.trim(), ru: nombre.trim(), max: Math.max(1, max), corto: rec === 'largo' ? undefined : rec })}>{L('Añadir', 'Добавить')}</button>
+      </div>
+      {otros.length > 0 && <><h4>{L('Otros', 'Другие')}</h4><ul className="lista-recursos">{otros.map(fila)}</ul></>}
+    </Modal>
   );
 }

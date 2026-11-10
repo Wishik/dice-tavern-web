@@ -66,6 +66,9 @@ export const BONOS: Record<string, Bono> = {
   'Pies Ligeros': { velocidad: 5 },
   'Curiosidad Incansable': { competencia: ['investigacion'], nota: { investigacion: '+1d4 si ya eras competente (Curiosidad Incansable)' } },
   'Ojos de Halcón': { competencia: ['percepcion'] },
+  'Estudios Avanzados': { competencia: ['arcano', 'historia', 'investigacion', 'naturaleza', 'religion'], competenciaO2: true },
+  'Paso Boscoso': { competencia: ['sigilo'] },
+  'Kitsune:Sentidos Agudos': { competencia: ['percepcion'] },
   'Aguante Sobrehumano': { fuerzaCarga: 2 },
   // Dotes
   'Defensa': { ca: 1, conArmadura: true },

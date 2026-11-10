@@ -5,7 +5,11 @@ import { HABILIDADES, avisosTirada, conSigno, idHabilidad, valorHabilidad, valor
 import { ATRIBUTOS, NOMBRE_ATRIBUTO } from '../types';
 import { buscarClase } from '../avisos';
 import { bonoHabilidad, bonoSalvacion } from '../bonos';
+import { anotarOrden, habilidadesTrasfondo, limitesHabilidades, sobrantes } from '../limitesHabilidades';
+import { createContext, useContext } from 'react';
 import { L, T, RU_ATRIBUTOS, RU_CLASES, RU_HABILIDADES, RU_NOMBRE_ATRIBUTO } from '../i18n';
+
+const DeMas = createContext<{ comp: Set<string>; pericia: Set<string> }>({ comp: new Set(), pericia: new Set() });
 
 const GRUPOS = [['cognitivas', 'Habilidades cognitivas', 'Умственные навыки'], ['fisicas', 'Habilidades físicas', 'Физические навыки'], ['sociales', 'Habilidades sociales', 'Социальные навыки']] as const;
 
@@ -15,11 +19,17 @@ export function TabHabilidades() {
   const clase = buscarClase(clases, p.clase);
   const sugeridas = new Set<string>();
   if (clase) (clase.atributos.habilidades.includes('*') ? HABILIDADES.map((h) => h.id) : clase.atributos.habilidades.map((h) => idHabilidad(h)).filter(Boolean) as string[]).forEach((x) => sugeridas.add(x));
-  const nComp = Object.values(p.habilidades).filter((h) => h.comp).length;
-  const nPericia = Object.values(p.habilidades).filter((h) => h.pericia).length;
-  const esperadas = (clase?.atributos.habilidadesN ?? 0) + (trasfondos?.find((t) => t.nombre === p.trasfondoEstilo)?.habilidades.length ?? 0);
-  const periciasEsperadas = clase ? clase.tabla.filter((f) => f.nivel <= p.nivel && /\bPericia\b/.test(f.rasgos)).length * 2 : 0;
-  const deTrasfondo = new Set((trasfondos?.find((t) => t.nombre === p.trasfondoEstilo)?.habilidades ?? []).map((h) => idHabilidad(h)));
+  const marcadasComp = Object.entries(p.habilidades).filter(([, h]) => h.comp).map(([id]) => id);
+  const marcadasPer = Object.entries(p.habilidades).filter(([, h]) => h.pericia).map(([id]) => id);
+  const nComp = marcadasComp.length;
+  const nPericia = marcadasPer.length;
+  const lim = limitesHabilidades(p, clase, trasfondos);
+  const esperadas = lim.comp;
+  const periciasEsperadas = lim.pericia;
+  const deTrasfondo = habilidadesTrasfondo(p, trasfondos);
+  const prioridad = [...deTrasfondo, ...sugeridas];
+  const deMas = { comp: clase ? sobrantes(marcadasComp, esperadas, p.ordenHabilidades?.comp, prioridad) : new Set<string>(), pericia: clase ? sobrantes(marcadasPer, periciasEsperadas, p.ordenHabilidades?.pericia, prioridad) : new Set<string>() };
+  const flexibles = lim.fuentes.filter((x) => x.flexible).map((x) => x.es);
 
   return (
     <div className="tab">
@@ -28,22 +38,24 @@ export function TabHabilidades() {
           <ul className="limites">
             <li className={nComp > esperadas ? 'pasado' : nComp < esperadas ? 'falta' : 'ok'}>
               <span>{L('Competencias', 'Владения')}</span><strong>{nComp} / {esperadas}</strong>
-              <small>{clase.atributos.habilidadesN} {L('de', 'от')} {T(RU_CLASES, p.clase)}{deTrasfondo.size ? L(` + ${deTrasfondo.size} del trasfondo`, ` + ${deTrasfondo.size} от предыстории`) : ''}{avisos.habilidades > 0 && <> · <PuntoRojo /> {L('te faltan', 'не хватает')} {avisos.habilidades}</>}</small>
+              <small>{lim.fuentes.filter((x) => x.comp > 0).map((x) => `${x.comp >= 18 ? L('todas', 'все') : x.comp} ${x === lim.fuentes[0] && clase ? T(RU_CLASES, p.clase) : L(x.es, x.ru)}`).join(' + ')}{nComp > esperadas && <> · <b className="error">{L(`${nComp - esperadas} de más`, `лишних: ${nComp - esperadas}`)}</b></>}{avisos.habilidades > 0 && <> · <PuntoRojo /> {L('te faltan', 'не хватает')} {avisos.habilidades}</>}</small>
             </li>
             {periciasEsperadas > 0 && (
               <li className={nPericia > periciasEsperadas ? 'pasado' : nPericia < periciasEsperadas ? 'falta' : 'ok'}>
                 <span>{L('Pericias', 'Компетентность')}</span><strong>{nPericia} / {periciasEsperadas}</strong>
-                <small>{L(`Por el rasgo «Pericia» de ${p.clase} hasta nivel ${p.nivel}`, `За умение «Компетентность» (${T(RU_CLASES, p.clase)}) до ${p.nivel} уровня`)}{nPericia < periciasEsperadas && <> · <PuntoRojo /> {L('te faltan', 'не хватает')} {periciasEsperadas - nPericia}</>}</small>
+                <small>{lim.fuentes.filter((x) => x.pericia > 0 || x.flexible).map((x) => `${x.pericia || x.comp} ${L(x.es, x.ru)}`).join(' + ')}{nPericia > periciasEsperadas && <> · <b className="error">{L(`${nPericia - periciasEsperadas} de más`, `лишних: ${nPericia - periciasEsperadas}`)}</b></>}{nPericia < periciasEsperadas && <> · <PuntoRojo /> {L('te faltan', 'не хватает')} {periciasEsperadas - nPericia}</>}</small>
               </li>
             )}
           </ul>
         )}
-        {clase && <p className="nota pequena">{L('◆ = habilidades que ofrece tu clase. Las razas y dotes pueden darte más: puedes marcar de más, solo se avisa.', '◆ = навыки, которые даёт твой класс. Раса и черты могут дать больше: можно отметить лишние, будет только предупреждение.')}</p>}
+        {clase && <p className="nota pequena">{L('◆ = habilidades que ofrece tu clase. Las que pasan del límite salen en rojo (⚠). Las competencias fijas de tu raza (★) no cuentan: ya se suman solas.', '◆ = навыки, которые даёт твой класс. Всё, что сверх лимита, отмечено красным (⚠). Фиксированные владения от расы (★) не считаются: они уже прибавлены сами.')}{flexibles.length > 0 && L(` ${flexibles.join(', ')}: competencia o, si ya la tienes, pericia (cuenta en los dos límites).`, ` ${flexibles.join(', ')}: владение или, если уже есть, компетентность (учтено в обоих лимитах).`)}</p>}
       </Seccion>
+      <DeMas.Provider value={deMas}>
       <div className="fila-2-tarjetas">
         <div>{GRUPOS.slice(0, 1).map(([g, t, tru]) => <Grupo key={g} grupo={g} titulo={L(t, tru)} sugeridas={sugeridas} />)}</div>
         <div>{GRUPOS.slice(1).map(([g, t, tru]) => <Grupo key={g} grupo={g} titulo={L(t, tru)} sugeridas={sugeridas} />)}</div>
       </div>
+      </DeMas.Provider>
       <Seccion titulo="Salvaciones">
         <ul className="lista-tiradas">
           {ATRIBUTOS.map((a) => {
@@ -77,6 +89,11 @@ export function TabHabilidades() {
 function Grupo({ grupo, titulo, sugeridas }: { grupo: string; titulo: string; sugeridas: Set<string> }) {
   const { p, upd } = useFicha();
   const { tirarD20 } = useDados();
+  const deMas = useContext(DeMas);
+  const orden = (x: { ordenHabilidades?: { comp: string[]; pericia: string[] } }, id: string, comp?: boolean, pericia?: boolean) => {
+    const o = x.ordenHabilidades ?? { comp: [], pericia: [] };
+    x.ordenHabilidades = { comp: comp === undefined ? o.comp : anotarOrden(o.comp, id, comp), pericia: pericia === undefined ? o.pericia : anotarOrden(o.pericia, id, pericia) };
+  };
   return (
     <Seccion titulo={titulo}>
       <div className="cab-cp"><span>{L('C', 'В')}</span><span>{L('P', 'К')}</span></div>
@@ -86,9 +103,11 @@ function Grupo({ grupo, titulo, sugeridas }: { grupo: string; titulo: string; su
           const v = valorHabilidad(p, h.id);
           const r = bonoHabilidad(p, h.id, st.comp);
           return (
-            <li key={h.id} className={r.origen.length ? 'con-rasgo' : ''}>
-              <Check valor={st.comp} set={(b) => upd((x) => { x.habilidades[h.id].comp = b; if (!b) x.habilidades[h.id].pericia = false; })} titulo="Competencia" />
-              <Check valor={st.pericia} set={(b) => upd((x) => { x.habilidades[h.id].pericia = b; if (b) x.habilidades[h.id].comp = true; })} titulo="Pericia" />
+            <li key={h.id} className={`${r.origen.length ? 'con-rasgo' : ''} ${deMas.comp.has(h.id) || deMas.pericia.has(h.id) ? 'de-mas' : ''}`}>
+              <Check valor={st.comp} clase={deMas.comp.has(h.id) ? 'de-mas' : ''} titulo={deMas.comp.has(h.id) ? L('Competencia (pasa del límite)', 'Владение (сверх лимита)') : 'Competencia'}
+                set={(b) => upd((x) => { const quitaP = !b && x.habilidades[h.id].pericia; x.habilidades[h.id].comp = b; if (!b) x.habilidades[h.id].pericia = false; orden(x, h.id, b, quitaP ? false : undefined); })} />
+              <Check valor={st.pericia} clase={deMas.pericia.has(h.id) ? 'de-mas' : ''} titulo={deMas.pericia.has(h.id) ? L('Pericia (pasa del límite)', 'Компетентность (сверх лимита)') : 'Pericia'}
+                set={(b) => upd((x) => { const ponC = b && !x.habilidades[h.id].comp; x.habilidades[h.id].pericia = b; if (b) x.habilidades[h.id].comp = true; orden(x, h.id, ponC ? true : undefined, b); })} />
               <span className="lt-nombre">{T(RU_HABILIDADES, h.id) === h.id ? h.nombre : T(RU_HABILIDADES, h.id)} <small>({T(RU_ATRIBUTOS, h.atributo.slice(0, 3))})</small>{sugeridas.has(h.id) && !st.comp && !r.comp && <span className="sugerida">◆</span>}
                 {r.origen.length > 0 && <small className="por-rasgo">★ {r.origen.join(', ')}</small>}</span>
               <Numero valor={st.bonus} set={(n) => upd((x) => { x.habilidades[h.id].bonus = n; })} className="mini" />

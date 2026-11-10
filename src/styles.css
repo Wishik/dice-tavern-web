@@ -636,3 +636,16 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .lista-elegir-conjuro .marca { font-weight: 700; color: #a52a1f; font-size: 18px; text-align: center; }
 .lista-elegir-conjuro strong, .lista-elegir-conjuro small { display: block; }
 .lista-elegir-conjuro small { color: var(--tinta-suave); font-size: 12px; }
+
+.check.de-mas { border-color: var(--rojo-vivo); box-shadow: 0 0 0 2px rgba(229, 57, 47, .35); }
+.check.de-mas.marcado { background: radial-gradient(circle, var(--rojo-vivo) 45%, transparent 50%); }
+.lista-tiradas li.de-mas .lt-nombre { color: var(--rojo); }
+.lista-tiradas li.de-mas .lt-nombre::after { content: ' ⚠'; }
+.limites li.pasado { border-color: var(--rojo-vivo); } .limites li.pasado > strong { color: var(--rojo); }
+.limites-fuentes { margin: 6px 0 0; padding-left: 18px; font-size: .85em; }
+
+.lista-recursos { list-style: none; padding: 0; margin: 0 0 12px; display: grid; gap: 6px; }
+.fila-recurso { width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 8px; text-align: left; }
+.fila-recurso small { opacity: .75; white-space: nowrap; }
+.form-recurso { display: grid; gap: 8px; margin-bottom: 12px; }
+.quitar-recurso { margin-left: 8px; padding: 0 4px; border: none; background: none; font-size: .8em; opacity: .55; cursor: pointer; color: inherit; }

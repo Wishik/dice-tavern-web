@@ -112,6 +112,8 @@ export interface Personaje {
   recursosUsados: Record<string, number>;
   /** Descansos cortos hechos desde el último descanso largo. */
   descansosCortos: number;
+  /** Recursos con usos que el jugador añade a mano (del catálogo o personalizados). */
+  recursosExtra?: { id: string; es: string; ru: string; max: number; corto?: 'uno' | 'todos' }[];
   // Hoja 4
   ataquesTurno: { habil: number; torpe: number };
   ataques: { nombre: string; ataque: string; dano: string }[];
@@ -120,6 +122,8 @@ export interface Personaje {
   salvaciones: Record<Atributo, { comp: boolean; bonus: number }>;
   muerte: { exitos: number; fallos: number };
   habilidades: Record<string, Habilidad>;
+  /** Orden en que se marcaron competencias y pericias (las últimas, si pasan del límite, salen en rojo). */
+  ordenHabilidades?: { comp: string[]; pericia: string[] };
   // Rasgos y dotes
   rasgosRaza: string[];
   /** Conjuros elegidos para los rasgos/dotes que dan a escoger (id de concesión → nombres). */

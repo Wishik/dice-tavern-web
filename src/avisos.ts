@@ -1,3 +1,4 @@
+import { limitesHabilidades } from './limitesHabilidades';
 import type { Clase, Raza, Razas, Trasfondo } from './data';
 import type { Personaje } from './types';
 import { HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, huecosVacios } from './rules';
@@ -56,10 +57,7 @@ export function calcularAvisos(p: Personaje, clases: Clase[] | null, razas: Raza
   const raza = buscarRaza(razas, p.raza);
   const rasgosRaza = raza ? Math.max(0, raza.rasgosAElegir - p.rasgosRaza.length) : 0;
 
-  let habilidadesEsperadas = 0;
-  if (c) habilidadesEsperadas += c.atributos.habilidadesN;
-  const t = trasfondos?.find((x) => x.nombre === p.trasfondoEstilo);
-  if (t) habilidadesEsperadas += t.habilidades.length;
+  const habilidadesEsperadas = c ? limitesHabilidades(p, c, trasfondos ?? null).comp : (trasfondos?.find((x) => x.nombre === p.trasfondoEstilo)?.habilidades.length ?? 0);
   const nComp = Object.values(p.habilidades).filter((h) => h.comp).length;
   const habilidades = Math.max(0, habilidadesEsperadas - nComp);
 

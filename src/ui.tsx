@@ -135,8 +135,8 @@ export function Etiqueta({ texto, children }: { texto: string; children: ReactNo
   return <label className="etiqueta"><span>{tr(texto)}</span>{children}</label>;
 }
 
-export function Check({ valor, set, titulo }: { valor: boolean; set: (b: boolean) => void; titulo?: string }) {
-  return <button type="button" className={`check ${valor ? 'marcado' : ''}`} title={titulo && tr(titulo)} onClick={() => set(!valor)} aria-pressed={valor} />;
+export function Check({ valor, set, titulo, clase = '' }: { valor: boolean; set: (b: boolean) => void; titulo?: string; clase?: string }) {
+  return <button type="button" className={`check ${valor ? 'marcado' : ''} ${clase}`} title={titulo && tr(titulo)} onClick={() => set(!valor)} aria-pressed={valor} />;
 }
 
 export function Buscador<T>({ items, texto, onElegir, placeholder, render, filtro, vacio }: {
