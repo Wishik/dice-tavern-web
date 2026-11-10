@@ -65,6 +65,7 @@ export function descansoLargo(x: Personaje) {
   x.pm.actual = x.pm.max;
   x.dgUsados = Math.max(0, x.dgUsados - dgRecuperados(x.nivel));
   x.recursosUsados = {};
+  x.descansosCortos = 0;
   x.agotamiento = Math.max(0, (x.agotamiento ?? 0) - 1);
   x.muerte = { exitos: 0, fallos: 0 };
   if (x.pg.actual > 0) x.estados = (x.estados ?? []).filter((e) => e !== 'inconsciente' && e !== 'moribundo');
@@ -84,6 +85,7 @@ export function descansoCorto(x: Personaje, clase: Clase | null | undefined): st
     hecho.push(r.id);
   }
   x.recursosUsados = usados;
+  x.descansosCortos = (x.descansosCortos ?? 0) + 1;
   if (x.clase === 'Explorador' && x.nivel >= 10 && x.agotamiento > 0) { x.agotamiento -= 1; hecho.push('agotamiento'); }
   return hecho;
 }

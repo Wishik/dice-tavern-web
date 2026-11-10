@@ -9,9 +9,14 @@ import { ATRIBUTOS, NOMBRE_ATRIBUTO } from '../types';
 import { buscarClase } from '../avisos';
 import { descansoCorto, descansoLargo, dgRecuperados, extraDadoGolpe, recursosPersonaje, resumenCorto } from '../recursos';
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO, idioma } from '../i18n';
+import { MAX_DESCANSOS_CORTOS, recordatoriosCorto } from '../descansoCorto';
+import { useDatos, type Conjuro } from '../data';
 
 export function TabAtributos() {
-  const { p, upd, clases, bloqueado } = useFicha();
+  const { p, upd, clases, razas, bloqueado } = useFicha();
+  const todosConjuros = useDatos<Conjuro[]>('spells');
+  const [corto, setCorto] = useState(false);
+  const cortosQuedan = Math.max(0, MAX_DESCANSOS_CORTOS - (p.descansosCortos ?? 0));
   const { tirarD20, tirar } = useDados();
   const carga = estadoCarga(p);
   const bc = bonoCompetencia(p.nivel);
@@ -79,14 +84,30 @@ export function TabAtributos() {
             <span>{dgQuedan} / {p.nivel}</span>
           </div>
           <div className="fila-botones pequena">
-            <button className="btn" onClick={() => {
-              const lista = resumenCorto(p, clase, idioma() === 'ru');
-              if (confirm(lista.length ? L(`¿Descanso corto? Recuperas: ${lista.join(', ')}.\nPara curarte, toca el dado de golpe.`, `Короткий отдых? Восстановится: ${lista.join(', ')}.\nЧтобы лечиться, нажимай на кость хитов.`) : L('¿Descanso corto? Tu clase y raza no recuperan nada automáticamente; para curarte, toca el dado de golpe.', 'Короткий отдых? У твоего класса и расы ничего не восстанавливается само; чтобы лечиться, нажимай на кость хитов.'))) upd((x) => { descansoCorto(x, clase); });
-            }}>☀️ {L('Descanso corto', 'Короткий отдых')}</button>
+            <button className="btn" disabled={!cortosQuedan} title={cortosQuedan ? '' : L('Ya no quedan descansos cortos: haz un descanso largo.', 'Короткие отдыхи закончились: нужен долгий отдых.')}
+              onClick={() => setCorto(true)}>☀️ {L('Descanso corto', 'Короткий отдых')} ({cortosQuedan}/{MAX_DESCANSOS_CORTOS})</button>
             <button className="btn" onClick={() => { if (confirm(L(`¿Descanso largo? Recuperas todos los PG y el maná, ${dgRecuperados(p.nivel)} DG, todos los recursos de clase y quitas 1 nivel de agotamiento.`, `Долгий отдых? Восстановятся все хиты и мана, ${dgRecuperados(p.nivel)} КХ, все ресурсы класса, и снимется 1 уровень истощения.`))) upd(descansoLargo); }}>🌙 {L('Descanso largo', 'Долгий отдых')}</button>
           </div>
         </Seccion>
       </div>
+      {corto && (() => {
+        const ru = idioma() === 'ru';
+        const auto = resumenCorto(p, clase, ru);
+        const extra = recordatoriosCorto(p, razas, todosConjuros, ru);
+        return (
+          <Modal titulo={L('Descanso corto', 'Короткий отдых')} onClose={() => setCorto(false)}
+            pie={<button className="btn primario" onClick={() => { upd((x) => { descansoCorto(x, clase); }); setCorto(false); }}>☀️ {L('Descansar', 'Отдохнуть')}</button>}>
+            <p className="nota">{L(`Te quedan ${cortosQuedan} de ${MAX_DESCANSOS_CORTOS} descansos cortos hasta el próximo descanso largo.`, `Осталось ${cortosQuedan} из ${MAX_DESCANSOS_CORTOS} коротких отдыхов до следующего долгого.`)}</p>
+            <h4>{L('Se recupera automáticamente', 'Восстановится автоматически')}</h4>
+            {auto.length ? <ul>{auto.map((t) => <li key={t}>{t}</li>)}</ul> : <p className="nota">{L('Nada de tu clase o raza.', 'Ничего от класса или расы.')}</p>}
+            <p className="nota">{L('Para curarte, toca el dado de golpe (DG).', 'Чтобы лечиться, нажимай на кость хитов (КХ).')}</p>
+            {extra.length > 0 && <>
+              <h4>{L('También puedes recuperar', 'Также можно восстановить')}</h4>
+              <ul>{extra.map((t) => <li key={t}>{t}</li>)}</ul>
+            </>}
+          </Modal>
+        );
+      })()}
 
       <div className="rejilla-caracteristicas">
         {ATRIBUTOS.map((a) => {

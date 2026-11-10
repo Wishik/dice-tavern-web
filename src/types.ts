@@ -110,6 +110,8 @@ export interface Personaje {
   recursos: string;
   /** Usos gastados de cada recurso de clase (claves de src/recursos.ts); el descanso largo lo vacía. */
   recursosUsados: Record<string, number>;
+  /** Descansos cortos hechos desde el último descanso largo. */
+  descansosCortos: number;
   // Hoja 4
   ataquesTurno: { habil: number; torpe: number };
   ataques: { nombre: string; ataque: string; dano: string }[];

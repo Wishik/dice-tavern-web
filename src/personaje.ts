@@ -13,7 +13,7 @@ export function nuevoPersonaje(nombre = ''): Personaje {
     pg: { max: 0, actual: 0, temp: 0 }, pm: { max: 0, actual: 0 }, inspiracion: 0, dgUsados: 0, subidasPendientes: 0,
     caracteristicas: car, bonusIniciativa: 0,
     velocidad: { andando: 30, corriendo: 60, trepando: '', nadando: '', volando: '' },
-    ca: '', bonusCA: 0, caV2: true, bonusPercepcionPasiva: 0, recursos: '', recursosUsados: {},
+    ca: '', bonusCA: 0, caV2: true, bonusPercepcionPasiva: 0, recursos: '', recursosUsados: {}, descansosCortos: 0,
     ataquesTurno: { habil: 1, torpe: 0 }, ataques: [],
     conjuroCaracteristica: '', conjurosTurno: { estandar: '', adicional: '' },
     salvaciones: Object.fromEntries(ATRIBUTOS.map((a) => [a, { comp: false, bonus: 0 }])) as Personaje['salvaciones'],

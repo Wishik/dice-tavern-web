@@ -255,7 +255,7 @@ function Lista({ usuario, onUsuario, onAbrir, onPartida, onSalir }: { usuario: U
                 <div className="tp-texto"><strong>{r.nombre || L('Sin nombre', 'Без имени')}</strong><span>{[T(RU_RAZAS, r.raza), T(RU_CLASES, r.clase)].filter(Boolean).join(' · ') || L('Sin raza ni clase', 'Без расы и класса')}</span><span className="nivel">{L('Nivel', 'Уровень')} {r.nivel}</span></div>
               </button>
               <div className="acciones-tarjeta">
-                <button className="btn-icono" title={r.bloqueado ? L('Desbloquear para editar raza, clase, características…', 'Разблокировать правку расы, класса, характеристик…') : L('Terminar la creación y bloquear raza, clase, características…', 'Закончить создание и заблокировать расу, класс, характеристики…')} onClick={() => alternarBloqueo(r)}>{r.bloqueado ? '✏️' : '🔒'}</button>
+                <button className="btn-icono" title={r.bloqueado ? L('Desbloquear para editar raza, clase, características…', 'Разблокировать правку расы, класса, характеристик…') : L('Terminar la creación y bloquear raza, clase, características…', 'Закончить создание и заблокировать расу, класс, характеристики…')} onClick={() => alternarBloqueo(r)}>{r.bloqueado ? '🔒' : '🔓'}</button>
                 <button className="btn-icono" title={L('Borrar personaje', 'Удалить персонажа')} aria-label={L('Borrar personaje', 'Удалить персонажа')} onClick={() => borrarPj(r)}>🗑️</button>
               </div>
             </div>
