@@ -46,6 +46,8 @@ export interface ConjuroPersonaje {
   /** Conjuro propio: copia editable del texto de un conjuro base. */
   base?: string;
   descripcion?: string;
+  /** Lo puso la hoja sola por un rasgo de raza o una dote (id de la concesión en src/conjurosRasgos.ts). */
+  origen?: string;
 }
 
 export interface Habilidad { comp: boolean; pericia: boolean; bonus: number }
@@ -117,7 +119,9 @@ export interface Personaje {
   muerte: { exitos: number; fallos: number };
   habilidades: Record<string, Habilidad>;
   // Rasgos y dotes
-  rasgosRaza: string[]; // nombres de rasgos elegidos (únicos o genéricos)
+  rasgosRaza: string[];
+  /** Conjuros elegidos para los rasgos/dotes que dan a escoger (id de concesión → nombres). */
+  eleccionesConjuros: Record<string, string[]>; // nombres de rasgos elegidos (únicos o genéricos)
   rasgos: EntradaTexto[]; // rasgos manuales extra
   dotes: EntradaTexto[];
   conjuros: ConjuroPersonaje[];

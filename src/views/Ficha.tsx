@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { Personaje } from '../types';
 import { backend } from '../store';
-import { useDatos, type Clase, type Dote, type Razas, type Trasfondo } from '../data';
+import { useDatos, type Clase, type Conjuro, type Dote, type Razas, type Trasfondo } from '../data';
 import { calcularAvisos, manaMaximo, type Avisos } from '../avisos';
 import { DadoIcono, PanelDados, useDados } from '../dice';
 import { conSigno, modificador } from '../rules';
@@ -18,6 +18,7 @@ import { TabMonturas } from './TabMonturas';
 import { TabMaster } from './TabMaster';
 import { ChipsEstados } from '../estados';
 import { L, T, RU_ATRIBUTOS, RU_CLASES, RU_RAZAS, } from '../i18n';
+import { eleccionesPendientes, sincronizarConjuros } from '../conjurosRasgos';
 
 interface FichaCtx {
   p: Personaje;
@@ -120,7 +121,13 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
     return () => { window.removeEventListener('pagehide', f); clearTimeout(timer.current); f(); };
   }, []);
 
-  const avisos = useMemo(() => p ? calcularAvisos(p, clases, razas, trasfondos) : null, [p, clases, razas, trasfondos]);
+  const avisos = useMemo(() => {
+    if (!p) return null;
+    const a = calcularAvisos(p, clases, razas, trasfondos);
+    // Conjuros de raza o dote que faltan por elegir.
+    const pend = eleccionesPendientes(p, razas).length;
+    return pend ? { ...a, conjurosElegir: pend, total: { ...a.total, magia: a.total.magia + pend } } : a;
+  }, [p, clases, razas, trasfondos]);
 
   if (error) return <div className="contenido"><p className="error">{error}</p><button className="btn" onClick={onVolver}>{L('Volver', 'Назад')}</button></div>;
   if (!p || !avisos) return <div className="cargando">{L('Abriendo el cuaderno…', 'Открываю тетрадь…')}</div>;
@@ -165,6 +172,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
         <button className="fab" onClick={() => setDados(true)} aria-label={L('Dados', 'Кубики')}><DadoIcono caras={20} size={40} /></button>
         <SubidaNivel />
         <SincronizarMana />
+        {!ajeno && <SincronizarConjuros />}
         {dados && <Modal titulo={L('Dados', 'Кубики')} onClose={() => setDados(false)}><PanelDados /></Modal>}
       </div>
     </Ctx.Provider>
@@ -206,5 +214,17 @@ function SincronizarMana() {
     if (!clases || max === p.pm.max) return;
     upd((x) => { const d = max - x.pm.max; x.pm.max = max; x.pm.actual = Math.max(0, Math.min(max, x.pm.actual + Math.max(0, d))); });
   }, [max, p.pm.max, clases, upd]);
+  return null;
+}
+
+/** Añade (o quita) solos los conjuros que dan los rasgos de raza y las dotes. */
+function SincronizarConjuros() {
+  const { p, upd, razas } = useFicha();
+  const todos = useDatos<Conjuro[]>('spells');
+  useEffect(() => {
+    if (!razas || !todos) return;
+    const prueba = structuredClone(p);
+    if (sincronizarConjuros(prueba, razas, todos)) upd((x) => { sincronizarConjuros(x, razas, todos); });
+  }, [p, razas, todos, upd]);
   return null;
 }

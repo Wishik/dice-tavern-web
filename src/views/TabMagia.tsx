@@ -8,13 +8,17 @@ import { ataqueConjuros, cdConjuros, conSigno, dadosConjuro, multiplicadorTruco 
 import { L } from '../i18n';
 import { tr } from '../ru';
 import { td } from '../datosRu';
+import { FUENTES, eleccionesPendientes, opcionesEleccion, concesionesActivas, type Concesion, type Fuente } from '../conjurosRasgos';
 
 const nombreNivel = (i: number) => i === 0 ? L('Trucos', 'Заговоры') : `${L('Nivel', 'Уровень')} ${i}`;
 const NIVELES = Array.from({ length: 10 }, (_, i) => i);
 
 export function TabMagia() {
-  const { p, upd, avisos } = useFicha();
+  const { p, upd, avisos, razas } = useFicha();
   const todos = useDatos<Conjuro[]>('spells');
+  const [elegir, setElegir] = useState<(Concesion & { fuente: Fuente }) | null>(null);
+  const pendientes = eleccionesPendientes(p, razas);
+  const conElecciones = concesionesActivas(p, razas).filter((c) => c.elegir);
   const [anadir, setAnadir] = useState<null | 'truco' | 'conjuro' | 'adicional'>(null);
   const [todasClases, setTodasClases] = useState(false);
   const [ver, setVer] = useState<{ c: ConjuroPersonaje; def?: Conjuro } | null>(null);
@@ -42,6 +46,7 @@ export function TabMagia() {
             <button className="conjuro-nombre" onClick={() => setVer({ c, def: d })}>
               <strong>{td(c.nombre)}{c.adicional ? <small className="etq-nivel"> · {c.nivel ? `${L('Nv', 'Ур')} ${c.nivel}` : L('Truco', 'Заговор')}</small> : null}</strong>
               {c.base && <small>{L('Propio, basado en', 'Своё, на основе')} {td(c.base)}</small>}
+              {c.origen && <small className="origen-conjuro">✨ {origenTexto(c.origen)}</small>}
               {d && <small>{td(d.escuela)} · {td(d.tiempo)} · {td(d.alcance)}{/concentración/i.test(d.duracion) ? L(' · Conc.', ' · Конц.') : ''}</small>}
             </button>
           </li>
@@ -52,6 +57,7 @@ export function TabMagia() {
   const conIdx = p.conjuros.map((c, idx) => ({ c, idx }));
   const porNivel = NIVELES.map((_, i) => conIdx.filter(({ c }) => c.nivel === i && !c.adicional));
   const adicionales = conIdx.filter(({ c }) => c.adicional).sort((a, b) => a.c.nivel - b.c.nivel);
+  const trucosAd = adicionales.filter(({ c }) => c.nivel === 0), conjAd = adicionales.filter(({ c }) => c.nivel > 0);
 
   return (
     <div className="tab">
@@ -71,11 +77,19 @@ export function TabMagia() {
         ))}
         {nConj > 0 && <p className="nota pequena">{L('● = preparado: los que tienes listos para lanzar hoy. Márcalos tras un descanso largo si tu clase prepara conjuros.', '● = подготовлено: то, что готово к накладыванию сегодня. Отмечай после долгого отдыха, если твой класс готовит заклинания.')}</p>}
       </Seccion>
-      <Seccion titulo="Conjuros adicionales">
-        <p className="nota pequena">{L('De tu raza, dotes, objetos o rasgos (p. ej. Taumaturgia de los Trols). No cuentan para el límite de tu clase.', 'От расы, черт, предметов или умений (напр. Чудотворство троллей). Не считаются в лимит класса.')}</p>
+      <Seccion titulo={L('Adicionales', 'Дополнительные')} aviso={pendientes.length}>
+        <p className="nota pequena">{L('De tu raza, dotes, objetos o rasgos. No cuentan para el límite de tu clase. Los de tu raza y tus dotes (✨) se añaden solos al llegar al nivel.', 'От расы, черт, предметов или умений. Не считаются в лимит класса. Заклинания от расы и черт (✨) добавляются сами, когда доходишь до нужного уровня.')}</p>
+        {pendientes.map((c) => (
+          <button key={c.id} className="aviso-rojo elegir-conjuro" onClick={() => setElegir(c)}>
+            <PuntoRojo /> {L(`«${td(c.fuente.rasgo)}» te deja elegir ${c.elegir!.cantidad > 1 ? `${c.elegir!.cantidad} conjuros` : 'un conjuro'}: toca para escoger`, `«${td(c.fuente.rasgo)}» даёт выбрать ${c.elegir!.cantidad > 1 ? `${c.elegir!.cantidad} заклинания` : 'заклинание'}: нажми, чтобы выбрать`)}
+          </button>
+        ))}
+        {trucosAd.length > 0 && <><h4 className="nivel-conjuro">{L('Trucos adicionales', 'Дополнительные заговоры')}</h4><ListaConjuros lista={trucosAd} preparar={false} /></>}
+        {conjAd.length > 0 && <><h4 className="nivel-conjuro">{L('Conjuros adicionales', 'Дополнительные заклинания')}</h4><ListaConjuros lista={conjAd} preparar={false} /></>}
         <BotonAnadir onClick={() => setAnadir('adicional')}>Añadir conjuro adicional</BotonAnadir>
-        {adicionales.length > 0 && <ListaConjuros lista={adicionales} preparar={false} />}
+        {conElecciones.length > pendientes.length && <p className="nota pequena"><button className="btn enlace pequeno" onClick={() => setElegir(conElecciones.find((c) => !pendientes.includes(c))!)}>{L('Cambiar conjuros elegidos de raza o dote', 'Поменять выбранные заклинания расы или черты')}</button></p>}
       </Seccion>
+      {elegir && todos && <ModalElegir c={elegir} todos={todos} otras={conElecciones} onCambiar={setElegir} onClose={() => setElegir(null)} />}
       {!p.clase && <p className="nota">{L('Elige una clase en «Personaje» para ver cuántos trucos y conjuros te tocan.', 'Выбери класс в «Персонаже», чтобы увидеть, сколько заговоров и заклинаний положено.')}</p>}
 
       {p.conjuros.length === 0 && <p className="vacio">{L('Aún no tienes conjuros.', 'Пока нет заклинаний.')}</p>}
@@ -137,7 +151,7 @@ export function TabMagia() {
       )}
       {ver && (
         <Modal titulo={td(ver.c.nombre)} onClose={() => setVer(null)}
-          pie={<button className="btn peligro" onClick={() => { upd((x) => { const i = x.conjuros.findIndex((c) => c.nombre === ver.c.nombre && c.nivel === ver.c.nivel); if (i >= 0) x.conjuros.splice(i, 1); }); setVer(null); }}>{L('Quitar de la lista', 'Убрать из списка')}</button>}>
+          pie={ver.c.origen ? <span className="nota">✨ {L('Te lo da', 'Даёт')}: {origenTexto(ver.c.origen)}</span> : <button className="btn peligro" onClick={() => { upd((x) => { const i = x.conjuros.findIndex((c) => c.nombre === ver.c.nombre && c.nivel === ver.c.nivel); if (i >= 0) x.conjuros.splice(i, 1); }); setVer(null); }}>{L('Quitar de la lista', 'Убрать из списка')}</button>}>
           {(() => {
             const mio = p.conjuros.find((c) => c.nombre === ver.c.nombre);
             if (mio && mio.descripcion !== undefined) return <>
@@ -205,5 +219,48 @@ function Lanzar({ texto, nivel, nombre }: { texto: string; nivel: number; nombre
       {mejoraTruco && <p className="nota pequena">{L(`Daño mejorado por tu nivel ${p.nivel} (trucos: ×2 a nivel 5, ×3 a nivel 11, ×4 a nivel 17).`, `Урон усилен за твой ${p.nivel} уровень (заговоры: ×2 на 5, ×3 на 11, ×4 на 17 уровне).`)}</p>}
       {at === null && (pideAtaque || pideSalvacion) && <p className="nota">{L('Elige la «Característica de conjuros» en Combate para ver tu ataque y CD.', 'Выбери «Заклинательную характеристику» во вкладке «Бой», чтобы видеть атаку и Сл.')}</p>}
     </div>
+  );
+}
+
+/** Nombre del rasgo o dote que da un conjuro automático. */
+function origenTexto(id: string) {
+  const f = FUENTES.find((x) => x.concesiones.some((c) => c.id === id));
+  return f ? `${td(f.rasgo)}${f.dote ? L(' (dote)', ' (черта)') : ''}` : '';
+}
+
+/** Ventana para escoger los conjuros que da un rasgo o una dote. */
+function ModalElegir({ c, todos, otras, onCambiar, onClose }: { c: Concesion & { fuente: Fuente }; todos: Conjuro[]; otras: (Concesion & { fuente: Fuente })[]; onCambiar: (c: Concesion & { fuente: Fuente }) => void; onClose: () => void }) {
+  const { p, upd } = useFicha();
+  const e = c.elegir!;
+  const [sel, setSel] = useState<string[]>(p.eleccionesConjuros?.[c.id] ?? []);
+  const [q, setQ] = useState('');
+  const ops = opcionesEleccion(e, todos);
+  const vis = ops.filter((o) => !q.trim() || td(o.nombre).toLowerCase().includes(q.trim().toLowerCase()) || o.nombre.toLowerCase().includes(q.trim().toLowerCase()));
+  const marcar = (n: string) => setSel((s) => s.includes(n) ? s.filter((x) => x !== n) : e.cantidad === 1 ? [n] : s.length < e.cantidad ? [...s, n] : s);
+  const que = e.nivelConjuro === 0 ? L('trucos', 'заговоры') : L('conjuros', 'заклинания');
+  return (
+    <Modal titulo={`✨ ${td(c.fuente.rasgo)}`} onClose={onClose}
+      pie={<button className="btn primario" disabled={sel.length !== Math.min(e.cantidad, ops.length)} onClick={() => { upd((x) => { x.eleccionesConjuros = { ...(x.eleccionesConjuros ?? {}), [c.id]: sel }; }); onClose(); }}>{L('Guardar', 'Сохранить')} ({sel.length}/{e.cantidad})</button>}>
+      {otras.length > 1 && (
+        <select className="campo" value={c.id} onChange={(ev) => onCambiar(otras.find((o) => o.id === ev.target.value)!)}>
+          {otras.map((o) => <option key={o.id} value={o.id}>{td(o.fuente.rasgo)} · {L('nivel', 'уровень')} {o.nivel}</option>)}
+        </select>
+      )}
+      <p className="nota">{L(`Elige ${e.cantidad} ${que}${e.clases ? ` de la lista de ${e.clases.join(' / ')}` : ''}${e.escuelas ? ` de ${e.escuelas.join(' o ')}` : ''}. Irán a «adicionales» y no cuentan para el límite de tu clase.`, `Выбери: ${e.cantidad} — ${que}${e.clases ? ` из списка: ${e.clases.join(' / ')}` : ''}${e.escuelas ? ` (школы: ${e.escuelas.join(', ')})` : ''}. Они попадут в «дополнительные» и не считаются в лимит класса.`)}</p>
+      {ops.length > 8 && <input className="campo" placeholder={L('Buscar…', 'Поиск…')} value={q} onChange={(ev) => setQ(ev.target.value)} />}
+      <ul className="lista-elegir-conjuro">
+        {vis.map((o) => {
+          const d = todos.find((x) => x.nombre === o.nombre);
+          return (
+            <li key={o.nombre} className={sel.includes(o.nombre) ? 'sel' : ''}>
+              <button type="button" onClick={() => marcar(o.nombre)}>
+                <span className="marca">{sel.includes(o.nombre) ? '✓' : ''}</span>
+                <span><strong>{td(o.nombre)}</strong><small>{o.nivel ? `${L('Nivel', 'Уровень')} ${o.nivel}` : L('Truco', 'Заговор')}{d ? ` · ${td(d.escuela)}` : ''}</small></span>
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </Modal>
   );
 }

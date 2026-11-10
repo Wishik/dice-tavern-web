@@ -628,3 +628,11 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .dano-estado .formula { width: 90px; padding: 6px 8px; }
 .recursos-clase { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
 .recursos-clase li { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 600; }
+.origen-conjuro { color: #8a5a12; }
+.elegir-conjuro { display: flex; align-items: center; gap: 6px; width: 100%; text-align: left; border: 1px dashed #a52a1f; border-radius: 10px; padding: 8px 10px; background: rgba(165,42,31,.08); margin-bottom: 8px; cursor: pointer; font: inherit; }
+.lista-elegir-conjuro { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 6px; max-height: 50vh; overflow-y: auto; }
+.lista-elegir-conjuro button { width: 100%; display: grid; grid-template-columns: 26px 1fr; gap: 8px; align-items: center; text-align: left; padding: 8px; border-radius: 10px; border: 1px solid #c9b182; background: rgba(255,255,255,.35); color: var(--tinta); font: inherit; }
+.lista-elegir-conjuro li.sel button { background: #f3d9cf; border-color: #a52a1f; }
+.lista-elegir-conjuro .marca { font-weight: 700; color: #a52a1f; font-size: 18px; text-align: center; }
+.lista-elegir-conjuro strong, .lista-elegir-conjuro small { display: block; }
+.lista-elegir-conjuro small { color: var(--tinta-suave); font-size: 12px; }

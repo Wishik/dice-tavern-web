@@ -19,7 +19,7 @@ export function nuevoPersonaje(nombre = ''): Personaje {
     salvaciones: Object.fromEntries(ATRIBUTOS.map((a) => [a, { comp: false, bonus: 0 }])) as Personaje['salvaciones'],
     muerte: { exitos: 0, fallos: 0 },
     habilidades: Object.fromEntries(HABILIDADES.map((h) => [h.id, { comp: false, pericia: false, bonus: 0 }])),
-    rasgosRaza: [], rasgos: [], dotes: [], conjuros: [],
+    rasgosRaza: [], eleccionesConjuros: {}, rasgos: [], dotes: [], conjuros: [],
     equipo: { yelmo: null, amuleto: null, armadura: null, capa: null, manoHabil: null, manoTorpe: null },
     mochila: [], cinturon: { tamano: 'pequeño', items: [] },
     viaje: { raciones: 0, odre: 0, pedernal: 0, antorchas: 0, cuerda: '', ropa: '', sacoDormir: false, manta: false, tienda: '' },

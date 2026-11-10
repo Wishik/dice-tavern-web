@@ -20,6 +20,8 @@ export interface Avisos {
   limitePreparados: number | null;
   nivelMaxConjuro: number | null;
   total: { general: number; habilidades: number; magia: number; rasgos: number };
+  /** Conjuros de raza/dote por elegir (lo calcula la ficha). */
+  conjurosElegir?: number;
 }
 
 export const buscarClase = (clases: Clase[] | null, nombre: string) => clases?.find((c) => c.nombre === nombre) ?? null;
