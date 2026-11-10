@@ -106,6 +106,8 @@ export interface Personaje {
   caV2?: boolean;
   bonusPercepcionPasiva: number;
   recursos: string;
+  /** Usos gastados de cada recurso de clase (claves de src/recursos.ts); el descanso largo lo vacía. */
+  recursosUsados: Record<string, number>;
   // Hoja 4
   ataquesTurno: { habil: number; torpe: number };
   ataques: { nombre: string; ataque: string; dano: string }[];

@@ -7,6 +7,7 @@ import { CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetenc
 import { bonoVelocidad } from '../bonos';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO } from '../types';
 import { buscarClase } from '../avisos';
+import { descansoLargo, dgRecuperados, recursosClase } from '../recursos';
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
 
 export function TabAtributos() {
@@ -16,6 +17,7 @@ export function TabAtributos() {
   const bc = bonoCompetencia(p.nivel);
   const clase = buscarClase(clases, p.clase);
   const dado = clase?.atributos.dadoGolpe ?? '';
+  const recursos = recursosClase(p, clase);
   const pen = carga.penalizacion;
   const vel = bonoVelocidad(p);
   const ajusteVel = (base: number, mult: number) => {
@@ -75,7 +77,7 @@ export function TabAtributos() {
           </div>
           <div className="fila-botones pequena">
             <button className="btn" onClick={() => upd((x) => { x.dgUsados = Math.min(x.nivel, x.dgUsados + 1); })}>{L('Gastar', 'Потратить')}</button>
-            <button className="btn" onClick={() => upd((x) => { x.dgUsados = 0; x.pm.actual = x.pm.max; })}>{L('Descanso largo', 'Долгий отдых')}</button>
+            <button className="btn" onClick={() => { if (confirm(L(`¿Descanso largo? Recuperas todos los PG y el maná, ${dgRecuperados(p.nivel)} DG, todos los recursos de clase y quitas 1 nivel de agotamiento.`, `Долгий отдых? Восстановятся все хиты и мана, ${dgRecuperados(p.nivel)} КХ, все ресурсы класса, и снимется 1 уровень истощения.`))) upd(descansoLargo); }}>🌙 {L('Descanso largo', 'Долгий отдых')}</button>
           </div>
         </Seccion>
       </div>
@@ -134,7 +136,25 @@ export function TabAtributos() {
             <Etiqueta texto="Ajuste"><Numero valor={p.bonusPercepcionPasiva} set={(n) => upd((x) => { x.bonusPercepcionPasiva = n; })} /></Etiqueta>
           </Seccion>
           <Seccion titulo="Recursos">
-            <Texto multilinea filas={4} valor={p.recursos} set={(s) => upd((x) => { x.recursos = s; })} placeholder="Furias, puntos de ki, usos por descanso…" />
+            {recursos.length > 0 && (
+              <ul className="recursos-clase">
+                {recursos.map((r) => {
+                  const quedan = Math.max(0, r.max - (p.recursosUsados?.[r.id] ?? 0));
+                  const poner = (n: number) => upd((x) => { x.recursosUsados = { ...(x.recursosUsados ?? {}), [r.id]: Math.max(0, Math.min(r.max, r.max - n)) }; });
+                  return (
+                    <li key={r.id}>
+                      <span>{L(r.es, r.ru)}</span>
+                      <span className="contador pequeno">
+                        <button type="button" onClick={() => poner(quedan - 1)} disabled={!quedan}>−</button>
+                        <span>{quedan}/{r.max}</span>
+                        <button type="button" onClick={() => poner(quedan + 1)} disabled={quedan >= r.max}>+</button>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+            <Texto multilinea filas={4} valor={p.recursos} set={(s) => upd((x) => { x.recursos = s; })} placeholder={L('Otros recursos y notas…', 'Другие ресурсы и заметки…')} />
           </Seccion>
         </div>
       </div>

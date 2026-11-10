@@ -35,7 +35,7 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
   useEffect(() => { recargar(); backend.listar().then(setMios).catch(() => {}); }, [id]);
   // Los cambios de los demás (PG, nivel…) se ven al volver a la pantalla o cada 20 s.
   useEffect(() => {
-    const t = setInterval(() => { if (document.visibilityState === 'visible') recargar(); }, 20000);
+    const t = setInterval(() => { if (document.visibilityState === 'visible') recargar(); }, 4000);
     const v = () => { if (document.visibilityState === 'visible') recargar(); };
     document.addEventListener('visibilitychange', v);
     return () => { clearInterval(t); document.removeEventListener('visibilitychange', v); };

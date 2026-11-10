@@ -69,20 +69,26 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
   const dotes = useDatos<Dote[]>('dotes');
   const timer = useRef<number>();
   const ultimo = useRef<Personaje | null>(null);
+  /** Cuenta las ediciones locales, para descartar recargas que empezaron antes de una edición. */
+  const cambios = useRef(0);
 
   useEffect(() => { backend.cargar(id).then((x) => x ? setP(x) : setError(L('No se encontró el personaje.', 'Персонаж не найден.'))).catch((e) => setError(e.message)); }, [id]);
   // En partida, el máster (o el jugador) puede cambiar la hoja desde otro dispositivo: se recarga si no hay cambios pendientes.
   const estadoRef = useRef(estado); estadoRef.current = estado;
   useEffect(() => {
     if (backend.modo !== 'nube') return;
-    const t = setInterval(async () => {
+    const mirar = async () => {
       if (document.visibilityState !== 'visible' || estadoRef.current !== 'guardado' || ultimo.current) return;
+      const gen = cambios.current;
       try {
         const x = await backend.cargar(id);
-        if (x && !ultimo.current && estadoRef.current === 'guardado') setP((prev) => (prev && x.actualizado !== prev.actualizado ? x : prev));
+        // Si se ha tocado algo mientras llegaba la respuesta, esa copia ya es vieja.
+        if (x && gen === cambios.current && !ultimo.current && estadoRef.current === 'guardado') setP((prev) => (prev && x.actualizado !== prev.actualizado ? x : prev));
       } catch { /* sin red: se intentará luego */ }
-    }, 12000);
-    return () => clearInterval(t);
+    };
+    const t = setInterval(mirar, 4000);
+    document.addEventListener('visibilitychange', mirar);
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', mirar); };
   }, [id]);
   useEffect(() => { try { localStorage.setItem('dicetavern.tab', tab); } catch { /* sin almacenamiento */ } }, [tab]);
 
@@ -94,6 +100,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
   }, [ajeno]);
 
   const upd = useCallback((f: (p: Personaje) => void) => {
+    cambios.current++;
     setP((prev) => {
       if (!prev) return prev;
       const n = structuredClone(prev);
