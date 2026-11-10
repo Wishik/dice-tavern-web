@@ -1,6 +1,6 @@
 import type { Clase } from './data';
 import type { Personaje, RecursoExtra } from './types';
-import { bonoCompetencia, modificador } from './rules';
+import { bonoCompetencia, car, modificador } from './rules';
 
 /**
  * Recurso de clase o raza con usos limitados. Todos se recuperan con un descanso largo;
@@ -58,7 +58,7 @@ export function recursosClase(p: Personaje, clase: Clase | null | undefined): Re
     if (n > 0) out.push({ id: c.id, es: c.es, ru: c.ru, max: n, corto: c.corto });
   }
   // Sin columna en la tabla: usos según el texto del rasgo.
-  if (clase.nombre === 'Bardo') out.unshift({ id: 'inspiracionBardica', es: 'Inspiración bárdica', ru: 'Бардовское вдохновение', max: Math.max(1, modificador(p.caracteristicas.CAR)), corto: p.nivel >= 5 ? 'todos' : undefined });
+  if (clase.nombre === 'Bardo') out.unshift({ id: 'inspiracionBardica', es: 'Inspiración bárdica', ru: 'Бардовское вдохновение', max: Math.max(1, modificador(car(p, 'CAR'))), corto: p.nivel >= 5 ? 'todos' : undefined });
   if (clase.nombre === 'Paladín') out.unshift({ id: 'imponerManos', es: 'Imponer las manos (PG)', ru: 'Наложение рук (хиты)', max: 5 * p.nivel });
   return out;
 }

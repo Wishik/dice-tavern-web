@@ -659,3 +659,17 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .historial-partida li.critico-exito strong { color: #2e7d32; }
 .historial-partida li.critico-fallo strong { color: var(--rojo); }
 .vista-partida { flex-wrap: wrap; }
+
+.efectos-car { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; }
+.efectos-car li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 6px 10px; border-radius: 10px; border: 1px solid; }
+.efectos-car li.debuff { border-color: var(--rojo-vivo); background: rgba(229,57,47,.08); }
+.efectos-car li.buff { border-color: #4a8f4e; background: rgba(74,143,78,.1); }
+.efectos-car .ef-valor { font-weight: 700; }
+.efectos-car .ef-nota { flex-basis: 100%; font-size: .9em; opacity: .85; }
+.efectos-car li .quitar-recurso { margin-left: auto; }
+.car-efecto { font-weight: 700; font-size: .9em; text-align: center; }
+.car-efecto.debuff { color: var(--rojo); } .car-efecto.buff { color: #2e7d32; }
+.chip-estado.debuff { background: rgba(229,57,47,.15); border-color: var(--rojo-vivo); }
+.chip-estado.buff { background: rgba(74,143,78,.15); border-color: #4a8f4e; }
+.form-efecto { display: grid; grid-template-columns: 1fr auto; gap: 8px; }
+.form-efecto input, .form-efecto button { grid-column: 1 / -1; }

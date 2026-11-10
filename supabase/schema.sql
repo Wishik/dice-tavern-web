@@ -132,7 +132,7 @@ begin
   if not public.personaje_en_mi_partida(pj, true) then raise exception 'no eres el máster de este personaje'; end if;
   update public.personajes
      set datos = datos || coalesce((select jsonb_object_agg(key, value) from jsonb_each(cambios)
-                                    where key in ('pg','equipo','mochila','cinturon','viaje','monedas','estados','estadosDetalle','agotamiento','iniciativaActual','actualizado')), '{}'::jsonb),
+                                    where key in ('pg','equipo','mochila','cinturon','viaje','monedas','estados','estadosDetalle','agotamiento','iniciativaActual','efectosCar','actualizado')), '{}'::jsonb),
          actualizado = now()
    where id = pj;
 end $$;

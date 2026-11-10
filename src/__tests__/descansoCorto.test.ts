@@ -68,3 +68,14 @@ describe('recursos propios', () => {
     expect(p.recursosUsados).toEqual({ a: 2, b: 2 });
   });
 });
+
+import { car, valorPrueba } from '../rules';
+describe('efectos del máster en características', () => {
+  it('cambian el valor y las tiradas', () => {
+    const p = nuevoPersonaje(); p.caracteristicas.FUE = 14;
+    p.efectosCar = [{ id: '1', atributo: 'FUE', valor: -4, nota: 'descanso largo' }];
+    expect(car(p, 'FUE')).toBe(10);
+    expect(valorPrueba(p, 'FUE')).toBe(0);
+    expect(p.caracteristicas.FUE).toBe(14);
+  });
+});

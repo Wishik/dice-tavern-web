@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useFicha } from './Ficha';
-import { calcularCA, conSigno, iniciativa, modificador, percepcionPasiva } from '../rules';
+import { calcularCA, car, conSigno, iniciativa, modificador, percepcionPasiva } from '../rules';
 import { ChipsEstados } from '../estados';
 import { Numero, Seccion } from '../ui';
 import { Contador } from '../dice';
 import { L, RU_ATRIBUTOS, T } from '../i18n';
 import { ATRIBUTOS } from '../types';
+import { ListaEfectosCar, NuevoEfectoCar } from '../efectosCar';
 
 /** Lo que el máster puede tocar de la hoja de un jugador: vida, estados e iniciativa (el inventario va en su pestaña). */
 export function TabMaster() {
@@ -24,7 +25,7 @@ export function TabMaster() {
   });
   return (
     <div className="tab">
-      <p className="aviso-local">👑 {L('Como máster puedes cambiar la vida, los estados, la iniciativa y el inventario. El resto lo cambia el jugador.', 'Как мастер ты можешь менять хиты, состояния, инициативу и инвентарь. Остальное меняет сам игрок.')}</p>
+      <p className="aviso-local">👑 {L('Como máster puedes cambiar la vida, los estados, la iniciativa, el inventario y poner efectos temporales en las características. El resto lo cambia el jugador.', 'Как мастер ты можешь менять хиты, состояния, инициативу, инвентарь и временно менять характеристики. Остальное меняет сам игрок.')}</p>
       <div className="fila-3-tarjetas">
         <Seccion titulo="PG (vida)" className="pg">
           <div className="pg-actual">
@@ -51,12 +52,17 @@ export function TabMaster() {
           <p className="nota">{L('Bono', 'Бонус')}: {conSigno(iniciativa(p))}</p>
         </Seccion>
       </div>
+      <Seccion titulo={L('Efectos en características', 'Эффекты на характеристики')}>
+        <p className="nota">{L('Sube o baja una característica de forma temporal (veneno, maldición, bendición…). El jugador lo verá con tu nota de cómo quitarlo. Se quita solo cuando tú lo quites.', 'Временно понизь или повысь характеристику (яд, проклятие, благословение…). Игрок увидит это вместе с твоей подсказкой, как снять. Снимается только тобой.')}</p>
+        <ListaEfectosCar efectos={p.efectosCar} quitar={(id) => upd((x) => { x.efectosCar = (x.efectosCar ?? []).filter((e) => e.id !== id); })} />
+        <NuevoEfectoCar onAnadir={(e) => upd((x) => { x.efectosCar = [...(x.efectosCar ?? []), e]; })} />
+      </Seccion>
       <Seccion titulo={L('Resumen (solo lectura)', 'Сводка (только просмотр)')}>
         <div className="resumen-master">
           <span>🛡 {L('CA', 'КД')} <strong>{calcularCA(p).total}</strong></span>
           <span>👁 {L('Percepción pasiva', 'Пассивная внимательность')} <strong>{percepcionPasiva(p)}</strong></span>
           {p.pm.max > 0 && <span>🔷 {L('Maná', 'Мана')} <strong>{p.pm.actual}/{p.pm.max}</strong></span>}
-          {ATRIBUTOS.map((a) => <span key={a}>{T(RU_ATRIBUTOS, a)} <strong>{p.caracteristicas[a]}</strong> ({conSigno(modificador(p.caracteristicas[a]))})</span>)}
+          {ATRIBUTOS.map((a) => <span key={a}>{T(RU_ATRIBUTOS, a)} <strong>{car(p, a)}</strong> ({conSigno(modificador(car(p, a)))})</span>)}
         </div>
       </Seccion>
     </div>

@@ -53,6 +53,8 @@ export interface ConjuroPersonaje {
 /** Recurso añadido a mano. `recupera`: con qué descanso vuelve entero (corto, largo o ambos). */
 export interface RecursoExtra { id: string; es: string; ru: string; max: number; recupera?: 'corto' | 'largo' | 'ambos'; notas?: string; /** Fichas antiguas. */ corto?: 'uno' | 'todos' }
 
+export interface EfectoCar { id: string; atributo: Atributo; valor: number; nota: string }
+
 export interface Habilidad { comp: boolean; pericia: boolean; bonus: number }
 
 export interface Viaje {
@@ -115,6 +117,8 @@ export interface Personaje {
   recursosUsados: Record<string, number>;
   /** Descansos cortos hechos desde el último descanso largo. */
   descansosCortos: number;
+  /** Cambios temporales de características que pone el máster (veneno, maldición…), con su nota de cómo se quitan. */
+  efectosCar?: EfectoCar[];
   /** Recursos con usos que el jugador añade a mano (del catálogo o personalizados). */
   recursosExtra?: RecursoExtra[];
   // Hoja 4

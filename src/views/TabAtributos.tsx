@@ -1,9 +1,10 @@
+import { ListaEfectosCar } from '../efectosCar';
 import { Bloq, useFicha } from './Ficha';
 import { ChipsEstados } from '../estados';
 import { useState } from 'react';
 import { BotonAnadir, Etiqueta, Modal, Numero, Seccion, Texto } from '../ui';
 import { Contador, useDados } from '../dice';
-import { CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetencia, calcularCA, conSigno, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto, valorPrueba } from '../rules';
+import { car, CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetencia, calcularCA, conSigno, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto, valorPrueba } from '../rules';
 import { bonoVelocidad } from '../bonos';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type RecursoExtra } from '../types';
 import { buscarClase } from '../avisos';
@@ -120,13 +121,21 @@ export function TabAtributos() {
         );
       })()}
 
+      {(p.efectosCar?.length ?? 0) > 0 && (
+        <Seccion titulo={L('Efectos del máster', 'Эффекты от мастера')} className="efectos-master">
+          <ListaEfectosCar efectos={p.efectosCar} />
+          <p className="nota pequena">{L('Ya están sumados en las tiradas. Solo el máster puede quitarlos.', 'Уже учтены в бросках. Снять их может только мастер.')}</p>
+        </Seccion>
+      )}
       <div className="rejilla-caracteristicas">
         {ATRIBUTOS.map((a) => {
-          const m = modificador(p.caracteristicas[a]);
+          const ef = car(p, a);
+          const m = modificador(ef);
           return (
             <div key={a} className="caracteristica">
               <div className="car-nombre">{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}</div>
               <Bloq><Numero valor={p.caracteristicas[a]} min={1} max={30} set={(n) => upd((x) => { x.caracteristicas[a] = n; })} className="car-valor" /></Bloq>
+              {ef !== p.caracteristicas[a] && <div className={`car-efecto ${ef < p.caracteristicas[a] ? 'debuff' : 'buff'}`} title={L('Con efectos del máster', 'С эффектами мастера')}>→ {ef}</div>}
               <button className="car-mod" onClick={() => tirarD20(L(`Prueba de ${NOMBRE_ATRIBUTO[a]}`, `Проверка: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}`), valorPrueba(p, a), avisosTirada(p, 'prueba', a))} title={L('Tirar prueba', 'Бросить проверку')}>{conSigno(m)}{valorPrueba(p, a) !== m && <small className="extra-rasgo">{conSigno(valorPrueba(p, a) - m)}</small>}</button>
             </div>
           );

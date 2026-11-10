@@ -1,3 +1,4 @@
+import { chipsEfectosCar } from '../efectosCar';
 import { setPersonajeActivo } from '../tiradasPartida';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { Personaje } from '../types';
@@ -5,7 +6,7 @@ import { backend } from '../store';
 import { useDatos, type Clase, type Conjuro, type Dote, type Razas, type Trasfondo } from '../data';
 import { calcularAvisos, manaMaximo, type Avisos } from '../avisos';
 import { DadoIcono, PanelDados, useDados } from '../dice';
-import { conSigno, modificador } from '../rules';
+import { car, conSigno, modificador } from '../rules';
 import { Modal, PuntoRojo } from '../ui';
 import { TabPersonaje } from './TabPersonaje';
 import { TabAtributos } from './TabAtributos';
@@ -157,9 +158,10 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
           {ajeno && <span className="sello-master">👑</span>}
           <span className={`estado-guardado ${estado}`}>{estado === 'guardado' ? L('✓ Guardado', '✓ Сохранено') : estado === 'error' ? L('⚠ Sin guardar', '⚠ Не сохранено') : '…'}</span>
         </header>
-        {(p.estados?.length > 0 || p.agotamiento > 0 || p.iniciativaActual !== null) && (
+        {(p.estados?.length > 0 || p.agotamiento > 0 || p.iniciativaActual !== null || (p.efectosCar?.length ?? 0) > 0) && (
           <div className="franja-estados">
             <ChipsEstados estados={p.estados} agotamiento={p.agotamiento} detalles={p.estadosDetalle} quien={p.nombre} set={(e, a, d) => upd((x) => { x.estados = e; x.agotamiento = a; x.estadosDetalle = d; })} />
+            {chipsEfectosCar(p)}
             {p.iniciativaActual !== null && <span className="chip-estado iniciativa">⚔️ {L('Iniciativa', 'Инициатива')} {p.iniciativaActual}</span>}
           </div>
         )}
@@ -188,7 +190,7 @@ function SubidaNivel() {
   const { tirar } = useDados();
   const dado = clases?.find((c) => c.nombre === p.clase)?.atributos.dadoGolpe ?? '';
   if (!p.subidasPendientes || !dado) return null;
-  const con = modificador(p.caracteristicas.CON);
+  const con = modificador(car(p, 'CON'));
   const nivelDe = p.nivel - p.subidasPendientes + 1;
   return (
     <div className="modal-fondo">

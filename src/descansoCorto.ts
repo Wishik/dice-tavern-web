@@ -1,7 +1,7 @@
 import type { Conjuro, Razas } from './data';
 import type { Personaje } from './types';
 import { FUENTES, concesionesActivas, fuenteActiva } from './conjurosRasgos';
-import { bonoCompetencia, modificador } from './rules';
+import { bonoCompetencia, car, modificador } from './rules';
 
 /** Descansos cortos que se pueden hacer entre dos descansos largos (regla de la mesa). */
 export const MAX_DESCANSOS_CORTOS = 2;
@@ -21,7 +21,7 @@ interface Recordatorio {
 }
 
 const uno = () => 1;
-const mod = (p: Personaje, a: 'SAB' | 'INT') => Math.max(1, modificador(p.caracteristicas[a]));
+const mod = (p: Personaje, a: 'SAB' | 'INT') => Math.max(1, modificador(car(p, a)));
 
 const R: Recordatorio[] = [
   // Clases y subclases

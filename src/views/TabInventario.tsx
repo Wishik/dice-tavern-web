@@ -4,7 +4,7 @@ import { BotonAnadir, Buscador, Etiqueta, ListaDatos, Modal, Numero, Seccion, Te
 import { cargarObjetos, type ObjetoBase } from '../data';
 import {
   CINTURON_ESPACIOS, MAX_MONEDAS, MAX_MUNICION, MOCHILA_BASE, MOCHILA_MAX, NOMBRE_MONEDA, TRAMOS_SOBRECARGA, UMBRALES_FUERZA, VALOR_PC,
-  cabeEnMochila, convertir, embolsarExceso, espaciosItem, espaciosLibresMochila, espaciosPorFuerza, espaciosUsados, estadoCarga, leerPrecio, uid, usaMunicion,
+  cabeEnMochila, car, convertir, embolsarExceso, espaciosItem, espaciosLibresMochila, espaciosPorFuerza, espaciosUsados, estadoCarga, leerPrecio, uid, usaMunicion,
 } from '../rules';
 import { MONEDAS, RANURAS_EQUIPO, type Item, type Moneda, type Personaje, type RanuraEquipo, type TamanoCinturon } from '../types';
 import { L, T, idioma, RU_MONEDAS } from '../i18n';
@@ -73,7 +73,7 @@ export function TabInventario() {
         <BarraCarga usados={carga.usados} libres={carga.libres} />
         {carga.penalizacion < 0
           ? <p className="aviso-carga">{L('Velocidad', 'Скорость')} {carga.penalizacion} {L('pies', 'фт')}. {carga.efecto}</p>
-          : <p className="nota">{MOCHILA_BASE} {L('espacios', 'ячеек')} + {espaciosPorFuerza(p.caracteristicas.FUE)} {L('por Fuerza', 'за Силу')} ({UMBRALES_FUERZA.map((u) => `${u}+`).join(', ')}).</p>}
+          : <p className="nota">{MOCHILA_BASE} {L('espacios', 'ячеек')} + {espaciosPorFuerza(car(p, 'FUE'))} {L('por Fuerza', 'за Силу')} ({UMBRALES_FUERZA.map((u) => `${u}+`).join(', ')}).</p>}
         {carga.sobreMaximo && <p className="error">{L(`Llevas ${carga.usados} espacios y el máximo es ${MOCHILA_MAX}. Toca una bolsa de monedas para eliminarla (o todas las de esa moneda) o saca cosas.`, `Занято ${carga.usados} ячеек, а максимум ${MOCHILA_MAX}. Нажми на кошель с монетами, чтобы удалить его (или все такие), или вынь вещи.`)}</p>}
         <ListaItems items={p.mochila} libres={carga.libres} onAbrir={(i) => setAbierto({ zona: 'mochila', i })} mostrarTramos />
         <BotonAnadir onClick={() => carga.usados >= MOCHILA_MAX ? alert(mochilaLlena()) : setAnadir({ zona: 'mochila' })}>Añadir a la mochila</BotonAnadir>

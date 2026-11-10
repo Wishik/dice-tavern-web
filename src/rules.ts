@@ -3,6 +3,13 @@ import { bonoAtaqueArma, bonoAtaqueConjuro, bonoCdConjuro, bonoFuerzaCarga, bono
 import { L } from './i18n';
 import { tr } from './ru';
 
+
+/** Valor de una característica con los efectos temporales del máster (entre 1 y 30). */
+export function car(p: Personaje, a: Atributo): number {
+  const extra = (p.efectosCar ?? []).filter((e) => e.atributo === a).reduce((s, e) => s + e.valor, 0);
+  return extra ? Math.max(1, Math.min(30, p.caracteristicas[a] + extra)) : p.caracteristicas[a];
+}
+
 export const modificador = (valor: number) => Math.floor((valor - 10) / 2);
 export const conSigno = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
 
@@ -49,14 +56,14 @@ export function valorHabilidad(p: Personaje, id: string): number {
   const h = p.habilidades[id] ?? { comp: false, pericia: false, bonus: 0 };
   const bc = bonoCompetencia(p.nivel);
   const r = bonoHabilidad(p, id, h.comp);
-  return modificador(p.caracteristicas[def.atributo]) + (h.comp || r.comp ? bc : 0) + (h.pericia ? bc : 0) + (h.bonus || 0) + r.bono + bonoPrueba(p, def.atributo);
+  return modificador(car(p, def.atributo)) + (h.comp || r.comp ? bc : 0) + (h.pericia ? bc : 0) + (h.bonus || 0) + r.bono + bonoPrueba(p, def.atributo);
 }
 /** Prueba de característica: modificador + bonos de rasgos (p. ej. «Poderoso» +2 a FUE). */
-export const valorPrueba = (p: Personaje, a: Atributo) => modificador(p.caracteristicas[a]) + bonoPrueba(p, a);
+export const valorPrueba = (p: Personaje, a: Atributo) => modificador(car(p, a)) + bonoPrueba(p, a);
 
 export function valorSalvacion(p: Personaje, a: Atributo): number {
   const s = p.salvaciones[a];
-  return modificador(p.caracteristicas[a]) + (s.comp ? bonoCompetencia(p.nivel) : 0) + (s.bonus || 0) + bonoSalvacion(p, a);
+  return modificador(car(p, a)) + (s.comp ? bonoCompetencia(p.nivel) : 0) + (s.bonus || 0) + bonoSalvacion(p, a);
 }
 
 export const iniciativa = (p: Personaje) => valorPrueba(p, 'DES') + (p.bonusIniciativa || 0);
@@ -64,11 +71,11 @@ export const percepcionPasiva = (p: Personaje) => 10 + valorHabilidad(p, 'percep
 
 export function cdConjuros(p: Personaje): number | null {
   const a = caracteristicaConjuros(p); if (!a) return null;
-  return 8 + bonoCompetencia(p.nivel) + modificador(p.caracteristicas[a]) + bonoCdConjuro(p);
+  return 8 + bonoCompetencia(p.nivel) + modificador(car(p, a)) + bonoCdConjuro(p);
 }
 export function ataqueConjuros(p: Personaje): number | null {
   const a = caracteristicaConjuros(p); if (!a) return null;
-  return bonoCompetencia(p.nivel) + modificador(p.caracteristicas[a]) + bonoAtaqueConjuro(p);
+  return bonoCompetencia(p.nivel) + modificador(car(p, a)) + bonoAtaqueConjuro(p);
 }
 
 // ---------------------------------------------------------------- Inventario
@@ -105,7 +112,7 @@ export interface EstadoCarga {
 }
 
 export function estadoCarga(p: Personaje): EstadoCarga {
-  const libres = MOCHILA_BASE + espaciosPorFuerza(p.caracteristicas.FUE + bonoFuerzaCarga(p));
+  const libres = MOCHILA_BASE + espaciosPorFuerza(car(p, 'FUE') + bonoFuerzaCarga(p));
   const usados = espaciosUsados(p.mochila);
   const exceso = Math.max(0, usados - libres);
   const max = TRAMOS_SOBRECARGA[TRAMOS_SOBRECARGA.length - 1].hasta;
@@ -273,7 +280,7 @@ const carasDado = (dado: string) => parseInt(dado.replace(/\D/g, ''), 10) || 0;
 /** PG de nivel 1: máximo del dado de golpe + CON. A partir de ahí, cada nivel se tira el dado (ver subirNivel). */
 export function pgPorDefecto(p: Personaje, dado: string): number {
   const c = carasDado(dado); if (!c) return 0;
-  return Math.max(1, c + modificador(p.caracteristicas.CON));
+  return Math.max(1, c + modificador(car(p, 'CON')));
 }
 /** Cambia el nivel y apunta las subidas pendientes de tirar dado de golpe. */
 export function cambiarNivel(p: Personaje, nivel: number) {
@@ -287,7 +294,7 @@ export const pgSubida = (tirada: number, con: number) => Math.max(1, tirada + 1 
 export interface DesgloseCA { total: number; partes: string[]; sigiloDesventaja: string[]; fuerzaMinima: number }
 /** CA = 10 + DES sin armadura; con armadura, su fórmula; + escudo; + ajuste manual. */
 export function calcularCA(p: Personaje): DesgloseCA {
-  const des = modificador(p.caracteristicas.DES);
+  const des = modificador(car(p, 'DES'));
   const partes: string[] = [];
   const sigiloDesventaja: string[] = [];
   let fuerzaMinima = 0;
@@ -307,9 +314,9 @@ export function calcularCA(p: Personaje): DesgloseCA {
     if (/desventaja/i.test(arm.detalles?.['Sigilo'] ?? '')) sigiloDesventaja.push(arm.nombre);
     fuerzaMinima = Math.max(fuerzaMinima, parseInt(arm.detalles?.['Fuerza'] ?? '', 10) || 0);
   } else if (p.clase === 'Bárbaro') {
-    const c = modificador(p.caracteristicas.CON); base = 10 + desEf + c; partes.push(L(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(c)} CON`, `Защита без доспехов 10 ${conSigno(desEf)} ЛОВ ${conSigno(c)} ТЕЛ`));
+    const c = modificador(car(p, 'CON')); base = 10 + desEf + c; partes.push(L(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(c)} CON`, `Защита без доспехов 10 ${conSigno(desEf)} ЛОВ ${conSigno(c)} ТЕЛ`));
   } else if (p.clase === 'Monje' && !escudo) {
-    const s = modificador(p.caracteristicas.SAB); base = 10 + desEf + s; partes.push(L(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(s)} SAB`, `Защита без доспехов 10 ${conSigno(desEf)} ЛОВ ${conSigno(s)} МДР`));
+    const s = modificador(car(p, 'SAB')); base = 10 + desEf + s; partes.push(L(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(s)} SAB`, `Защита без доспехов 10 ${conSigno(desEf)} ЛОВ ${conSigno(s)} МДР`));
   } else partes.push(`10 ${conSigno(desEf)} ${L('DES', 'ЛОВ')}`);
   let total = base;
   for (const it of [p.equipo.manoHabil, p.equipo.manoTorpe]) {
@@ -371,7 +378,7 @@ export function avisosTirada(p: Personaje, tipo: TipoTirada, atr: Atributo | nul
   else if (fisica && tramo === 1 && (tipo === 'salvacion' || tipo === 'habilidad')) out.push(L(`Desventaja: mochila sobrecargada (${carga.usados} espacios), TS y habilidades de Fuerza y Destreza.`, `Помеха: рюкзак перегружен (${carga.usados} ячеек), спасброски и навыки Силы и Ловкости.`));
   const ca = calcularCA(p);
   if (habilidad === 'sigilo' && ca.sigiloDesventaja.length) out.push(L(`Desventaja en Sigilo por ${ca.sigiloDesventaja.join(' y ')}.`, `Помеха на Скрытность из-за: ${ca.sigiloDesventaja.join(', ')}.`));
-  if (ca.fuerzaMinima && p.caracteristicas.FUE < ca.fuerzaMinima && fisica) out.push(L(`Tu armadura pide Fuerza ${ca.fuerzaMinima}: pregunta al DM si te penaliza.`, `Доспех требует Силу ${ca.fuerzaMinima}: спроси мастера о штрафе.`));
+  if (ca.fuerzaMinima && car(p, 'FUE') < ca.fuerzaMinima && fisica) out.push(L(`Tu armadura pide Fuerza ${ca.fuerzaMinima}: pregunta al DM si te penaliza.`, `Доспех требует Силу ${ca.fuerzaMinima}: спроси мастера о штрафе.`));
   return out;
 }
 
@@ -382,7 +389,7 @@ export const MAX_MUNICION = 20;
 /** Bonificador de ataque de un arma: competencia + FUE (o DES si es a distancia o sutil, la mejor). */
 export function bonoArma(p: Personaje, it: Item): { ataque: number; mod: number; atr: Atributo } {
   const props = it.detalles?.['Propiedades'] ?? '';
-  const fue = modificador(p.caracteristicas.FUE), des = modificador(p.caracteristicas.DES);
+  const fue = modificador(car(p, 'FUE')), des = modificador(car(p, 'DES'));
   const distancia = usaMunicion(it) || (/alcance\s*\(/i.test(props) && !/arrojadiz/i.test(props));
   const atr: Atributo = distancia || (/sutil/i.test(props) && des > fue) ? 'DES' : 'FUE';
   const mod = atr === 'DES' ? des : fue;
