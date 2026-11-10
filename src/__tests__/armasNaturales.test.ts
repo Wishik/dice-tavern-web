@@ -27,3 +27,17 @@ describe('armas naturales y golpe sin armas', () => {
     expect(armasNaturales(k, null)).toHaveLength(2);
   });
 });
+
+import { bonoArma } from '../rules';
+describe('característica elegida por arma', () => {
+  it('ataque con CAR y daño con FUE', () => {
+    const p = nuevoPersonaje(); p.nivel = 1;
+    p.caracteristicas = { FUE: 14, DES: 10, CON: 10, INT: 10, SAB: 10, CAR: 18 };
+    const it = { id: 'x', nombre: 'Espada', descripcion: '', precio: '', cantidad: 1, tipo: 'arma' as const, detalles: { 'Daño': '1d8 cortante', 'Propiedades': '' } };
+    expect(bonoArma(p, it)).toMatchObject({ ataque: 4, mod: 2, atr: 'FUE' });
+    p.atrArmas = { x: { ataque: 'CAR' } };
+    expect(bonoArma(p, it)).toMatchObject({ ataque: 6, mod: 2, atr: 'CAR' });
+    p.atrArmas = { x: { ataque: 'CAR', dano: 'CAR' } };
+    expect(bonoArma(p, it).mod).toBe(4);
+  });
+});

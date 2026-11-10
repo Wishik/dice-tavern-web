@@ -4,7 +4,7 @@ import { BotonAnadir, Etiqueta, Numero, Seccion, Texto } from '../ui';
 import { useDados } from '../dice';
 import { CARACTERISTICA_CONJUROS, MAX_MUNICION, ataqueConjuros, avisosTirada, bonoArma, cdConjuros, conSigno, parseFormula, usaMunicion } from '../rules';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo, type Item, type Personaje } from '../types';
-import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
+import { L, T, RU_ATRIBUTOS, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
 import { tr } from '../ru';
 import { td } from '../datosRu';
 import { buscarClase } from '../avisos';
@@ -57,7 +57,8 @@ export function TabCombate() {
         {objetos.length === 0 && <p className="nota">{L('Equipa un arma en la mano hábil o torpe, o ponla en el cinturón (Inventario), y aparecerá aquí con su ataque y daño.', 'Возьми оружие в ведущую или вторую руку или повесь на пояс (Инвентарь) — оно появится здесь с атакой и уроном.')}</p>}
         <ul className="lista-ataques">
           {llevadas.map(({ it, donde, ref, extra, natural }) => {
-            const { ataque: ataqueBase, mod, atr, distancia } = bonoArma(p, it);
+            const { ataque: ataqueBase, mod, atr, distancia, auto: atrAuto } = bonoArma(p, it);
+            const elegido = p.atrArmas?.[it.id] ?? {};
             const pots = disponibles.filter((pt) => aplicaArma(pt, it, atr, distancia));
             const act = pots.filter((pt) => activos.has(pt.id));
             const ataque = ataqueBase + bonoAt(act);
@@ -73,6 +74,21 @@ export function TabCombate() {
               <li key={it.id} className="ataque auto">
                 <div className="ataque-titulo"><strong>{natural ? it.nombre : td(it.nombre)}</strong><small>{natural ? donde : tr(donde)}{tipo ? ` · ${tipo}` : ''}</small></div>
                 {natural && it.descripcion && <p className="nota pequena">{it.descripcion}</p>}
+                <div className="atr-arma">
+                  {(['ataque', 'dano'] as const).map((k) => (
+                    <label key={k}>{k === 'ataque' ? L('Ataque con', 'Атака от') : L('Daño con', 'Урон от')}
+                      <select className="campo" value={elegido[k] ?? ''} onChange={(e) => upd((x) => {
+                        const v = e.target.value as Atributo | '';
+                        const actual = { ...(x.atrArmas?.[it.id] ?? {}) };
+                        if (v) actual[k] = v; else delete actual[k];
+                        x.atrArmas = { ...(x.atrArmas ?? {}), [it.id]: actual };
+                      })}>
+                        <option value="">{L('Auto', 'Авто')} ({T(RU_ATRIBUTOS, atrAuto)})</option>
+                        {ATRIBUTOS.map((a) => <option key={a} value={a}>{T(RU_ATRIBUTOS, a)}</option>)}
+                      </select>
+                    </label>
+                  ))}
+                </div>
                 <div className="ataque-fila">
                   <button className="btn primario" disabled={sinMunicion} onClick={() => {
                     if (municion) upd((x) => { const y = ref(x); if (y) y.municion = Math.max(0, (y.municion ?? 0) - 1); });
@@ -92,7 +108,7 @@ export function TabCombate() {
             );
           })}
         </ul>
-        {llevadas.length > 0 && <p className="nota pequena">{L('Ataque = competencia + FUE (DES si es a distancia; la mejor si es sutil). Daño = dado del arma + el mismo modificador. Cada ataque con arco o ballesta gasta 1 de munición.', 'Атака = бонус мастерства + СИЛ (ЛОВ для дальнобойного; лучшая для фехтовального). Урон = кость оружия + тот же модификатор. Каждый выстрел из лука или арбалета тратит 1 боеприпас.')}</p>}
+        {llevadas.length > 0 && <p className="nota pequena">{L('Ataque = competencia + FUE (DES si es a distancia; la mejor si es sutil), o la característica que elijas en «Ataque con». Daño = dado del arma + el modificador de «Daño con». Cada ataque con arco o ballesta gasta 1 de munición.', 'Атака = бонус мастерства + СИЛ (ЛОВ для дальнобойного; лучшая для фехтовального) или характеристика, выбранная в «Атака от». Урон = кость оружия + модификатор из «Урон от». Каждый выстрел из лука или арбалета тратит 1 боеприпас.')}</p>}
       </Seccion>
 
       <Seccion titulo="Otros ataques">

@@ -121,6 +121,8 @@ export interface Personaje {
   efectosCar?: EfectoCar[];
   /** Potenciadores de combate encendidos (Furia, Ataque furtivo…), ids de potenciadores.ts. */
   potenciadores?: string[];
+  /** Característica elegida para el ataque y el daño de cada arma (id del objeto o «nat:…»). Sin valor: automática. */
+  atrArmas?: Record<string, { ataque?: Atributo; dano?: Atributo }>;
   /** Recursos con usos que el jugador añade a mano (del catálogo o personalizados). */
   recursosExtra?: RecursoExtra[];
   // Hoja 4

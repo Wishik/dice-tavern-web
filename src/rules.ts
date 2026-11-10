@@ -393,13 +393,16 @@ export function esDistancia(it: Item): boolean {
   return usaMunicion(it) || (/alcance\s*\(/i.test(props) && !/arrojadiz/i.test(props));
 }
 
-export function bonoArma(p: Personaje, it: Item): { ataque: number; mod: number; atr: Atributo; distancia: boolean } {
+export function bonoArma(p: Personaje, it: Item): { ataque: number; mod: number; atr: Atributo; distancia: boolean; auto: Atributo } {
   const props = it.detalles?.['Propiedades'] ?? '';
   const fue = modificador(car(p, 'FUE')), des = modificador(car(p, 'DES'));
   const distancia = esDistancia(it);
-  const atr: Atributo = distancia || (/sutil/i.test(props) && des > fue) ? 'DES' : 'FUE';
-  const mod = atr === 'DES' ? des : fue;
-  return { ataque: mod + bonoCompetencia(p.nivel) + bonoAtaqueArma(p, distancia), mod, atr, distancia };
+  const auto: Atributo = distancia || (/sutil/i.test(props) && des > fue) ? 'DES' : 'FUE';
+  // El jugador puede elegir otra característica para el ataque y/o el daño de esta arma.
+  const elegido = p.atrArmas?.[it.id];
+  const atr: Atributo = elegido?.ataque ?? auto;
+  const mod = modificador(car(p, elegido?.dano ?? auto));
+  return { ataque: modificador(car(p, atr)) + bonoCompetencia(p.nivel) + bonoAtaqueArma(p, distancia), mod, atr, distancia, auto };
 }
 
 // ---------------------------------------------------------------- Rasgos raciales recomendados e idiomas
