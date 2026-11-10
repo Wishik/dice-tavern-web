@@ -119,6 +119,8 @@ export interface Personaje {
   descansosCortos: number;
   /** Cambios temporales de características que pone el máster (veneno, maldición…), con su nota de cómo se quitan. */
   efectosCar?: EfectoCar[];
+  /** Potenciadores de combate encendidos (Furia, Ataque furtivo…), ids de potenciadores.ts. */
+  potenciadores?: string[];
   /** Recursos con usos que el jugador añade a mano (del catálogo o personalizados). */
   recursosExtra?: RecursoExtra[];
   // Hoja 4

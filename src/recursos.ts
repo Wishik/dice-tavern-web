@@ -76,6 +76,7 @@ export function descansoLargo(x: Personaje) {
   const usados: Record<string, number> = {};
   for (const r of x.recursosExtra ?? []) if (x.recursosUsados?.[r.id]) usados[r.id] = x.recursosUsados[r.id];
   x.recursosUsados = usados;
+  x.potenciadores = [];
   x.descansosCortos = 0;
   x.agotamiento = Math.max(0, (x.agotamiento ?? 0) - 1);
   x.muerte = { exitos: 0, fallos: 0 };

@@ -387,13 +387,19 @@ export function avisosTirada(p: Personaje, tipo: TipoTirada, atr: Atributo | nul
 export const usaMunicion = (it: Item | null | undefined) => !!it && it.tipo === 'arma' && /munici[oó]n/i.test(it.detalles?.['Propiedades'] ?? '');
 export const MAX_MUNICION = 20;
 /** Bonificador de ataque de un arma: competencia + FUE (o DES si es a distancia o sutil, la mejor). */
-export function bonoArma(p: Personaje, it: Item): { ataque: number; mod: number; atr: Atributo } {
+/** Arma a distancia (arco, ballesta, honda…): las arrojadizas cuentan como cuerpo a cuerpo. */
+export function esDistancia(it: Item): boolean {
+  const props = it.detalles?.['Propiedades'] ?? '';
+  return usaMunicion(it) || (/alcance\s*\(/i.test(props) && !/arrojadiz/i.test(props));
+}
+
+export function bonoArma(p: Personaje, it: Item): { ataque: number; mod: number; atr: Atributo; distancia: boolean } {
   const props = it.detalles?.['Propiedades'] ?? '';
   const fue = modificador(car(p, 'FUE')), des = modificador(car(p, 'DES'));
-  const distancia = usaMunicion(it) || (/alcance\s*\(/i.test(props) && !/arrojadiz/i.test(props));
+  const distancia = esDistancia(it);
   const atr: Atributo = distancia || (/sutil/i.test(props) && des > fue) ? 'DES' : 'FUE';
   const mod = atr === 'DES' ? des : fue;
-  return { ataque: mod + bonoCompetencia(p.nivel) + bonoAtaqueArma(p, distancia), mod, atr };
+  return { ataque: mod + bonoCompetencia(p.nivel) + bonoAtaqueArma(p, distancia), mod, atr, distancia };
 }
 
 // ---------------------------------------------------------------- Rasgos raciales recomendados e idiomas

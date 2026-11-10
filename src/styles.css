@@ -677,3 +677,8 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .lista-botin { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
 .lista-botin li { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed rgba(106,86,67,.35); }
 .btn.robar { border-color: #7a4f9a; color: #5b2f7a; }
+
+.chips-potenciadores { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+.chip.pot { padding: 5px 10px; font-size: 12px; }
+.chip.pot small { opacity: .8; margin-left: 4px; font-family: inherit; }
+.pot-activos { font-size: 12px; color: var(--oro); }

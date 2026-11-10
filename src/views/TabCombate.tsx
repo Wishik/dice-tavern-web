@@ -6,6 +6,9 @@ import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo, type Item, type Personaje } 
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
 import { tr } from '../ru';
 import { td } from '../datosRu';
+import { buscarClase } from '../avisos';
+import { recursosPersonaje } from '../recursos';
+import { alternarPotenciador, apagarDeUnGolpe, aplicaArma, potenciadoresDisponibles, sumarDano, type Potenciador } from '../potenciadores';
 
 type ArmaLlevada = { it: Item; donde: string; ref: (x: Personaje) => Item | null | undefined };
 /** Armas que llevas en las manos o en el cinturón: salen solas en Combate. */
@@ -18,7 +21,22 @@ function armasLlevadas(p: Personaje): ArmaLlevada[] {
 }
 
 export function TabCombate() {
-  const { p, upd } = useFicha();
+  const { p, upd, clases } = useFicha();
+  const clase = buscarClase(clases, p.clase);
+  const disponibles = potenciadoresDisponibles(p, clase);
+  const activos = new Set(p.potenciadores ?? []);
+  const bonoAt = (l: Potenciador[]) => l.reduce((s, x) => s + (x.ataque ?? 0), 0);
+  const extrasDano = (l: Potenciador[]) => l.map((x) => x.dano).filter(Boolean) as string[];
+  const nombres = (l: Potenciador[]) => (l.length ? ` (${l.map((x) => L(x.es, x.ru)).join(', ')})` : '');
+  const chips = (lista: Potenciador[]) => <ChipsPotenciadores lista={lista} activos={activos} alternar={(pt) => {
+    // Se comprueba antes con una copia: upd() aplica el cambio más tarde.
+    const falta = alternarPotenciador(structuredClone(p), pt, clase);
+    if (!falta) upd((x) => { alternarPotenciador(x, pt, clase); });
+    else {
+      const r = recursosPersonaje(p, clase).find((y) => y.id === falta);
+      alert(L(`No te quedan usos de ${r?.es ?? falta}.`, `Не осталось: ${r?.ru ?? falta}.`));
+    }
+  }} />;
   const { tirar, tirarD20 } = useDados();
   const cd = cdConjuros(p), at = ataqueConjuros(p);
   const llevadas = armasLlevadas(p);
@@ -36,12 +54,16 @@ export function TabCombate() {
         {llevadas.length === 0 && <p className="nota">{L('Equipa un arma en la mano hábil o torpe, o ponla en el cinturón (Inventario), y aparecerá aquí con su ataque y daño.', 'Возьми оружие в ведущую или вторую руку или повесь на пояс (Инвентарь) — оно появится здесь с атакой и уроном.')}</p>}
         <ul className="lista-ataques">
           {llevadas.map(({ it, donde, ref }) => {
-            const { ataque, mod, atr } = bonoArma(p, it);
+            const { ataque: ataqueBase, mod, atr, distancia } = bonoArma(p, it);
+            const pots = disponibles.filter((pt) => aplicaArma(pt, it, atr, distancia));
+            const act = pots.filter((pt) => activos.has(pt.id));
+            const ataque = ataqueBase + bonoAt(act);
             const danoTxt = it.detalles?.['Daño'] ?? '';
             const dado = danoTxt.match(/^\s*(\d+d\d+|\d+)/i)?.[1] ?? '';
             const tipo = danoTxt.replace(/^\s*(\d+d\d+|\d+)\s*/i, '');
             const versatil = (it.detalles?.['Propiedades'] ?? '').match(/vers[aá]til\s*\((\d+d\d+)\)/i)?.[1];
-            const formula = (d: string) => /d/.test(d) ? `${d}${mod ? conSigno(mod) : ''}` : `${Math.max(1, parseInt(d, 10) + mod)}`;
+            const formula = (d: string) => sumarDano(/d/.test(d) ? `${d}${mod ? conSigno(mod) : ''}` : `${Math.max(1, parseInt(d, 10) + mod)}`, extrasDano(act));
+            const tirarDano = (titulo: string, f: string) => { tirar(`${titulo}: ${td(it.nombre)}${nombres(act)}`, f); upd((x) => apagarDeUnGolpe(x, act)); };
             const municion = usaMunicion(it);
             const sinMunicion = municion && !(it.municion ?? 0);
             return (
@@ -50,11 +72,12 @@ export function TabCombate() {
                 <div className="ataque-fila">
                   <button className="btn primario" disabled={sinMunicion} onClick={() => {
                     if (municion) upd((x) => { const y = ref(x); if (y) y.municion = Math.max(0, (y.municion ?? 0) - 1); });
-                    tirarD20(`${L('Ataque', 'Атака')}: ${it.nombre}`, ataque, avisosTirada(p, 'ataque', atr));
+                    tirarD20(`${L('Ataque', 'Атака')}: ${td(it.nombre)}${nombres(act.filter((x) => x.ataque))}`, ataque, avisosTirada(p, 'ataque', atr));
                   }}>🎲 {L('Ataque', 'Атака')} {conSigno(ataque)}</button>
-                  {dado && <button className="btn" onClick={() => tirar(`${L('Daño', 'Урон')}: ${it.nombre}`, formula(dado))}>🎲 {formula(dado)}</button>}
-                  {versatil && <button className="btn" onClick={() => tirar(`${L('Daño a dos manos', 'Урон двумя руками')}: ${it.nombre}`, formula(versatil))}>🎲 {L('A dos manos', 'Двумя руками')} {formula(versatil)}</button>}
+                  {dado && <button className="btn" onClick={() => tirarDano(L('Daño', 'Урон'), formula(dado))}>🎲 {formula(dado)}</button>}
+                  {versatil && <button className="btn" onClick={() => tirarDano(L('Daño a dos manos', 'Урон двумя руками'), formula(versatil))}>🎲 {L('A dos manos', 'Двумя руками')} {formula(versatil)}</button>}
                 </div>
+                {pots.length > 0 && chips(pots)}
                 {municion && (
                   <div className="ataque-fila">
                     <span className={sinMunicion ? 'error' : 'nota'}>🏹 {L('Munición', 'Боеприпасы')}: {it.municion ?? 0}/{MAX_MUNICION}{sinMunicion ? L(' · ¡sin munición!', ' · закончились!') : ''}</span>
@@ -71,20 +94,25 @@ export function TabCombate() {
       <Seccion titulo="Otros ataques">
         <ul className="lista-ataques">
           {p.ataques.map((a, i) => {
-            const bon = parseInt(a.ataque.replace(/\s/g, ''), 10);
+            const pots = disponibles.filter((pt) => !pt.armas);
+            const act = pots.filter((pt) => activos.has(pt.id));
+            const bonBase = parseInt(a.ataque.replace(/\s/g, ''), 10);
+            const bon = bonBase + bonoAt(act);
+            const danoTot = a.dano ? sumarDano(a.dano, extrasDano(act)) : '';
             const danoOk = !!parseFormula(a.dano);
             return (
               <li key={i} className="ataque">
                 <Texto valor={a.nombre} set={(s) => upd((x) => { x.ataques[i].nombre = s; })} placeholder="Nombre (p. ej. Espada corta c/c)" />
                 <div className="ataque-fila">
-                  <label>{L('Ataque', 'Атака')}<span className="con-mas"><span>+</span><input className="campo" inputMode="numeric" value={isNaN(bon) ? '' : String(Math.abs(bon))} placeholder="0"
+                  <label>{L('Ataque', 'Атака')}<span className="con-mas"><span>+</span><input className="campo" inputMode="numeric" value={isNaN(bonBase) ? '' : String(Math.abs(bonBase))} placeholder="0"
                     onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); upd((x) => { x.ataques[i].ataque = v ? `+${v}` : ''; }); }} /></span></label>
-                  <button className="btn" disabled={isNaN(bon)} onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${a.nombre || L('arma', 'оружие')}`, bon, avisosTirada(p, 'ataque', null))}>🎲 d20</button>
+                  <button className="btn" disabled={isNaN(bon)} onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${a.nombre || L('arma', 'оружие')}${nombres(act.filter((x) => x.ataque))}`, bon, avisosTirada(p, 'ataque', null))}>🎲 d20{act.some((x) => x.ataque) && !isNaN(bon) ? ` ${conSigno(bon)}` : ''}</button>
                 </div>
                 <div className="ataque-fila">
                   <label>{L('Daño', 'Урон')}<SelectorDano valor={a.dano} set={(v) => upd((x) => { x.ataques[i].dano = v; })} /></label>
-                  <button className="btn" disabled={!danoOk} onClick={() => tirar(`${L('Daño', 'Урон')}: ${a.nombre || L('arma', 'оружие')}`, a.dano)}>🎲 {L('Daño', 'Урон')}</button>
+                  <button className="btn" disabled={!danoOk} onClick={() => { tirar(`${L('Daño', 'Урон')}: ${a.nombre || L('arma', 'оружие')}${nombres(act)}`, danoTot); upd((x) => apagarDeUnGolpe(x, act)); }}>🎲 {act.some((x) => x.dano) ? danoTot : L('Daño', 'Урон')}</button>
                 </div>
+                {pots.length > 0 && chips(pots)}
                 <div className="ataque-fila derecha">
                   <button className="btn icono peligro-suave" title={L('Quitar', 'Убрать')} onClick={() => upd((x) => { x.ataques.splice(i, 1); })}>✕ {L('Quitar', 'Убрать')}</button>
                 </div>
@@ -115,6 +143,25 @@ export function TabCombate() {
           <div><small>{L('Ataque de conjuro', 'Атака заклинанием')}</small>{at !== null ? <button className="lt-valor" onClick={() => tirarD20(L('Ataque de conjuro', 'Атака заклинанием'), at)}>{conSigno(at)}</button> : <strong>—</strong>}</div>
         </div>
       </Seccion>
+    </div>
+  );
+}
+
+/** Botones para encender Furia, Ataque furtivo… en un arma. Encendido = dorado. */
+function ChipsPotenciadores({ lista, activos, alternar }: { lista: Potenciador[]; activos: Set<string>; alternar: (pt: Potenciador) => void }) {
+  return (
+    <div className="chips-potenciadores">
+      {lista.map((pt) => {
+        const on = activos.has(pt.id);
+        const efecto = [pt.ataque ? `${conSigno(pt.ataque)} ${L('at.', 'ат.')}` : '', pt.dano ? `${pt.dano.replace(/^(?=\d)/, '+')} ${L('daño', 'урон')}` : ''].filter(Boolean).join(' · ');
+        const nota = L(pt.nota_es ?? '', pt.nota_ru ?? '');
+        return (
+          <button key={pt.id} type="button" className={`chip pot${on ? ' activo' : ''}`} title={nota + (pt.unaVez ? L(' Se apaga sola tras tirar el daño.', ' Выключится сама после броска урона.') : '')}
+            onClick={() => alternar(pt)}>
+            {on ? '✓ ' : ''}{L(pt.es, pt.ru)}<small>{efecto}</small>
+          </button>
+        );
+      })}
     </div>
   );
 }
