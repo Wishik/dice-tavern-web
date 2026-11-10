@@ -137,3 +137,41 @@ begin
    where id = pj;
 end $$;
 grant execute on function public.master_guardar(text, jsonb) to authenticated;
+
+-- Historial de tiradas de la partida: los jugadores registran sus tiradas, solo el máster las ve.
+create table if not exists public.tiradas (
+  id bigserial primary key,
+  partida uuid not null references public.partidas(id) on delete cascade,
+  usuario uuid not null references auth.users(id) on delete cascade,
+  personaje text,
+  quien text not null default '',
+  etiqueta text not null default '',
+  formula text not null default '',
+  total integer not null,
+  detalle text not null default '',
+  modo text not null default 'normal',
+  critico text,
+  creada timestamptz not null default now()
+);
+create index if not exists tiradas_partida_creada on public.tiradas (partida, creada desc);
+alter table public.tiradas enable row level security;
+grant select on public.tiradas to authenticated;
+drop policy if exists "el máster ve las tiradas" on public.tiradas;
+create policy "el máster ve las tiradas" on public.tiradas for select to authenticated using (public.es_master(partida));
+
+-- Registra una tirada del personaje en todas las partidas en las que juega su dueño con él. Guarda solo las 200 últimas por partida.
+create or replace function public.registrar_tirada(pj text, etiqueta text, formula text, total integer, detalle text, modo text, critico text) returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  p uuid;
+  nom text;
+begin
+  select coalesce(datos->>'nombre', '') into nom from public.personajes where id = pj and propietario = auth.uid();
+  if not found then return; end if;
+  for p in select partida from public.miembros where personaje = pj and usuario = auth.uid() loop
+    insert into public.tiradas (partida, usuario, personaje, quien, etiqueta, formula, total, detalle, modo, critico)
+    values (p, auth.uid(), pj, left(nom, 60), left(etiqueta, 120), left(formula, 60), total, left(detalle, 300), left(coalesce(modo, 'normal'), 12), critico);
+    delete from public.tiradas where partida = p and id not in (select id from public.tiradas where partida = p order by creada desc limit 200);
+  end loop;
+end $$;
+grant execute on function public.registrar_tirada(text, text, text, integer, text, text, text) to authenticated;

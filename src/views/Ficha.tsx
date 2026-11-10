@@ -1,3 +1,4 @@
+import { setPersonajeActivo } from '../tiradasPartida';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { Personaje } from '../types';
 import { backend } from '../store';
@@ -72,6 +73,8 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
   const ultimo = useRef<Personaje | null>(null);
   /** Cuenta las ediciones locales, para descartar recargas que empezaron antes de una edición. */
   const cambios = useRef(0);
+  // Las tiradas de mi propia hoja se apuntan en el historial de mis partidas.
+  useEffect(() => { if (ajeno) return; setPersonajeActivo(id); return () => setPersonajeActivo(null); }, [id, ajeno]);
 
   useEffect(() => { backend.cargar(id).then((x) => x ? setP(x) : setError(L('No se encontró el personaje.', 'Персонаж не найден.'))).catch((e) => setError(e.message)); }, [id]);
   // En partida, el máster (o el jugador) puede cambiar la hoja desde otro dispositivo: se recarga si no hay cambios pendientes.

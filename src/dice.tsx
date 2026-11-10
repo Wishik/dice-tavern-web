@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { conSigno, parseFormula } from './rules';
 import { L } from './i18n';
+import { registrarTirada } from './tiradasPartida';
 
 export type Modo = 'normal' | 'ventaja' | 'desventaja';
 export interface Tirada {
@@ -51,6 +52,7 @@ export function DiceProvider({ children }: { children: ReactNode }) {
       critico: d20 && f.dados.length === 1 ? (d20.valor === 20 ? 'exito' : d20.valor === 1 ? 'fallo' : undefined) : undefined };
     setHistorial((h) => [t, ...h].slice(0, 50));
     setActual(t);
+    registrarTirada(t);
     return t;
   }, []);
 

@@ -651,3 +651,11 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .quitar-recurso { margin-left: 8px; padding: 0 4px; border: none; background: none; font-size: .8em; opacity: .55; cursor: pointer; color: inherit; }
 .recursos-clase li { flex-wrap: wrap; }
 .notas-recurso { flex-basis: 100%; font-weight: 400; opacity: .75; font-size: .85em; white-space: pre-wrap; }
+
+.historial-partida .historial { max-height: none; }
+.historial-partida .hora { opacity: .6; min-width: 40px; }
+.historial-partida .ht-texto { flex: 1; display: flex; flex-direction: column; }
+.historial-partida .ht-detalle { opacity: .7; }
+.historial-partida li.critico-exito strong { color: #2e7d32; }
+.historial-partida li.critico-fallo strong { color: var(--rojo); }
+.vista-partida { flex-wrap: wrap; }
