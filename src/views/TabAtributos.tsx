@@ -198,7 +198,8 @@ export function TabAtributos() {
             <BotonAnadir onClick={() => setAnadirRec(true)}>{L('Añadir recurso', 'Добавить ресурс')}</BotonAnadir>
             {anadirRec && <ModalRecurso onClose={() => setAnadirRec(false)} />}
             {editRec && <ModalRecurso editar={editRec} onClose={() => setEditRec(null)} />}
-            <Texto multilinea filas={4} valor={p.recursos} set={(s) => upd((x) => { x.recursos = s; })} placeholder={L('Otros recursos y notas…', 'Другие ресурсы и заметки…')} />
+            {/* El campo libre ya no se usa; solo se muestra si quedó texto de antes, para poder pasarlo a recursos. */}
+            {!!p.recursos?.trim() && <Texto multilinea filas={4} valor={p.recursos} set={(s) => upd((x) => { x.recursos = s; })} placeholder={L('Otros recursos y notas…', 'Другие ресурсы и заметки…')} />}
           </Seccion>
         </div>
       </div>
