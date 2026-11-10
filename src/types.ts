@@ -50,6 +50,9 @@ export interface ConjuroPersonaje {
   origen?: string;
 }
 
+/** Recurso añadido a mano. `recupera`: con qué descanso vuelve entero (corto, largo o ambos). */
+export interface RecursoExtra { id: string; es: string; ru: string; max: number; recupera?: 'corto' | 'largo' | 'ambos'; notas?: string; /** Fichas antiguas. */ corto?: 'uno' | 'todos' }
+
 export interface Habilidad { comp: boolean; pericia: boolean; bonus: number }
 
 export interface Viaje {
@@ -113,7 +116,7 @@ export interface Personaje {
   /** Descansos cortos hechos desde el último descanso largo. */
   descansosCortos: number;
   /** Recursos con usos que el jugador añade a mano (del catálogo o personalizados). */
-  recursosExtra?: { id: string; es: string; ru: string; max: number; corto?: 'uno' | 'todos' }[];
+  recursosExtra?: RecursoExtra[];
   // Hoja 4
   ataquesTurno: { habil: number; torpe: number };
   ataques: { nombre: string; ataque: string; dano: string }[];

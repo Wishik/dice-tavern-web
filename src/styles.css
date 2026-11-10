@@ -649,3 +649,5 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .fila-recurso small { opacity: .75; white-space: nowrap; }
 .form-recurso { display: grid; gap: 8px; margin-bottom: 12px; }
 .quitar-recurso { margin-left: 8px; padding: 0 4px; border: none; background: none; font-size: .8em; opacity: .55; cursor: pointer; color: inherit; }
+.recursos-clase li { flex-wrap: wrap; }
+.notas-recurso { flex-basis: 100%; font-weight: 400; opacity: .75; font-size: .85em; white-space: pre-wrap; }

@@ -56,3 +56,20 @@ describe('límites de habilidades', () => {
     expect([...sobrantes(['a', 'b', 'c'], 2, ['c', 'a', 'b'], [])]).toEqual(['b']);
   });
 });
+
+describe('recupera de recursos propios', () => {
+  it('corto, largo o ambos', () => {
+    const p = nuevoPersonaje();
+    p.recursosExtra = [
+      { id: 'a', es: 'A', ru: 'A', max: 2, recupera: 'corto' },
+      { id: 'b', es: 'B', ru: 'B', max: 2, recupera: 'largo' },
+      { id: 'c', es: 'C', ru: 'C', max: 2, recupera: 'ambos' },
+    ];
+    p.recursosUsados = { a: 2, b: 2, c: 2 };
+    descansoLargo(p);
+    expect(p.recursosUsados).toEqual({ a: 2 });
+    p.recursosUsados = { a: 2, b: 2, c: 2 };
+    descansoCorto(p, null);
+    expect(p.recursosUsados).toEqual({ a: 0, b: 2, c: 0 });
+  });
+});
