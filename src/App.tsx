@@ -255,7 +255,7 @@ function Lista({ usuario, onUsuario, onAbrir, onPartida, onSalir }: { usuario: U
                 <div className="tp-texto"><strong>{r.nombre || L('Sin nombre', 'Без имени')}</strong><span>{[T(RU_RAZAS, r.raza), trClases(r.clase)].filter(Boolean).join(' · ') || L('Sin raza ni clase', 'Без расы и класса')}</span><span className="nivel">{L('Nivel', 'Уровень')} {r.nivel}</span></div>
               </button>
               <div className="acciones-tarjeta">
-                <button className={`candado ${r.bloqueado ? 'cerrado' : 'abierto'}`} title={r.bloqueado ? L('Desbloquear para editar raza, clase, características…', 'Разблокировать правку расы, класса, характеристик…') : L('Terminar la creación y bloquear raza, clase, características…', 'Закончить создание и заблокировать расу, класс, характеристики…')} onClick={() => alternarBloqueo(r)}><span>{r.bloqueado ? '🔒' : '🔓'}</span><small>{r.bloqueado ? L('Cerrado', 'Закрыт') : L('Abierto', 'Открыт')}</small></button>
+                <button className="btn-icono candado" aria-label={r.bloqueado ? L('Bloqueado', 'Заблокирован') : L('Editable', 'Можно править')} title={r.bloqueado ? L('Desbloquear para editar raza, clase, características…', 'Разблокировать правку расы, класса, характеристик…') : L('Terminar la creación y bloquear raza, clase, características…', 'Закончить создание и заблокировать расу, класс, характеристики…')} onClick={() => alternarBloqueo(r)}><IconoCandado cerrado={!!r.bloqueado} /></button>
                 <button className="btn-icono" title={L('Borrar personaje', 'Удалить персонажа')} aria-label={L('Borrar personaje', 'Удалить персонажа')} onClick={() => borrarPj(r)}>🗑️</button>
               </div>
             </div>
@@ -286,5 +286,15 @@ function Lista({ usuario, onUsuario, onAbrir, onPartida, onSalir }: { usuario: U
       {unirseCod !== null && backend.modo === 'nube' && !pedirAlias && <ModalUnirse codigoInicial={unirseCod} onClose={cerrarUnirse} onUnido={(id) => { cerrarUnirse(); onPartida(id); }} />}
       {pedirAlias && <ModalAlias onListo={(a) => { setPedirAlias(false); if (a) onUsuario({ ...usuario, alias: a }); }} />}
     </div>
+  );
+}
+
+/** Candado dibujado: cerrado con el arco metido en el cuerpo; abierto con el arco levantado y girado a un lado. */
+function IconoCandado({ cerrado }: { cerrado: boolean }) {
+  return (
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="4" y="11" width="13" height="10" rx="2" />
+      {cerrado ? <path d="M7 11V7.5a3.5 3.5 0 0 1 7 0V11" /> : <path d="M14 11V5.5a3.5 3.5 0 0 1 7 0V8" />}
+    </svg>
   );
 }
