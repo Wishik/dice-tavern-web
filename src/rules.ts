@@ -311,6 +311,8 @@ export function calcularCA(p: Personaje): DesgloseCA {
       const d = tope ? Math.min(desEf, parseInt(tope[1], 10)) : desEf;
       base = n + d; partes.push(`${arm.nombre} ${n} ${conSigno(d)} ${L('DES', 'ЛОВ')}`);
     } else { base = n; partes.push(`${arm.nombre} ${n}`); }
+    const mg = bonoMagicoArma(arm);
+    if (mg) { base += mg; partes.push(`${L('mágica', 'магия')} ${conSigno(mg)}`); }
     if (/desventaja/i.test(arm.detalles?.['Sigilo'] ?? '')) sigiloDesventaja.push(arm.nombre);
     fuerzaMinima = Math.max(fuerzaMinima, parseInt(arm.detalles?.['Fuerza'] ?? '', 10) || 0);
   } else if (p.clase === 'Bárbaro') {
@@ -322,7 +324,8 @@ export function calcularCA(p: Personaje): DesgloseCA {
   for (const it of [p.equipo.manoHabil, p.equipo.manoTorpe]) {
     if (it?.tipo !== 'escudo') continue;
     const b = parseInt((it.detalles?.['Clase de armadura'] ?? '+2').replace(/[^\d-]/g, ''), 10) || 2;
-    total += b; partes.push(`${it.nombre} +${b}`);
+    const mg = bonoMagicoArma(it);
+    total += b + mg; partes.push(`${it.nombre} +${b + mg}`);
     if (/desventaja/i.test(it.detalles?.['Sigilo'] ?? '')) sigiloDesventaja.push(it.nombre);
     fuerzaMinima = Math.max(fuerzaMinima, parseInt(it.detalles?.['Fuerza'] ?? '', 10) || 0);
   }
@@ -390,7 +393,7 @@ export const MAX_MUNICION = 20;
 /** Armas sencillas cuerpo a cuerpo (armas.json): todas son armas de monje. */
 const SENCILLAS_CAC = ['Bastón', 'Cestus', 'Daga', 'Garrote', 'Garrote grande', 'Hacha de mano', 'Hoz', 'Lanza', 'Lanza de caza', 'Martillo ligero', 'Maza', 'Nudillo de latón', 'Puñal'];
 /** «Daga +1» → 1: bonificador mágico escrito en el nombre del arma. */
-export const bonoMagicoArma = (it: Item) => parseInt(it.nombre.match(/\+\s*(\d)\b/)?.[1] ?? '0', 10);
+export const bonoMagicoArma = (it: Item) => it.magico ?? parseInt(it.nombre.match(/\+\s*(\d)\b/)?.[1] ?? '0', 10);
 /** Arma de monje: sencilla cuerpo a cuerpo o marcial cuerpo a cuerpo con la propiedad «ligera». */
 export function esArmaMonje(it: Item): boolean {
   if (it.tipo !== 'arma' || it.id.startsWith('nat:') || esDistancia(it)) return false;

@@ -11,6 +11,28 @@ import { L, T, idioma, RU_MONEDAS } from '../i18n';
 import { tr } from '../ru';
 import { td } from '../datosRu';
 import { nombreBotin, useBotin } from '../botin';
+import { EditorObjeto } from './EditorObjeto';
+
+/** Al cambiar el tipo de un objeto propio, le damos los datos mínimos para que funcione como arma, armadura o escudo. */
+function conTipo(it: Item, tipo: Item['tipo']): Item {
+  const y: Item = { ...it, tipo, detalles: { ...(it.detalles ?? {}) } };
+  if (tipo === 'arma' && !y.detalles!['Daño']) Object.assign(y.detalles!, { 'Daño': '1d6 Cortante', 'Propiedades': y.detalles!['Propiedades'] ?? '' });
+  if (tipo === 'armadura' && !/^\d/.test(y.detalles!['Clase de armadura'] ?? '')) Object.assign(y.detalles!, { 'Clase de armadura': '11 + modificador de Destreza', 'Fuerza': '--', 'Sigilo': '--' });
+  if (tipo === 'escudo' && !y.detalles!['Clase de armadura']) y.detalles!['Clase de armadura'] = '+2';
+  if (!Object.keys(y.detalles!).length) delete y.detalles;
+  return y;
+}
+
+function SelectorTipo({ valor, set }: { valor: Item['tipo']; set: (t: Item['tipo']) => void }) {
+  return (
+    <Etiqueta texto={L('Categoría', 'Категория')}>
+      <select className="campo" value={valor} onChange={(e) => set(e.target.value as Item['tipo'])}>
+        <option value="otro">{L('Objeto', 'Предмет')}</option><option value="pocion">{L('Poción', 'Зелье')}</option><option value="consumible">{L('Consumible', 'Расходник')}</option>
+        <option value="arma">{L('Arma', 'Оружие')}</option><option value="armadura">{L('Armadura', 'Доспех')}</option><option value="escudo">{L('Escudo', 'Щит')}</option><option value="herramienta">{L('Herramienta', 'Инструмент')}</option>
+      </select>
+    </Etiqueta>
+  );
+}
 
 type Lugar = { zona: 'mochila' | 'cinturon'; i: number } | { zona: 'equipo'; r: RanuraEquipo };
 type Destino = { zona: 'mochila' | 'cinturon' } | { zona: 'equipo'; r: RanuraEquipo };
@@ -160,6 +182,7 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
   };
   const it = leer(p, lugar)!;
   const [equipar, setEquipar] = useState(false);
+  const [editar, setEditar] = useState(false);
   const set = (f: (it: Item) => void) => upd((x) => { const y = leer(x, lugar); if (y) f(y); });
   const mover = (d: Destino) => { if (!cabe(p, it, d, lugar)) return; upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, d); }); onClose(); };
   const usable = it.tipo === 'pocion' || it.tipo === 'consumible';
@@ -186,7 +209,11 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
         <Etiqueta texto="Cantidad"><Numero valor={it.cantidad} min={1} set={(n) => set((y) => { y.cantidad = n; })} /></Etiqueta>
         <Etiqueta texto="Precio (si lo sabes)"><input className="campo" value={it.precio} placeholder="p. ej. 25po" onChange={(e) => set((y) => { y.precio = e.target.value; })} /></Etiqueta>
         <Etiqueta texto="Máx. por espacio"><input className="campo" inputMode="numeric" value={it.maxPorEspacio ?? ''} placeholder="sin límite" onChange={(e) => { const n = parseInt(e.target.value, 10); set((y) => { y.maxPorEspacio = isNaN(n) || n < 1 ? undefined : n; }); }} /></Etiqueta>
+        <SelectorTipo valor={it.tipo} set={(t) => set((y) => { Object.assign(y, conTipo(y, t)); })} />
       </div>
+      {['arma', 'armadura', 'escudo'].includes(it.tipo) && (editar
+        ? <EditorObjeto it={it} set={set} />
+        : <button className="btn pequeno" onClick={() => setEditar(true)}>✎ {L('Editar daño, propiedades, +1…', 'Изменить урон, свойства, +1…')}</button>)}
       {usaMunicion(it) && (
         <div className="municion">
           <Etiqueta texto={L(`Munición en el mismo espacio (máx. ${MAX_MUNICION})`, `Боеприпасы в той же ячейке (макс. ${MAX_MUNICION})`)}>
@@ -328,18 +355,13 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
   if (borrador) return (
     <Modal titulo={L(`Añadir a ${nombreDestino}`, `Добавить: ${nombreDestino}`)} onClose={onClose}
       pie={<button className="btn primario" disabled={!borrador.nombre.trim()} onClick={() => { if (!cabe(p, borrador, destino)) return; upd((x) => poner(x, borrador, destino)); onClose(); }}>{L('Añadir', 'Добавить')}</button>}>
-      {borrador.detalles && <ListaDatos datos={borrador.detalles} />}
       <div className="rejilla-campos">
         <Etiqueta texto="Nombre"><input className="campo" value={borrador.nombre} onChange={(e) => setBorrador({ ...borrador, nombre: e.target.value })} /></Etiqueta>
         <Etiqueta texto="Cantidad"><Numero valor={borrador.cantidad} min={1} set={(n) => setBorrador({ ...borrador, cantidad: n })} /></Etiqueta>
         <Etiqueta texto="Precio (si lo sabes)"><input className="campo" value={borrador.precio} placeholder="p. ej. 25po" onChange={(e) => setBorrador({ ...borrador, precio: e.target.value })} /></Etiqueta>
-        <Etiqueta texto="Tipo">
-          <select className="campo" value={borrador.tipo} onChange={(e) => setBorrador({ ...borrador, tipo: e.target.value as Item['tipo'] })}>
-            <option value="otro">{L('Objeto', 'Предмет')}</option><option value="pocion">{L('Poción', 'Зелье')}</option><option value="consumible">{L('Consumible', 'Расходник')}</option>
-            <option value="arma">{L('Arma', 'Оружие')}</option><option value="armadura">{L('Armadura', 'Доспех')}</option><option value="escudo">{L('Escudo', 'Щит')}</option><option value="herramienta">{L('Herramienta', 'Инструмент')}</option>
-          </select>
-        </Etiqueta>
+        <SelectorTipo valor={borrador.tipo} set={(t) => setBorrador(conTipo(borrador, t))} />
       </div>
+      <EditorObjeto it={borrador} set={(f) => setBorrador((b) => { if (!b) return b; const y = structuredClone(b); f(y); return y; })} />
       <Etiqueta texto="Descripción"><Texto multilinea filas={5} valor={borrador.descripcion} set={(v) => setBorrador((b) => b && { ...b, descripcion: v })} placeholder="Qué hace, cuánto cura, cuánto daño…" /></Etiqueta>
     </Modal>
   );

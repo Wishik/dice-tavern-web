@@ -23,6 +23,10 @@ export interface Item {
   detalles?: Record<string, string>;
   /** Armas a distancia: munición que lleva en el mismo espacio (máx. 20). */
   municion?: number;
+  /** Bonificador mágico (+1, +2, +3): al ataque y daño de un arma, o a la CA de una armadura o escudo. */
+  magico?: number;
+  /** Daño extra del arma (p. ej. «1d6 fuego» de una espada flamígera). */
+  danoExtra?: string;
 }
 
 export type RanuraEquipo = 'yelmo' | 'amuleto' | 'armadura' | 'capa' | 'manoHabil' | 'manoTorpe';

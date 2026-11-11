@@ -70,13 +70,13 @@ export function TabCombate() {
             const tipo = danoTxt.replace(/^\s*(\d+d\d+|\d+)\s*/i, '');
             const versatilArma = (it.detalles?.['Propiedades'] ?? '').match(/vers[aá]til\s*\((\d+d\d+)\)/i)?.[1];
             const versatil = versatilArma && dadoMayor(versatilArma, artes) !== dado ? dadoMayor(versatilArma, artes) : undefined;
-            const formula = (d: string) => sumarDano(/d/.test(d) ? `${d}${mod ? conSigno(mod) : ''}` : `${Math.max(1, parseInt(d, 10) + mod)}`, [...(extra ? [extra] : []), ...extrasDano(act)]);
+            const formula = (d: string) => sumarDano(/d/.test(d) ? `${d}${mod ? conSigno(mod) : ''}` : `${Math.max(1, parseInt(d, 10) + mod)}`, [...(extra ? [extra] : []), ...(it.danoExtra ? [`+${it.danoExtra.split(' ')[0]}`] : []), ...extrasDano(act)]);
             const tirarDano = (titulo: string, f: string) => { tirar(`${titulo}: ${td(it.nombre)}${nombres(act)}`, f); upd((x) => apagarDeUnGolpe(x, act)); };
             const municion = usaMunicion(it);
             const sinMunicion = municion && !(it.municion ?? 0);
             return (
               <li key={it.id} className="ataque auto">
-                <div className="ataque-titulo"><strong>{natural ? it.nombre : td(it.nombre)}</strong><small>{natural ? donde : tr(donde)}{tipo ? ` · ${tipo}` : ''}</small></div>
+                <div className="ataque-titulo"><strong>{natural ? it.nombre : td(it.nombre)}</strong><small>{natural ? donde : tr(donde)}{tipo ? ` · ${tipo}` : ''}{it.danoExtra ? ` + ${it.danoExtra}` : ''}{it.magico ? ` · +${it.magico}` : ''}</small></div>
                 {natural && it.descripcion && <p className="nota pequena">{it.descripcion}</p>}
                 {artes && <p className="nota pequena">🥋 {dado !== dadoArma ? L(`Arma de monje: usa tu dado de artes marciales (${artes}) en vez de ${dadoArma}.`, `Оружие монаха: кость боевых искусств (${artes}) вместо ${dadoArma}.`) : L('Arma de monje: puedes usar FUE o DES.', 'Оружие монаха: можно бить от СИЛ или ЛОВ.')}</p>}
                 <div className="atr-arma">

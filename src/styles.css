@@ -688,3 +688,6 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .atr-arma { display: flex; gap: 10px; margin: 6px 0 8px; }
 .atr-arma label { flex: 1; display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: #6b5440; }
 .atr-arma select.campo { padding: 6px 8px; font-size: 14px; }
+.editor-objeto { border-top: 1px dashed #c9ad7a; margin-top: 10px; padding-top: 6px; }
+.editor-objeto h4 { margin: 8px 0 6px; }
+.check-linea { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
