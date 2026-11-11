@@ -4,7 +4,7 @@ import { tiradasPartida, type TiradaPartida } from '../tiradasPartida';
 import { useEffect, useState } from 'react';
 import { backend, type Resumen, type Usuario } from '../store';
 import { borrarPartida, cargarPartida, crearPartida, elegirPersonaje, enlaceInvitacion, quitarMiembro, unirse, type Miembro, type Partida } from '../partidas';
-import { L, RU_CLASES, RU_RAZAS, T } from '../i18n';
+import { L, RU_CLASES, RU_RAZAS, T, trClases } from '../i18n';
 import { Modal } from '../ui';
 import { Ficha } from './Ficha';
 import { ChipsEstados } from '../estados';
@@ -20,7 +20,7 @@ function useAncho(min = 1000) {
 
 /** Con combate (alguien tiene iniciativa), los jugadores se ordenan por iniciativa. */
 const ordenar = (ms: Miembro[]): Miembro[] => [...ms].sort((a, b) => (b.pj?.iniciativaActual ?? -1000) - (a.pj?.iniciativaActual ?? -1000));
-const linea = (pj: NonNullable<Miembro['pj']>) => [T(RU_RAZAS, pj.raza), pj.clase && `${T(RU_CLASES, pj.clase)} ${pj.nivel}`].filter(Boolean).join(' · ');
+const linea = (pj: NonNullable<Miembro['pj']>) => [T(RU_RAZAS, pj.raza), pj.clase && `${trClases(pj.clase)} ${pj.nivel}`].filter(Boolean).join(' · ');
 
 /** Pantalla de una partida: código para invitar, jugadores y sus personajes. */
 export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: string; usuario: Usuario; onVolver: () => void; onAbrirFicha: (pj: string) => void }) {
@@ -98,7 +98,7 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
                 if (pj) { const x = await backend.cargar(pj); if (x && !x.bloqueado) await backend.guardar({ ...x, bloqueado: true, actualizado: new Date().toISOString() }); }
               })}>
                 <option value="">{L('— Elige —', '— Выбери —')}</option>
-                {mios.map((r) => <option key={r.id} value={r.id}>{r.nombre || L('Sin nombre', 'Без имени')} ({T(RU_CLASES, r.clase)} {r.nivel})</option>)}
+                {mios.map((r) => <option key={r.id} value={r.id}>{r.nombre || L('Sin nombre', 'Без имени')} ({trClases(r.clase)} {r.nivel})</option>)}
               </select>
             </label>
           </section>

@@ -7,7 +7,7 @@ import { Ficha } from './views/Ficha';
 import { Modal } from './ui';
 import { misPartidas, type Partida } from './partidas';
 import { ModalCrearPartida, ModalUnirse, PantallaPartida } from './views/Partida';
-import { L, RU_CLASES, RU_RAZAS, T, cambiarIdioma, useIdioma } from './i18n';
+import { L, RU_CLASES, RU_RAZAS, T, cambiarIdioma, useIdioma, trClases } from './i18n';
 
 // Código del enlace de invitación (?unirse=…). Se lee una sola vez al cargar: la pantalla puede montarse varias veces
 // (al cambiar de idioma), y hasta entrar en la cuenta hay que conservarlo.
@@ -252,7 +252,7 @@ function Lista({ usuario, onUsuario, onAbrir, onPartida, onSalir }: { usuario: U
             <div key={r.id} className="tarjeta-personaje miembro">
               <button className="miembro-cuerpo" onClick={() => onAbrir(r.id)}>
                 <div className="retrato">{r.foto ? <img src={r.foto} alt="" /> : <span>{(r.nombre || '?')[0]}</span>}</div>
-                <div className="tp-texto"><strong>{r.nombre || L('Sin nombre', 'Без имени')}</strong><span>{[T(RU_RAZAS, r.raza), T(RU_CLASES, r.clase)].filter(Boolean).join(' · ') || L('Sin raza ni clase', 'Без расы и класса')}</span><span className="nivel">{L('Nivel', 'Уровень')} {r.nivel}</span></div>
+                <div className="tp-texto"><strong>{r.nombre || L('Sin nombre', 'Без имени')}</strong><span>{[T(RU_RAZAS, r.raza), trClases(r.clase)].filter(Boolean).join(' · ') || L('Sin raza ni clase', 'Без расы и класса')}</span><span className="nivel">{L('Nivel', 'Уровень')} {r.nivel}</span></div>
               </button>
               <div className="acciones-tarjeta">
                 <button className="btn-icono" title={r.bloqueado ? L('Desbloquear para editar raza, clase, características…', 'Разблокировать правку расы, класса, характеристик…') : L('Terminar la creación y bloquear raza, clase, características…', 'Закончить создание и заблокировать расу, класс, характеристики…')} onClick={() => alternarBloqueo(r)}>{r.bloqueado ? '🔒' : '🔓'}</button>

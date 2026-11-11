@@ -207,6 +207,9 @@ select.campo { appearance: none; background-image: linear-gradient(45deg, transp
 .inspiracion { display: grid; place-items: center; padding: 0; width: 44px; height: 44px; border-radius: 50%; border: 3px double #7d6448; background: none; font-size: 22px; color: #a89070; }
 .inspiracion.activa { color: var(--oro); border-color: var(--oro); background: radial-gradient(circle, rgba(240,201,106,.5), transparent 70%); text-shadow: 0 0 12px var(--oro); }
 .dg { display: flex; align-items: center; justify-content: center; gap: 14px; font-size: 24px; font-weight: 700; }
+.dg { flex-wrap: wrap; gap: 8px 10px; }
+.dg > span { white-space: nowrap; }
+.dg:has(.dado-pequeno + .dado-pequeno) .dado-pequeno { min-width: 0; padding: 8px 10px; font-size: 18px; }
 .dado-pequeno { font-size: 20px; min-width: 60px; }
 .rejilla-caracteristicas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 @media (min-width: 720px) { .rejilla-caracteristicas { grid-template-columns: repeat(6, 1fr); } }
@@ -691,3 +694,7 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .editor-objeto { border-top: 1px dashed #c9ad7a; margin-top: 10px; padding-top: 6px; }
 .editor-objeto h4 { margin: 8px 0 6px; }
 .check-linea { display: flex; gap: 8px; align-items: center; margin: 6px 0; }
+.multiclase { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 8px; }
+.fila-multiclase { display: grid; grid-template-columns: 1fr 90px 1.4fr auto; gap: 8px; align-items: end; border: 1px solid #c9ad7a; border-radius: 10px; padding: 8px; }
+.fila-multiclase > strong { align-self: center; }
+@media (max-width: 480px) { .fila-multiclase { grid-template-columns: 1fr 80px auto; } .fila-multiclase > label:nth-of-type(2) { grid-column: 1 / -1; grid-row: 2; } }

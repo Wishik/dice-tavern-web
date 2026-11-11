@@ -25,7 +25,7 @@ function armasLlevadas(p: Personaje): ArmaLlevada[] {
 export function TabCombate() {
   const { p, upd, clases } = useFicha();
   const clase = buscarClase(clases, p.clase);
-  const disponibles = potenciadoresDisponibles(p, clase);
+  const disponibles = potenciadoresDisponibles(p, clase, clases);
   const activos = new Set(p.potenciadores ?? []);
   const bonoAt = (l: Potenciador[]) => l.reduce((s, x) => s + (x.ataque ?? 0), 0);
   const extrasDano = (l: Potenciador[]) => l.map((x) => x.dano).filter(Boolean) as string[];

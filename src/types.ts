@@ -43,6 +43,8 @@ export type TamanoCinturon = 'pequeño' | 'mediano' | 'grande';
 
 export interface EntradaTexto { nombre: string; texto: string; origen?: string }
 
+export interface NivelClase { clase: string; subclase: string; nivel: number }
+
 export interface ConjuroPersonaje {
   nombre: string; nivel: number; preparado?: boolean; notas?: string;
   /** Conjuro adicional (de raza, dote, objeto…): no cuenta para el límite de la clase. */
@@ -52,6 +54,8 @@ export interface ConjuroPersonaje {
   descripcion?: string;
   /** Lo puso la hoja sola por un rasgo de raza o una dote (id de la concesión en src/conjurosRasgos.ts). */
   origen?: string;
+  /** Multiclase: clase por la que se aprendió (sin valor: la principal). */
+  clase?: string;
 }
 
 /** Recurso añadido a mano. `recupera`: con qué descanso vuelve entero (corto, largo o ambos). */
@@ -84,9 +88,15 @@ export interface Personaje {
   tamano: string;
   edad: string;
   raza: string;
+  /** Clase principal (la primera). Con multiclase, las demás van en `multiclase`. */
   clase: string;
   subclase: string;
+  /** Nivel de PERSONAJE (suma de todas las clases). El de la clase principal = nivel − niveles de `multiclase`. */
   nivel: number;
+  /** Otras clases (multiclase), cada una con su nivel y subclase. */
+  multiclase?: NivelClase[];
+  /** Solo en las «vistas» por clase (src/multiclase.ts): el nivel total del personaje. No se guarda. */
+  nivelPersonaje?: number;
   /** PX acumulados hacia el siguiente nivel (al subir se resta lo gastado). */
   exp: number;
   trasfondoEstilo: string;

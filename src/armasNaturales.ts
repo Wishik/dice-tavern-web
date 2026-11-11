@@ -2,6 +2,7 @@ import type { Clase } from './data';
 import type { Item, Personaje } from './types';
 import { RASGOS_FIJOS } from './fijos';
 import { L } from './i18n';
+import { clasesDe, datosClase, nivelEn, nivelTotal, vistaClase } from './multiclase';
 
 /**
  * Ataques que no salen de un objeto: golpe sin armas (artes marciales del monje, Matón de taberna…)
@@ -29,8 +30,8 @@ const DEFS: Def[] = [
     { ...MORDISCO, es: 'Mordisco tóxico', ru: 'Ядовитый укус', nota_es: 'Si lo elegiste. TS de Constitución o envenenado.', nota_ru: 'Если выбран. Спасбросок Телосложения, иначе отравлен.' },
     { ...MORDISCO, es: 'Frenesí voraz', ru: 'Ненасытное бешенство', dano: '1d4', nota_es: 'Si lo elegiste. Acción adicional.', nota_ru: 'Если выбран. Бонусное действие.' }] },
   { razas: ['Norn'], rasgo: 'Bendición de los Espíritus', ataques: (p) => [
-    { ...GARRAS, es: 'Garras (forma híbrida)', ru: 'Когти (гибридный облик)', dano: porNivel(p.nivel, [[1, '2d4'], [5, '2d6'], [11, '2d8'], [17, '2d10']]) },
-    { ...MORDISCO, es: 'Mordisco o picotazo (forma híbrida)', ru: 'Укус или клевок (гибридный облик)', dano: porNivel(p.nivel, [[1, '1d6'], [5, '1d8'], [11, '1d10'], [17, '1d12']]) }] },
+    { ...GARRAS, es: 'Garras (forma híbrida)', ru: 'Когти (гибридный облик)', dano: porNivel(nivelTotal(p), [[1, '2d4'], [5, '2d6'], [11, '2d8'], [17, '2d10']]) },
+    { ...MORDISCO, es: 'Mordisco o picotazo (forma híbrida)', ru: 'Укус или клевок (гибридный облик)', dano: porNivel(nivelTotal(p), [[1, '1d6'], [5, '1d8'], [11, '1d10'], [17, '1d12']]) }] },
 ];
 
 const item = (id: string, nombre: string, dano: string, tipo: string, props: string, desc = ''): Item =>
@@ -54,7 +55,7 @@ export function armasNaturales(p: Personaje, clase: Clase | null | undefined): A
   let dano = '1', props = '', fuente = '';
   if (tiene('Matón de taberna')) { dano = '1d4'; fuente = 'Matón de taberna'; }
   if (tiene('Combate sin armas')) { dano = manosLibres ? '1d8' : '1d6'; fuente = 'Combate sin armas'; }
-  if (p.clase === 'Monje') {
+  if (nivelEn(p, 'Monje') > 0) {
     const dm = dadoArtesMarciales(p, clase) ?? '1d6';
     const caras = (x: string) => parseInt(x.split('d')[1] ?? '0', 10);
     if (caras(dm) >= caras(dano)) { dano = dm; fuente = L('Artes marciales', 'Боевые искусства'); }
@@ -65,8 +66,10 @@ export function armasNaturales(p: Personaje, clase: Clase | null | undefined): A
 }
 
 /** Dado de artes marciales del monje a su nivel (null si no es monje). */
-export const dadoArtesMarciales = (p: Personaje, clase: Clase | null | undefined): string | null =>
-  p.clase === 'Monje' ? columna(clase, p, 'Artes marciales') || '1d6' : null;
+export const dadoArtesMarciales = (p: Personaje, clase: Clase | null | undefined): string | null => {
+  const m = clasesDe(p).find((c) => c.clase === 'Monje');
+  return m ? columna(datosClase('Monje', clase), vistaClase(p, m), 'Artes marciales') || '1d6' : null;
+};
 
 /** El mayor de dos dados («1d4» vs «1d6» → «1d6»), comparando la media. */
 export function dadoMayor(a: string, b: string | null): string {

@@ -1,3 +1,4 @@
+import { clasesDe, datosClase, esMulticlase, nivelEn, nivelTotal, vistaClase } from './multiclase';
 import type { Clase } from './data';
 import type { Personaje, RecursoExtra } from './types';
 import { bonoCompetencia, car, modificador } from './rules';
@@ -27,7 +28,7 @@ const tieneRasgo = (p: Personaje, nombre: string) => (p.rasgosRaza ?? []).some((
 /** Recursos que da la raza (o un rasgo racial elegido). */
 export function recursosRaza(p: Personaje): Recurso[] {
   const out: Recurso[] = [];
-  if (TROLES.includes(p.raza)) out.push({ id: 'trance', es: 'Puntos de Trance', ru: 'Очки транса', max: bonoCompetencia(p.nivel), corto: 'uno' });
+  if (TROLES.includes(p.raza)) out.push({ id: 'trance', es: 'Puntos de Trance', ru: 'Очки транса', max: bonoCompetencia(nivelTotal(p)), corto: 'uno' });
   if (p.raza === 'Norn') out.push(
     { id: 'formaTotal', es: 'Forma total', ru: 'Полный облик', max: 1 },
     { id: 'estres', es: 'Estrés espiritual', ru: 'Духовный стресс', max: 3, corto: 'uno', acumula: true },
@@ -48,8 +49,16 @@ export function recursoDeExtra(r: RecursoExtra): Recurso {
 /** Recupera de un recurso añadido (las fichas antiguas no lo tienen). */
 export const recuperaExtra = (r: RecursoExtra): 'corto' | 'largo' | 'ambos' => r.recupera ?? (r.corto ? 'ambos' : 'largo');
 
-/** Recursos de la clase del personaje a su nivel actual, sacados de la tabla de la clase del manual. */
+/** Recursos de todas las clases del personaje (multiclase: cada una a su nivel), sin repetir. */
 export function recursosClase(p: Personaje, clase: Clase | null | undefined): Recurso[] {
+  if (!esMulticlase(p)) return recursosUnaClase(p, clase);
+  const out: Recurso[] = [];
+  for (const c of clasesDe(p)) for (const r of recursosUnaClase(vistaClase(p, c), datosClase(c.clase, clase))) if (!out.some((x) => x.id === r.id)) out.push(r);
+  return out;
+}
+
+/** Recursos de la clase del personaje a su nivel actual, sacados de la tabla de la clase del manual. */
+function recursosUnaClase(p: Personaje, clase: Clase | null | undefined): Recurso[] {
   if (!clase) return [];
   const fila = clase.tabla.find((f) => f.nivel === p.nivel) ?? clase.tabla[clase.tabla.length - 1];
   const out: Recurso[] = [];
@@ -84,7 +93,7 @@ export function descansoLargo(x: Personaje) {
 }
 
 /** Bonificador extra al tirar un dado de golpe (Taratuga: + bonificador por competencia en descanso corto). */
-export const extraDadoGolpe = (p: Personaje) => (p.raza === 'Taratuga' ? bonoCompetencia(p.nivel) : 0);
+export const extraDadoGolpe = (p: Personaje) => (p.raza === 'Taratuga' ? bonoCompetencia(nivelTotal(p)) : 0);
 
 /** Descanso corto: devuelve los usos que marca el manual y quita 1 de agotamiento al Explorador de nivel 10+. Devuelve qué ha recuperado. */
 export function descansoCorto(x: Personaje, clase: Clase | null | undefined): string[] {
@@ -98,13 +107,13 @@ export function descansoCorto(x: Personaje, clase: Clase | null | undefined): st
   }
   x.recursosUsados = usados;
   x.descansosCortos = (x.descansosCortos ?? 0) + 1;
-  if (x.clase === 'Explorador' && x.nivel >= 10 && x.agotamiento > 0) { x.agotamiento -= 1; hecho.push('agotamiento'); }
+  if (nivelEn(x, 'Explorador') >= 10 && x.agotamiento > 0) { x.agotamiento -= 1; hecho.push('agotamiento'); }
   return hecho;
 }
 
 /** Texto de lo que recupera un descanso corto, para avisar antes de hacerlo. */
 export function resumenCorto(p: Personaje, clase: Clase | null | undefined, ru: boolean): string[] {
   const out = recursosPersonaje(p, clase).filter((r) => r.corto).map((r) => `${ru ? r.ru : r.es} (${r.corto === 'todos' ? (ru ? 'все' : 'todos') : '+1'})`);
-  if (p.clase === 'Explorador' && p.nivel >= 10) out.push(ru ? 'истощение −1' : 'agotamiento −1');
+  if (nivelEn(p, 'Explorador') >= 10) out.push(ru ? 'истощение −1' : 'agotamiento −1');
   return out;
 }

@@ -1,13 +1,14 @@
 import { chipsEfectosCar } from '../efectosCar';
 import { setPersonajeActivo } from '../tiradasPartida';
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { Personaje } from '../types';
+import type { Atributo, Personaje } from '../types';
 import { backend } from '../store';
 import { useDatos, type Clase, type Conjuro, type Dote, type Razas, type Trasfondo } from '../data';
 import { calcularAvisos, manaMaximo, type Avisos } from '../avisos';
 import { DadoIcono, PanelDados, useDados } from '../dice';
 import { car, conSigno, modificador } from '../rules';
-import { Modal, PuntoRojo } from '../ui';
+import { Etiqueta, Modal, PuntoRojo } from '../ui';
+import { GANAS_MULTICLASE, asignarNivel, clasesDe, cumpleRequisito, fijarClases, textoClases, textoRequisito } from '../multiclase';
 import { TabPersonaje } from './TabPersonaje';
 import { TabAtributos } from './TabAtributos';
 import { TabHabilidades } from './TabHabilidades';
@@ -69,6 +70,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
   const [tab, setTab] = useState<string>(() => { try { return localStorage.getItem('dicetavern.tab') || 'personaje'; } catch { return 'personaje'; } });
   const [dados, setDados] = useState(false);
   const clases = useDatos<Clase[]>('clases');
+  fijarClases(clases);
   const razas = useDatos<Razas>('razas');
   const trasfondos = useDatos<Trasfondo[]>('trasfondos');
   const dotes = useDatos<Dote[]>('dotes');
@@ -155,7 +157,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
           <button className="btn enlace volver" onClick={onVolver}>‹ {volverTexto ?? L('Personajes', 'Персонажи')}</button>
           <div className="titulo-ficha">
             <strong>{p.nombre || L('Sin nombre', 'Без имени')}</strong>
-            <span>{[T(RU_RAZAS, p.raza), p.clase && `${T(RU_CLASES, p.clase)} ${p.nivel}`].filter(Boolean).join(' · ')}</span>
+            <span>{[T(RU_RAZAS, p.raza), p.clase && textoClases(p)].filter(Boolean).join(' · ')}</span>
           </div>
           {ajeno && <span className="sello-master">👑</span>}
           <span className={`estado-guardado ${estado}`}>{estado === 'guardado' ? L('✓ Guardado', '✓ Сохранено') : estado === 'error' ? L('⚠ Sin guardar', '⚠ Не сохранено') : '…'}</span>
@@ -190,23 +192,39 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
 function SubidaNivel() {
   const { p, upd, clases } = useFicha();
   const { tirar } = useDados();
-  const dado = clases?.find((c) => c.nombre === p.clase)?.atributos.dadoGolpe ?? '';
-  if (!p.subidasPendientes || !dado) return null;
+  const [clase, setClase] = useState(p.clase);
+  const dado = clases?.find((c) => c.nombre === clase)?.atributos.dadoGolpe ?? '';
+  if (!p.subidasPendientes || !p.clase) return null;
   const con = modificador(car(p, 'CON'));
   const nivelDe = p.nivel - p.subidasPendientes + 1;
+  const mias = clasesDe(p).map((c) => c.clase);
+  const nueva = !mias.includes(clase);
+  const valor = (a: Atributo) => car(p, a);
+  const sinRequisito = nueva && (!cumpleRequisito(clase, valor) || !cumpleRequisito(p.clase, valor));
   return (
     <div className="modal-fondo">
       <div className="modal elegir-modo">
         <h3>{L(`¡Subes a nivel ${nivelDe}!`, `Новый уровень: ${nivelDe}!`)}</h3>
-        <p>{L(`Tira tu dado de golpe de ${p.clase}:`, `Брось кость хитов класса ${T(RU_CLASES, p.clase)}:`)} <strong>1{dado} +1 {conSigno(con)} {T(RU_ATRIBUTOS, 'CON')}</strong>. {L('El total se suma a tus PG máximos y actuales.', 'Сумма прибавится к максимуму и текущим хитам.')}</p>
+        <Etiqueta texto={L('¿En qué clase subes este nivel?', 'В какой класс идёт этот уровень?')}>
+          <select className="campo" value={clase} onChange={(e) => setClase(e.target.value)}>
+            {clasesDe(p).map((c) => <option key={c.clase} value={c.clase}>{T(RU_CLASES, c.clase)} {c.nivel} → {c.nivel + (c.clase === p.clase ? 0 : 1)}</option>)}
+            <optgroup label={L('Nueva clase (multiclase)', 'Новый класс (мультикласс)')}>
+              {(clases ?? []).filter((c) => !mias.includes(c.nombre)).map((c) => <option key={c.nombre} value={c.nombre}>{T(RU_CLASES, c.nombre)} 1</option>)}
+            </optgroup>
+          </select>
+        </Etiqueta>
+        {nueva && <p className="nota">{L(`Multiclase: ganas ${(GANAS_MULTICLASE[clase]?.[0] ?? '').toLowerCase()} Requisito: ${textoRequisito(p.clase)} (${p.clase}) y ${textoRequisito(clase)} (${clase}).`, `Мультикласс: получаешь ${(GANAS_MULTICLASE[clase]?.[1] ?? '').toLowerCase()} Требование: ${textoRequisito(p.clase)} (${T(RU_CLASES, p.clase)}) и ${textoRequisito(clase)} (${T(RU_CLASES, clase)}).`)}</p>}
+        {sinRequisito && <p className="error">⚠ {L('No llegas a 13 en la característica que pide. Pregunta a tu máster.', 'Не хватает 13 в нужной характеристике. Уточни у мастера.')}</p>}
+        <p>{L(`Tira tu dado de golpe de ${clase}:`, `Брось кость хитов класса ${T(RU_CLASES, clase)}:`)} <strong>1{dado} +1 {conSigno(con)} {T(RU_ATRIBUTOS, 'CON')}</strong>. {L('El total se suma a tus PG máximos y actuales.', 'Сумма прибавится к максимуму и текущим хитам.')}</p>
         {p.subidasPendientes > 1 && <p className="nota">{L(`Te quedan ${p.subidasPendientes} niveles por tirar.`, `Осталось бросков за уровни: ${p.subidasPendientes}.`)}</p>}
         <div className="fila-botones">
           <button className="btn primario" onClick={() => {
             const t = tirar(L(`PG al subir a nivel ${nivelDe}`, `Хиты за уровень ${nivelDe}`), `1${dado}+1${conSigno(con)}`);
             if (!t) return;
             const gana = Math.max(1, t.total); // ya incluye +1 y CON
-            upd((x) => { x.pg.max += gana; x.pg.actual += gana; x.subidasPendientes = Math.max(0, x.subidasPendientes - 1); });
-          }}>🎲 {L('Tirar', 'Бросить')} 1{dado}</button>
+            upd((x) => { x.pg.max += gana; x.pg.actual += gana; x.subidasPendientes = Math.max(0, x.subidasPendientes - 1); asignarNivel(x, clase); });
+            setClase(p.clase);
+          }} disabled={!dado}>🎲 {L('Tirar', 'Бросить')} 1{dado}</button>
         </div>
       </div>
     </div>

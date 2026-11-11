@@ -1,3 +1,4 @@
+import { textoClasesBreve } from './multiclase';
 import { supabase } from './store';
 import { L } from './i18n';
 import type { Personaje } from './types';
@@ -78,7 +79,7 @@ export async function cargarPartida(id: string): Promise<{ partida: Partida; mie
   const res = new Map(((pj.data ?? []) as { id: string; datos: Personaje }[]).map((x) => {
     const p = normalizar(x.datos);
     let ca = 10; try { ca = calcularCA(p).total; } catch { /* datos antiguos */ }
-    return [x.id, { nombre: p.nombre, raza: p.raza, clase: p.clase, nivel: p.nivel, foto: p.foto, pg: p.pg, pm: p.pm, ca, estados: p.estados ?? [], estadosDetalle: p.estadosDetalle ?? {}, agotamiento: p.agotamiento ?? 0, iniciativaActual: p.iniciativaActual ?? null, bonoIni: iniciativa(p) }];
+    return [x.id, { nombre: p.nombre, raza: p.raza, clase: textoClasesBreve(p), nivel: p.nivel, foto: p.foto, pg: p.pg, pm: p.pm, ca, estados: p.estados ?? [], estadosDetalle: p.estadosDetalle ?? {}, agotamiento: p.agotamiento ?? 0, iniciativaActual: p.iniciativaActual ?? null, bonoIni: iniciativa(p) }];
   }));
   return {
     partida: p.data as Partida,

@@ -2,6 +2,7 @@ import { limitesHabilidades } from './limitesHabilidades';
 import type { Clase, Raza, Razas, Trasfondo } from './data';
 import type { Personaje } from './types';
 import { HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, huecosVacios } from './rules';
+import { PESO_LANZADOR, clasesDe, dotesDeClases, nivelLanzador } from './multiclase';
 
 /** Avisos "puedes añadir": cuántas cosas te faltan según las reglas. Nunca bloquean añadir más. */
 export interface Avisos {
@@ -20,6 +21,8 @@ export interface Avisos {
   conjurosAbierto: boolean;
   limitePreparados: number | null;
   nivelMaxConjuro: number | null;
+  /** Límites de magia por clase (una entrada por clase; la principal primero). */
+  magia: MagiaClase[];
   total: { general: number; habilidades: number; magia: number; rasgos: number };
   /** Conjuros de raza/dote por elegir (lo calcula la ficha). */
   conjurosElegir?: number;
@@ -34,24 +37,43 @@ export function filaClase(c: Clase | null, nivel: number) {
   return c?.tabla.find((f) => f.nivel === nivel) ?? null;
 }
 
-export function calcularAvisos(p: Personaje, clases: Clase[] | null, razas: Razas | null, trasfondos: Trasfondo[] | null): Avisos {
-  const c = buscarClase(clases, p.clase);
-  const f = filaClase(c, p.nivel);
-  const sub = SUBCLASES_MAGICAS[p.subclase]?.[p.nivel - 1];
+/** Límites de magia de UNA clase a su nivel. */
+export interface MagiaClase {
+  clase: string; nivel: number;
+  limiteTrucos: number | null; limiteConjuros: number | null; conjurosAbierto: boolean; limitePreparados: number | null; nivelMaxConjuro: number | null;
+  nTrucos: number; nConj: number; nPrep: number;
+}
+
+/** Conjuros de clase (no adicionales) aprendidos por esa clase; los antiguos sin clase son de la principal. */
+export const claseDeConjuro = (p: Personaje, x: { clase?: string }) => (x.clase && clasesDe(p).some((c) => c.clase === x.clase) ? x.clase : p.clase);
+export const conjurosDeClase = (p: Personaje, clase: string) => p.conjuros.filter((x) => !x.adicional && claseDeConjuro(p, x) === clase);
+
+function magiaClase(p: Personaje, c: { clase: string; subclase: string; nivel: number }, datos: Clase | null): MagiaClase {
+  const f = filaClase(datos, c.nivel);
+  const sub = SUBCLASES_MAGICAS[c.subclase]?.[c.nivel - 1];
   const limiteTrucos = f && 'Trucos' in f ? num(f['Trucos']) : sub ? sub[0] : null;
   const limiteConjuros = f && 'Conjuros conocidos' in f ? num(f['Conjuros conocidos']) : sub ? sub[1] : null;
-  const conjurosAbierto = !!f && /\+/.test(String(f['Conjuros conocidos'] ?? ''));
-  const limitePreparados = f && 'Conjuros preparados' in f ? num(f['Conjuros preparados']) : limiteConjuros;
-  const nivelMaxConjuro = f && 'Nivel máximo de conjuro' in f ? num(f['Nivel máximo de conjuro']) : sub ? sub[2] : null;
-  // Los conjuros adicionales (raza, dote, objeto…) no cuentan para el límite de la clase.
-  const nTrucos = p.conjuros.filter((x) => x.nivel === 0 && !x.adicional).length;
-  const nConj = p.conjuros.filter((x) => x.nivel > 0 && !x.adicional).length;
-  const trucos = limiteTrucos ? Math.max(0, limiteTrucos - nTrucos) : 0;
-  const conjuros = limiteConjuros ? Math.max(0, limiteConjuros - nConj) : 0;
+  const propios = conjurosDeClase(p, c.clase);
+  return {
+    clase: c.clase, nivel: c.nivel, limiteTrucos, limiteConjuros,
+    conjurosAbierto: !!f && /\+/.test(String(f['Conjuros conocidos'] ?? '')),
+    limitePreparados: f && 'Conjuros preparados' in f ? num(f['Conjuros preparados']) : limiteConjuros,
+    nivelMaxConjuro: f && 'Nivel máximo de conjuro' in f ? num(f['Nivel máximo de conjuro']) : sub ? sub[2] : null,
+    nTrucos: propios.filter((x) => x.nivel === 0).length, nConj: propios.filter((x) => x.nivel > 0).length, nPrep: propios.filter((x) => x.nivel > 0 && x.preparado).length,
+  };
+}
 
-  // Dotes: 1 de origen por trasfondo + una por cada "Mejora de característica"/"Don épico" alcanzado.
-  let dotesEsperadas = p.trasfondoEstilo ? 1 : 0;
-  if (c) dotesEsperadas += c.tabla.filter((r) => r.nivel <= p.nivel && /Mejora de característica|Don épico/.test(r.rasgos)).length;
+export function calcularAvisos(p: Personaje, clases: Clase[] | null, razas: Razas | null, trasfondos: Trasfondo[] | null): Avisos {
+  const c = buscarClase(clases, p.clase);
+  const todas = clasesDe(p);
+  // Magia: cada clase con sus límites (multiclase). Los adicionales (raza, dote, objeto…) no cuentan.
+  const magia = todas.map((x) => magiaClase(p, x, buscarClase(clases, x.clase)));
+  const m0 = magia[0];
+  const trucos = magia.reduce((s, m) => s + (m.limiteTrucos ? Math.max(0, m.limiteTrucos - m.nTrucos) : 0), 0);
+  const conjuros = magia.reduce((s, m) => s + (m.limiteConjuros ? Math.max(0, m.limiteConjuros - m.nConj) : 0), 0);
+
+  // Dotes: 1 de origen por trasfondo + una por cada "Mejora de característica"/"Don épico" alcanzado en cada clase.
+  const dotesEsperadas = (p.trasfondoEstilo ? 1 : 0) + dotesDeClases(p, c);
   const dotes = Math.max(0, dotesEsperadas - p.dotes.length);
 
   const raza = buscarRaza(razas, p.raza);
@@ -64,11 +86,12 @@ export function calcularAvisos(p: Personaje, clases: Clase[] | null, razas: Raza
   const idiomas = huecosVacios(p, HUECOS_IDIOMAS, p.idiomas);
   const oficios = huecosVacios(p, HUECOS_OFICIOS, p.oficios);
   const profesiones = huecosVacios(p, HUECOS_PROFESIONES, p.profesiones);
-  const subclase = !!c && p.nivel >= 3 && !p.subclase;
+  const subclase = todas.some((x) => x.nivel >= 3 && !x.subclase && !!buscarClase(clases, x.clase));
 
   return {
-    trucos, conjuros, dotes, rasgosRaza, habilidades, idiomas, oficios, profesiones, subclase,
-    limiteTrucos, limiteConjuros, conjurosAbierto, limitePreparados, nivelMaxConjuro,
+    trucos, conjuros, dotes, rasgosRaza, habilidades, idiomas, oficios, profesiones, subclase, magia,
+    limiteTrucos: m0?.limiteTrucos ?? null, limiteConjuros: m0?.limiteConjuros ?? null, conjurosAbierto: m0?.conjurosAbierto ?? false,
+    limitePreparados: m0?.limitePreparados ?? null, nivelMaxConjuro: m0?.nivelMaxConjuro ?? null,
     total: {
       general: idiomas + oficios + profesiones + (subclase ? 1 : 0),
       habilidades,
@@ -94,8 +117,25 @@ export const SUBCLASES_MAGICAS: Record<string, [number, number, number][]> = {
 const MANA_ARCANO = [0, 0, 2, 3, 3, 3, 8, 8, 8, 10, 10, 10, 16, 16, 16, 19, 19, 19, 23, 23];
 /** Maná máximo: columna «Maná» de la tabla de la clase (o del Embaucador/Caballero arcano) + Despertar Interior (+1 por nivel). */
 export function manaMaximo(p: Personaje, clases: Clase[] | null): number {
-  const f = filaClase(buscarClase(clases, p.clase), p.nivel);
-  let m = f && 'Maná' in f ? num(f['Maná']) ?? 0 : SUBCLASES_MAGICAS[p.subclase] ? MANA_ARCANO[p.nivel - 1] ?? 0 : 0;
+  const manaDe = (clase: string, subclase: string, nivel: number) => {
+    const f = filaClase(buscarClase(clases, clase), nivel);
+    return f && 'Maná' in f ? num(f['Maná']) ?? 0 : SUBCLASES_MAGICAS[subclase] ? MANA_ARCANO[nivel - 1] ?? 0 : 0;
+  };
+  const conMana = clasesDe(p).filter((c) => manaDe(c.clase, c.subclase, c.nivel) > 0);
+  let m: number;
+  if (conMana.length <= 1) m = conMana[0] ? manaDe(conMana[0].clase, conMana[0].subclase, conMana[0].nivel) : 0;
+  else if (MODO_MANA === 'sumar') m = conMana.reduce((s, c) => s + manaDe(c.clase, c.subclase, c.nivel), 0);
+  else if (MODO_MANA === 'principal') m = manaDe(p.clase, p.subclase, clasesDe(p)[0].nivel);
+  else {
+    // Como los espacios de conjuro del manual: nivel de lanzador conjunto en la tabla de un lanzador completo; el Brujo suma aparte.
+    const brujo = conMana.find((c) => c.clase === 'Brujo');
+    const n = nivelLanzador(p);
+    m = (n > 0 ? manaDe('Mago', '', Math.min(20, n)) : 0) + (brujo ? manaDe('Brujo', '', brujo.nivel) : 0);
+    if (!conMana.some((c) => PESO_LANZADOR[c.clase] || SUBCLASES_MAGICAS[c.subclase])) m = conMana.reduce((s, c) => s + manaDe(c.clase, c.subclase, c.nivel), 0);
+  }
   if (p.rasgosRaza.includes('Despertar Interior') && m > 0) m += p.nivel;
   return m;
 }
+
+/** Cómo se junta el maná de varias clases lanzadoras: 'conjunto' (como el manual), 'sumar' o 'principal'. */
+export const MODO_MANA: 'conjunto' | 'sumar' | 'principal' = 'conjunto';

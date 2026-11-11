@@ -1,3 +1,4 @@
+import { clasesDe, nivelTotal, vistaClase } from './multiclase';
 import type { Conjuro, Razas } from './data';
 import type { Personaje } from './types';
 import { FUENTES, concesionesActivas, fuenteActiva } from './conjurosRasgos';
@@ -36,14 +37,14 @@ const R: Recordatorio[] = [
   { clase: 'Explorador', subclase: 'Cazador', nivel: 7, es: 'Tácticas defensivas: puedes cambiar la opción elegida.', ru: '«Оборонительная тактика»: можно поменять выбранный вариант.' },
   { clase: 'Guerrero', nivel: 2, es: 'Acción súbita vuelve a estar disponible.', ru: '«Всплеск действий» снова доступен.' , rec: { id: 'accionSubita', es: 'Acción súbita', ru: 'Всплеск действий', max: (p) => (p.nivel >= 17 ? 2 : 1), corto: 'todos' } },
   { clase: 'Guerrero', subclase: 'Caballero arcano', nivel: 3, es: 'Vínculo de guerra: puedes hacer el ritual (1 hora) durante el descanso.', ru: '«Боевая связь»: во время отдыха можно провести ритуал (1 час).' },
-  { clase: 'Guerrero', subclase: 'Guerrero psiónico', nivel: 3, es: 'Dados de energía psiónica: recuperas uno. Telequinesis vuelve a estar disponible.', ru: 'Кости псионической энергии: +1. Телекинез снова доступен.' , rec: { id: 'dadosPsionicos', es: 'Dados de energía psiónica', ru: 'Кости псионической энергии', max: (p) => 2 * bonoCompetencia(p.nivel), corto: 'uno' } },
+  { clase: 'Guerrero', subclase: 'Guerrero psiónico', nivel: 3, es: 'Dados de energía psiónica: recuperas uno. Telequinesis vuelve a estar disponible.', ru: 'Кости псионической энергии: +1. Телекинез снова доступен.' , rec: { id: 'dadosPsionicos', es: 'Dados de energía psiónica', ru: 'Кости псионической энергии', max: (p) => 2 * bonoCompetencia(nivelTotal(p)), corto: 'uno' } },
   { clase: 'Guerrero', subclase: 'Guerrero psiónico', nivel: 7, es: 'Adepto telequinético vuelve a estar disponible.', ru: '«Телекинетический адепт» снова доступен.' , rec: { id: 'adeptoTelequinetico', es: 'Adepto telequinético', ru: 'Телекинетический адепт', max: uno, corto: 'todos' } },
   { clase: 'Guerrero', subclase: 'Maestro del combate', nivel: 3, es: 'Dados de supremacía: recuperas todos.', ru: 'Кости превосходства: восстанавливаются все.' , rec: { id: 'dadosSupremacia', es: 'Dados de supremacía', ru: 'Кости превосходства', max: (p) => (p.nivel >= 15 ? 6 : p.nivel >= 7 ? 5 : 4), corto: 'todos' } },
   { clase: 'Hechicero', nivel: 5, es: 'Recuperación mágica: puedes recuperar puntos de hechicería hasta la mitad de tu nivel (1 vez por descanso largo).', ru: '«Магическое восстановление»: можно вернуть очки чародейства до половины уровня (1 раз за долгий отдых).' },
   { clase: 'Mago', nivel: 1, es: 'Recuperación arcana: puedes recuperar maná o espacios de conjuro estudiando tu libro.', ru: '«Магическое восстановление»: можно вернуть ману или ячейки, изучая книгу заклинаний.' },
   { clase: 'Mago', nivel: 5, es: 'Memorizar conjuro: puedes cambiar un conjuro preparado por otro de tu libro.', ru: '«Запоминание заклинания»: можно заменить одно подготовленное заклинание другим из книги.' },
   { clase: 'Mago', subclase: 'Universalista', nivel: 6, es: 'Teoría arcana: recuperas los usos (mod. INT).', ru: '«Магическая теория»: восстанавливаются использования (мод. ИНТ).' , rec: { id: 'teoriaArcana', es: 'Teoría arcana', ru: 'Магическая теория', max: (p) => mod(p, 'INT'), corto: 'todos' } },
-  { clase: 'Pícaro', subclase: 'Rebanaalmas', nivel: 3, es: 'Dados de energía psiónica: recuperas uno.', ru: 'Кости псионической энергии: +1.' , rec: { id: 'dadosPsionicos', es: 'Dados de energía psiónica', ru: 'Кости псионической энергии', max: (p) => 2 * bonoCompetencia(p.nivel), corto: 'uno' } },
+  { clase: 'Pícaro', subclase: 'Rebanaalmas', nivel: 3, es: 'Dados de energía psiónica: recuperas uno.', ru: 'Кости псионической энергии: +1.' , rec: { id: 'dadosPsionicos', es: 'Dados de energía psiónica', ru: 'Кости псионической энергии', max: (p) => 2 * bonoCompetencia(nivelTotal(p)), corto: 'uno' } },
   // Razas
   { rasgo: 'Alas Celestiales', razas: ['Aasimar'], es: 'Alas celestiales vuelven a estar disponibles.', ru: '«Небесные крылья» снова доступны.' , rec: { id: 'alasCelestiales', es: 'Alas celestiales', ru: 'Небесные крылья', max: uno, corto: 'todos' } },
   { rasgo: 'Linaje Dracónido', razas: ['Dracónido'], es: 'Aliento de dragón vuelve a estar disponible.', ru: 'Драконье дыхание снова доступно.' , rec: { id: 'alientoDragon', es: 'Aliento de dragón', ru: 'Драконье дыхание', max: uno, corto: 'todos' } },
@@ -79,8 +80,11 @@ function tieneRasgo(p: Personaje, razas: Razas | null, nombre: string, lista?: s
 
 /** Recordatorios para el descanso corto de este personaje, en el idioma pedido. */
 const aplica = (p: Personaje, razas: Razas | null) => (r: Recordatorio) => {
-  if (r.clase && (r.clase !== p.clase || p.nivel < (r.nivel ?? 1))) return false;
-  if (r.subclase && !igual(r.subclase, p.subclase ?? '')) return false;
+  if (r.clase) {
+    const c = clasesDe(p).find((x) => x.clase === r.clase);
+    if (!c || c.nivel < (r.nivel ?? 1)) return false;
+    if (r.subclase && !igual(r.subclase, c.subclase ?? '')) return false;
+  } else if (r.subclase && !clasesDe(p).some((c) => igual(r.subclase!, c.subclase ?? ''))) return false;
   if (r.rasgo && !tieneRasgo(p, razas, r.rasgo, r.razas)) return false;
   if (r.dote && !(p.dotes ?? []).some((d) => igual(d.nombre, r.dote!))) return false;
   return true;
@@ -97,7 +101,7 @@ export function catalogoRecursos(p: Personaje, razas: Razas | null): RecursoCata
   for (const r of [...R.filter(ok), ...R.filter((x) => !ok(x))]) {
     if (!r.rec || ya.has(r.rec.id) || vistos.has(r.rec.id)) continue;
     vistos.add(r.rec.id);
-    out.push({ id: r.rec.id, es: r.rec.es, ru: r.rec.ru, max: r.rec.max(p), corto: r.rec.corto, tuyo: ok(r) });
+    out.push({ id: r.rec.id, es: r.rec.es, ru: r.rec.ru, max: r.rec.max(r.clase && clasesDe(p).some((c) => c.clase === r.clase) ? vistaClase(p, clasesDe(p).find((c) => c.clase === r.clase)!) : p), corto: r.rec.corto, tuyo: ok(r) });
   }
   return out;
 }

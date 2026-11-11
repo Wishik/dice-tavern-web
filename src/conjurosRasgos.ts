@@ -1,3 +1,4 @@
+import { nivelTotal } from './multiclase';
 import type { Conjuro, Razas } from './data';
 import type { ConjuroPersonaje, Personaje } from './types';
 import { bonoCompetencia } from './rules';
@@ -21,7 +22,7 @@ export interface Eleccion {
   porBC?: boolean;
 }
 /** Cuántos conjuros se eligen ahora. */
-export const cantidadEleccion = (e: Eleccion, p: Personaje) => (e.porBC ? bonoCompetencia(p.nivel) : e.cantidad);
+export const cantidadEleccion = (e: Eleccion, p: Personaje) => (e.porBC ? bonoCompetencia(nivelTotal(p)) : e.cantidad);
 export interface Concesion { id: string; nivel: number; conjuros?: string[]; elegir?: Eleccion }
 export interface Fuente { rasgo: string; razas?: string[]; dote?: boolean; concesiones: Concesion[] }
 

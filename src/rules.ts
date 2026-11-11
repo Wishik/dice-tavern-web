@@ -1,3 +1,4 @@
+import { ajustarMulticlase, nivelEn, nivelTotal } from './multiclase';
 import type { Atributo, Item, Moneda, Personaje } from './types';
 import { bonoAtaqueArma, bonoAtaqueConjuro, bonoCdConjuro, bonoFuerzaCarga, bonoHabilidad, bonoPrueba, bonoSalvacion, bonosCA } from './bonos';
 import { L } from './i18n';
@@ -54,7 +55,7 @@ export function idHabilidad(nombre: string): string | undefined {
 export function valorHabilidad(p: Personaje, id: string): number {
   const def = HABILIDADES.find((h) => h.id === id)!;
   const h = p.habilidades[id] ?? { comp: false, pericia: false, bonus: 0 };
-  const bc = bonoCompetencia(p.nivel);
+  const bc = bonoCompetencia(nivelTotal(p));
   const r = bonoHabilidad(p, id, h.comp);
   return modificador(car(p, def.atributo)) + (h.comp || r.comp ? bc : 0) + (h.pericia ? bc : 0) + (h.bonus || 0) + r.bono + bonoPrueba(p, def.atributo);
 }
@@ -63,7 +64,7 @@ export const valorPrueba = (p: Personaje, a: Atributo) => modificador(car(p, a))
 
 export function valorSalvacion(p: Personaje, a: Atributo): number {
   const s = p.salvaciones[a];
-  return modificador(car(p, a)) + (s.comp ? bonoCompetencia(p.nivel) : 0) + (s.bonus || 0) + bonoSalvacion(p, a);
+  return modificador(car(p, a)) + (s.comp ? bonoCompetencia(nivelTotal(p)) : 0) + (s.bonus || 0) + bonoSalvacion(p, a);
 }
 
 export const iniciativa = (p: Personaje) => valorPrueba(p, 'DES') + (p.bonusIniciativa || 0);
@@ -71,11 +72,11 @@ export const percepcionPasiva = (p: Personaje) => 10 + valorHabilidad(p, 'percep
 
 export function cdConjuros(p: Personaje): number | null {
   const a = caracteristicaConjuros(p); if (!a) return null;
-  return 8 + bonoCompetencia(p.nivel) + modificador(car(p, a)) + bonoCdConjuro(p);
+  return 8 + bonoCompetencia(nivelTotal(p)) + modificador(car(p, a)) + bonoCdConjuro(p);
 }
 export function ataqueConjuros(p: Personaje): number | null {
   const a = caracteristicaConjuros(p); if (!a) return null;
-  return bonoCompetencia(p.nivel) + modificador(car(p, a)) + bonoAtaqueConjuro(p);
+  return bonoCompetencia(nivelTotal(p)) + modificador(car(p, a)) + bonoAtaqueConjuro(p);
 }
 
 // ---------------------------------------------------------------- Inventario
@@ -287,6 +288,7 @@ export function cambiarNivel(p: Personaje, nivel: number) {
   const d = nivel - p.nivel;
   p.nivel = nivel;
   p.subidasPendientes = Math.max(0, (p.subidasPendientes || 0) + d);
+  if (d < 0) ajustarMulticlase(p);
 }
 /** PG ganados al subir un nivel: lo que sale en el dado + 1 + modificador de CON (mínimo 1). */
 export const pgSubida = (tirada: number, con: number) => Math.max(1, tirada + 1 + modificador(con));
@@ -315,9 +317,9 @@ export function calcularCA(p: Personaje): DesgloseCA {
     if (mg) { base += mg; partes.push(`${L('mágica', 'магия')} ${conSigno(mg)}`); }
     if (/desventaja/i.test(arm.detalles?.['Sigilo'] ?? '')) sigiloDesventaja.push(arm.nombre);
     fuerzaMinima = Math.max(fuerzaMinima, parseInt(arm.detalles?.['Fuerza'] ?? '', 10) || 0);
-  } else if (p.clase === 'Bárbaro') {
+  } else if (nivelEn(p, 'Bárbaro') > 0) {
     const c = modificador(car(p, 'CON')); base = 10 + desEf + c; partes.push(L(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(c)} CON`, `Защита без доспехов 10 ${conSigno(desEf)} ЛОВ ${conSigno(c)} ТЕЛ`));
-  } else if (p.clase === 'Monje' && !escudo) {
+  } else if (nivelEn(p, 'Monje') > 0 && !escudo) {
     const s = modificador(car(p, 'SAB')); base = 10 + desEf + s; partes.push(L(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(s)} SAB`, `Защита без доспехов 10 ${conSigno(desEf)} ЛОВ ${conSigno(s)} МДР`));
   } else partes.push(`10 ${conSigno(desEf)} ${L('DES', 'ЛОВ')}`);
   let total = base;
@@ -412,14 +414,14 @@ export function bonoArma(p: Personaje, it: Item): { ataque: number; mod: number;
   const fue = modificador(car(p, 'FUE')), des = modificador(car(p, 'DES'));
   const distancia = esDistancia(it);
   // Ataques diestros del monje: con sus armas puede usar DES en vez de FUE.
-  const sutil = /sutil/i.test(props) || (p.clase === 'Monje' && esArmaMonje(it));
+  const sutil = /sutil/i.test(props) || (nivelEn(p, 'Monje') > 0 && esArmaMonje(it));
   const auto: Atributo = distancia || (sutil && des > fue) ? 'DES' : 'FUE';
   const magico = bonoMagicoArma(it);
   // El jugador puede elegir otra característica para el ataque y/o el daño de esta arma.
   const elegido = p.atrArmas?.[it.id];
   const atr: Atributo = elegido?.ataque ?? auto;
   const mod = modificador(car(p, elegido?.dano ?? auto)) + magico;
-  return { ataque: modificador(car(p, atr)) + magico + bonoCompetencia(p.nivel) + bonoAtaqueArma(p, distancia), mod, atr, distancia, auto };
+  return { ataque: modificador(car(p, atr)) + magico + bonoCompetencia(nivelTotal(p)) + bonoAtaqueArma(p, distancia), mod, atr, distancia, auto };
 }
 
 // ---------------------------------------------------------------- Rasgos raciales recomendados e idiomas

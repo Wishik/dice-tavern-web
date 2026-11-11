@@ -2,6 +2,7 @@ import type { Clase, Trasfondo } from './data';
 import type { Personaje } from './types';
 import { HABILIDADES, idHabilidad } from './rules';
 import { RASGOS_FIJOS } from './fijos';
+import { HABILIDADES_MULTICLASE, clasesDe, dotesDeClases } from './multiclase';
 
 /** Una fuente que da competencias o pericias en habilidades «a elegir» (las fijas de raza ya se suman solas en bonos.ts). */
 export interface FuenteHabilidad { es: string; ru: string; comp: number; pericia: number; /** Vale como competencia o, si ya la tienes, como pericia. */ flexible?: boolean }
@@ -54,13 +55,17 @@ export function limitesHabilidades(p: Personaje, clase: Clase | null | undefined
   if (clase) f.push({ es: p.clase, ru: p.clase, comp: clase.atributos.habilidadesN, pericia: 0 });
   const tras = habilidadesTrasfondo(p, trasfondos);
   if (tras.length) f.push({ es: 'Trasfondo', ru: 'Предыстория', comp: tras.length, pericia: 0 });
-  if (p.clase === 'Bárbaro' && p.nivel >= 3) f.push({ es: 'Conocimiento primigenio', ru: 'Conocimiento primigenio', comp: 1, pericia: 0 });
-  if (clase && p.nivel >= 3) for (const [s, n] of Object.entries(SUBCLASES)) if (igual(s, p.subclase ?? '')) f.push({ es: s, ru: s, comp: n, pericia: 0 });
-  for (const [nivel, n, nombre] of PERICIAS[p.clase] ?? []) if (p.nivel >= nivel) f.push({ es: `${nombre} (niv. ${nivel})`, ru: `${nombre} (ур. ${nivel})`, comp: 0, pericia: n });
+  clasesDe(p).forEach((c, i) => {
+    // Las otras clases (multiclase) solo dan las habilidades que marca la regla de multiclase.
+    if (i > 0 && HABILIDADES_MULTICLASE[c.clase]) f.push({ es: `${c.clase} (multiclase)`, ru: `${c.clase} (мультикласс)`, comp: HABILIDADES_MULTICLASE[c.clase], pericia: 0 });
+    if (c.clase === 'Bárbaro' && c.nivel >= 3) f.push({ es: 'Conocimiento primigenio', ru: 'Conocimiento primigenio', comp: 1, pericia: 0 });
+    if (c.nivel >= 3) for (const [s, n] of Object.entries(SUBCLASES)) if (igual(s, c.subclase ?? '')) f.push({ es: s, ru: s, comp: n, pericia: 0 });
+    for (const [nivel, n, nombre] of PERICIAS[c.clase] ?? []) if (c.nivel >= nivel) f.push({ es: `${nombre} (niv. ${nivel})`, ru: `${nombre} (ур. ${nivel})`, comp: 0, pericia: n });
+  });
 
   const rasgos = new Set([...(RASGOS_FIJOS[p.raza] ?? []), ...(p.rasgosRaza ?? [])]);
   // El humano elige entre una dote extra o dos habilidades: si ya tiene más dotes de las que le tocan, eligió la dote.
-  const dotesNormales = (p.trasfondoEstilo ? 1 : 0) + (clase?.tabla.filter((r) => r.nivel <= p.nivel && /Mejora de característica|Don épico/.test(r.rasgos)).length ?? 0);
+  const dotesNormales = (p.trasfondoEstilo ? 1 : 0) + dotesDeClases(p, clase);
   const humanoConDote = p.raza === 'Humano' && (p.dotes ?? []).length > dotesNormales;
   for (const [r, v] of Object.entries(RASGOS)) if (rasgos.has(r) && !(r === 'Hábil' && humanoConDote)) f.push({ es: r, ru: r, ...v });
   for (const d of p.dotes ?? []) { const k = Object.keys(DOTES).find((x) => igual(x, d.nombre)); if (k) f.push({ es: k, ru: k, ...DOTES[k] }); }

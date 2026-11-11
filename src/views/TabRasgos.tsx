@@ -7,6 +7,7 @@ import type { EntradaTexto } from '../types';
 import { RASGOS_IDIOMA, RASGOS_RECOMENDADOS } from '../rules';
 import { L, T, RU_CLASES, RU_RAZAS } from '../i18n';
 import { td } from '../datosRu';
+import { clasesDe } from '../multiclase';
 
 export function TabRasgos() {
   const { p, upd, razas, clases, dotes, trasfondos, avisos } = useFicha();
@@ -28,8 +29,14 @@ export function TabRasgos() {
   ];
   const tieneExcl = p.rasgosRaza.some((n) => excl.some((e) => e.nombre === n));
   const tras = trasfondos?.find((t) => t.nombre === p.trasfondoEstilo);
-  const rasgosClase = [...(clase?.rasgos ?? []), ...(sub?.rasgos ?? []).map((r) => ({ ...r, nombre: `${td(r.nombre)} (${td(sub!.nombre)})` }))]
-    .filter((r) => r.nivel <= p.nivel && !RASGOS_IDIOMA[r.nombre]).sort((a, b) => a.nivel - b.nivel);
+  // Multiclase: una lista por clase, cada una con los rasgos hasta su nivel.
+  const porClase = clasesDe(p).map((c) => {
+    const datos = buscarClase(clases, c.clase);
+    const s2 = datos?.subclases.find((s) => s.nombre === c.subclase);
+    const lista = [...(datos?.rasgos ?? []), ...(s2?.rasgos ?? []).map((r) => ({ ...r, nombre: `${td(r.nombre)} (${td(s2!.nombre)})` }))]
+      .filter((r) => r.nivel <= c.nivel && !RASGOS_IDIOMA[r.nombre]).sort((a, b) => a.nivel - b.nivel);
+    return { c, datos, sub: s2, lista };
+  }).filter((x) => x.datos);
 
   return (
     <div className="tab">
@@ -55,14 +62,14 @@ export function TabRasgos() {
         </Seccion>
       )}
 
-      {clase && (
-        <Seccion titulo={`${L(`Rasgos de ${clase.nombre}`, `Умения: ${T(RU_CLASES, clase.nombre)}`)}${sub ? ` · ${td(sub.nombre)}` : ''}`}>
+      {porClase.map(({ c, datos, sub, lista }) => (
+        <Seccion key={c.clase} titulo={`${L(`Rasgos de ${datos!.nombre}`, `Умения: ${T(RU_CLASES, datos!.nombre)}`)}${porClase.length > 1 ? ` ${c.nivel}` : ''}${sub ? ` · ${td(sub.nombre)}` : ''}`}>
           <ul className="lista-rasgos">
-            {rasgosClase.map((r, i) => <li key={i}><button onClick={() => setVer({ titulo: r.nombre, texto: r.texto })}><strong>{td(r.nombre)}</strong><small>{L('Nivel', 'Уровень')} {r.nivel}</small></button></li>)}
+            {lista.map((r, i) => <li key={i}><button onClick={() => setVer({ titulo: r.nombre, texto: r.texto })}><strong>{td(r.nombre)}</strong><small>{L('Nivel', 'Уровень')} {r.nivel}</small></button></li>)}
           </ul>
-          {avisos.subclase && <p className="aviso-rojo"><PuntoRojo /> {L('A nivel 3 eliges subclase (en «Personaje»).', 'На 3 уровне выбираешь подкласс (во вкладке «Персонаж»).')}</p>}
+          {c.nivel >= 3 && !c.subclase && <p className="aviso-rojo"><PuntoRojo /> {L('A nivel 3 eliges subclase (en «Personaje»).', 'На 3 уровне выбираешь подкласс (во вкладке «Персонаж»).')}</p>}
         </Seccion>
-      )}
+      ))}
 
       <Seccion titulo="Otros rasgos">
         <ul className="lista-rasgos">

@@ -1,4 +1,6 @@
-import type { Clase, Razas } from './data';
+import { clasesDe, nivelTotal, vistaClase } from './multiclase';
+import { buscarClase } from './avisos';
+import type { Clase } from './data';
 import type { Item, Personaje } from './types';
 import { bonoCompetencia } from './rules';
 import { RASGOS_FIJOS } from './fijos';
@@ -65,7 +67,7 @@ const DEFS: Record<string, Def> = {
   iraControlada: { rasgo: 'Ira controlada', crear: () => ({ es: 'Ira controlada', ru: 'Сдержанный гнев', dano: '+2', unaVez: true, nota_es: 'Contra quien te acaba de dañar.', nota_ru: 'Против того, кто тебя только что ранил.' }) },
   // ---------- Dotes
   carga: { dote: 'Atacante a la carga', crear: () => ({ es: 'Atacante a la carga', ru: 'Атакующий с разбега', dano: '+1d8', unaVez: true, armas: 'cac', nota_es: 'Tras moverte 10 pies en línea recta.', nota_ru: 'После 10 фт по прямой.' }) },
-  armasPesadas: { dote: 'Maestro en armas pesadas', crear: (p) => ({ es: 'Maestro en armas pesadas', ru: 'Мастер тяжёлого оружия', dano: `+${bonoCompetencia(p.nivel)}`, armas: 'pesada' }) },
+  armasPesadas: { dote: 'Maestro en armas pesadas', crear: (p) => ({ es: 'Maestro en armas pesadas', ru: 'Мастер тяжёлого оружия', dano: `+${bonoCompetencia(nivelTotal(p))}`, armas: 'pesada' }) },
   duelo: { dote: 'Duelo', crear: () => ({ es: 'Duelo', ru: 'Дуэль', dano: '+2', armas: 'cac', nota_es: 'Arma a una mano y nada en la otra.', nota_ru: 'Оружие в одной руке, вторая свободна.' }) },
   arrojadizas: { dote: 'Combate con armas arrojadizas', crear: () => ({ es: 'Armas arrojadizas', ru: 'Метательное оружие', dano: '+2', armas: 'arrojadiza', nota_es: 'Al lanzarla.', nota_ru: 'При броске.' }) },
 };
@@ -73,12 +75,19 @@ const DEFS: Record<string, Def> = {
 const igual = (a: string, b: string) => a.localeCompare(b, 'es', { sensitivity: 'base' }) === 0;
 
 /** Potenciadores que puede usar el personaje ahora mismo. */
-export function potenciadoresDisponibles(p: Personaje, clase: Clase | null | undefined, _razas?: Razas | null): Potenciador[] {
+export function potenciadoresDisponibles(p: Personaje, clase: Clase | null | undefined, clases?: Clase[] | null): Potenciador[] {
   const rasgos = [...(RASGOS_FIJOS[p.raza] ?? []), ...(p.rasgosRaza ?? [])];
   const out: Potenciador[] = [];
   for (const [id, d] of Object.entries(DEFS)) {
-    if (d.clase && (d.clase !== p.clase || p.nivel < (d.nivel ?? 1))) continue;
-    if (d.subclase && !igual(d.subclase, p.subclase ?? '')) continue;
+    if (d.clase) {
+      // De clase: se mira con el nivel de esa clase (multiclase).
+      const c = clasesDe(p).find((x) => x.clase === d.clase);
+      if (!c || c.nivel < (d.nivel ?? 1) || (d.subclase && !igual(d.subclase, c.subclase ?? ''))) continue;
+      const v = vistaClase(p, c);
+      const x = d.crear(v, buscarClase(clases ?? null, c.clase) ?? (c.clase === p.clase ? clase : null));
+      if (x) out.push({ id, ...x });
+      continue;
+    }
     if (d.razas && !d.razas.includes(p.raza)) continue;
     if (d.rasgo && !rasgos.some((r) => igual(r, d.rasgo!))) continue;
     if (d.dote && !(p.dotes ?? []).some((x) => igual(x.nombre, d.dote!))) continue;

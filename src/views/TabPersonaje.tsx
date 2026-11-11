@@ -1,12 +1,13 @@
 import { Fragment, useRef, useState } from 'react';
 import { Bloq, useFicha } from './Ficha';
 import { Etiqueta, Modal, Numero, PuntoRojo, Seccion, Texto, TextoLargo, comprimirFoto } from '../ui';
-import { HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, aplicarConjuntoEstandar, aplicarExperiencia, caracteristicasSinTocar, huecoDisponible, idHabilidad, cambiarNivel, idiomasDeTexto, pgPorDefecto, pxParaSubir, RASGOS_IDIOMA } from '../rules';
+import { car, HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, aplicarConjuntoEstandar, aplicarExperiencia, caracteristicasSinTocar, huecoDisponible, idHabilidad, cambiarNivel, idiomasDeTexto, pgPorDefecto, pxParaSubir, RASGOS_IDIOMA } from '../rules';
 import { ATRIBUTOS, type Atributo, type Personaje } from '../types';
 import { buscarClase, buscarRaza } from '../avisos';
 import { L, T, idioma, RU_ATRIBUTOS, RU_CLASES, RU_RAZAS } from '../i18n';
 import { tr } from '../ru';
 import { td } from '../datosRu';
+import { GANAS_MULTICLASE, clasesDe, cumpleRequisito, esMulticlase, textoRequisito } from '../multiclase';
 
 const ABREV: Record<string, Atributo> = { FUE: 'FUE', DES: 'DES', CON: 'CON', INT: 'INT', SAB: 'SAB', CAR: 'CAR' };
 
@@ -17,12 +18,14 @@ export function TabPersonaje() {
   const [errFoto, setErrFoto] = useState('');
   const inputFoto = useRef<HTMLInputElement>(null);
   const clase = buscarClase(clases, p.clase);
+  const nivelPrincipal = clasesDe(p)[0]?.nivel ?? p.nivel;
+  const [nuevaClase, setNuevaClase] = useState(false);
   const raza = buscarRaza(razas, p.raza);
   const tras = trasfondos?.find((t) => t.nombre === p.trasfondoEstilo);
   // Idiomas que ya vienen dados: los de la raza y los de rasgos de clase como «Druídico» o «Jerga de ladrones».
   const idiomasFijos = [
     ...(raza ? idiomasDeTexto(raza.idiomas).map((n) => ({ nombre: n, origen: raza.nombre })) : []),
-    ...(clase?.rasgos ?? []).filter((r) => r.nivel <= p.nivel && RASGOS_IDIOMA[r.nombre]).map((r) => ({ nombre: RASGOS_IDIOMA[r.nombre], origen: clase!.nombre })),
+    ...(clase?.rasgos ?? []).filter((r) => r.nivel <= nivelPrincipal && RASGOS_IDIOMA[r.nombre]).map((r) => ({ nombre: RASGOS_IDIOMA[r.nombre], origen: clase!.nombre })),
   ];
 
   const elegirRaza = (nombre: string) => upd((x) => {
@@ -92,7 +95,7 @@ export function TabPersonaje() {
               {raza && <button className="btn icono" onClick={() => setInfo('raza')} title={L('Ver raza', 'О расе')}>ⓘ</button>}
             </div>
           </Etiqueta>
-          <Etiqueta texto="Clase">
+          <Etiqueta texto={esMulticlase(p) ? L(`Clase principal (nivel ${nivelPrincipal})`, `Основной класс (${nivelPrincipal} ур.)`) : 'Clase'}>
             <div className="con-boton">
               <Bloq><select className="campo" value={p.clase} onChange={(e) => elegirClase(e.target.value)}>
                 <option value="">{L('— Elige —', '— Выбери —')}</option>
@@ -102,7 +105,7 @@ export function TabPersonaje() {
             </div>
           </Etiqueta>
           {clase && (
-            <Etiqueta texto={L(`Subclase${p.nivel < 3 ? ' (nivel 3)' : ''}`, `Подкласс${p.nivel < 3 ? ' (3 уровень)' : ''}`)}>
+            <Etiqueta texto={L(`Subclase${nivelPrincipal < 3 ? ' (nivel 3)' : ''}`, `Подкласс${nivelPrincipal < 3 ? ' (3 уровень)' : ''}`)}>
               <div className="con-boton">
                 <Bloq si={!!p.subclase}><select className="campo" value={p.subclase} onChange={(e) => upd((x) => { x.subclase = e.target.value; })}>
                   <option value="">{L('— Ninguna —', '— Нет —')}</option>
@@ -112,6 +115,7 @@ export function TabPersonaje() {
               </div>
             </Etiqueta>
           )}
+          {clase && <Multiclase abrir={nuevaClase} setAbrir={setNuevaClase} />}
           <Etiqueta texto="Tamaño"><Bloq><Texto valor={p.tamano} set={(s) => upd((x) => { x.tamano = s; })} /></Bloq></Etiqueta>
           <Etiqueta texto="Edad"><Texto valor={p.edad} set={(s) => upd((x) => { x.edad = s; })} /></Etiqueta>
         </div>
@@ -186,7 +190,7 @@ export function TabPersonaje() {
             {clase.atributos.herramientas && <><dt>{L('Herramientas', 'Инструменты')}</dt><dd>{td(clase.atributos.herramientas)}</dd></>}
             <dt>{L('Equipo inicial', 'Стартовое снаряжение')}</dt><dd>{td(clase.atributos.equipo)}</dd>
           </dl>
-          <TablaClase clase={clase} nivel={p.nivel} />
+          <TablaClase clase={clase} nivel={nivelPrincipal} />
         </Modal>
       )}
       {info === 'trasfondo' && tras && (
@@ -295,5 +299,52 @@ function ModalExperiencia({ onClose }: { onClose: () => void }) {
         </div>
       </details>
     </Modal>
+  );
+}
+
+/** Otras clases (multiclase): nivel de cada una, su subclase y añadir o quitar. Los niveles salen de la clase principal. */
+function Multiclase({ abrir, setAbrir }: { abrir: boolean; setAbrir: (b: boolean) => void }) {
+  const { p, upd, clases, bloqueado } = useFicha();
+  const todas = clasesDe(p);
+  const principal = todas[0]?.nivel ?? p.nivel;
+  const otras = p.multiclase ?? [];
+  const valor = (a: Atributo) => car(p, a);
+  const disponibles = (clases ?? []).filter((c) => !todas.some((t) => t.clase === c.nombre));
+  return (
+    <div className="multiclase">
+      {otras.map((m, i) => {
+        const datos = buscarClase(clases, m.clase);
+        return (
+          <div key={m.clase} className="fila-multiclase">
+            <strong>{T(RU_CLASES, m.clase)}</strong>
+            <Etiqueta texto={L('Nivel', 'Уровень')}><Numero valor={m.nivel} min={1} max={m.nivel + principal - 1} set={(n) => upd((x) => { x.multiclase![i].nivel = Math.max(1, Math.min(n, m.nivel + principal - 1)); })} /></Etiqueta>
+            {datos && <Etiqueta texto={L(`Subclase${m.nivel < 3 ? ' (nivel 3)' : ''}`, `Подкласс${m.nivel < 3 ? ' (3 ур.)' : ''}`)}>
+              <select className="campo" value={m.subclase} disabled={bloqueado && !!m.subclase} onChange={(e) => upd((x) => { x.multiclase![i].subclase = e.target.value; })}>
+                <option value="">{L('— Ninguna —', '— Нет —')}</option>
+                {datos.subclases.map((s) => <option key={s.nombre} value={s.nombre}>{td(s.nombre)}</option>)}
+              </select>
+            </Etiqueta>}
+            {!bloqueado && <button className="btn icono peligro-suave" title={L('Quitar clase', 'Убрать класс')} onClick={() => { if (confirm(L(`¿Quitar ${m.clase}? Sus ${m.nivel} niveles vuelven a ${p.clase}.`, `Убрать ${T(RU_CLASES, m.clase)}? Его уровни (${m.nivel}) вернутся в ${T(RU_CLASES, p.clase)}.`))) upd((x) => { x.multiclase = x.multiclase!.filter((y) => y.clase !== m.clase); }); }}>✕</button>}
+          </div>
+        );
+      })}
+      {!bloqueado && (abrir ? (
+        <Etiqueta texto={L('Nueva clase (multiclase): se lleva 1 nivel de la principal', 'Новый класс (мультикласс): забирает 1 уровень у основного')}>
+          <select className="campo" value="" onChange={(e) => {
+            const c = e.target.value; if (!c) return;
+            if (principal < 2) { alert(L('Necesitas al menos nivel 2: un nivel se queda en tu clase principal. Sube de nivel y elige la nueva clase al tirar el dado de golpe.', 'Нужен хотя бы 2-й уровень: один уровень остаётся основному классу. Повысь уровень и выбери новый класс при броске кости хитов.')); return; }
+            const ok = cumpleRequisito(c, valor) && cumpleRequisito(p.clase, valor);
+            if (!ok && !confirm(L(`Para multiclase hace falta ${textoRequisito(p.clase)} (${p.clase}) y ${textoRequisito(c)} (${c}). ¿Añadirla igualmente?`, `Для мультикласса нужно ${textoRequisito(p.clase)} (${T(RU_CLASES, p.clase)}) и ${textoRequisito(c)} (${T(RU_CLASES, c)}). Всё равно добавить?`))) return;
+            upd((x) => { x.multiclase = [...(x.multiclase ?? []), { clase: c, subclase: '', nivel: 1 }]; });
+            setAbrir(false);
+          }}>
+            <option value="">{L('— Elige —', '— Выбери —')}</option>
+            {disponibles.map((c) => <option key={c.nombre} value={c.nombre}>{T(RU_CLASES, c.nombre)} · {textoRequisito(c.nombre)}{cumpleRequisito(c.nombre, valor) ? '' : ' ⚠'}</option>)}
+          </select>
+          <span className="nota pequena">{L('Lo normal es elegirla al subir de nivel (en la ventana del dado de golpe).', 'Обычно новый класс выбирают при повышении уровня (в окне кости хитов).')}</span>
+        </Etiqueta>
+      ) : <button className="btn enlace pequeno" onClick={() => setAbrir(true)}>＋ {L('Multiclase: añadir otra clase', 'Мультикласс: добавить класс')}</button>)}
+      {otras.length > 0 && <p className="nota pequena">{otras.map((m) => `${T(RU_CLASES, m.clase)}: ${L(GANAS_MULTICLASE[m.clase]?.[0] ?? '', GANAS_MULTICLASE[m.clase]?.[1] ?? '')}`).join(' · ')}</p>}
+    </div>
   );
 }

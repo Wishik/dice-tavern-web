@@ -1,3 +1,4 @@
+import { clasesDe, nivelTotal, textoClases } from '../multiclase';
 import { ListaEfectosCar } from '../efectosCar';
 import { Bloq, useFicha } from './Ficha';
 import { ChipsEstados } from '../estados';
@@ -22,9 +23,11 @@ export function TabAtributos() {
   const cortosQuedan = Math.max(0, MAX_DESCANSOS_CORTOS - (p.descansosCortos ?? 0));
   const { tirarD20, tirar } = useDados();
   const carga = estadoCarga(p);
-  const bc = bonoCompetencia(p.nivel);
+  const bc = bonoCompetencia(nivelTotal(p));
   const clase = buscarClase(clases, p.clase);
   const dado = clase?.atributos.dadoGolpe ?? '';
+  // Multiclase: un botón por cada tipo de dado de golpe de tus clases.
+  const dadosDG = [...new Set(clasesDe(p).map((c) => buscarClase(clases, c.clase)?.atributos.dadoGolpe).filter(Boolean) as string[])];
   const recursos = recursosPersonaje(p, clase);
   const dgQuedan = Math.max(0, p.nivel - p.dgUsados);
   const extraDg = extraDadoGolpe(p);
@@ -68,7 +71,7 @@ export function TabAtributos() {
               <span className="de">/ {p.pm.max}</span>
             </div>
             <div className="barra-vida barra-mana"><div style={{ width: `${Math.max(0, Math.min(100, (p.pm.actual / p.pm.max) * 100))}%` }} /></div>
-            <p className="nota pequena centro">{L(`Por ${p.clase} nivel ${p.nivel}. Se recupera con descanso largo.`, `${T(RU_CLASES, p.clase)}, ${p.nivel} уровень. Восстанавливается после долгого отдыха.`)}</p>
+            <p className="nota pequena centro">{L(`Por ${textoClases(p)}. Se recupera con descanso largo.`, `${textoClases(p)}. Восстанавливается после долгого отдыха.`)}</p>
           </Seccion>
         )}
         <Seccion titulo="Inspiración">
@@ -82,8 +85,10 @@ export function TabAtributos() {
         </Seccion>
         <Seccion titulo="DG">
           <div className="dg">
-            <button className="btn dado-pequeno" disabled={!dado || !dgQuedan} title={L('Gastar un dado de golpe y tirarlo', 'Потратить кость хитов и бросить её')}
-              onClick={() => { if (!dado || !dgQuedan) return; tirar(L(`Dado de golpe (${dado})`, `Кость хитов (${dado})`), `1${dado}${extraDg ? `+${extraDg}` : ''}`); upd((x) => { x.dgUsados = Math.min(x.nivel, x.dgUsados + 1); }); }}>{dado ? `1${dado}` : 'D'}</button>
+            {(dadosDG.length ? dadosDG : [dado]).map((d) => (
+              <button key={d || 'D'} className="btn dado-pequeno" disabled={!d || !dgQuedan} title={L('Gastar un dado de golpe y tirarlo', 'Потратить кость хитов и бросить её')}
+                onClick={() => { if (!d || !dgQuedan) return; tirar(L(`Dado de golpe (${d})`, `Кость хитов (${d})`), `1${d}${extraDg ? `+${extraDg}` : ''}`); upd((x) => { x.dgUsados = Math.min(x.nivel, x.dgUsados + 1); }); }}>{d ? `1${d}` : 'D'}</button>
+            ))}
             <span>{dgQuedan} / {p.nivel}</span>
           </div>
           <div className="fila-botones pequena">
