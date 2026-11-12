@@ -103,7 +103,14 @@ export interface Personaje {
   trasfondo: string;
   personalidad: string;
   // Hoja 2
+  /** Texto antiguo de competencias (ya no se edita; se muestra si no era el de «Rellenar desde la clase»). */
   competencias: string;
+  /** Competencias añadidas a mano (las automáticas salen de src/competencias.ts). */
+  compPropias?: { id: string; tipo: 'armas' | 'armaduras' | 'herramientas' | 'otras'; nombre: string }[];
+  /** Claves de competencias automáticas que el jugador quitó o cambió. */
+  compOcultas?: string[];
+  /** Lo elegido en las elecciones de raza, clase y dotes (src/elecciones.ts): id → valores. */
+  elecciones?: Record<string, string[]>;
   /** Rejilla 15×15: x 0 (legal) → 14 (caótico), y 0 (bueno) → 14 (maligno). orden/moral se deducen de la casilla. */
   alineamiento: { orden: '' | 'legal' | 'neutral' | 'caotico'; moral: '' | 'bueno' | 'neutral' | 'maligno'; x?: number; y?: number };
   idiomas: Record<string, string>; // clave: 'trasfondo-0', 'INT5', 'INT10', 'INT14', 'INT17', 'INT19'

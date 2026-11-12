@@ -699,3 +699,34 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .fila-multiclase > strong { align-self: center; }
 @media (max-width: 480px) { .fila-multiclase { grid-template-columns: 1fr 80px auto; } .fila-multiclase > label:nth-of-type(2) { grid-column: 1 / -1; grid-row: 2; } }
 .candado { display: inline-flex; align-items: center; justify-content: center; color: var(--tinta, #3a2414); }
+
+/* Competencias (lista) y «Por elegir» */
+.comp-grupo { margin: 4px 0 10px; }
+.comp-grupo h4 { margin: 0 0 6px; font-size: 14px; }
+.chips-comp { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.chip-comp { background: #efe3c8; border: 1px solid #c9ad7a; border-radius: 999px; padding: 5px 11px; font-size: 14px; display: inline-flex; gap: 6px; align-items: baseline; color: inherit; font-family: inherit; cursor: pointer; text-align: left; }
+.chip-comp small { color: #7a6450; font-size: 11px; }
+.chip-comp.propia { border-style: dashed; background: #f6eedb; }
+.chip-comp.anadir { padding: 5px 12px; font-weight: 700; background: transparent; border-style: dashed; }
+.vacio-comp { color: var(--tinta-suave); font-size: 13px; align-self: center; }
+.fila-botones-comp { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.comp-viejas { margin-top: 8px; font-size: 13px; }
+.comp-viejas summary { cursor: pointer; color: var(--tinta-suave); }
+.aviso-eleccion { margin: 6px 0; padding: 6px 10px; border-radius: 8px; background: #fbe4dc; border: 1px solid #e9a597; color: #6d1c14; font-size: 13px; }
+.lista-elecciones { display: flex; flex-direction: column; gap: 10px; }
+.eleccion { border: 1px solid #c9ad7a; border-radius: 10px; padding: 8px 10px; background: #f6eedb; }
+.eleccion.pendiente { border-color: #e9a597; background: #fdf0ea; }
+.cab-eleccion { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cab-eleccion small { color: #7a6450; font-size: 12px; }
+.cab-eleccion .btn { margin-left: auto; }
+.resumen-eleccion { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 14px; }
+.resumen-eleccion .btn { margin-left: auto; }
+.opciones-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.opciones-grandes { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+.opcion-eleccion { background: #fffaf0; border: 1px solid #c9ad7a; border-radius: 8px; padding: 6px 10px; color: inherit; font-family: inherit; font-size: 14px; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+.opciones-chips .opcion-eleccion { border-radius: 999px; }
+.opcion-eleccion small { color: #7a6450; font-size: 12px; }
+.opcion-eleccion.activo { background: var(--oro); border-color: #8a6a2a; color: #1d130c; }
+.opcion-eleccion.activo small { color: #3b2a14; }
+.ranuras-eleccion { display: grid; gap: 6px; margin-top: 6px; }
+.maestria-arma { color: #7a5a12; }

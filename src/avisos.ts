@@ -1,3 +1,4 @@
+import { eleccionesDe, eleccionesPendientes, esDoteDeEstilo, trucoExtraOrden } from './elecciones';
 import { limitesHabilidades } from './limitesHabilidades';
 import type { Clase, Raza, Razas, Trasfondo } from './data';
 import type { Personaje } from './types';
@@ -15,6 +16,8 @@ export interface Avisos {
   oficios: number;
   profesiones: number;
   subclase: boolean;
+  /** Cosas por elegir de raza, clase y dotes (instrumentos, Orden divina, maestría…). */
+  elecciones: number;
   limiteTrucos: number | null;
   limiteConjuros: number | null;
   /** El libro (Mago «6+») puede tener más conjuros que el número de la tabla. */
@@ -51,7 +54,8 @@ export const conjurosDeClase = (p: Personaje, clase: string) => p.conjuros.filte
 function magiaClase(p: Personaje, c: { clase: string; subclase: string; nivel: number }, datos: Clase | null): MagiaClase {
   const f = filaClase(datos, c.nivel);
   const sub = SUBCLASES_MAGICAS[c.subclase]?.[c.nivel - 1];
-  const limiteTrucos = f && 'Trucos' in f ? num(f['Trucos']) : sub ? sub[0] : null;
+  const lt = f && 'Trucos' in f ? num(f['Trucos']) : sub ? sub[0] : null;
+  const limiteTrucos = lt === null ? null : lt + trucoExtraOrden(p, c.clase);
   const limiteConjuros = f && 'Conjuros conocidos' in f ? num(f['Conjuros conocidos']) : sub ? sub[1] : null;
   const propios = conjurosDeClase(p, c.clase);
   return {
@@ -74,7 +78,7 @@ export function calcularAvisos(p: Personaje, clases: Clase[] | null, razas: Raza
 
   // Dotes: 1 de origen por trasfondo + una por cada "Mejora de característica"/"Don épico" alcanzado en cada clase.
   const dotesEsperadas = (p.trasfondoEstilo ? 1 : 0) + dotesDeClases(p, c);
-  const dotes = Math.max(0, dotesEsperadas - p.dotes.length);
+  const dotes = Math.max(0, dotesEsperadas - p.dotes.filter((d) => !esDoteDeEstilo(d)).length);
 
   const raza = buscarRaza(razas, p.raza);
   const rasgosRaza = raza ? Math.max(0, raza.rasgosAElegir - p.rasgosRaza.length) : 0;
@@ -86,14 +90,15 @@ export function calcularAvisos(p: Personaje, clases: Clase[] | null, razas: Raza
   const idiomas = huecosVacios(p, HUECOS_IDIOMAS, p.idiomas);
   const oficios = huecosVacios(p, HUECOS_OFICIOS, p.oficios);
   const profesiones = huecosVacios(p, HUECOS_PROFESIONES, p.profesiones);
+  const elecciones = eleccionesPendientes(p, eleccionesDe(p, clases, raza));
   const subclase = todas.some((x) => x.nivel >= 3 && !x.subclase && !!buscarClase(clases, x.clase));
 
   return {
-    trucos, conjuros, dotes, rasgosRaza, habilidades, idiomas, oficios, profesiones, subclase, magia,
+    trucos, conjuros, dotes, rasgosRaza, habilidades, idiomas, oficios, profesiones, subclase, elecciones, magia,
     limiteTrucos: m0?.limiteTrucos ?? null, limiteConjuros: m0?.limiteConjuros ?? null, conjurosAbierto: m0?.conjurosAbierto ?? false,
     limitePreparados: m0?.limitePreparados ?? null, nivelMaxConjuro: m0?.nivelMaxConjuro ?? null,
     total: {
-      general: idiomas + oficios + profesiones + (subclase ? 1 : 0),
+      general: idiomas + oficios + profesiones + (subclase ? 1 : 0) + elecciones,
       habilidades,
       magia: trucos + conjuros,
       rasgos: dotes + rasgosRaza,

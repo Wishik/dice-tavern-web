@@ -7,6 +7,9 @@ import { buscarClase, buscarRaza } from '../avisos';
 import { L, T, idioma, RU_ATRIBUTOS, RU_CLASES, RU_RAZAS } from '../i18n';
 import { tr } from '../ru';
 import { td } from '../datosRu';
+import { Competencias } from './Competencias';
+import { Elecciones } from './Elecciones';
+import { eleccionesDe, idiomasElegidos } from '../elecciones';
 import { GANAS_MULTICLASE, clasesDe, cumpleRequisito, esMulticlase, textoRequisito } from '../multiclase';
 
 const ABREV: Record<string, Atributo> = { FUE: 'FUE', DES: 'DES', CON: 'CON', INT: 'INT', SAB: 'SAB', CAR: 'CAR' };
@@ -26,6 +29,7 @@ export function TabPersonaje() {
   const idiomasFijos = [
     ...(raza ? idiomasDeTexto(raza.idiomas).map((n) => ({ nombre: n, origen: raza.nombre })) : []),
     ...(clase?.rasgos ?? []).filter((r) => r.nivel <= nivelPrincipal && RASGOS_IDIOMA[r.nombre]).map((r) => ({ nombre: RASGOS_IDIOMA[r.nombre], origen: clase!.nombre })),
+    ...idiomasElegidos(p, eleccionesDe(p, clases, raza)),
   ];
 
   const elegirRaza = (nombre: string) => upd((x) => {
@@ -37,6 +41,9 @@ export function TabPersonaje() {
       if (!isNaN(v)) { x.velocidad.andando = v; x.velocidad.corriendo = v * 2; }
       const nad = r.velocidad.match(/(\d+)\s*pies\s+nadando/); if (nad) x.velocidad.nadando = nad[1];
       x.rasgosRaza = [];
+      // Lo elegido para la raza anterior (Resiliencia, linaje…) ya no vale.
+      for (const a of x.elecciones?.['raza:resiliencia'] ?? []) if (a in x.salvaciones && !buscarClase(clases, x.clase)?.atributos.salvaciones.includes(a)) x.salvaciones[a as Atributo].comp = false;
+      if (x.elecciones) x.elecciones = Object.fromEntries(Object.entries(x.elecciones).filter(([k]) => !k.startsWith('raza:')));
     }
   });
   const elegirClase = (nombre: string) => upd((x) => {
@@ -44,7 +51,9 @@ export function TabPersonaje() {
     const pgViejo = viejo ? pgPorDefecto(x, viejo.atributos.dadoGolpe) : 0;
     x.clase = nombre; x.subclase = '';
     const c = buscarClase(clases, nombre);
-    if (c) for (const a of ATRIBUTOS) x.salvaciones[a].comp = c.atributos.salvaciones.includes(a);
+    if (c) for (const a of ATRIBUTOS) x.salvaciones[a].comp = c.atributos.salvaciones.includes(a) || !!x.elecciones?.['raza:resiliencia']?.includes(a);
+    // El estilo de combate de la clase anterior ya no vale.
+    if (viejo && viejo.nombre !== nombre) x.dotes = x.dotes.filter((d) => d.origen !== `Estilo de combate · ${viejo.nombre}`);
     // Al elegir clase, si aún no has tocado las características, pone el conjunto estándar del manual.
     if (caracteristicasSinTocar(x)) aplicarConjuntoEstandar(x, nombre);
     // PG por defecto si aún no los habías puesto (o seguían siendo los de la clase anterior).
@@ -121,6 +130,8 @@ export function TabPersonaje() {
         </div>
       </Seccion>
 
+      <Elecciones />
+
       <Seccion titulo="Trasfondo">
         <Etiqueta texto="Estilo de trasfondo (opcional)">
           <div className="con-boton">
@@ -139,13 +150,7 @@ export function TabPersonaje() {
         <Texto multilinea filas={3} valor={p.personalidad} set={(s) => upd((x) => { x.personalidad = s; })} />
       </Seccion>
 
-      <Seccion titulo="Competencias">
-        <Texto multilinea filas={3} valor={p.competencias} set={(s) => upd((x) => { x.competencias = s; })} placeholder="Armas, armaduras, herramientas…" />
-        {clase && <button className="btn enlace pequeno" onClick={() => upd((x) => {
-          const a = clase.atributos;
-          x.competencias = [`Armas: ${a.armas}`, `Armaduras: ${a.armaduras}`, a.herramientas && `Herramientas: ${a.herramientas}`].filter(Boolean).join('\n');
-        })}>{L('Rellenar desde la clase', 'Заполнить по классу')}</button>}
-      </Seccion>
+      <Competencias />
 
       <Seccion titulo="Alineamiento">
         <Alineamiento p={p} set={(a) => upd((x) => { x.alineamiento = a; })} />
@@ -158,7 +163,7 @@ export function TabPersonaje() {
           </ul>
         )}
         <Huecos huecos={HUECOS_IDIOMAS} valores={p.idiomas} set={(k, v) => upd((x) => { x.idiomas[k] = v; })} p={p} />
-        {raza && /elecci[oó]n/i.test(raza.idiomas) && <p className="nota">{L('Tu raza te da además un idioma a tu elección: escríbelo en un hueco.', 'Раса даёт ещё один язык на выбор: впиши его в свободную строку.')}</p>}
+        {raza && /elecci[oó]n/i.test(raza.idiomas) && !p.elecciones?.['raza:idioma']?.[0]?.trim() && <p className="nota">{L('Tu raza te da además un idioma a tu elección: escríbelo arriba, en «Por elegir».', 'Раса даёт ещё один язык на выбор: впиши его выше, в «Нужно выбрать».')}</p>}
       </Seccion>
       <div className="fila-2-tarjetas">
         <Seccion titulo="Oficios" aviso={avisos.oficios}>
