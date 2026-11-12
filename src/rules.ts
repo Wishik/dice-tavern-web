@@ -444,3 +444,6 @@ export const RASGOS_RECOMENDADOS: Record<string, string[]> = {
 export const RASGOS_IDIOMA: Record<string, string> = { 'Druídico': 'Druídico', 'Jerga de ladrones': 'Jerga de ladrones' };
 /** «Élfico, Silvano y Común» → ['Élfico', 'Silvano', 'Común'] (sin «Otro a tu elección»). */
 export const idiomasDeTexto = (t: string) => t.split(/,|\s+y\s+|\s+e\s+/).map((x) => x.trim()).filter((x) => x && !/elecci[oó]n/i.test(x));
+/** Todos los idiomas que salen en las razas (para elegir de una lista), Común primero. */
+export const listaIdiomas = (razas: { razas: { idiomas: string }[] } | null) =>
+  [...new Set((razas?.razas ?? []).flatMap((r) => idiomasDeTexto(r.idiomas)))].sort((a, b) => (a === 'Común' ? -1 : b === 'Común' ? 1 : a.localeCompare(b, 'es')));

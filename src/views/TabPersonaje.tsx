@@ -1,6 +1,7 @@
 import { Fragment, useRef, useState } from 'react';
 import { Bloq, useFicha } from './Ficha';
 import { Etiqueta, Modal, Numero, PuntoRojo, Seccion, Texto, TextoLargo, comprimirFoto } from '../ui';
+import { listaIdiomas } from '../rules';
 import { car, HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, aplicarConjuntoEstandar, aplicarExperiencia, caracteristicasSinTocar, huecoDisponible, idHabilidad, cambiarNivel, idiomasDeTexto, pgPorDefecto, pxParaSubir, RASGOS_IDIOMA } from '../rules';
 import { ATRIBUTOS, type Atributo, type Personaje } from '../types';
 import { buscarClase, buscarRaza } from '../avisos';
@@ -162,7 +163,7 @@ export function TabPersonaje() {
             {idiomasFijos.map((i) => <li key={i.nombre} className="chip-idioma" title={i.origen}>{td(i.nombre)}<small>{i.origen}</small></li>)}
           </ul>
         )}
-        <Huecos huecos={HUECOS_IDIOMAS} valores={p.idiomas} set={(k, v) => upd((x) => { x.idiomas[k] = v; })} p={p} />
+        <Huecos huecos={HUECOS_IDIOMAS} valores={p.idiomas} set={(k, v) => upd((x) => { x.idiomas[k] = v; })} p={p} opciones={listaIdiomas(razas).filter((n) => !idiomasFijos.some((i) => i.nombre === n))} />
         {raza && /elecci[oó]n/i.test(raza.idiomas) && !p.elecciones?.['raza:idioma']?.[0]?.trim() && <p className="nota">{L('Tu raza te da además un idioma a tu elección: escríbelo arriba, en «Por elegir».', 'Раса даёт ещё один язык на выбор: впиши его выше, в «Нужно выбрать».')}</p>}
       </Seccion>
       <div className="fila-2-tarjetas">
@@ -257,7 +258,7 @@ function Alineamiento({ p, set }: { p: Personaje; set: (a: Personaje['alineamien
   );
 }
 
-function Huecos({ huecos, valores, set, p }: { huecos: readonly { id: string; etiqueta: string; atr: null | 'INT' | 'SAB'; min: number }[]; valores: Record<string, string>; set: (k: string, v: string) => void; p: Personaje }) {
+function Huecos({ huecos, valores, set, p, opciones }: { huecos: readonly { id: string; etiqueta: string; atr: null | 'INT' | 'SAB'; min: number }[]; valores: Record<string, string>; set: (k: string, v: string) => void; p: Personaje; opciones?: string[] }) {
   return (
     <ul className="huecos">
       {huecos.map((h) => {
@@ -266,7 +267,17 @@ function Huecos({ huecos, valores, set, p }: { huecos: readonly { id: string; et
         return (
           <li key={h.id} className={disp ? '' : 'bloqueado'}>
             <span className="hueco-etq">{tr(h.etiqueta)}{disp && vacio && h.atr && <PuntoRojo />}</span>
-            <input className="campo" value={valores[h.id] ?? ''} placeholder={disp ? '' : L(`Necesitas ${h.atr} ${h.min}`, `Нужно ${T(RU_ATRIBUTOS, h.atr ?? '')} ${h.min}`)} onChange={(e) => set(h.id, e.target.value)} />
+            {opciones && disp ? (
+              <select className="campo" value={valores[h.id] ?? ''} onChange={(e) => {
+                if (e.target.value !== '__otro') { set(h.id, e.target.value); return; }
+                const v = window.prompt(L('Escribe el idioma', 'Впиши язык'), '');
+                if (v?.trim()) set(h.id, v.trim());
+              }}>
+                <option value="">{L('— Elige —', '— Выбери —')}</option>
+                {[...new Set([...(valores[h.id] ? [valores[h.id]] : []), ...opciones.filter((o) => o === valores[h.id] || !Object.values(valores).includes(o))])].map((o) => <option key={o} value={o}>{td(o)}</option>)}
+                <option value="__otro">{L('Otro (escribir)…', 'Другой (вписать)…')}</option>
+              </select>
+            ) : <input className="campo" value={valores[h.id] ?? ''} disabled={!disp && !!opciones} placeholder={disp ? '' : L(`Necesitas ${h.atr} ${h.min}`, `Нужно ${T(RU_ATRIBUTOS, h.atr ?? '')} ${h.min}`)} onChange={(e) => set(h.id, e.target.value)} />}
           </li>
         );
       })}

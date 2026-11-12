@@ -7,6 +7,7 @@ import { buscarRaza } from '../avisos';
 import { cargarObjetos, useDatos, type Arma } from '../data';
 import { type Eleccion, eleccionesDe, eleccionesPendientes, elegido, faltan, fijarEleccion } from '../elecciones';
 import { meterEquipoInicial } from '../equipoInicial';
+import { idiomasDeTexto, listaIdiomas } from '../rules';
 
 /** «Por elegir»: lo que la raza, la clase o una dote mandan escoger. Lo pendiente sale con punto rojo. */
 export function Elecciones() {
@@ -28,7 +29,7 @@ export function Elecciones() {
 const etiqueta = (e: Eleccion, v: string) => { const op = e.opciones.find((o) => o.valor === v); return op ? L(op.es, op.ru) : td(v); };
 
 function FilaEleccion({ e }: { e: Eleccion }) {
-  const { p, upd, dotes } = useFicha();
+  const { p, upd, dotes, razas } = useFicha();
   const armas = useDatos<Arma[]>('armas');
   const [abierta, setAbierta] = useState(false);
   const valores = elegido(p, e.id);
@@ -77,12 +78,14 @@ function FilaEleccion({ e }: { e: Eleccion }) {
   } else if (e.modo === 'lista' || e.modo === 'armas') {
     const ops = e.modo === 'armas'
       ? (armas ?? []).filter((a) => 'dano' in a && a.maestria).map((a) => ({ valor: a.nombre, texto: `${td(a.nombre)} (${td(a.maestria)})` }))
-      : e.opciones.map((o) => ({ valor: o.valor, texto: L(o.es, o.ru) }));
+      : e.idioma ? listaIdiomas(razas).filter((n) => !idiomasDeTexto(buscarRaza(razas, p.raza)?.idiomas ?? '').includes(n)).map((n) => ({ valor: n, texto: td(n) }))
+      : e.opciones.map((o) => ({ valor: o.valor, texto: L(o.es, o.ru) + (o.nota_es ? ` (${L(o.nota_es, o.nota_ru ?? o.nota_es)})` : '') }));
     cuerpo = (
       <div className="ranuras-eleccion">
         {ranuras.map((v, i) => (
           <select key={i} className="campo" value={v} onChange={(ev) => ponerRanura(i, ev.target.value)}>
             <option value="">{L('— Elige —', '— Выбери —')}</option>
+            {v && !ops.some((o) => o.valor === v) && <option value={v}>{v}</option>}
             {ops.filter((o) => o.valor === v || !ranuras.includes(o.valor)).map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}
           </select>
         ))}

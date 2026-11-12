@@ -42,6 +42,8 @@ export const ARTESANO: Opcion[] = [
   o('Suministros de alquimista', 'Припасы алхимика'), o('Suministros de calígrafo', 'Припасы каллиграфа'), o('Suministros de cervecero', 'Припасы пивовара'),
   o('Suministros de pintor', 'Припасы художника'), o('Útiles de cocinero', 'Инструменты повара'),
 ];
+/** Invocaciones sobrenaturales (clases.json, «Opciones de invocación sobrenatural»): [nombre, nivel de brujo mínimo, requisito]. */
+const INVOCACIONES: [string, number, string][] = [["Armadura de sombras", 1, ""], ["Castigo arcano", 5, "Pacto del filo"], ["Descarga agónica", 2, "truco de brujo que inflija daño"], ["Descarga ahuyentadora", 2, "truco de brujo que inflija daño"], ["Devorador de vida", 9, "Pacto del filo"], ["Don de las profundidades", 5, ""], ["Don de los protectores", 9, "Pacto del grimorio"], ["Filo sediento", 5, "Pacto del filo"], ["Hoja devoradora", 12, "Filo sediento"], ["Inversión del amo de las cadenas", 5, "Pacto de la cadena"], ["Lanza sobrenatural", 2, "truco de brujo que inflija daño"], ["Lecciones de los primeros", 2, ""], ["Maestro de las formas innumerables", 5, ""], ["Mascara de los mil rostros", 2, ""], ["Mente sobrenatural", 1, ""], ["Mirada de la dos mentes", 5, ""], ["Pacto de la cadena", 1, ""], ["Pacto del filo", 1, ""], ["Pacto del grimorio", 1, ""], ["Paso ascendente", 5, ""], ["Salto sobrenatural", 2, ""], ["Susurros del sepulcro", 7, ""], ["Uno con la sombra", 5, ""], ["Vigor infernal", 2, ""], ["Visión bruja", 15, ""], ["Visiones brumosas", 2, ""], ["Visiones de reinos remotos", 9, ""], ["Vista del diablo", 2, ""]];
 const METAMAGIA = ['Conjuro acelerado', 'Conjuro buscador', 'Conjuro cuidadoso', 'Conjuro distante', 'Conjuro duplicado', 'Conjuro ampliado', 'Conjuro intensificado', 'Conjuro potenciado', 'Conjuro sutil', 'Conjuro transmutado'].map((n) => o(n));
 const LINAJES: Opcion[] = [
   ['Rojo', 'Красный', 'Fuego · TS de Destreza', 'Огонь · спасбросок Ловкости'], ['Oro', 'Золотой', 'Fuego · TS de Destreza', 'Огонь · спасбросок Ловкости'],
@@ -100,9 +102,17 @@ export function eleccionesDe(p: Personaje, clases: Clase[] | null, raza: Raza | 
       ...ESTILOS.map((n) => o(n)),
       ...(c.clase === 'Paladín' ? [o('Guerrero bendito (2 trucos de clérigo)', 'Благословенный воин (2 заговора жреца)')] : c.clase === 'Explorador' ? [o('2 trucos de druida', '2 заговора друида')] : [])],
       ayuda_es: 'Se añade a tus dotes.', ayuda_ru: 'Добавится к твоим чертам.' });
-    if (c.clase === 'Brujo') { const n = columna(datos, c.nivel, 'Invocaciones sobrenaturales') || 1; out.push({ id: id('invocaciones'), es: `Invocaciones sobrenaturales (${n})`, ru: `Таинственные воззвания (${n})`, origen: org, cantidad: n, modo: 'texto', opciones: [], ayuda_es: 'Escribe el nombre de cada invocación.', ayuda_ru: 'Впиши название каждого воззвания.' }); }
-    if (c.clase === 'Hechicero' && c.nivel >= 2) { const n = c.nivel >= 17 ? 6 : c.nivel >= 10 ? 4 : 2; out.push({ id: id('metamagia'), es: `Metamagia (${n})`, ru: `Метамагия (${n})`, origen: org, cantidad: n, modo: 'texto', opciones: METAMAGIA }); }
-    if (c.clase === 'Explorador' && c.nivel >= 2) out.push({ id: id('idiomas'), es: 'Explorador hábil: dos idiomas', ru: 'Ловкий следопыт: два языка', origen: org, cantidad: 2, modo: 'texto', idioma: true, opciones: [] });
+    if (c.clase === 'Brujo') {
+      const n = columna(datos, c.nivel, 'Invocaciones sobrenaturales') || 1;
+      const ops = INVOCACIONES.filter(([, nv]) => nv <= c.nivel).map(([nombre, nv, req]) => {
+        const r = [nv > 1 ? `nivel ${nv}+` : '', req].filter(Boolean).join(', ');
+        const rr = [nv > 1 ? `${nv}+ ур.` : '', req].filter(Boolean).join(', ');
+        return o(nombre, nombre, r ? `requisito: ${r}` : undefined, rr ? `требование: ${rr}` : undefined);
+      });
+      out.push({ id: id('invocaciones'), es: `Invocaciones sobrenaturales (${n})`, ru: `Таинственные воззвания (${n})`, origen: org, cantidad: n, modo: 'lista', opciones: ops, ayuda_es: 'Solo salen las de tu nivel de brujo. Mira el requisito entre paréntesis.', ayuda_ru: 'Показаны только доступные на твоём уровне колдуна. Требование — в скобках.' });
+    }
+    if (c.clase === 'Hechicero' && c.nivel >= 2) { const n = c.nivel >= 17 ? 6 : c.nivel >= 10 ? 4 : 2; out.push({ id: id('metamagia'), es: `Metamagia (${n})`, ru: `Метамагия (${n})`, origen: org, cantidad: n, modo: 'lista', opciones: METAMAGIA }); }
+    if (c.clase === 'Explorador' && c.nivel >= 2) out.push({ id: id('idiomas'), es: 'Explorador hábil: dos idiomas', ru: 'Ловкий следопыт: два языка', origen: org, cantidad: 2, modo: 'lista', idioma: true, opciones: [] });
     if (principal && datos?.atributos.equipo) out.push({ id: id('equipo'), es: 'Equipo inicial', ru: 'Стартовое снаряжение', origen: org, cantidad: 1, modo: 'chips', equipo: true, opciones: opcionesEquipo(datos.atributos.equipo), ayuda_es: 'Al elegir se mete en el inventario y en las monedas.', ayuda_ru: 'После выбора всё попадёт в инвентарь и кошелёк.' });
   });
 
@@ -112,7 +122,7 @@ export function eleccionesDe(p: Personaje, clases: Clase[] | null, raza: Raza | 
   if (rr.has('Resiliencia')) out.push({ id: 'raza:resiliencia', es: 'Resiliencia: una tirada de salvación', ru: 'Стойкость: один спасбросок', origen: orgR, cantidad: 1, modo: 'chips', opciones: ATRIBUTOS.map((a) => ({ valor: a, es: T(RU_ATRIBUTOS, a), ru: T(RU_ATRIBUTOS, a) })), ayuda_es: 'Ganas competencia en esa TS.', ayuda_ru: 'Получаешь владение этим спасброском.' });
   if (p.raza === 'Norn') out.push({ id: 'raza:espiritu', es: 'Espíritu animal', ru: 'Дух-зверь', origen: orgR, cantidad: 1, modo: 'chips', opciones: [o('Oso', 'Медведь'), o('Lobo', 'Волк'), o('Cuervo', 'Ворон')], ayuda_es: 'Permanente: decide tu forma híbrida.', ayuda_ru: 'Навсегда: определяет гибридный облик.' });
   if (p.raza === 'Dracónido') out.push({ id: 'raza:linaje', es: 'Linaje dracónido', ru: 'Драконье происхождение', origen: orgR, cantidad: 1, modo: 'chips', opciones: LINAJES, ayuda_es: 'Tipo de resistencia, de aliento y de TS. No se puede cambiar.', ayuda_ru: 'Тип сопротивления, дыхания и спасброска. Менять нельзя.' });
-  if (raza && /elecci[oó]n/i.test(raza.idiomas)) out.push({ id: 'raza:idioma', es: 'Idioma a tu elección', ru: 'Язык на выбор', origen: orgR, cantidad: 1, modo: 'texto', idioma: true, opciones: [] });
+  if (raza && /elecci[oó]n/i.test(raza.idiomas)) out.push({ id: 'raza:idioma', es: 'Idioma a tu elección', ru: 'Язык на выбор', origen: orgR, cantidad: 1, modo: 'lista', idioma: true, opciones: [] });
 
   // Dotes
   const dotes = new Set(p.dotes.map((d) => d.nombre));
