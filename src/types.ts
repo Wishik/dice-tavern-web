@@ -132,6 +132,8 @@ export interface Personaje {
   /** Ajuste a la CA calculada (anillos, Defensa sin armadura, magia…). */
   bonusCA: number;
   caV2?: boolean;
+  /** PG de nivel 1 ya con el +1 de la mesa. */
+  pgV2?: boolean;
   bonusPercepcionPasiva: number;
   recursos: string;
   /** Usos gastados de cada recurso de clase (claves de src/recursos.ts); el descanso largo lo vacía. */

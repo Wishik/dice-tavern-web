@@ -106,3 +106,16 @@ describe('efectos de lo elegido', () => {
     expect(m.opciones.every((o) => (o.desc ?? '').length > 50)).toBe(true);
   });
 });
+
+describe('PG nivel 1', () => {
+  it('Guerrero CON 13: 10 + 1 + 1 = 12, y las fichas antiguas suben 1 una vez', async () => {
+    const { pgPorDefecto } = await import('../rules');
+    const { normalizar: normalizarPersonaje } = await import('../personaje');
+    const p = nuevoPersonaje(); p.clase = 'Guerrero'; p.caracteristicas.CON = 13;
+    expect(pgPorDefecto(p, 'd10')).toBe(12);
+    const viejo = { ...p, pg: { max: 11, actual: 11, temp: 0 }, pgV2: undefined };
+    const n = normalizarPersonaje(viejo);
+    expect(n.pg).toMatchObject({ max: 12, actual: 12 });
+    expect(normalizarPersonaje(n).pg.max).toBe(12);
+  });
+});

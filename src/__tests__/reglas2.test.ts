@@ -41,7 +41,7 @@ describe('CA automática', () => {
 describe('PG, conjuros y armas', () => {
   it('PG por defecto: dado máximo + CON y luego la media', () => {
     const p = nuevoPersonaje(); p.caracteristicas.CON = 14;
-    expect(pgPorDefecto(p, 'd8')).toBe(10);
+    expect(pgPorDefecto(p, 'd8')).toBe(11);
     cambiarNivel(p, 3);
     expect(p.subidasPendientes).toBe(2);
     expect(pgSubida(1, 6)).toBe(1);

@@ -13,7 +13,7 @@ export function nuevoPersonaje(nombre = ''): Personaje {
     pg: { max: 0, actual: 0, temp: 0 }, pm: { max: 0, actual: 0 }, inspiracion: 0, dgUsados: 0, subidasPendientes: 0,
     caracteristicas: car, bonusIniciativa: 0,
     velocidad: { andando: 30, corriendo: 60, trepando: '', nadando: '', volando: '' },
-    ca: '', bonusCA: 0, caV2: true, bonusPercepcionPasiva: 0, recursos: '', recursosUsados: {}, descansosCortos: 0,
+    ca: '', bonusCA: 0, caV2: true, pgV2: true, bonusPercepcionPasiva: 0, recursos: '', recursosUsados: {}, descansosCortos: 0,
     ataquesTurno: { habil: 1, torpe: 0 }, ataques: [],
     conjuroCaracteristica: '', conjurosTurno: { estandar: '', adicional: '' },
     salvaciones: Object.fromEntries(ATRIBUTOS.map((a) => [a, { comp: false, bonus: 0 }])) as Personaje['salvaciones'],
@@ -45,6 +45,8 @@ export function normalizar(p: Partial<Personaje>): Personaje {
   // La CA antigua escrita a mano no se traslada: la CA se calcula sola (10 + DES, armadura, escudo).
   // caV2: limpia una vez el «ajuste» que la primera versión de esta migración calculó mal.
   if (!p.caV2) { out.bonusCA = 0; out.caV2 = true; }
+  // pgV2: los PG de nivel 1 antes no sumaban el +1 de la mesa (dado máx. + CON + 1): se suma una vez.
+  if (!p.pgV2) { if (out.clase && out.pg?.max > 0) { const lleno = out.pg.actual >= out.pg.max; out.pg = { ...out.pg, max: out.pg.max + 1, actual: lleno ? out.pg.max + 1 : out.pg.actual }; } out.pgV2 = true; }
   out.ca = '';
   // Los PG actuales nunca pueden pasar de los máximos: si pasa (datos antiguos), el máximo sube.
   if (out.pg.actual > out.pg.max) out.pg.max = out.pg.actual;

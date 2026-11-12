@@ -281,7 +281,8 @@ const carasDado = (dado: string) => parseInt(dado.replace(/\D/g, ''), 10) || 0;
 /** PG de nivel 1: máximo del dado de golpe + CON. A partir de ahí, cada nivel se tira el dado (ver subirNivel). */
 export function pgPorDefecto(p: Personaje, dado: string): number {
   const c = carasDado(dado); if (!c) return 0;
-  return Math.max(1, c + modificador(car(p, 'CON')));
+  // Regla de la mesa: a nivel 1, dado máximo + CON + 1 (el mismo +1 que en cada subida).
+  return Math.max(1, c + 1 + modificador(car(p, 'CON')));
 }
 /** Cambia el nivel y apunta las subidas pendientes de tirar dado de golpe. */
 export function cambiarNivel(p: Personaje, nivel: number) {
