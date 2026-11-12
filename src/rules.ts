@@ -7,8 +7,19 @@ import { tr } from './ru';
 
 /** Valor de una característica con los efectos temporales del máster (entre 1 y 30). */
 export function car(p: Personaje, a: Atributo): number {
-  const extra = (p.efectosCar ?? []).filter((e) => e.atributo === a).reduce((s, e) => s + e.valor, 0);
+  const extra = (p.efectosCar ?? []).filter((e) => e.atributo === a).reduce((s, e) => s + e.valor, 0)
+    + (p.bonosExtra ?? []).filter((b) => b.donde === a).reduce((s, b) => s + (b.valor || 0), 0);
   return extra ? Math.max(1, Math.min(30, p.caracteristicas[a] + extra)) : p.caracteristicas[a];
+}
+/** Una línea del desglose: de dónde sale cada número. `id` = bonus puesto a mano (se puede cambiar o quitar). */
+export interface LineaDesglose { texto: string; valor: number; id?: string; nota?: string; base?: boolean }
+/** Desglose de una característica: base, bonus a mano y efectos del máster. */
+export function desgloseCar(p: Personaje, a: Atributo): LineaDesglose[] {
+  return [
+    { texto: L('Puntuación base', 'Базовое значение'), valor: p.caracteristicas[a], base: true },
+    ...(p.bonosExtra ?? []).filter((b) => b.donde === a).map((b) => ({ texto: b.origen || L('Bonus', 'Бонус'), valor: b.valor, id: b.id })),
+    ...(p.efectosCar ?? []).filter((e) => e.atributo === a).map((e) => ({ texto: L('Máster', 'Мастер'), valor: e.valor, nota: e.nota })),
+  ];
 }
 
 export const modificador = (valor: number) => Math.floor((valor - 10) / 2);
@@ -294,47 +305,49 @@ export function cambiarNivel(p: Personaje, nivel: number) {
 /** PG ganados al subir un nivel: lo que sale en el dado + 1 + modificador de CON (mínimo 1). */
 export const pgSubida = (tirada: number, con: number) => Math.max(1, tirada + 1 + modificador(con));
 
-export interface DesgloseCA { total: number; partes: string[]; sigiloDesventaja: string[]; fuerzaMinima: number }
-/** CA = 10 + DES sin armadura; con armadura, su fórmula; + escudo; + ajuste manual. */
+export interface DesgloseCA { total: number; partes: string[]; lineas: LineaDesglose[]; sigiloDesventaja: string[]; fuerzaMinima: number }
+/** CA = 10 + DES sin armadura; con armadura, su fórmula; + escudo; + rasgos y dotes; + bonus a mano. */
 export function calcularCA(p: Personaje): DesgloseCA {
   const des = modificador(car(p, 'DES'));
-  const partes: string[] = [];
+  const lineas: LineaDesglose[] = [];
   const sigiloDesventaja: string[] = [];
   let fuerzaMinima = 0;
   const arm = Object.values(p.equipo).find((it) => it && it.tipo === 'armadura' && /^\d+/.test(it.detalles?.['Clase de armadura'] ?? ''));
   const extra = bonosCA(p, !!arm);
   const desEf = des > 0 ? Math.max(0, des - extra.menosDes) : des;
   const escudo = [p.equipo.manoHabil, p.equipo.manoTorpe].some((it) => it?.tipo === 'escudo');
-  let base = 10 + desEf;
+  const DES = L('Destreza', 'Ловкость');
   if (arm) {
     const f = arm.detalles!['Clase de armadura'];
     const n = parseInt(f, 10);
+    lineas.push({ texto: arm.nombre, valor: n, base: true });
     if (/Destreza/i.test(f)) {
       const tope = f.match(/m[aá]x\.?\s*(\d+)/i);
       const d = tope ? Math.min(desEf, parseInt(tope[1], 10)) : desEf;
-      base = n + d; partes.push(`${arm.nombre} ${n} ${conSigno(d)} ${L('DES', 'ЛОВ')}`);
-    } else { base = n; partes.push(`${arm.nombre} ${n}`); }
+      lineas.push({ texto: tope && d < desEf ? `${DES} (${L('máx.', 'макс.')} ${tope[1]})` : DES, valor: d });
+    }
     const mg = bonoMagicoArma(arm);
-    if (mg) { base += mg; partes.push(`${L('mágica', 'магия')} ${conSigno(mg)}`); }
+    if (mg) lineas.push({ texto: `${arm.nombre} (${L('mágica', 'магия')})`, valor: mg });
     if (/desventaja/i.test(arm.detalles?.['Sigilo'] ?? '')) sigiloDesventaja.push(arm.nombre);
     fuerzaMinima = Math.max(fuerzaMinima, parseInt(arm.detalles?.['Fuerza'] ?? '', 10) || 0);
-  } else if (nivelEn(p, 'Bárbaro') > 0) {
-    const c = modificador(car(p, 'CON')); base = 10 + desEf + c; partes.push(L(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(c)} CON`, `Защита без доспехов 10 ${conSigno(desEf)} ЛОВ ${conSigno(c)} ТЕЛ`));
-  } else if (nivelEn(p, 'Monje') > 0 && !escudo) {
-    const s = modificador(car(p, 'SAB')); base = 10 + desEf + s; partes.push(L(`Defensa sin armadura 10 ${conSigno(desEf)} DES ${conSigno(s)} SAB`, `Защита без доспехов 10 ${conSigno(desEf)} ЛОВ ${conSigno(s)} МДР`));
-  } else partes.push(`10 ${conSigno(desEf)} ${L('DES', 'ЛОВ')}`);
-  let total = base;
+  } else {
+    lineas.push({ texto: L('Base', 'База'), valor: 10, base: true }, { texto: DES, valor: desEf });
+    if (nivelEn(p, 'Bárbaro') > 0) lineas.push({ texto: L('Constitución (Defensa sin armadura)', 'Телосложение (защита без доспехов)'), valor: modificador(car(p, 'CON')) });
+    else if (nivelEn(p, 'Monje') > 0 && !escudo) lineas.push({ texto: L('Sabiduría (Defensa sin armadura)', 'Мудрость (защита без доспехов)'), valor: modificador(car(p, 'SAB')) });
+  }
   for (const it of [p.equipo.manoHabil, p.equipo.manoTorpe]) {
     if (it?.tipo !== 'escudo') continue;
     const b = parseInt((it.detalles?.['Clase de armadura'] ?? '+2').replace(/[^\d-]/g, ''), 10) || 2;
-    const mg = bonoMagicoArma(it);
-    total += b + mg; partes.push(`${it.nombre} +${b + mg}`);
+    lineas.push({ texto: it.nombre, valor: b + bonoMagicoArma(it) });
     if (/desventaja/i.test(it.detalles?.['Sigilo'] ?? '')) sigiloDesventaja.push(it.nombre);
     fuerzaMinima = Math.max(fuerzaMinima, parseInt(it.detalles?.['Fuerza'] ?? '', 10) || 0);
   }
-  if (extra.total) { total += extra.total; partes.push(...extra.partes); }
-  if (p.bonusCA) { total += p.bonusCA; partes.push(`${L('ajuste', 'поправка')} ${conSigno(p.bonusCA)}`); }
-  return { total, partes, sigiloDesventaja, fuerzaMinima };
+  lineas.push(...extra.lineas);
+  for (const b of p.bonosExtra ?? []) if (b.donde === 'CA') lineas.push({ texto: b.origen || L('Bonus', 'Бонус'), valor: b.valor || 0, id: b.id });
+  if (p.bonusCA) lineas.push({ texto: L('Ajuste', 'Поправка'), valor: p.bonusCA });
+  const total = lineas.reduce((t, x) => t + x.valor, 0);
+  const partes = lineas.map((x) => `${x.texto} ${x.texto === L('Base', 'База') ? x.valor : conSigno(x.valor)}`);
+  return { total, partes, lineas, sigiloDesventaja, fuerzaMinima };
 }
 
 // ---------------------------------------------------------------- Conjuros por clase

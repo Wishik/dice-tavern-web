@@ -142,6 +142,8 @@ export interface Personaje {
   descansosCortos: number;
   /** Cambios temporales de características que pone el máster (veneno, maldición…), con su nota de cómo se quitan. */
   efectosCar?: EfectoCar[];
+  /** Bonus puestos a mano en una característica o en la CA (anillo, bendición…), con de dónde salen. */
+  bonosExtra?: { id: string; donde: Atributo | 'CA'; valor: number; origen: string }[];
   /** Potenciadores de combate encendidos (Furia, Ataque furtivo…), ids de potenciadores.ts. */
   potenciadores?: string[];
   /** Característica elegida para el ataque y el daño de cada arma (id del objeto o «nat:…»). Sin valor: automática. */

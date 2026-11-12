@@ -118,8 +118,8 @@ export const bonoFuerzaCarga = (p: Personaje) => sumar(bonosActivos(p), (b) => b
 export const bonoAtaqueConjuro = (p: Personaje) => sumar(bonosActivos(p), (b) => b.ataqueConjuro);
 export const bonoCdConjuro = (p: Personaje) => sumar(bonosActivos(p), (b) => b.cdConjuro);
 export const bonoAtaqueArma = (p: Personaje, distancia: boolean) => sumar(bonosActivos(p), (b) => distancia ? b.ataqueDistancia : b.ataqueCaC);
-export function bonosCA(p: Personaje, conArmadura: boolean): { total: number; menosDes: number; partes: string[] } {
+export function bonosCA(p: Personaje, conArmadura: boolean): { total: number; menosDes: number; partes: string[]; lineas: { texto: string; valor: number }[] } {
   const l = bonosActivos(p).filter((x) => !x.b.conArmadura || conArmadura);
-  return { total: sumar(l, (b) => b.ca), menosDes: sumar(l, (b) => b.caMenosDes), partes: origenes(l, (b) => b.ca) };
+  return { total: sumar(l, (b) => b.ca), menosDes: sumar(l, (b) => b.caMenosDes), partes: origenes(l, (b) => b.ca), lineas: l.filter((x) => x.b.ca).map((x) => ({ texto: x.origen, valor: x.b.ca! })) };
 }
 export const origenesTexto = origenes;

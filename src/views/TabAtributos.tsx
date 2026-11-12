@@ -5,9 +5,9 @@ import { ChipsEstados } from '../estados';
 import { useState } from 'react';
 import { BotonAnadir, Etiqueta, Modal, Numero, Seccion, Texto } from '../ui';
 import { Contador, useDados } from '../dice';
-import { car, CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetencia, calcularCA, conSigno, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto, valorPrueba } from '../rules';
+import { car, CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetencia, calcularCA, conSigno, desgloseCar, uid, type LineaDesglose, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto, valorPrueba } from '../rules';
 import { bonoVelocidad } from '../bonos';
-import { ATRIBUTOS, NOMBRE_ATRIBUTO, type RecursoExtra } from '../types';
+import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo, type RecursoExtra } from '../types';
 import { buscarClase } from '../avisos';
 import { descansoCorto, descansoLargo, dgRecuperados, extraDadoGolpe, recursosPersonaje, recuperaExtra, resumenCorto } from '../recursos';
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO, idioma } from '../i18n';
@@ -39,6 +39,7 @@ export function TabAtributos() {
   };
   const [corregir, setCorregir] = useState(false);
   const ca = calcularCA(p);
+  const [desglose, setDesglose] = useState<Atributo | 'CA' | null>(null);
   const pgDef = pgPorDefecto(p, dado);
 
   return (
@@ -140,7 +141,8 @@ export function TabAtributos() {
             <div key={a} className="caracteristica">
               <div className="car-nombre">{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}</div>
               <Bloq><Numero valor={p.caracteristicas[a]} min={1} max={30} set={(n) => upd((x) => { x.caracteristicas[a] = n; })} className="car-valor" /></Bloq>
-              {ef !== p.caracteristicas[a] && <div className={`car-efecto ${ef < p.caracteristicas[a] ? 'debuff' : 'buff'}`} title={L('Con efectos del máster', 'С эффектами мастера')}>→ {ef}</div>}
+              {ef !== p.caracteristicas[a] && <div className={`car-efecto ${ef < p.caracteristicas[a] ? 'debuff' : 'buff'}`} title={L('Con bonus y efectos', 'С бонусами и эффектами')}>→ {ef}</div>}
+              <button className="car-desglose" onClick={() => setDesglose(a)} title={L('De dónde sale y bonus', 'Откуда и бонусы')}>{ef !== p.caracteristicas[a] ? 'ⓘ' : '＋'}</button>
               <button className="car-mod" onClick={() => tirarD20(L(`Prueba de ${NOMBRE_ATRIBUTO[a]}`, `Проверка: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}`), valorPrueba(p, a), avisosTirada(p, 'prueba', a))} title={L('Tirar prueba', 'Бросить проверку')}>{conSigno(m)}{valorPrueba(p, a) !== m && <small className="extra-rasgo">{conSigno(valorPrueba(p, a) - m)}</small>}</button>
             </div>
           );
@@ -164,10 +166,12 @@ export function TabAtributos() {
         </Seccion>
         <Seccion titulo="CA">
           <div className="valor-grande">{ca.total}</div>
-          <p className="nota pequena centro">{ca.partes.join(' · ')}</p>
-          <Etiqueta texto="Ajuste"><Numero valor={p.bonusCA} set={(n) => upd((x) => { x.bonusCA = n; })} /></Etiqueta>
+          <ListaDesglose lineas={ca.lineas} />
+          <button className="btn enlace pequeno" onClick={() => setDesglose('CA')}>✎ {L('Bonus a mano', 'Свои бонусы')}</button>
         </Seccion>
       </div>
+
+      {desglose && <ModalDesglose donde={desglose} onClose={() => setDesglose(null)} />}
 
       <div className="fila-2-tarjetas">
         <Seccion titulo="Velocidad">
@@ -275,6 +279,45 @@ function ModalRecurso({ onClose, editar }: { onClose: () => void; editar?: Recur
     <Modal titulo={L('Añadir recurso', 'Добавить ресурс')} onClose={onClose}>
       <BotonAnadir onClick={() => setForm(nuevo())}>{L('Recurso propio', 'Свой ресурс')}</BotonAnadir>
       {tuyos.length > 0 && <><h4>{L('De tu clase, raza y dotes', 'От твоего класса, расы и черт')}</h4><ul className="lista-recursos">{tuyos.map(fila)}</ul></>}
+    </Modal>
+  );
+}
+
+/** Cada número con su origen (los puestos a mano llevan ✎). */
+function ListaDesglose({ lineas }: { lineas: LineaDesglose[] }) {
+  return (
+    <ul className="lista-desglose">
+      {lineas.map((x, i) => <li key={i} className={x.id ? 'propio' : ''}><span>{x.texto}{x.nota ? <small> · {x.nota}</small> : null}</span><strong>{x.base ? x.valor : conSigno(x.valor)}</strong></li>)}
+    </ul>
+  );
+}
+
+/** Desglose de la CA o de una característica, con bonus a mano que se pueden añadir, cambiar y quitar. */
+function ModalDesglose({ donde, onClose }: { donde: Atributo | 'CA'; onClose: () => void }) {
+  const { p, upd } = useFicha();
+  const lineas = donde === 'CA' ? calcularCA(p).lineas : desgloseCar(p, donde);
+  const total = donde === 'CA' ? calcularCA(p).total : car(p, donde);
+  const propios = (p.bonosExtra ?? []).filter((b) => b.donde === donde);
+  const cambiar = (id: string, f: (b: { origen: string; valor: number }) => void) => upd((x) => { const b = x.bonosExtra?.find((y) => y.id === id); if (b) f(b); });
+  const titulo = donde === 'CA' ? L('Clase de armadura', 'Класс доспеха') : T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[donde]);
+  return (
+    <Modal titulo={`${titulo}: ${total}`} onClose={onClose}
+      pie={<button className="btn primario" onClick={onClose}>{L('Listo', 'Готово')}</button>}>
+      <h4>{L('De dónde sale', 'Из чего складывается')}</h4>
+      <ListaDesglose lineas={lineas.filter((x) => !x.id)} />
+      {donde !== 'CA' && <p className="nota pequena">{L('La puntuación base se cambia en la tarjeta. Los efectos del máster solo los quita el máster.', 'Базовое значение меняется на карточке. Эффекты мастера снимает только мастер.')}</p>}
+      <h4>{L('Bonus a mano', 'Свои бонусы')}</h4>
+      {propios.length === 0 && <p className="nota pequena">{L('Ninguno. Añade, por ejemplo, un anillo de protección +1 o un cinturón de fuerza.', 'Пока нет. Например, кольцо защиты +1 или пояс силы.')}</p>}
+      <ul className="bonos-propios">
+        {propios.map((b) => (
+          <li key={b.id}>
+            <input className="campo" value={b.origen} placeholder={L('¿De dónde sale?', 'Откуда?')} onChange={(e) => { const v = e.target.value; cambiar(b.id, (y) => { y.origen = v; }); }} />
+            <Numero valor={b.valor} min={-30} max={30} ancho={64} set={(n) => cambiar(b.id, (y) => { y.valor = n; })} />
+            <button className="btn icono" title={L('Quitar', 'Убрать')} onClick={() => upd((x) => { x.bonosExtra = (x.bonosExtra ?? []).filter((y) => y.id !== b.id); })}>✕</button>
+          </li>
+        ))}
+      </ul>
+      <BotonAnadir onClick={() => upd((x) => { x.bonosExtra = [...(x.bonosExtra ?? []), { id: uid(), donde, valor: 1, origen: '' }]; })}>{L('Añadir bonus', 'Добавить бонус')}</BotonAnadir>
     </Modal>
   );
 }

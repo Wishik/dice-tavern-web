@@ -739,3 +739,13 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .elegidos { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; flex: 1; }
 .elegidos summary { cursor: pointer; }
 .elegidos details[open] summary { font-weight: 700; margin-bottom: 4px; }
+
+/* Desglose de CA y características */
+.lista-desglose { list-style: none; padding: 0; margin: 4px 0 6px; font-size: 13px; }
+.lista-desglose li { display: flex; justify-content: space-between; gap: 8px; padding: 2px 0; border-bottom: 1px dashed #d8c39a; }
+.lista-desglose li:last-child { border-bottom: none; }
+.lista-desglose li.propio span { font-style: italic; }
+.lista-desglose small { color: #7a6450; }
+.car-desglose { position: absolute; bottom: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; border: 1px solid #c9ad7a; background: #fffaf0; color: #5a4430; font-size: 14px; line-height: 1; padding: 0; cursor: pointer; }
+.bonos-propios { list-style: none; padding: 0; margin: 0 0 10px; display: flex; flex-direction: column; gap: 6px; }
+.bonos-propios li { display: grid; grid-template-columns: 1fr auto auto; gap: 6px; align-items: center; }

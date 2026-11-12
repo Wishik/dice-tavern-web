@@ -48,6 +48,8 @@ export function normalizar(p: Partial<Personaje>): Personaje {
   // pgV2: los PG de nivel 1 antes no sumaban el +1 de la mesa (dado máx. + CON + 1): se suma una vez.
   if (!p.pgV2) { if (out.clase && out.pg?.max > 0) { const lleno = out.pg.actual >= out.pg.max; out.pg = { ...out.pg, max: out.pg.max + 1, actual: lleno ? out.pg.max + 1 : out.pg.actual }; } out.pgV2 = true; }
   out.ca = '';
+  // El antiguo «Ajuste» de la CA pasa a ser un bonus con nombre (se puede cambiar o quitar).
+  if (out.bonusCA) { out.bonosExtra = [...(out.bonosExtra ?? []), { id: `ajusteCA${Date.now().toString(36)}`, donde: 'CA', valor: out.bonusCA, origen: 'Ajuste' }]; out.bonusCA = 0; }
   // Los PG actuales nunca pueden pasar de los máximos: si pasa (datos antiguos), el máximo sube.
   if (out.pg.actual > out.pg.max) out.pg.max = out.pg.actual;
   return out;
