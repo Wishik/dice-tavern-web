@@ -749,3 +749,4 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .car-desglose { position: absolute; bottom: 6px; right: 6px; width: 26px; height: 26px; border-radius: 50%; border: 1px solid #c9ad7a; background: #fffaf0; color: #5a4430; font-size: 14px; line-height: 1; padding: 0; cursor: pointer; }
 .bonos-propios { list-style: none; padding: 0; margin: 0 0 10px; display: flex; flex-direction: column; gap: 6px; }
 .bonos-propios li { display: grid; grid-template-columns: 1fr auto auto; gap: 6px; align-items: center; }
+.sin-boton { display: block; width: 100%; background: none; border: 0; padding: 0; text-align: inherit; color: inherit; font: inherit; cursor: pointer; }

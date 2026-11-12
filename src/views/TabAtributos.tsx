@@ -166,8 +166,8 @@ export function TabAtributos() {
         </Seccion>
         <Seccion titulo="CA">
           <div className="valor-grande">{ca.total}</div>
-          <ListaDesglose lineas={ca.lineas} />
-          <button className="btn enlace pequeno" onClick={() => setDesglose('CA')}>✎ {L('Bonus a mano', 'Свои бонусы')}</button>
+          <button className="sin-boton" onClick={() => setDesglose('CA')} title={L('Cambiar bonus', 'Изменить бонусы')}><ListaDesglose lineas={ca.lineas} /></button>
+          <button className="btn enlace pequeno" onClick={() => setDesglose('CA')}>✎ {L('Cambiar bonus', 'Изменить бонусы')}</button>
         </Seccion>
       </div>
 
@@ -295,29 +295,36 @@ function ListaDesglose({ lineas }: { lineas: LineaDesglose[] }) {
 /** Desglose de la CA o de una característica, con bonus a mano que se pueden añadir, cambiar y quitar. */
 function ModalDesglose({ donde, onClose }: { donde: Atributo | 'CA'; onClose: () => void }) {
   const { p, upd } = useFicha();
-  const lineas = donde === 'CA' ? calcularCA(p).lineas : desgloseCar(p, donde);
-  const total = donde === 'CA' ? calcularCA(p).total : car(p, donde);
-  const propios = (p.bonosExtra ?? []).filter((b) => b.donde === donde);
-  const cambiar = (id: string, f: (b: { origen: string; valor: number }) => void) => upd((x) => { const b = x.bonosExtra?.find((y) => y.id === id); if (b) f(b); });
+  // Se edita un borrador: solo «Listo» lo guarda; cerrar (✕, fuera o Esc) lo descarta.
+  const [borr, setBorr] = useState(() => (p.bonosExtra ?? []).filter((b) => b.donde === donde).map((b) => ({ ...b })));
+  const prev = { ...p, bonosExtra: [...(p.bonosExtra ?? []).filter((b) => b.donde !== donde), ...borr] };
+  const lineas = donde === 'CA' ? calcularCA(prev).lineas : desgloseCar(prev, donde);
+  const total = donde === 'CA' ? calcularCA(prev).total : car(prev, donde);
+  const cambiar = (id: string, c: Partial<{ origen: string; valor: number }>) => setBorr((l) => l.map((b) => (b.id === id ? { ...b, ...c } : b)));
+  const guardar = () => {
+    upd((x) => { x.bonosExtra = [...(x.bonosExtra ?? []).filter((b) => b.donde !== donde), ...borr.filter((b) => b.valor !== 0 || b.origen.trim()).map((b) => ({ ...b, origen: b.origen.trim() || L('Bonus', 'Бонус') }))]; });
+    onClose();
+  };
   const titulo = donde === 'CA' ? L('Clase de armadura', 'Класс доспеха') : T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[donde]);
   return (
     <Modal titulo={`${titulo}: ${total}`} onClose={onClose}
-      pie={<button className="btn primario" onClick={onClose}>{L('Listo', 'Готово')}</button>}>
+      pie={<><button className="btn" onClick={onClose}>{L('Cancelar', 'Отмена')}</button><button className="btn primario" onClick={guardar}>{L('Guardar', 'Сохранить')}</button></>}>
       <h4>{L('De dónde sale', 'Из чего складывается')}</h4>
       <ListaDesglose lineas={lineas.filter((x) => !x.id)} />
       {donde !== 'CA' && <p className="nota pequena">{L('La puntuación base se cambia en la tarjeta. Los efectos del máster solo los quita el máster.', 'Базовое значение меняется на карточке. Эффекты мастера снимает только мастер.')}</p>}
       <h4>{L('Bonus a mano', 'Свои бонусы')}</h4>
-      {propios.length === 0 && <p className="nota pequena">{L('Ninguno. Añade, por ejemplo, un anillo de protección +1 o un cinturón de fuerza.', 'Пока нет. Например, кольцо защиты +1 или пояс силы.')}</p>}
+      {borr.length === 0 && <p className="nota pequena">{L('Ninguno. Añade, por ejemplo, un anillo de protección +1 o un cinturón de fuerza.', 'Пока нет. Например, кольцо защиты +1 или пояс силы.')}</p>}
       <ul className="bonos-propios">
-        {propios.map((b) => (
+        {borr.map((b) => (
           <li key={b.id}>
-            <input className="campo" value={b.origen} placeholder={L('¿De dónde sale?', 'Откуда?')} onChange={(e) => { const v = e.target.value; cambiar(b.id, (y) => { y.origen = v; }); }} />
-            <Numero valor={b.valor} min={-30} max={30} ancho={64} set={(n) => cambiar(b.id, (y) => { y.valor = n; })} />
-            <button className="btn icono" title={L('Quitar', 'Убрать')} onClick={() => upd((x) => { x.bonosExtra = (x.bonosExtra ?? []).filter((y) => y.id !== b.id); })}>✕</button>
+            <input className="campo" value={b.origen} placeholder={L('¿De dónde sale?', 'Откуда?')} onChange={(e) => cambiar(b.id, { origen: e.target.value })} />
+            <Numero valor={b.valor} min={-30} max={30} ancho={64} set={(n) => cambiar(b.id, { valor: n })} />
+            <button className="btn icono" title={L('Quitar', 'Убрать')} onClick={() => setBorr((l) => l.filter((y) => y.id !== b.id))}>✕</button>
           </li>
         ))}
       </ul>
-      <BotonAnadir onClick={() => upd((x) => { x.bonosExtra = [...(x.bonosExtra ?? []), { id: uid(), donde, valor: 1, origen: '' }]; })}>{L('Añadir bonus', 'Добавить бонус')}</BotonAnadir>
+      <BotonAnadir onClick={() => setBorr((l) => [...l, { id: uid(), donde, valor: 1, origen: '' }])}>{L('Añadir bonus', 'Добавить бонус')}</BotonAnadir>
+      <p className="nota pequena">{L('Los cambios se guardan al pulsar «Guardar».', 'Изменения сохраняются кнопкой «Сохранить».')}</p>
     </Modal>
   );
 }
