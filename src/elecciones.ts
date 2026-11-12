@@ -9,7 +9,7 @@ import { RASGOS_FIJOS } from './fijos';
  * Cosas que la raza, la clase o una dote mandan ELEGIR (instrumentos, Orden divina, maestría con armas, equipo
  * inicial…). Lo elegido se guarda en `p.elecciones[id]`; lo que falte sale con punto rojo en «Personaje».
  */
-export interface Opcion { valor: string; es: string; ru: string; nota_es?: string; nota_ru?: string }
+export interface Opcion { valor: string; es: string; ru: string; nota_es?: string; nota_ru?: string; /** Descripción larga (qué hace). */ desc?: string }
 export interface Eleccion {
   id: string;
   es: string; ru: string;
@@ -44,7 +44,47 @@ export const ARTESANO: Opcion[] = [
 ];
 /** Invocaciones sobrenaturales (clases.json, «Opciones de invocación sobrenatural»): [nombre, nivel de brujo mínimo, requisito]. */
 const INVOCACIONES: [string, number, string][] = [["Armadura de sombras", 1, ""], ["Castigo arcano", 5, "Pacto del filo"], ["Descarga agónica", 2, "truco de brujo que inflija daño"], ["Descarga ahuyentadora", 2, "truco de brujo que inflija daño"], ["Devorador de vida", 9, "Pacto del filo"], ["Don de las profundidades", 5, ""], ["Don de los protectores", 9, "Pacto del grimorio"], ["Filo sediento", 5, "Pacto del filo"], ["Hoja devoradora", 12, "Filo sediento"], ["Inversión del amo de las cadenas", 5, "Pacto de la cadena"], ["Lanza sobrenatural", 2, "truco de brujo que inflija daño"], ["Lecciones de los primeros", 2, ""], ["Maestro de las formas innumerables", 5, ""], ["Mascara de los mil rostros", 2, ""], ["Mente sobrenatural", 1, ""], ["Mirada de la dos mentes", 5, ""], ["Pacto de la cadena", 1, ""], ["Pacto del filo", 1, ""], ["Pacto del grimorio", 1, ""], ["Paso ascendente", 5, ""], ["Salto sobrenatural", 2, ""], ["Susurros del sepulcro", 7, ""], ["Uno con la sombra", 5, ""], ["Vigor infernal", 2, ""], ["Visión bruja", 15, ""], ["Visiones brumosas", 2, ""], ["Visiones de reinos remotos", 9, ""], ["Vista del diablo", 2, ""]];
-const METAMAGIA = ['Conjuro acelerado', 'Conjuro buscador', 'Conjuro cuidadoso', 'Conjuro distante', 'Conjuro duplicado', 'Conjuro ampliado', 'Conjuro intensificado', 'Conjuro potenciado', 'Conjuro sutil', 'Conjuro transmutado'].map((n) => o(n));
+/** Busca en los rasgos de la clase el apartado «Opciones de …» y lo trocea por nombres (cada opción empieza en una línea). */
+function bloqueOpciones(datos: Clase | null | undefined, cabecera: string, fin: string): string {
+  const t = datos?.rasgos.map((r) => r.texto).find((x) => x.includes(cabecera) && x.includes(fin)) ?? '';
+  const i = t.indexOf(cabecera);
+  return i < 0 ? '' : t.slice(i, t.indexOf(fin, i));
+}
+export function trocearOpciones(bloque: string, nombres: string[]): Record<string, string> {
+  const pos = nombres.map((n) => ({ n, i: bloque.search(new RegExp(`(^|\\n)${n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')} `)) })).filter((x) => x.i >= 0).sort((a, b) => a.i - b.i);
+  const out: Record<string, string> = {};
+  pos.forEach((x, k) => { out[x.n] = bloque.slice(x.i, k + 1 < pos.length ? pos[k + 1].i : undefined).trim().slice(x.n.length).replace(/^\s*/, '').trim(); });
+  return out;
+}
+/** Metamagia (clases.json, «Opciones de metamagia»). El segundo «Conjuro intensificado» del manual es el potenciado. */
+function metamagia(datos: Clase | null | undefined): Opcion[] {
+  const b = bloqueOpciones(datos, 'Opciones de metamagia Las siguientes', 'Lista de conjuros de hechicero');
+  const out: Opcion[] = [];
+  const lineas = b.split('\n').slice(1);
+  let actual: Opcion | null = null;
+  for (const l of lineas) {
+    const m = l.match(/^(Conjuro \S+) (Coste: .*)$/);
+    if (m) {
+      const nombre = out.some((x) => x.valor === m[1]) ? 'Conjuro potenciado' : m[1];
+      const coste = m[2].match(/Coste: ([^.]*)\./)?.[1] ?? '';
+      actual = { valor: nombre, es: nombre, ru: nombre, nota_es: coste, nota_ru: coste, desc: m[2].replace(/^Coste: [^.]*\.\s*(Descripción:\s*)?/, '') };
+      out.push(actual);
+    } else if (actual && l.trim()) actual.desc += ' ' + l.trim();
+  }
+  return out;
+}
+/** Propiedades de maestría de las armas (resumen de las reglas de 2024). */
+export const MAESTRIAS: Record<string, [string, string]> = {
+  'Debilitar': ['Si aciertas, el objetivo tiene desventaja en su siguiente tirada de ataque antes del inicio de tu próximo turno.', 'При попадании цель совершает следующий бросок атаки с помехой до начала твоего следующего хода.'],
+  'Derribar': ['Si aciertas, el objetivo hace una TS de Constitución (CD 8 + modificador de ataque + competencia) o queda derribado.', 'При попадании цель делает спасбросок Телосложения (Сл 8 + модификатор атаки + мастерство) или падает ничком.'],
+  'Empujar': ['Si aciertas, puedes empujar al objetivo hasta 10 pies en línea recta si es Grande o más pequeño.', 'При попадании можешь оттолкнуть цель (Большую или меньше) на 10 футов по прямой.'],
+  'Hender': ['Si aciertas cuerpo a cuerpo, puedes atacar a otra criatura a 5 pies del objetivo (una vez por turno); no sumas el modificador al daño salvo que sea negativo.', 'При попадании в ближнем бою можешь атаковать другое существо в 5 футах от цели (раз в ход); модификатор к урону не добавляется, если он не отрицательный.'],
+  'Mellar': ['El ataque extra de luchar con dos armas ligeras forma parte de la acción de Atacar, no de la acción adicional (una vez por turno).', 'Дополнительная атака вторым лёгким оружием входит в действие Атака, а не в бонусное действие (раз в ход).'],
+  'Molestar': ['Si aciertas y haces daño, tienes ventaja en tu siguiente ataque contra esa criatura antes del final de tu próximo turno.', 'При попадании с уроном следующая твоя атака по этому существу до конца следующего хода — с преимуществом.'],
+  'Ralentizar': ['Si aciertas y haces daño, la velocidad del objetivo baja 10 pies hasta el inicio de tu próximo turno.', 'При попадании с уроном скорость цели уменьшается на 10 футов до начала твоего следующего хода.'],
+  'Rozar': ['Si fallas, el objetivo recibe igualmente daño igual al modificador de característica del ataque (del mismo tipo).', 'При промахе цель всё равно получает урон, равный модификатору характеристики атаки (того же типа).'],
+};
+export const textoMaestria = (m: string) => m.split(/\s+o\s+/).filter((x) => MAESTRIAS[x]).map((x) => `${x}: ${L(...MAESTRIAS[x])}`).join(' ');
 const LINAJES: Opcion[] = [
   ['Rojo', 'Красный', 'Fuego · TS de Destreza', 'Огонь · спасбросок Ловкости'], ['Oro', 'Золотой', 'Fuego · TS de Destreza', 'Огонь · спасбросок Ловкости'],
   ['Oropel', 'Латунный', 'Fuego · TS de Destreza', 'Огонь · спасбросок Ловкости'], ['Blanco', 'Белый', 'Frío · TS de Constitución', 'Холод · спасбросок Телосложения'],
@@ -104,14 +144,15 @@ export function eleccionesDe(p: Personaje, clases: Clase[] | null, raza: Raza | 
       ayuda_es: 'Se añade a tus dotes.', ayuda_ru: 'Добавится к твоим чертам.' });
     if (c.clase === 'Brujo') {
       const n = columna(datos, c.nivel, 'Invocaciones sobrenaturales') || 1;
+      const textos = trocearOpciones(bloqueOpciones(datos, 'Opciones de invocación sobrenatural Las', 'Lista de conjuros de brujo'), INVOCACIONES.map((x) => x[0]));
       const ops = INVOCACIONES.filter(([, nv]) => nv <= c.nivel).map(([nombre, nv, req]) => {
         const r = [nv > 1 ? `nivel ${nv}+` : '', req].filter(Boolean).join(', ');
         const rr = [nv > 1 ? `${nv}+ ур.` : '', req].filter(Boolean).join(', ');
-        return o(nombre, nombre, r ? `requisito: ${r}` : undefined, rr ? `требование: ${rr}` : undefined);
+        return { ...o(nombre, nombre, r ? `requisito: ${r}` : undefined, rr ? `требование: ${rr}` : undefined), desc: (textos[nombre] ?? '').replace(/^Requisitos: [^.]*\.\s*Efecto:\s*/, '') };
       });
       out.push({ id: id('invocaciones'), es: `Invocaciones sobrenaturales (${n})`, ru: `Таинственные воззвания (${n})`, origen: org, cantidad: n, modo: 'lista', opciones: ops, ayuda_es: 'Solo salen las de tu nivel de brujo. Mira el requisito entre paréntesis.', ayuda_ru: 'Показаны только доступные на твоём уровне колдуна. Требование — в скобках.' });
     }
-    if (c.clase === 'Hechicero' && c.nivel >= 2) { const n = c.nivel >= 17 ? 6 : c.nivel >= 10 ? 4 : 2; out.push({ id: id('metamagia'), es: `Metamagia (${n})`, ru: `Метамагия (${n})`, origen: org, cantidad: n, modo: 'lista', opciones: METAMAGIA }); }
+    if (c.clase === 'Hechicero' && c.nivel >= 2) { const n = c.nivel >= 17 ? 6 : c.nivel >= 10 ? 4 : 2; out.push({ id: id('metamagia'), es: `Metamagia (${n})`, ru: `Метамагия (${n})`, origen: org, cantidad: n, modo: 'lista', opciones: metamagia(datos) }); }
     if (c.clase === 'Explorador' && c.nivel >= 2) out.push({ id: id('idiomas'), es: 'Explorador hábil: dos idiomas', ru: 'Ловкий следопыт: два языка', origen: org, cantidad: 2, modo: 'lista', idioma: true, opciones: [] });
     if (principal && datos?.atributos.equipo) out.push({ id: id('equipo'), es: 'Equipo inicial', ru: 'Стартовое снаряжение', origen: org, cantidad: 1, modo: 'chips', equipo: true, opciones: opcionesEquipo(datos.atributos.equipo), ayuda_es: 'Al elegir se mete en el inventario y en las monedas.', ayuda_ru: 'После выбора всё попадёт в инвентарь и кошелёк.' });
   });
@@ -120,7 +161,7 @@ export function eleccionesDe(p: Personaje, clases: Clase[] | null, raza: Raza | 
   const rr = rasgosDeRaza(p);
   const orgR = L('Raza', 'Раса');
   if (rr.has('Resiliencia')) out.push({ id: 'raza:resiliencia', es: 'Resiliencia: una tirada de salvación', ru: 'Стойкость: один спасбросок', origen: orgR, cantidad: 1, modo: 'chips', opciones: ATRIBUTOS.map((a) => ({ valor: a, es: T(RU_ATRIBUTOS, a), ru: T(RU_ATRIBUTOS, a) })), ayuda_es: 'Ganas competencia en esa TS.', ayuda_ru: 'Получаешь владение этим спасброском.' });
-  if (p.raza === 'Norn') out.push({ id: 'raza:espiritu', es: 'Espíritu animal', ru: 'Дух-зверь', origen: orgR, cantidad: 1, modo: 'chips', opciones: [o('Oso', 'Медведь'), o('Lobo', 'Волк'), o('Cuervo', 'Ворон')], ayuda_es: 'Permanente: decide tu forma híbrida.', ayuda_ru: 'Навсегда: определяет гибридный облик.' });
+  if (p.raza === 'Norn') out.push({ id: 'raza:espiritu', es: 'Espíritu animal', ru: 'Дух-зверь', origen: orgR, cantidad: 1, modo: 'chips', opciones: [o('Oso', 'Медведь', 'En forma híbrida: +1 FUE y CON; ventaja en Atletismo y TS de Fuerza.', 'В гибридном облике: +1 СИЛ и ТЕЛ; преимущество на Атлетику и спасброски Силы.'), o('Lobo', 'Волк', 'En forma híbrida: +1 DES y CON; ventaja en Percepción por olfato y TS de Destreza.', 'В гибридном облике: +1 ЛОВ и ТЕЛ; преимущество на Восприятие по запаху и спасброски Ловкости.'), o('Cuervo', 'Ворон', 'En forma híbrida: +1 INT y SAB; ventaja en Percepción por vista y TS de Sabiduría.', 'В гибридном облике: +1 ИНТ и МДР; преимущество на Восприятие зрением и спасброски Мудрости.')], ayuda_es: 'Permanente: decide tu forma híbrida.', ayuda_ru: 'Навсегда: определяет гибридный облик.' });
   if (p.raza === 'Dracónido') out.push({ id: 'raza:linaje', es: 'Linaje dracónido', ru: 'Драконье происхождение', origen: orgR, cantidad: 1, modo: 'chips', opciones: LINAJES, ayuda_es: 'Tipo de resistencia, de aliento y de TS. No se puede cambiar.', ayuda_ru: 'Тип сопротивления, дыхания и спасброска. Менять нельзя.' });
   if (raza && /elecci[oó]n/i.test(raza.idiomas)) out.push({ id: 'raza:idioma', es: 'Idioma a tu elección', ru: 'Язык на выбор', origen: orgR, cantidad: 1, modo: 'lista', idioma: true, opciones: [] });
 

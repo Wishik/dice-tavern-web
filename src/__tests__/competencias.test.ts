@@ -86,3 +86,23 @@ describe('elecciones', () => {
     expect(p.monedas.PO).toBe(19);
   });
 });
+
+describe('efectos de lo elegido', () => {
+  it('invocaciones dan conjuros, Lecciones da dote, Taumaturgo da bono', async () => {
+    const { concesionesActivas } = await import('../conjurosRasgos');
+    const { bonoHabilidad } = await import('../bonos');
+    const p = nuevoPersonaje(); p.clase = 'Brujo'; p.nivel = 5;
+    p.elecciones = { 'Brujo:invocaciones': ['Armadura de sombras', 'Pacto del grimorio', 'Lecciones de los primeros'] };
+    const ids = concesionesActivas(p, razas).map((c) => c.id);
+    expect(ids).toEqual(expect.arrayContaining(['invocacion:Armadura de sombras', 'invocacion:grimorio:trucos', 'invocacion:grimorio:rituales']));
+    expect(calcularAvisos(p, clases, razas, null).dotes).toBe(2);
+    const c = nuevoPersonaje(); c.clase = 'Clérigo'; c.caracteristicas.SAB = 16; c.elecciones = { 'Clérigo:orden': ['Taumaturgo'] };
+    expect(bonoHabilidad(c, 'religion', false).bono).toBe(3);
+  });
+  it('descripciones de invocaciones y metamagia', () => {
+    const p = nuevoPersonaje(); p.clase = 'Hechicero'; p.nivel = 2;
+    const m = eleccionesDe(p, clases, null).find((e) => e.id === 'Hechicero:metamagia')!;
+    expect(m.opciones.map((o) => o.valor)).toContain('Conjuro potenciado');
+    expect(m.opciones.every((o) => (o.desc ?? '').length > 50)).toBe(true);
+  });
+});

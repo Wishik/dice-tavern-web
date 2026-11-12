@@ -1,4 +1,4 @@
-import { nivelTotal } from './multiclase';
+import { nivelEn, nivelTotal } from './multiclase';
 import type { Conjuro, Razas } from './data';
 import type { ConjuroPersonaje, Personaje } from './types';
 import { bonoCompetencia } from './rules';
@@ -24,7 +24,7 @@ export interface Eleccion {
 /** Cuántos conjuros se eligen ahora. */
 export const cantidadEleccion = (e: Eleccion, p: Personaje) => (e.porBC ? bonoCompetencia(nivelTotal(p)) : e.cantidad);
 export interface Concesion { id: string; nivel: number; conjuros?: string[]; elegir?: Eleccion }
-export interface Fuente { rasgo: string; razas?: string[]; dote?: boolean; concesiones: Concesion[] }
+export interface Fuente { rasgo: string; razas?: string[]; dote?: boolean; /** Invocación sobrenatural elegida (p.elecciones['Brujo:invocaciones']). */ invocacion?: boolean; concesiones: Concesion[] }
 
 const TROLES = ['Trol de hielo (Drakkari)', 'Trol de la jungla (Gurubashi)', 'Trol del bosque (Amani)', 'Trol lanza-negra', 'Trol zandalari'];
 const tiefling = (rasgo: string, truco: string, n3: string, n5: string): Fuente => ({
@@ -33,7 +33,15 @@ const tiefling = (rasgo: string, truco: string, n3: string, n5: string): Fuente 
   ],
 });
 
+const inv = (rasgo: string, conjuro: string): Fuente => ({ rasgo, invocacion: true, concesiones: [{ id: `invocacion:${rasgo}`, nivel: 1, conjuros: [conjuro] }] });
 export const FUENTES: Fuente[] = [
+  inv('Armadura de sombras', 'Armadura de mago'), inv('Don de las profundidades', 'Respirar bajo el agua'), inv('Maestro de las formas innumerables', 'Alterar el propio aspecto'),
+  inv('Mascara de los mil rostros', 'Disfrazarse'), inv('Paso ascendente', 'Levitar'), inv('Salto sobrenatural', 'Salto'), inv('Susurros del sepulcro', 'Hablar con los muertos'),
+  inv('Uno con la sombra', 'Invisibilidad'), inv('Vigor infernal', 'Falsa vida'), inv('Visiones brumosas', 'Imagen silenciosa'), inv('Visiones de reinos remotos', 'Ojo arcano'),
+  inv('Pacto de la cadena', 'Encontrar familiar'),
+  { rasgo: 'Pacto del grimorio', invocacion: true, concesiones: [
+    { id: 'invocacion:grimorio:trucos', nivel: 1, elegir: { cantidad: 3, nivelConjuro: 0 } },
+    { id: 'invocacion:grimorio:rituales', nivel: 1, elegir: { cantidad: 2, nivelConjuro: 1, ritual: true } }] },
   { rasgo: 'Portador de Luz', razas: ['Aasimar'], concesiones: [{ id: 'aasimar:1', nivel: 1, conjuros: ['Luz'] }, { id: 'aasimar:5', nivel: 5, conjuros: ['Luz del día'] }] },
   { rasgo: 'Llamar al viento', razas: ['Avianthar'], concesiones: [{ id: 'avianthar:1', nivel: 1, conjuros: ['Ráfaga de viento'] }] },
   { rasgo: 'Magia del Bosque', razas: ['Elfos de los Bosques'], concesiones: [{ id: 'elfoBosque:1', nivel: 1, elegir: { cantidad: 2, nivelConjuro: 0, clases: ['druida'] } }] },
@@ -100,6 +108,7 @@ const igual = (a: string, b: string) => a.localeCompare(b, 'es', { sensitivity: 
 
 /** ¿El personaje tiene activo este rasgo o dote? Los rasgos fijos de la raza cuentan siempre; los demás, si los eligió. */
 export function fuenteActiva(f: Fuente, p: Personaje, razas: Razas | null): boolean {
+  if (f.invocacion) return nivelEn(p, 'Brujo') > 0 && (p.elecciones?.['Brujo:invocaciones'] ?? []).some((n) => igual(n, f.rasgo));
   if (f.dote) return (p.dotes ?? []).some((d) => igual(d.nombre, f.rasgo));
   if (f.razas && !f.razas.includes(p.raza)) return false;
   if ((p.rasgosRaza ?? []).some((r) => igual(r, f.rasgo))) return true;

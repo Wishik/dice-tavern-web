@@ -8,9 +8,17 @@ import { RASGOS_IDIOMA, RASGOS_RECOMENDADOS } from '../rules';
 import { L, T, RU_CLASES, RU_RAZAS } from '../i18n';
 import { td } from '../datosRu';
 import { clasesDe } from '../multiclase';
+import { eleccionesDe, elegido } from '../elecciones';
 
 export function TabRasgos() {
   const { p, upd, razas, clases, dotes, trasfondos, avisos } = useFicha();
+  // Invocaciones, metamagia, orden, linaje… con su texto.
+  const elegidos = eleccionesDe(p, clases, buscarRaza(razas, p.raza))
+    .filter((e) => /:(invocaciones|metamagia|orden|linaje|espiritu)$/.test(e.id))
+    .flatMap((e) => elegido(p, e.id).map((v) => {
+      const op = e.opciones.find((o) => o.valor === v);
+      return { clave: `${e.id}:${v}`, nombre: op ? L(op.es, op.ru) : v, de: `${L(e.es, e.ru).replace(/\s*\(\d+\)$/, '')} · ${e.origen}`, texto: [op?.nota_es && L(op.nota_es, op.nota_ru ?? op.nota_es), op?.desc].filter(Boolean).join('\n\n') };
+    }));
   const [modal, setModal] = useState<null | 'rasgoRaza' | 'dote' | 'rasgo'>(null);
   const [ver, setVer] = useState<{ titulo: string; texto: string; quitar?: () => void } | null>(null);
   const [editar, setEditar] = useState<{ lista: 'dotes' | 'rasgos'; i: number; e: EntradaTexto } | null>(null);
@@ -70,6 +78,15 @@ export function TabRasgos() {
           {c.nivel >= 3 && !c.subclase && <p className="aviso-rojo"><PuntoRojo /> {L('A nivel 3 eliges subclase (en «Personaje»).', 'На 3 уровне выбираешь подкласс (во вкладке «Персонаж»).')}</p>}
         </Seccion>
       ))}
+
+      {elegidos.length > 0 && (
+        <Seccion titulo={L('Elegido en «Por elegir»', 'Выбрано в «Нужно выбрать»')}>
+          <ul className="lista-rasgos">
+            {elegidos.map((x) => <li key={x.clave}><button onClick={() => setVer({ titulo: x.nombre, texto: x.texto })}><strong>{td(x.nombre)}</strong><small>{x.de}</small></button></li>)}
+          </ul>
+          <p className="nota pequena">{L('Se cambian en la pestaña Personaje, en «Por elegir».', 'Меняются на вкладке «Персонаж», в блоке «Нужно выбрать».')}</p>
+        </Seccion>
+      )}
 
       <Seccion titulo="Otros rasgos">
         <ul className="lista-rasgos">

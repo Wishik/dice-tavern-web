@@ -84,6 +84,11 @@ export function bonosActivos(p: Personaje): BonoActivo[] {
     const b = BONOS[`${p.raza}:${n}`] ?? BONOS[n];
     if (b) out.push({ origen: n, b });
   }
+  // Orden divina «Taumaturgo» / Orden primigenia «Mago»: + mod. de Sabiduría (mín. +1) a dos habilidades.
+  const sab = Math.max(1, Math.floor(((p.caracteristicas?.SAB ?? 10) - 10) / 2));
+  const tiene = (c: string) => p.clase === c || !!p.multiclase?.some((m) => m.clase === c && m.nivel > 0);
+  if (tiene('Clérigo') && p.elecciones?.['Clérigo:orden']?.[0] === 'Taumaturgo') out.push({ origen: 'Taumaturgo', b: { habilidad: { arcano: sab, religion: sab } } });
+  if (tiene('Druida') && p.elecciones?.['Druida:orden']?.[0] === 'Mago') out.push({ origen: L('Mago (Orden primigenia)', 'Маг (Первородный орден)'), b: { habilidad: { arcano: sab, naturaleza: sab } } });
   return out;
 }
 

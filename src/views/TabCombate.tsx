@@ -11,7 +11,7 @@ import { buscarClase } from '../avisos';
 import { armasNaturales, dadoArtesMarciales, dadoMayor } from '../armasNaturales';
 import { recursosPersonaje } from '../recursos';
 import { alternarPotenciador, apagarDeUnGolpe, aplicaArma, potenciadoresDisponibles, sumarDano, type Potenciador } from '../potenciadores';
-import { armasConMaestria } from '../elecciones';
+import { armasConMaestria, textoMaestria } from '../elecciones';
 import { normalizarTexto } from '../data';
 
 type ArmaLlevada = { it: Item; donde: string; ref: (x: Personaje) => Item | null | undefined; extra?: string; natural?: boolean };
@@ -81,7 +81,7 @@ export function TabCombate() {
               <li key={it.id} className="ataque auto">
                 <div className="ataque-titulo"><strong>{natural ? it.nombre : td(it.nombre)}</strong><small>{natural ? donde : tr(donde)}{tipo ? ` · ${tipo}` : ''}{it.danoExtra ? ` + ${it.danoExtra}` : ''}{it.magico ? ` · +${it.magico}` : ''}</small></div>
                 {natural && it.descripcion && <p className="nota pequena">{it.descripcion}</p>}
-                {!natural && maestrias.some((n) => normalizarTexto(it.nombre).includes(normalizarTexto(n))) && <p className="nota pequena maestria-arma">⭐ {L('Maestría', 'Мастерство')}{it.detalles?.['Maestría'] ? `: ${td(it.detalles['Maestría'])}` : ''}</p>}
+                {!natural && maestrias.some((n) => normalizarTexto(it.nombre).includes(normalizarTexto(n))) && <p className="nota pequena maestria-arma">⭐ {L('Maestría', 'Мастерство')}{it.detalles?.['Maestría'] ? `: ${textoMaestria(it.detalles['Maestría'])}` : ''}</p>}
                 {artes && <p className="nota pequena">🥋 {dado !== dadoArma ? L(`Arma de monje: usa tu dado de artes marciales (${artes}) en vez de ${dadoArma}.`, `Оружие монаха: кость боевых искусств (${artes}) вместо ${dadoArma}.`) : L('Arma de monje: puedes usar FUE o DES.', 'Оружие монаха: можно бить от СИЛ или ЛОВ.')}</p>}
                 <div className="atr-arma">
                   {(['ataque', 'dano'] as const).map((k) => (

@@ -5,7 +5,8 @@ import { L } from '../i18n';
 import { td } from '../datosRu';
 import { buscarRaza } from '../avisos';
 import { cargarObjetos, useDatos, type Arma } from '../data';
-import { type Eleccion, eleccionesDe, eleccionesPendientes, elegido, faltan, fijarEleccion } from '../elecciones';
+import { FUENTES } from '../conjurosRasgos';
+import { ESTILOS, textoMaestria, type Eleccion, eleccionesDe, eleccionesPendientes, elegido, faltan, fijarEleccion } from '../elecciones';
 import { meterEquipoInicial } from '../equipoInicial';
 import { idiomasDeTexto, listaIdiomas } from '../rules';
 
@@ -48,11 +49,47 @@ function FilaEleccion({ e }: { e: Eleccion }) {
     } else fijar([valor]);
   };
 
+  const armaDe = (v: string) => (armas ?? []).find((a) => a.nombre === v && 'dano' in a);
+  /** Qué hace lo elegido (texto del manual). */
+  const desc = (v: string): string => {
+    if (e.modo === 'armas') { const m = armaDe(v)?.maestria ?? ''; return m ? textoMaestria(m) : ''; }
+    if (e.dote) return dotes?.find((d) => d.nombre === v)?.descripcion ?? '';
+    const op = e.opciones.find((o) => o.valor === v);
+    return op?.desc ?? (op?.nota_es ? L(op.nota_es, op.nota_ru ?? op.nota_es) : '');
+  };
+  /** Qué ha hecho la hoja sola con lo elegido. */
+  const efecto = (v: string): string => {
+    if (e.id === 'Brujo:invocaciones') {
+      const f = FUENTES.find((x) => x.invocacion && x.rasgo === v);
+      if (f?.concesiones[0].conjuros) return L(`Añadido a tus conjuros: ${f.concesiones[0].conjuros.join(', ')}.`, `Добавлено в заклинания: ${f.concesiones[0].conjuros.map(td).join(', ')}.`);
+      if (f) return L('Elige los trucos y rituales del libro en la pestaña Conjuros.', 'Выбери заговоры и ритуалы книги на вкладке «Заклинания».');
+      if (v === 'Lecciones de los primeros') return L('+1 dote de origen: elígela en «Rasgos y dotes».', '+1 черта происхождения: выбери её в «Особенности и черты».');
+      return L('Apuntado en «Rasgos y dotes».', 'Записано в «Особенности и черты».');
+    }
+    if (e.id.endsWith(':metamagia')) return L('Apuntado en «Rasgos y dotes».', 'Записано в «Особенности и черты».');
+    if (e.dote) return ESTILOS.includes(v) ? L('Añadido a tus dotes; sus bonos (CA, ataque, daño) se suman solos.', 'Добавлено в черты; её бонусы (КД, атака, урон) считаются сами.') : '';
+    if (e.modo === 'armas') return L('Sale en Combate junto a esa arma.', 'Показывается во вкладке «Бой» у этого оружия.');
+    if (e.id === 'raza:resiliencia') return L('Competencia marcada en esa salvación.', 'Владение этим спасброском отмечено.');
+    if (e.id.endsWith(':orden')) return v === 'Protector' || v === 'Guardián' ? L('Añadido a Competencias.', 'Добавлено во владения.') : L('Truco extra y bono a las habilidades ya sumados.', 'Лишний заговор и бонус к навыкам уже учтены.');
+    if (e.idioma) return L('Añadido a Idiomas.', 'Добавлено в языки.');
+    if (/:(instrumentos|herramienta)$|^dote:/.test(e.id)) return L('Añadido a Competencias.', 'Добавлено во владения.');
+    return '';
+  };
+  const Detalle = ({ v, soloEfecto }: { v: string; soloEfecto?: boolean }) => {
+    const d = soloEfecto ? '' : desc(v); const ef = efecto(v);
+    if (!d && !ef) return null;
+    return <div className="detalle-eleccion">{d && <p>{d}</p>}{ef && <p className="efecto-eleccion">✨ {ef}</p>}</div>;
+  };
+
   let cuerpo: React.ReactNode = null;
   if (e.equipo && hecho) cuerpo = <p className="nota pequena">{valores[0] === 'Ya lo tengo' ? L('Marcado como ya puesto a mano.', 'Отмечено: уже добавлено вручную.') : L('Ya está en tu mochila y en tus monedas.', 'Уже в рюкзаке и в кошельке.')}</p>;
   else if (hecho && !abierta) cuerpo = (
     <div className="resumen-eleccion">
-      <span>{valores.map((v) => etiqueta(e, v)).join(', ')}</span>
+      <ul className="elegidos">
+        {valores.map((v) => (desc(v) || efecto(v)
+          ? <li key={v}><details><summary>{e.modo === 'armas' ? `${td(v)} (${td(armaDe(v)?.maestria ?? '')})` : etiqueta(e, v)}</summary><Detalle v={v} /></details></li>
+          : <li key={v}>{etiqueta(e, v)}</li>))}
+      </ul>
       <button className="btn enlace pequeno" onClick={() => setAbierta(true)} title={L('Cambiar', 'Изменить')}>✎</button>
     </div>
   );
@@ -73,6 +110,7 @@ function FilaEleccion({ e }: { e: Eleccion }) {
             </button>
           );
         })}
+        {!e.equipo && valores.map((v) => <Detalle key={v} v={v} soloEfecto={grande} />)}
       </div>
     );
   } else if (e.modo === 'lista' || e.modo === 'armas') {
@@ -83,11 +121,14 @@ function FilaEleccion({ e }: { e: Eleccion }) {
     cuerpo = (
       <div className="ranuras-eleccion">
         {ranuras.map((v, i) => (
-          <select key={i} className="campo" value={v} onChange={(ev) => ponerRanura(i, ev.target.value)}>
-            <option value="">{L('— Elige —', '— Выбери —')}</option>
-            {v && !ops.some((o) => o.valor === v) && <option value={v}>{v}</option>}
-            {ops.filter((o) => o.valor === v || !ranuras.includes(o.valor)).map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}
-          </select>
+          <div key={i} className="ranura">
+            <select className="campo" value={v} onChange={(ev) => ponerRanura(i, ev.target.value)}>
+              <option value="">{L('— Elige —', '— Выбери —')}</option>
+              {v && !ops.some((o) => o.valor === v) && <option value={v}>{v}</option>}
+              {ops.filter((o) => o.valor === v || !ranuras.includes(o.valor)).map((o) => <option key={o.valor} value={o.valor}>{o.texto}</option>)}
+            </select>
+            {v && <Detalle v={v} />}
+          </div>
         ))}
       </div>
     );

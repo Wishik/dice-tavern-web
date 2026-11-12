@@ -1,3 +1,4 @@
+import { nivelEn } from './multiclase';
 import { eleccionesDe, eleccionesPendientes, esDoteDeEstilo, trucoExtraOrden } from './elecciones';
 import { limitesHabilidades } from './limitesHabilidades';
 import type { Clase, Raza, Razas, Trasfondo } from './data';
@@ -77,7 +78,8 @@ export function calcularAvisos(p: Personaje, clases: Clase[] | null, razas: Raza
   const conjuros = magia.reduce((s, m) => s + (m.limiteConjuros ? Math.max(0, m.limiteConjuros - m.nConj) : 0), 0);
 
   // Dotes: 1 de origen por trasfondo + una por cada "Mejora de característica"/"Don épico" alcanzado en cada clase.
-  const dotesEsperadas = (p.trasfondoEstilo ? 1 : 0) + dotesDeClases(p, c);
+  const dotesEsperadas = (p.trasfondoEstilo ? 1 : 0) + dotesDeClases(p, c)
+    + (nivelEn(p, 'Brujo') && p.elecciones?.['Brujo:invocaciones']?.includes('Lecciones de los primeros') ? 1 : 0);
   const dotes = Math.max(0, dotesEsperadas - p.dotes.filter((d) => !esDoteDeEstilo(d)).length);
 
   const raza = buscarRaza(razas, p.raza);
