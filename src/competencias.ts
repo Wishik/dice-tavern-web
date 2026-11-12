@@ -79,7 +79,8 @@ export function competenciasAuto(p: Personaje): CompAuto[] {
     d?.armaduras?.forEach((x) => add('armaduras', x, origen));
     d?.herramientas?.forEach((x) => add('herramientas', x, origen));
   };
-  clasesDe(p).forEach((c, i) => {
+  const todas = clasesDe(p);
+  todas.forEach((c, i) => {
     const org = T(RU_CLASES, c.clase);
     addTodo(i === 0 ? CLASE[c.clase] : MULTI[c.clase], org);
     if (c.clase === 'Clérigo' && p.elecciones?.['Clérigo:orden']?.[0] === 'Protector') addTodo({ armas: [MAR], armaduras: [PES] }, `${org} (${L('Protector', 'Защитник')})`);
@@ -87,6 +88,13 @@ export function competenciasAuto(p: Personaje): CompAuto[] {
     if (c.clase === 'Bardo' && c.subclase === 'Colegio del valor' && c.nivel >= 3) addTodo({ armas: [MAR], armaduras: [MED, ESC] }, `${org} (${L('Colegio del valor', 'Коллегия доблести')})`);
     for (const s of ['instrumentos', 'herramienta']) elegido(p, `${c.clase}:${s}`).forEach((n) => add('herramientas', parDe(n), org));
   });
+  // Las otras clases también «tienen» lo que ya sale de la principal (p. ej. Armas sencillas: Pícaro, Mago); solo se añade el origen.
+  for (const c of todas.slice(1)) {
+    const d = CLASE[c.clase]; if (!d) continue;
+    const org = T(RU_CLASES, c.clase);
+    for (const [tipo, lista] of [['armas', d.armas], ['armaduras', d.armaduras], ['herramientas', d.herramientas ?? []]] as const)
+      for (const [es] of lista) { const e = mapa.get(claveComp(tipo, es)); if (e && !e.origenes.includes(org)) e.origenes.push(org); }
+  }
   for (const d of p.dotes) addTodo(DOTES[d.nombre], d.nombre);
   elegido(p, 'dote:musico').forEach((n) => add('herramientas', parDe(n), 'Músico'));
   elegido(p, 'dote:fabricante').forEach((n) => add('herramientas', parDe(n), 'Fabricante'));

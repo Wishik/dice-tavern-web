@@ -17,6 +17,7 @@ describe('competencias', () => {
   it('salen de la clase y de la multiclase sin repetir', () => {
     const p = nuevoPersonaje(); p.clase = 'Pícaro'; p.nivel = 3; p.multiclase = [{ clase: 'Mago', subclase: '', nivel: 1 }];
     expect(nombres(p, 'armaduras')).toEqual(['Armaduras ligeras']);
+    expect(competenciasAuto(p).find((c) => c.es === 'Armas sencillas')!.origenes).toEqual(['Pícaro', 'Mago']);
     expect(nombres(p, 'herramientas')).toEqual(['Herramientas de ladrón']);
     p.multiclase = [{ clase: 'Guerrero', subclase: '', nivel: 1 }];
     expect(nombres(p, 'armas')).toContain('Armas marciales');
