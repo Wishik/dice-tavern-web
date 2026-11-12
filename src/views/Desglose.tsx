@@ -16,25 +16,29 @@ export function ListaDesglose({ lineas }: { lineas: LineaDesglose[] }) {
 
 /** Desglose de un número (CA, característica, habilidad, salvación) con bonus a mano.
  *  Se edita un borrador: solo «Guardar» lo guarda; cerrar (✕, fuera o Esc) lo descarta. */
-export function ModalDesglose({ donde, titulo, calcular, onClose, nota, conSignoTotal }: {
+export function ModalDesglose({ donde, titulo, calcular, onClose, nota, conSignoTotal, base }: {
   donde: string; titulo: string; onClose: () => void; nota?: string; conSignoTotal?: boolean;
+  /** Puntuación base editable (características): también va al borrador. */
+  base?: { valor: number; min: number; max: number; aplicar: (p: Personaje, n: number) => void };
   calcular: (p: Personaje) => { lineas: LineaDesglose[]; total: number };
 }) {
   const { p, upd } = useFicha();
   const [borr, setBorr] = useState(() => (p.bonosExtra ?? []).filter((b) => b.donde === donde).map((b) => ({ ...b })));
-  const prev = { ...p, bonosExtra: [...(p.bonosExtra ?? []).filter((b) => b.donde !== donde), ...borr] };
+  const [baseBorr, setBaseBorr] = useState(base?.valor ?? 0);
+  const prev: Personaje = { ...p, bonosExtra: [...(p.bonosExtra ?? []).filter((b) => b.donde !== donde), ...borr] };
+  if (base) base.aplicar(prev, baseBorr);
   const { lineas, total } = calcular(prev);
   const cambiar = (id: string, c: Partial<{ origen: string; valor: number }>) => setBorr((l) => l.map((b) => (b.id === id ? { ...b, ...c } : b)));
   const guardar = () => {
-    upd((x) => { x.bonosExtra = [...(x.bonosExtra ?? []).filter((b) => b.donde !== donde), ...borr.filter((b) => b.valor !== 0 || b.origen.trim()).map((b) => ({ ...b, origen: b.origen.trim() || L('Bonus', 'Бонус') }))]; });
+    upd((x) => { if (base && baseBorr !== base.valor) base.aplicar(x, baseBorr); x.bonosExtra = [...(x.bonosExtra ?? []).filter((b) => b.donde !== donde), ...borr.filter((b) => b.valor !== 0 || b.origen.trim()).map((b) => ({ ...b, origen: b.origen.trim() || L('Bonus', 'Бонус') }))]; });
     onClose();
   };
   return (
     <Modal titulo={`${titulo}: ${conSignoTotal ? conSigno(total) : total}`} onClose={onClose}
       pie={<><button className="btn" onClick={onClose}>{L('Cancelar', 'Отмена')}</button><button className="btn primario" onClick={guardar}>{L('Guardar', 'Сохранить')}</button></>}>
-      <h4>{L('De dónde sale', 'Из чего складывается')}</h4>
-      <ListaDesglose lineas={lineas.filter((x) => !x.id)} />
-      {nota && <p className="nota pequena">{nota}</p>}
+      {base && <label className="fila-base"><span>{L('Puntuación base', 'Базовое значение')}</span><Numero valor={baseBorr} min={base.min} max={base.max} ancho={72} set={setBaseBorr} /></label>}
+      {(() => { const auto = lineas.filter((x) => !x.id && !(base && x.base)); return auto.length > 0 && <><h4>{L('De dónde sale', 'Из чего складывается')}</h4><ListaDesglose lineas={auto} /></>; })()}
+      {nota && lineas.some((x) => !x.id && !(base && x.base)) && <p className="nota pequena">{nota}</p>}
       <h4>{L('Bonus a mano', 'Свои бонусы')}</h4>
       {borr.length === 0 && <p className="nota pequena">{L('Ninguno. Añade, por ejemplo, un objeto mágico o una bendición.', 'Пока нет. Например, магический предмет или благословение.')}</p>}
       <ul className="bonos-propios">

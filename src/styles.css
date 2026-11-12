@@ -753,3 +753,9 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .bonus-mano { width: 48px; min-height: 34px; padding: 4px; font-size: 15px; border: 1px dashed #c9ad7a; border-radius: 8px; background: #fffaf0; color: #8a7355; cursor: pointer; }
 .bonus-mano.con { border-style: solid; color: #2e6b2e; font-weight: 700; }
 .por-mano { display: block; font-size: 11px; color: #2e6b2e; line-height: 1.2; font-style: italic; }
+.car-cambiado { cursor: pointer; }
+.car-cambiado.buff { color: #2e7d32 !important; } .car-cambiado.debuff { color: var(--rojo) !important; }
+.valor-grande.con-bonus, .lt-valor.con-bonus { color: #2e7d32; }
+.lt-valor.con-bonus { border-color: #2e7d32; }
+.fila-base { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0 8px; font-weight: 600; }
+.tirable-no { cursor: pointer; font-family: inherit; }

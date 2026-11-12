@@ -13,7 +13,7 @@ import { descansoCorto, descansoLargo, dgRecuperados, extraDadoGolpe, recursosPe
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO, idioma } from '../i18n';
 import { MAX_DESCANSOS_CORTOS, catalogoRecursos, recordatoriosCorto } from '../descansoCorto';
 import { useDatos, type Conjuro } from '../data';
-import { ListaDesglose, ModalDesglose } from './Desglose';
+import { ModalDesglose } from './Desglose';
 
 export function TabAtributos() {
   const { p, upd, clases, razas, bloqueado } = useFicha();
@@ -141,8 +141,9 @@ export function TabAtributos() {
           return (
             <div key={a} className="caracteristica">
               <div className="car-nombre">{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}</div>
-              <Bloq><Numero valor={p.caracteristicas[a]} min={1} max={30} set={(n) => upd((x) => { x.caracteristicas[a] = n; })} className="car-valor" /></Bloq>
-              {ef !== p.caracteristicas[a] && <div className={`car-efecto ${ef < p.caracteristicas[a] ? 'debuff' : 'buff'}`} title={L('Con bonus y efectos', 'С бонусами и эффектами')}>→ {ef}</div>}
+              {ef === p.caracteristicas[a]
+                ? <Bloq><Numero valor={p.caracteristicas[a]} min={1} max={30} set={(n) => upd((x) => { x.caracteristicas[a] = n; })} className="car-valor" /></Bloq>
+                : <button className={`campo car-valor car-cambiado ${ef < p.caracteristicas[a] ? 'debuff' : 'buff'}`} onClick={() => setDesglose(a)} title={L(`Base ${p.caracteristicas[a]}: toca para ver de dónde sale`, `База ${p.caracteristicas[a]}: нажми, чтобы посмотреть, откуда`)}>{ef}</button>}
               <button className="car-desglose" onClick={() => setDesglose(a)} title={L('De dónde sale y bonus', 'Откуда и бонусы')}>{ef !== p.caracteristicas[a] ? 'ⓘ' : '＋'}</button>
               <button className="car-mod" onClick={() => tirarD20(L(`Prueba de ${NOMBRE_ATRIBUTO[a]}`, `Проверка: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}`), valorPrueba(p, a), avisosTirada(p, 'prueba', a))} title={L('Tirar prueba', 'Бросить проверку')}>{conSigno(m)}{valorPrueba(p, a) !== m && <small className="extra-rasgo">{conSigno(valorPrueba(p, a) - m)}</small>}</button>
             </div>
@@ -166,16 +167,16 @@ export function TabAtributos() {
           </div>
         </Seccion>
         <Seccion titulo="CA">
-          <div className="valor-grande">{ca.total}</div>
-          <button className="sin-boton" onClick={() => setDesglose('CA')} title={L('Cambiar bonus', 'Изменить бонусы')}><ListaDesglose lineas={ca.lineas} /></button>
-          <button className="btn enlace pequeno" onClick={() => setDesglose('CA')}>✎ {L('Cambiar bonus', 'Изменить бонусы')}</button>
+          <button className={`valor-grande tirable-no ${ca.lineas.some((x) => x.id) ? 'con-bonus' : ''}`} onClick={() => setDesglose('CA')} title={L('De dónde sale', 'Откуда')}>{ca.total}</button>
+          <button className="btn enlace pequeno" onClick={() => setDesglose('CA')}>ⓘ {L('Ver y añadir bonus', 'Бонусы')}</button>
         </Seccion>
       </div>
 
       {desglose && <ModalDesglose donde={desglose} onClose={() => setDesglose(null)}
         titulo={desglose === 'CA' ? L('Clase de armadura', 'Класс доспеха') : T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[desglose])}
         calcular={(q) => desglose === 'CA' ? calcularCA(q) : { lineas: desgloseCar(q, desglose), total: car(q, desglose) }}
-        nota={desglose !== 'CA' ? L('La puntuación base se cambia en la tarjeta. Los efectos del máster solo los quita el máster.', 'Базовое значение меняется на карточке. Эффекты мастера снимает только мастер.') : undefined} />}
+        base={desglose !== 'CA' && !bloqueado ? { valor: p.caracteristicas[desglose], min: 1, max: 30, aplicar: (q, n) => { q.caracteristicas = { ...q.caracteristicas, [desglose]: n }; } } : undefined}
+        nota={desglose !== 'CA' ? L('Los efectos del máster solo los quita el máster.', 'Эффекты мастера снимает только мастер.') : undefined} />}
 
       <div className="fila-2-tarjetas">
         <Seccion titulo="Velocidad">
