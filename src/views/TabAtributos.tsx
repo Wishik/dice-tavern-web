@@ -13,6 +13,7 @@ import { descansoCorto, descansoLargo, dgRecuperados, extraDadoGolpe, recursosPe
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO, idioma } from '../i18n';
 import { MAX_DESCANSOS_CORTOS, catalogoRecursos, recordatoriosCorto } from '../descansoCorto';
 import { useDatos, type Conjuro } from '../data';
+import { ListaDesglose, ModalDesglose } from './Desglose';
 
 export function TabAtributos() {
   const { p, upd, clases, razas, bloqueado } = useFicha();
@@ -171,7 +172,10 @@ export function TabAtributos() {
         </Seccion>
       </div>
 
-      {desglose && <ModalDesglose donde={desglose} onClose={() => setDesglose(null)} />}
+      {desglose && <ModalDesglose donde={desglose} onClose={() => setDesglose(null)}
+        titulo={desglose === 'CA' ? L('Clase de armadura', 'Класс доспеха') : T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[desglose])}
+        calcular={(q) => desglose === 'CA' ? calcularCA(q) : { lineas: desgloseCar(q, desglose), total: car(q, desglose) }}
+        nota={desglose !== 'CA' ? L('La puntuación base se cambia en la tarjeta. Los efectos del máster solo los quita el máster.', 'Базовое значение меняется на карточке. Эффекты мастера снимает только мастер.') : undefined} />}
 
       <div className="fila-2-tarjetas">
         <Seccion titulo="Velocidad">
@@ -283,48 +287,3 @@ function ModalRecurso({ onClose, editar }: { onClose: () => void; editar?: Recur
   );
 }
 
-/** Cada número con su origen (los puestos a mano llevan ✎). */
-function ListaDesglose({ lineas }: { lineas: LineaDesglose[] }) {
-  return (
-    <ul className="lista-desglose">
-      {lineas.map((x, i) => <li key={i} className={x.id ? 'propio' : ''}><span>{x.texto}{x.nota ? <small> · {x.nota}</small> : null}</span><strong>{x.base ? x.valor : conSigno(x.valor)}</strong></li>)}
-    </ul>
-  );
-}
-
-/** Desglose de la CA o de una característica, con bonus a mano que se pueden añadir, cambiar y quitar. */
-function ModalDesglose({ donde, onClose }: { donde: Atributo | 'CA'; onClose: () => void }) {
-  const { p, upd } = useFicha();
-  // Se edita un borrador: solo «Listo» lo guarda; cerrar (✕, fuera o Esc) lo descarta.
-  const [borr, setBorr] = useState(() => (p.bonosExtra ?? []).filter((b) => b.donde === donde).map((b) => ({ ...b })));
-  const prev = { ...p, bonosExtra: [...(p.bonosExtra ?? []).filter((b) => b.donde !== donde), ...borr] };
-  const lineas = donde === 'CA' ? calcularCA(prev).lineas : desgloseCar(prev, donde);
-  const total = donde === 'CA' ? calcularCA(prev).total : car(prev, donde);
-  const cambiar = (id: string, c: Partial<{ origen: string; valor: number }>) => setBorr((l) => l.map((b) => (b.id === id ? { ...b, ...c } : b)));
-  const guardar = () => {
-    upd((x) => { x.bonosExtra = [...(x.bonosExtra ?? []).filter((b) => b.donde !== donde), ...borr.filter((b) => b.valor !== 0 || b.origen.trim()).map((b) => ({ ...b, origen: b.origen.trim() || L('Bonus', 'Бонус') }))]; });
-    onClose();
-  };
-  const titulo = donde === 'CA' ? L('Clase de armadura', 'Класс доспеха') : T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[donde]);
-  return (
-    <Modal titulo={`${titulo}: ${total}`} onClose={onClose}
-      pie={<><button className="btn" onClick={onClose}>{L('Cancelar', 'Отмена')}</button><button className="btn primario" onClick={guardar}>{L('Guardar', 'Сохранить')}</button></>}>
-      <h4>{L('De dónde sale', 'Из чего складывается')}</h4>
-      <ListaDesglose lineas={lineas.filter((x) => !x.id)} />
-      {donde !== 'CA' && <p className="nota pequena">{L('La puntuación base se cambia en la tarjeta. Los efectos del máster solo los quita el máster.', 'Базовое значение меняется на карточке. Эффекты мастера снимает только мастер.')}</p>}
-      <h4>{L('Bonus a mano', 'Свои бонусы')}</h4>
-      {borr.length === 0 && <p className="nota pequena">{L('Ninguno. Añade, por ejemplo, un anillo de protección +1 o un cinturón de fuerza.', 'Пока нет. Например, кольцо защиты +1 или пояс силы.')}</p>}
-      <ul className="bonos-propios">
-        {borr.map((b) => (
-          <li key={b.id}>
-            <input className="campo" value={b.origen} placeholder={L('¿De dónde sale?', 'Откуда?')} onChange={(e) => cambiar(b.id, { origen: e.target.value })} />
-            <Numero valor={b.valor} min={-30} max={30} ancho={64} set={(n) => cambiar(b.id, { valor: n })} />
-            <button className="btn icono" title={L('Quitar', 'Убрать')} onClick={() => setBorr((l) => l.filter((y) => y.id !== b.id))}>✕</button>
-          </li>
-        ))}
-      </ul>
-      <BotonAnadir onClick={() => setBorr((l) => [...l, { id: uid(), donde, valor: 1, origen: '' }])}>{L('Añadir bonus', 'Добавить бонус')}</BotonAnadir>
-      <p className="nota pequena">{L('Los cambios se guardan al pulsar «Guardar».', 'Изменения сохраняются кнопкой «Сохранить».')}</p>
-    </Modal>
-  );
-}

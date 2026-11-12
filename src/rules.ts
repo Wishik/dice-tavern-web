@@ -1,7 +1,8 @@
 import { ajustarMulticlase, nivelEn, nivelTotal } from './multiclase';
 import type { Atributo, Item, Moneda, Personaje } from './types';
-import { bonoAtaqueArma, bonoAtaqueConjuro, bonoCdConjuro, bonoFuerzaCarga, bonoHabilidad, bonoPrueba, bonoSalvacion, bonosCA } from './bonos';
-import { L } from './i18n';
+import { bonoAtaqueArma, bonoAtaqueConjuro, bonoCdConjuro, bonoFuerzaCarga, bonoHabilidad, bonoPrueba, bonoSalvacion, bonosCA, bonosActivos, lineasBonos } from './bonos';
+import { NOMBRE_ATRIBUTO } from './types';
+import { L, T, RU_NOMBRE_ATRIBUTO } from './i18n';
 import { tr } from './ru';
 
 
@@ -63,19 +64,45 @@ export function idHabilidad(nombre: string): string | undefined {
   return mapa[n];
 }
 
+/** Bonus puestos a mano en un sitio (`hab:sigilo`, `salv:FUE`, `CA`, `FUE`...). */
+export const bonosManoEn = (p: Personaje, donde: string) => (p.bonosExtra ?? []).filter((b) => b.donde === donde);
+const lineasMano = (p: Personaje, donde: string): LineaDesglose[] => bonosManoEn(p, donde).map((b) => ({ texto: b.origen || L('Bonus', 'Бонус'), valor: b.valor || 0, id: b.id }));
+const nombreAtr = (a: Atributo) => T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a]);
+
 export function valorHabilidad(p: Personaje, id: string): number {
+  return desgloseHabilidad(p, id).reduce((s, x) => s + x.valor, 0);
+}
+/** De dónde sale el número de una habilidad: modificador, competencia, pericia, rasgos y bonus a mano. */
+export function desgloseHabilidad(p: Personaje, id: string): LineaDesglose[] {
   const def = HABILIDADES.find((h) => h.id === id)!;
   const h = p.habilidades[id] ?? { comp: false, pericia: false, bonus: 0 };
   const bc = bonoCompetencia(nivelTotal(p));
-  const r = bonoHabilidad(p, id, h.comp);
-  return modificador(car(p, def.atributo)) + (h.comp || r.comp ? bc : 0) + (h.pericia ? bc : 0) + (h.bonus || 0) + r.bono + bonoPrueba(p, def.atributo);
+  const l: LineaDesglose[] = [{ texto: L(`Modificador de ${NOMBRE_ATRIBUTO[def.atributo]}`, `Модификатор: ${nombreAtr(def.atributo)}`), valor: modificador(car(p, def.atributo)) }];
+  let comp = h.comp;
+  for (const { origen, b } of bonosActivos(p)) {
+    if (!b.competencia?.includes(id)) continue;
+    if (h.comp && b.competenciaO2) l.push({ texto: origen, valor: 2 });
+    else if (!comp) { comp = true; l.push({ texto: L(`Competencia (${origen})`, `Владение (${origen})`), valor: bc }); }
+  }
+  if (h.comp) l.push({ texto: L('Competencia', 'Владение'), valor: bc });
+  if (h.pericia) l.push({ texto: L('Pericia', 'Компетентность'), valor: bc });
+  l.push(...lineasBonos(p, (b) => b.habilidad?.[id]), ...lineasBonos(p, (b) => b.prueba?.[def.atributo]));
+  if (h.bonus) l.push({ texto: L('Ajuste', 'Поправка'), valor: h.bonus });
+  return [...l, ...lineasMano(p, `hab:${id}`)];
 }
 /** Prueba de característica: modificador + bonos de rasgos (p. ej. «Poderoso» +2 a FUE). */
 export const valorPrueba = (p: Personaje, a: Atributo) => modificador(car(p, a)) + bonoPrueba(p, a);
 
 export function valorSalvacion(p: Personaje, a: Atributo): number {
+  return desgloseSalvacion(p, a).reduce((s, x) => s + x.valor, 0);
+}
+export function desgloseSalvacion(p: Personaje, a: Atributo): LineaDesglose[] {
   const s = p.salvaciones[a];
-  return modificador(car(p, a)) + (s.comp ? bonoCompetencia(nivelTotal(p)) : 0) + (s.bonus || 0) + bonoSalvacion(p, a);
+  const l: LineaDesglose[] = [{ texto: L(`Modificador de ${NOMBRE_ATRIBUTO[a]}`, `Модификатор: ${nombreAtr(a)}`), valor: modificador(car(p, a)) }];
+  if (s.comp) l.push({ texto: L('Competencia', 'Владение'), valor: bonoCompetencia(nivelTotal(p)) });
+  l.push(...lineasBonos(p, (b) => b.salvacion?.[a]));
+  if (s.bonus) l.push({ texto: L('Ajuste', 'Поправка'), valor: s.bonus });
+  return [...l, ...lineasMano(p, `salv:${a}`)];
 }
 
 export const iniciativa = (p: Personaje) => valorPrueba(p, 'DES') + (p.bonusIniciativa || 0);

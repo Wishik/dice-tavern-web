@@ -50,6 +50,15 @@ export function normalizar(p: Partial<Personaje>): Personaje {
   out.ca = '';
   // El antiguo «Ajuste» de la CA pasa a ser un bonus con nombre (se puede cambiar o quitar).
   if (out.bonusCA) { out.bonosExtra = [...(out.bonosExtra ?? []), { id: `ajusteCA${Date.now().toString(36)}`, donde: 'CA', valor: out.bonusCA, origen: 'Ajuste' }]; out.bonusCA = 0; }
+  // Las casillas pequeñas de bonus en habilidades y salvaciones pasan a ser bonus con nombre.
+  const mano: { id: string; donde: string; valor: number; origen: string }[] = [];
+  if (out.habilidades && Object.values(out.habilidades).some((h) => h?.bonus)) {
+    out.habilidades = Object.fromEntries(Object.entries(out.habilidades).map(([id, h]) => { if (h?.bonus) mano.push({ id: `aj-${id}-${Date.now().toString(36)}`, donde: `hab:${id}`, valor: h.bonus, origen: 'Ajuste' }); return [id, h ? { ...h, bonus: 0 } : h]; }));
+  }
+  if (out.salvaciones && Object.values(out.salvaciones).some((x) => x?.bonus)) {
+    out.salvaciones = Object.fromEntries(Object.entries(out.salvaciones).map(([a, x]) => { if (x?.bonus) mano.push({ id: `aj-s${a}-${Date.now().toString(36)}`, donde: `salv:${a}`, valor: x.bonus, origen: 'Ajuste' }); return [a, x ? { ...x, bonus: 0 } : x]; })) as typeof out.salvaciones;
+  }
+  if (mano.length) out.bonosExtra = [...(out.bonosExtra ?? []), ...mano];
   // Los PG actuales nunca pueden pasar de los máximos: si pasa (datos antiguos), el máximo sube.
   if (out.pg.actual > out.pg.max) out.pg.max = out.pg.actual;
   return out;

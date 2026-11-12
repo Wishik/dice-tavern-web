@@ -97,6 +97,10 @@ const sumar = (lista: BonoActivo[], f: (b: Bono) => number | undefined) =>
 const origenes = (lista: BonoActivo[], f: (b: Bono) => number | undefined) =>
   lista.filter((x) => f(x.b)).map((x) => `${x.origen} ${(f(x.b)! > 0 ? '+' : '')}${f(x.b)}`);
 
+/** Una línea por rasgo o dote que da algo (para el desglose). */
+export const lineasBonos = (p: Personaje, f: (b: Bono) => number | undefined) =>
+  bonosActivos(p).filter((x) => f(x.b)).map((x) => ({ texto: x.origen, valor: f(x.b)! }));
+
 export function bonoHabilidad(p: Personaje, id: string, compMarcada: boolean): { comp: boolean; bono: number; origen: string[]; notas: string[] } {
   const l = bonosActivos(p);
   let comp = false, bono = 0;

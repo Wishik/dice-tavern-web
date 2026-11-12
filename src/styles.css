@@ -750,3 +750,6 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .bonos-propios { list-style: none; padding: 0; margin: 0 0 10px; display: flex; flex-direction: column; gap: 6px; }
 .bonos-propios li { display: grid; grid-template-columns: 1fr auto auto; gap: 6px; align-items: center; }
 .sin-boton { display: block; width: 100%; background: none; border: 0; padding: 0; text-align: inherit; color: inherit; font: inherit; cursor: pointer; }
+.bonus-mano { width: 48px; min-height: 34px; padding: 4px; font-size: 15px; border: 1px dashed #c9ad7a; border-radius: 8px; background: #fffaf0; color: #8a7355; cursor: pointer; }
+.bonus-mano.con { border-style: solid; color: #2e6b2e; font-weight: 700; }
+.por-mano { display: block; font-size: 11px; color: #2e6b2e; line-height: 1.2; font-style: italic; }

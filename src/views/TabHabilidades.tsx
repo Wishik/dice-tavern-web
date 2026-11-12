@@ -1,15 +1,27 @@
 import { useFicha } from './Ficha';
-import { Check, Numero, PuntoRojo, Seccion } from '../ui';
+import { Check, PuntoRojo, Seccion } from '../ui';
 import { useDados } from '../dice';
-import { HABILIDADES, avisosTirada, conSigno, idHabilidad, valorHabilidad, valorSalvacion } from '../rules';
-import { ATRIBUTOS, NOMBRE_ATRIBUTO } from '../types';
+import { HABILIDADES, avisosTirada, bonosManoEn, conSigno, desgloseHabilidad, desgloseSalvacion, idHabilidad, valorHabilidad, valorSalvacion } from '../rules';
+import { ModalDesglose } from './Desglose';
+import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo } from '../types';
 import { buscarClase } from '../avisos';
 import { bonoHabilidad, bonoSalvacion } from '../bonos';
 import { anotarOrden, habilidadesTrasfondo, limitesHabilidades, sobrantes } from '../limitesHabilidades';
-import { createContext, useContext } from 'react';
+import { createContext, useContext, useState } from 'react';
 import { L, T, RU_ATRIBUTOS, RU_CLASES, RU_HABILIDADES, RU_NOMBRE_ATRIBUTO } from '../i18n';
 
 const DeMas = createContext<{ comp: Set<string>; pericia: Set<string> }>({ comp: new Set(), pericia: new Set() });
+const AbrirDesglose = createContext<(d: string) => void>(() => {});
+
+/** Botón pequeño con la suma de los bonus a mano (o ＋ si no hay): abre el desglose. */
+function BotonBonus({ donde }: { donde: string }) {
+  const { p } = useFicha();
+  const abrir = useContext(AbrirDesglose);
+  const l = bonosManoEn(p, donde);
+  const suma = l.reduce((s, b) => s + (b.valor || 0), 0);
+  return <button type="button" className={`bonus-mano ${l.length ? 'con' : ''}`} onClick={() => abrir(donde)} title={L('De dónde sale y bonus a mano', 'Откуда и свои бонусы')}>{l.length ? conSigno(suma) : '＋'}</button>;
+}
+const textoMano = (p: Parameters<typeof bonosManoEn>[0], donde: string) => bonosManoEn(p, donde).map((b) => `${b.origen} ${conSigno(b.valor)}`).join(', ');
 
 const GRUPOS = [['cognitivas', 'Habilidades cognitivas', 'Умственные навыки'], ['fisicas', 'Habilidades físicas', 'Физические навыки'], ['sociales', 'Habilidades sociales', 'Социальные навыки']] as const;
 
@@ -30,8 +42,16 @@ export function TabHabilidades() {
   const prioridad = [...deTrasfondo, ...sugeridas];
   const deMas = { comp: clase ? sobrantes(marcadasComp, esperadas, p.ordenHabilidades?.comp, prioridad) : new Set<string>(), pericia: clase ? sobrantes(marcadasPer, periciasEsperadas, p.ordenHabilidades?.pericia, prioridad) : new Set<string>() };
   const flexibles = lim.fuentes.filter((x) => x.flexible).map((x) => x.es);
+  const [desglose, setDesglose] = useState<string | null>(null);
+  const tituloDesglose = (d: string) => {
+    const [t, id] = d.split(':');
+    if (t === 'salv') return L(`Salvación de ${NOMBRE_ATRIBUTO[id as Atributo]}`, `Спасбросок: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[id as Atributo])}`);
+    const h = HABILIDADES.find((x) => x.id === id)!;
+    return T(RU_HABILIDADES, h.id) === h.id ? h.nombre : T(RU_HABILIDADES, h.id);
+  };
 
   return (
+    <AbrirDesglose.Provider value={setDesglose}>
     <div className="tab">
       <Seccion titulo="Límites">
         {!clase ? <p className="nota">{L('Elige tu clase en la pestaña Personaje para ver cuántas competencias te tocan.', 'Выбери класс на вкладке «Персонаж», чтобы увидеть, сколько владений положено.')}</p> : (
@@ -63,8 +83,8 @@ export function TabHabilidades() {
             return (
               <li key={a}>
                 <Check valor={p.salvaciones[a].comp} set={(b) => upd((x) => { x.salvaciones[a].comp = b; })} titulo="Competencia" />
-                <span className="lt-nombre">{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}{bonoSalvacion(p, a) !== 0 && <small className="por-rasgo">★ {L('rasgos', 'особенности')} {conSigno(bonoSalvacion(p, a))}</small>}</span>
-                <Numero valor={p.salvaciones[a].bonus} set={(n) => upd((x) => { x.salvaciones[a].bonus = n; })} className="mini" />
+                <span className="lt-nombre">{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}{bonoSalvacion(p, a) !== 0 && <small className="por-rasgo">★ {L('rasgos', 'особенности')} {conSigno(bonoSalvacion(p, a))}</small>}{textoMano(p, `salv:${a}`) && <small className="por-mano">✎ {textoMano(p, `salv:${a}`)}</small>}</span>
+                <BotonBonus donde={`salv:${a}`} />
                 <button className="lt-valor" onClick={() => tirarD20(L(`Salvación de ${NOMBRE_ATRIBUTO[a]}`, `Спасбросок: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}`), v, avisosTirada(p, 'salvacion', a))}>{conSigno(v)}</button>
               </li>
             );
@@ -81,8 +101,12 @@ export function TabHabilidades() {
           <button className="btn" onClick={() => tirarD20(L('Salvación contra muerte', 'Спасбросок от смерти'), 0)}>{L('Tirar', 'Бросить')}</button>
         </div>
       </Seccion>
-      <p className="nota">{L('C = competencia, P = pericia. La casilla pequeña es un bonus extra a mano. Los bonos de raza y dotes (★) ya se suman solos: no los repitas aquí.', 'В = владение, К = компетентность. Маленькое поле — дополнительный бонус вручную. Бонусы расы и черт (★) уже прибавлены сами: не дублируй их здесь.')}</p>
+      <p className="nota">{L('C = competencia, P = pericia. El botón ＋ junto al número enseña de dónde sale y deja añadir, cambiar o quitar bonus a mano (✎). Los bonos de raza y dotes (★) ya se suman solos: no los repitas.', 'В = владение, К = компетентность. Кнопка ＋ рядом с числом показывает, из чего оно складывается, и позволяет добавить, изменить или убрать свои бонусы (✎). Бонусы расы и черт (★) уже прибавлены сами: не дублируй их.')}</p>
+      {desglose && <ModalDesglose donde={desglose} titulo={tituloDesglose(desglose)} conSignoTotal onClose={() => setDesglose(null)}
+        calcular={(q) => { const [t, id] = desglose.split(':'); const lineas = t === 'salv' ? desgloseSalvacion(q, id as Atributo) : desgloseHabilidad(q, id); return { lineas, total: lineas.reduce((s, x) => s + x.valor, 0) }; }}
+        nota={L('Competencia y pericia se marcan con las casillas C y P.', 'Владение и компетентность отмечаются галочками В и К.')} />}
     </div>
+    </AbrirDesglose.Provider>
   );
 }
 
@@ -109,8 +133,8 @@ function Grupo({ grupo, titulo, sugeridas }: { grupo: string; titulo: string; su
               <Check valor={st.pericia} clase={deMas.pericia.has(h.id) ? 'de-mas' : ''} titulo={deMas.pericia.has(h.id) ? L('Pericia (pasa del límite)', 'Компетентность (сверх лимита)') : 'Pericia'}
                 set={(b) => upd((x) => { const ponC = b && !x.habilidades[h.id].comp; x.habilidades[h.id].pericia = b; if (b) x.habilidades[h.id].comp = true; orden(x, h.id, ponC ? true : undefined, b); })} />
               <span className="lt-nombre">{T(RU_HABILIDADES, h.id) === h.id ? h.nombre : T(RU_HABILIDADES, h.id)} <small>({T(RU_ATRIBUTOS, h.atributo.slice(0, 3))})</small>{sugeridas.has(h.id) && !st.comp && !r.comp && <span className="sugerida">◆</span>}
-                {r.origen.length > 0 && <small className="por-rasgo">★ {r.origen.join(', ')}</small>}</span>
-              <Numero valor={st.bonus} set={(n) => upd((x) => { x.habilidades[h.id].bonus = n; })} className="mini" />
+                {r.origen.length > 0 && <small className="por-rasgo">★ {r.origen.join(', ')}</small>}{textoMano(p, `hab:${h.id}`) && <small className="por-mano">✎ {textoMano(p, `hab:${h.id}`)}</small>}</span>
+              <BotonBonus donde={`hab:${h.id}`} />
               <button className="lt-valor" onClick={() => tirarD20(T(RU_HABILIDADES, h.id) === h.id ? h.nombre : T(RU_HABILIDADES, h.id), v, [...r.notas, ...avisosTirada(p, 'habilidad', h.atributo, h.id)])}>{conSigno(v)}</button>
             </li>
           );
