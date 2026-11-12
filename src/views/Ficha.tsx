@@ -207,7 +207,7 @@ function SubidaNivel() {
         <h3>{L(`¡Subes a nivel ${nivelDe}!`, `Новый уровень: ${nivelDe}!`)}</h3>
         <Etiqueta texto={L('¿En qué clase subes este nivel?', 'В какой класс идёт этот уровень?')}>
           <select className="campo" value={clase} onChange={(e) => setClase(e.target.value)}>
-            {clasesDe(p).map((c) => <option key={c.clase} value={c.clase}>{T(RU_CLASES, c.clase)} {c.nivel} → {c.nivel + (c.clase === p.clase ? 0 : 1)}</option>)}
+            {clasesDe(p).map((c) => <option key={c.clase} value={c.clase}>{T(RU_CLASES, c.clase)} {c.clase === p.clase ? `${c.nivel - p.subidasPendientes} → ${c.nivel - p.subidasPendientes + 1}` : `${c.nivel} → ${c.nivel + 1}`}</option>)}
             <optgroup label={L('Nueva clase (multiclase)', 'Новый класс (мультикласс)')}>
               {(clases ?? []).filter((c) => !mias.includes(c.nombre)).map((c) => <option key={c.nombre} value={c.nombre}>{T(RU_CLASES, c.nombre)} 1</option>)}
             </optgroup>
