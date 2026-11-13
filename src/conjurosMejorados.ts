@@ -4,11 +4,11 @@ import type { Personaje } from './types';
  * Regla de la casa: aprender un conjuro que ya tienes (por otra clase, rasgo o dote) no lo duplica.
  * Se convierte en «Nombre +», «Nombre ++»…: se ve una sola vez, en el grupo con mejor ataque/CD,
  * y su texto es editable (cada partida mejora distinto). Al quitar uno se vuelve al estado anterior.
- * De momento solo Bola de fuego (prueba).
+ * Vale para todos los conjuros (se probó primero con Bola de fuego).
+ * Si hay empate de ataque/CD, el jugador elige dónde va (p.ubicacionMejorados).
  */
-export const CONJUROS_MEJORABLES = ['Bola de fuego'];
 const clave = (n: string) => n.toLocaleLowerCase('es');
-export const esMejorable = (nombre: string) => CONJUROS_MEJORABLES.some((m) => clave(m) === clave(nombre));
+export const esMejorable = (_nombre: string) => true;
 
 export const nombreMejorado = (nombre: string, plus: number) => (plus > 0 ? `${nombre} ${'+'.repeat(plus)}` : nombre);
 
@@ -19,8 +19,8 @@ export const copias = (p: Personaje, nombre: string) => p.conjuros.map((c, i) =>
  * Qué copia se ve de cada conjuro repetido y cuántos «+» lleva.
  * `potencia(i)` = [ataque, CD] del grupo de la copia i: gana la mayor (a igualdad, la primera).
  */
-export function resolverMejorados(p: Personaje, potencia: (i: number) => [number, number]): { ocultos: Set<number>; plus: Map<number, number> } {
-  const ocultos = new Set<number>(), plus = new Map<number, number>();
+export function resolverMejorados(p: Personaje, potencia: (i: number) => [number, number], grupo: (i: number) => string = () => ''): { ocultos: Set<number>; plus: Map<number, number>; empates: Map<number, number[]> } {
+  const ocultos = new Set<number>(), plus = new Map<number, number>(), empates = new Map<number, number[]>();
   const vistos = new Set<string>();
   p.conjuros.forEach((c) => {
     const k = clave(c.nombre);
@@ -33,11 +33,22 @@ export function resolverMejorados(p: Personaje, potencia: (i: number) => [number
       const [a, d] = potencia(i), [ma, md] = potencia(mejor);
       if (a > ma || (a === ma && d > md)) mejor = i;
     }
+    // Empate: copias igual de potentes en grupos distintos; gana la que eligió el jugador.
+    const [ma, md] = potencia(mejor);
+    const iguales = idx.filter((i) => { const [a, d] = potencia(i); return a === ma && d === md; });
+    const porGrupo = iguales.filter((i, n) => iguales.findIndex((j) => grupo(j) === grupo(i)) === n);
+    if (porGrupo.length > 1) {
+      const elegido = porGrupo.find((i) => grupo(i) === p.ubicacionMejorados?.[k]);
+      if (elegido !== undefined) mejor = elegido;
+      empates.set(mejor, porGrupo);
+    }
     idx.forEach((i) => { if (i !== mejor) ocultos.add(i); });
     plus.set(mejor, idx.length - 1);
   });
-  return { ocultos, plus };
+  return { ocultos, plus, empates };
 }
+
+export function fijarUbicacion(x: Personaje, nombre: string, grupo: string) { x.ubicacionMejorados = { ...(x.ubicacionMejorados ?? {}), [clave(nombre)]: grupo }; }
 
 /** Texto de la versión mejorada (nivel de «+»): el guardado o, si no hay, el del conjuro base. */
 export const textoMejorado = (p: Personaje, nombre: string, plus: number, base: string) => p.mejorasConjuro?.[clave(nombre)]?.[plus - 1] ?? base;

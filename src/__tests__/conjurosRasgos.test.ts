@@ -12,12 +12,13 @@ describe('conjuros de raza y dotes', () => {
     const p = nuevoPersonaje(); p.raza = 'Aasimar'; p.rasgosRaza = ['Portador de Luz']; p.nivel = 2;
     p.conjuros = [{ nombre: 'Luz', nivel: 0 }];
     expect(sincronizarConjuros(p, R, S)).toBe(true);
-    expect(p.conjuros).toEqual([{ nombre: 'Luz', nivel: 0, adicional: true, origen: 'aasimar:1', preparado: undefined }]);
+    // Regla de la casa: el que ya tenías se queda y la copia de la raza lo convierte en «Luz +».
+    expect(p.conjuros).toEqual([{ nombre: 'Luz', nivel: 0 }, { nombre: 'Luz', nivel: 0, adicional: true, origen: 'aasimar:1' }]);
     expect(sincronizarConjuros(p, R, S)).toBe(false);
     p.nivel = 5; sincronizarConjuros(p, R, S);
-    expect(p.conjuros.map((c) => c.nombre)).toEqual(['Luz', 'Luz del día']);
+    expect(p.conjuros.map((c) => c.nombre)).toEqual(['Luz', 'Luz', 'Luz del día']);
     p.rasgosRaza = []; sincronizarConjuros(p, R, S);
-    expect(p.conjuros).toEqual([]);
+    expect(p.conjuros).toEqual([{ nombre: 'Luz', nivel: 0 }]);
   });
   it('los rasgos fijos cuentan sin elegirlos y las elecciones quedan pendientes', () => {
     const k = nuevoPersonaje(); k.raza = 'Kitsune'; sincronizarConjuros(k, R, S);

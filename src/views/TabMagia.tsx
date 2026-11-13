@@ -12,7 +12,7 @@ import { claseDeConjuro, type MagiaClase } from '../avisos';
 import { tr } from '../ru';
 import { td } from '../datosRu';
 import { atributoAuto, atributoGrupo, ataqueCon, cdCon, fijarAtributoGrupo, grupoDe, gruposOtros, type GrupoConjuros } from '../gruposConjuros';
-import { copias, esMejorable, fijarTextoMejorado, nombreMejorado, quitarCopia, resolverMejorados, textoMejorado } from '../conjurosMejorados';
+import { copias, esMejorable, fijarTextoMejorado, fijarUbicacion, nombreMejorado, quitarCopia, resolverMejorados, textoMejorado } from '../conjurosMejorados';
 import { TERRENOS, subclaseEn, FUENTES, cantidadEleccion, eleccionesPendientes, opcionesEleccion, concesionesActivas, type Concesion, type Fuente } from '../conjurosRasgos';
 
 const nombreNivel = (i: number) => i === 0 ? L('Trucos', 'Заговоры') : `${L('Nivel', 'Уровень')} ${i}`;
@@ -70,7 +70,8 @@ export function TabMagia() {
   const nombresLanzadoras = (lanzadoras.length ? lanzadoras : magia.filter((m) => CARACTERISTICA_CONJUROS[m.clase] && (m.nTrucos || m.nConj))).map((m) => m.clase);
   const atrDe = (c: ConjuroPersonaje) => atributoGrupo(p, grupoDe(p, c), nombresLanzadoras, razas);
   // Conjuros aprendidos más de una vez: se ven una sola vez («Bola de fuego +») en el grupo con mejor ataque/CD.
-  const { ocultos, plus } = resolverMejorados(p, (i) => { const a = atrDe(p.conjuros[i]); return [ataqueCon(p, a) ?? -99, cdCon(p, a) ?? -99]; });
+  const { ocultos, plus, empates } = resolverMejorados(p, (i) => { const a = atrDe(p.conjuros[i]); return [ataqueCon(p, a) ?? -99, cdCon(p, a) ?? -99]; }, (i) => grupoDe(p, p.conjuros[i]).id);
+  const nombreGrupo = (g: GrupoConjuros) => g.tipo === 'clase' ? T(RU_CLASES, g.clase ?? '') : g.tipo === 'lista' ? L(`lista de ${g.clase}`, `список: ${T(RU_CLASES, g.clase ?? '')}`) : g.tipo === 'invocacion' ? L('invocación', 'воззвание') : g.tipo === 'otros' ? L('otros', 'другое') : td(g.rasgo ?? '');
   const { tirarD20 } = useDados();
   const tituloGrupo = (g: GrupoConjuros) => g.tipo === 'subclase' ? <>{td(g.rasgo ?? '')}<small> · {L('siempre conocidos', 'всегда известны')}</small></> : g.tipo === 'raza' ? <>{L('Conjuros raciales', 'Расовые заклинания')}{g.rasgo && <small> · {td(g.rasgo)}</small>}</>
     : g.tipo === 'dote' ? <>{L('Dote', 'Черта')}: {td(g.rasgo ?? '')}</>
@@ -102,6 +103,8 @@ export function TabMagia() {
   const maxNivelAnadir = (anadirQue ? magia.find((m) => m.clase === anadirQue.clase)?.nivelMaxConjuro : null) ?? avisos.nivelMaxConjuro ?? null;
   const anadirConjuro = (c: Conjuro) => {
     const ya = copias(p, c.nombre).length;
+    const destino = anadir === 'adicional' ? grupoDe(p, { nombre: c.nombre, nivel: c.nivel, adicional: true, ...(listaAnadir ? { lista: listaAnadir } : {}) }).id : `clase:${multi ? anadirQue!.clase : p.clase}`;
+    if (copias(p, c.nombre).some((i) => grupoDe(p, p.conjuros[i]).id === destino)) { alert(L(`«${td(c.nombre)}» ya está en este grupo. Para mejorarlo tiene que venir de otra clase, rasgo o dote.`, `«${td(c.nombre)}» уже есть в этой группе. Чтобы улучшить его, оно должно прийти из другого класса, умения или черты.`)); return false; }
     if (ya > 0 && !confirm(L(`Ya tienes «${nombreMejorado(td(c.nombre), ya - 1)}». Si lo aprendes otra vez se convierte en «${nombreMejorado(td(c.nombre), ya)}»: se verá una sola vez, en la clase o rasgo con mejor ataque y CD, y podrás editar su texto. ¿Añadirlo?`, `У тебя уже есть «${nombreMejorado(td(c.nombre), ya - 1)}». Если выучить его ещё раз, оно станет «${nombreMejorado(td(c.nombre), ya)}»: будет показано один раз, там, где лучше атака и Сл, и его текст можно менять. Добавить?`))) return false;
     if (anadir !== 'adicional' && c.nivel > 0 && maxNivelAnadir !== null && c.nivel > maxNivelAnadir
       && !confirm(L(`«${td(c.nombre)}» es de nivel ${c.nivel}, pero ahora solo puedes lanzar conjuros hasta nivel ${maxNivelAnadir}. ¿Añadirlo igualmente?`, `«${td(c.nombre)}» — ${c.nivel} уровня, а сейчас тебе доступны заклинания только до ${maxNivelAnadir} уровня. Всё равно добавить?`))) return false;
@@ -280,10 +283,19 @@ export function TabMagia() {
             if (ver.plus) {
               const base = ver.def ? `${td(ver.def.tiempo)} · ${td(ver.def.alcance)} · ${td(ver.def.componentes)} · ${td(ver.def.duracion)}\n\n${td(ver.def.descripcion)}` : '';
               const texto = textoMejorado(p, ver.c.nombre, ver.plus, base);
-              const donde = copias(p, ver.c.nombre).map((i) => { const g = grupoDe(p, p.conjuros[i]); return g.tipo === 'clase' ? T(RU_CLASES, g.clase ?? '') : g.tipo === 'lista' ? L(`lista de ${g.clase}`, `список: ${T(RU_CLASES, g.clase ?? '')}`) : g.tipo === 'invocacion' ? L('invocación', 'воззвание') : g.tipo === 'otros' ? L('otros', 'другое') : td(g.rasgo ?? ''); });
+              const donde = copias(p, ver.c.nombre).map((i) => nombreGrupo(grupoDe(p, p.conjuros[i])));
+              const shownIdx = [...plus.keys()].find((i) => p.conjuros[i] && p.conjuros[i].nombre.toLowerCase() === ver.c.nombre.toLowerCase());
+              const emp = shownIdx !== undefined ? empates.get(shownIdx) : undefined;
               return <>
                 <p className="nota mejorado">⭐ {L(`Conjuro mejorado: lo has aprendido ${ver.plus + 1} veces (${donde.join(', ')}). Se lanza con el mejor ataque y CD.`, `Улучшенное заклинание: выучено ${ver.plus + 1} раз (${donde.join(', ')}). Накладывается с лучшей атакой и Сл.`)}</p>
-                <Lanzar texto={texto} nivel={ver.c.nivel} nombre={nombreMejorado(ver.c.nombre, ver.plus)} atr={atrDe(ver.c)} />
+                {emp && (
+                  <label className="etiqueta"><span>{L('Tienen el mismo ataque y CD: ¿dónde lo quieres?', 'Атака и Сл одинаковые: где его показывать?')}</span>
+                    <select className="campo" value={grupoDe(p, p.conjuros[shownIdx!]).id} onChange={(e) => { const v = e.target.value; upd((x) => fijarUbicacion(x, ver.c.nombre, v)); const j = emp.find((i) => grupoDe(p, p.conjuros[i]).id === v); if (j !== undefined) setVer({ ...ver, c: p.conjuros[j] }); }}>
+                      {emp.map((i) => { const g = grupoDe(p, p.conjuros[i]); return <option key={g.id} value={g.id}>{nombreGrupo(g)}</option>; })}
+                    </select>
+                  </label>
+                )}
+                <Lanzar texto={texto} nivel={ver.c.nivel} nombre={nombreMejorado(ver.c.nombre, ver.plus)} atr={atrDe(shownIdx !== undefined ? p.conjuros[shownIdx] : ver.c)} />
                 <label className="etiqueta"><span>{L('Texto de la versión mejorada (cámbialo según la mejora de tu partida)', 'Текст улучшенной версии (поменяй под улучшение в твоей партии)')}</span>
                   <Texto multilinea filas={10} valor={texto} set={(v) => upd((x) => fijarTextoMejorado(x, ver.c.nombre, ver.plus!, v))} />
                 </label>
@@ -332,7 +344,7 @@ function Lanzar({ texto: completo, nivel, nombre, atr }: { texto: string; nivel:
   const { p, upd, avisos, ajeno } = useFicha();
   const { tirar, tirarD20 } = useDados();
   const at = ataqueCon(p, atr), cd = cdCon(p, atr);
-  const maxEsp = Math.max(nivel, Math.min(9, avisos.nivelMaxConjuro ?? 9));
+  const maxEsp = Math.max(nivel, Math.min(9, avisos.nivelMaxLanzar ?? avisos.nivelMaxConjuro ?? 9));
   const [espacio, setEspacio] = useState(nivel);
   const [lanzado, setLanzado] = useState('');
   const pideAtaque = /tirada de ataque|ataque de conjuro/i.test(texto);

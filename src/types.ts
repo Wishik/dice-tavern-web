@@ -161,6 +161,8 @@ export interface Personaje {
   caracteristicaGrupos?: Record<string, Atributo>;
   /** Textos editados de los conjuros mejorados («Bola de fuego +», «++»…): nombre en minúsculas → texto por nivel de «+». */
   mejorasConjuro?: Record<string, string[]>;
+  /** Conjuros mejorados con empate de ataque/CD: grupo elegido para mostrarlos (nombre en minúsculas → id de grupo). */
+  ubicacionMejorados?: Record<string, string>;
   conjurosTurno: { estandar: string; adicional: string };
   salvaciones: Record<Atributo, { comp: boolean; bonus: number }>;
   muerte: { exitos: number; fallos: number };

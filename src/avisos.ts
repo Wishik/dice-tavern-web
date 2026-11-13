@@ -25,6 +25,8 @@ export interface Avisos {
   conjurosAbierto: boolean;
   limitePreparados: number | null;
   nivelMaxConjuro: number | null;
+  /** Nivel más alto al que puede lanzar (multiclase: el de la tabla del mago con el nivel de lanzador conjunto, o el mejor de sus clases). */
+  nivelMaxLanzar: number | null;
   /** Límites de magia por clase (una entrada por clase; la principal primero). */
   magia: MagiaClase[];
   total: { general: number; habilidades: number; magia: number; rasgos: number };
@@ -99,6 +101,12 @@ export function calcularAvisos(p: Personaje, clases: Clase[] | null, razas: Raza
     trucos, conjuros, dotes, rasgosRaza, habilidades, idiomas, oficios, profesiones, subclase, elecciones, magia,
     limiteTrucos: m0?.limiteTrucos ?? null, limiteConjuros: m0?.limiteConjuros ?? null, conjurosAbierto: m0?.conjurosAbierto ?? false,
     limitePreparados: m0?.limitePreparados ?? null, nivelMaxConjuro: m0?.nivelMaxConjuro ?? null,
+    nivelMaxLanzar: (() => {
+      const nl = Math.min(20, nivelLanzador(p));
+      const fm = todas.length > 1 && nl > 0 ? filaClase(buscarClase(clases, 'Mago'), nl) : null;
+      const n = Math.max(0, ...magia.map((m) => m.nivelMaxConjuro ?? 0), fm ? num(fm['Nivel máximo de conjuro']) ?? 0 : 0);
+      return n || null;
+    })(),
     total: {
       general: idiomas + oficios + profesiones + (subclase ? 1 : 0) + elecciones,
       habilidades,
