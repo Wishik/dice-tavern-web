@@ -33,8 +33,8 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
   const [sel, setSel] = useState<string | null>(null);
   // La pestaña elegida (Jugadores / Combate) se recuerda al recargar la página.
   const claveVista = `dicetavern.vista.${id}`;
-  type Vista = 'combate' | 'tiradas';
-  const [vista, setVistaE] = useState<Vista>(() => { try { return localStorage.getItem(claveVista) === 'tiradas' ? 'tiradas' : 'combate'; } catch { return 'combate'; } });
+  type Vista = 'jugadores' | 'combate';
+  const [vista, setVistaE] = useState<Vista>(() => { try { return localStorage.getItem(claveVista) === 'combate' ? 'combate' : 'jugadores'; } catch { return 'jugadores'; } });
   const setVista = (v: Vista) => { setVistaE(v); try { localStorage.setItem(claveVista, v); } catch { /* sin almacenamiento */ } };
   const recargar = () => cargarPartida(id).then((x) => { setD(x); setError(''); }).catch((e) => setError(e.message));
   useEffect(() => { recargar(); backend.listar().then(setMios).catch(() => {}); }, [id]);
@@ -72,37 +72,9 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
     </section>
   );
 
-  // Máster: a la izquierda las tiradas, a la derecha el combate (o la hoja del jugador abierto). En el móvil, dos pestañas.
-  if (soyMaster) {
-    const combatePanel = <PanelCombate partida={partida} miembros={miembros} onRecargar={recargar} onAbrirPj={ancho ? setSel : onAbrirFicha} onExpulsar={expulsar} />;
-    return (
-      <div className={`pantalla-lista ${ancho ? 'partida-escritorio' : ''}`}>
-        <header className="barra">
-          <button className="btn enlace volver" onClick={onVolver}>‹ {L('Inicio', 'Главная')}</button>
-          <div className="titulo-ficha"><strong>{partida.nombre}</strong><span>{L('Eres el máster', 'Ты мастер')}</span></div>
-        </header>
-        <div className="partida-cuerpo">
-          <main className="contenido partida-lado">
-            {error && <p className="error">{error}</p>}
-            {!ancho && (
-              <div className="segmentado vista-partida">
-                <button className={vista === 'combate' ? 'activo' : ''} onClick={() => setVista('combate')}>⚔️ {L('Combate', 'Бой')}</button>
-                <button className={vista === 'tiradas' ? 'activo' : ''} onClick={() => setVista('tiradas')}>🎲 {L('Tiradas', 'Броски')}</button>
-              </div>
-            )}
-            {ancho || vista === 'tiradas' ? <HistorialTiradas partida={partida} /> : combatePanel}
-            {(ancho || vista === 'combate') && <>{tarjetaInvitacion}<PanelBotin /></>}
-          </main>
-          {ancho && (
-            <section className="partida-panel">
-              {sel ? <Ficha key={sel} id={sel} ajeno volverTexto={L('Volver al combate', 'Назад к бою')} onVolver={() => { setSel(null); recargar(); }} />
-                : <div className="contenido">{combatePanel}</div>}
-            </section>
-          )}
-        </div>
-      </div>
-    );
-  }
+  // Máster: a la izquierda los jugadores (como antes), a la derecha los combates con el historial de tiradas debajo.
+  const zonaCombate = soyMaster && <><PanelCombate partida={partida} miembros={miembros} onRecargar={recargar} onAbrirPj={ancho ? setSel : onAbrirFicha} /><HistorialTiradas partida={partida} /></>;
+  const verCombateMovil = soyMaster && !ancho && vista === 'combate';
 
   return (
     <div className={`pantalla-lista ${ancho ? 'partida-escritorio' : ''}`}>
@@ -113,6 +85,13 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
       <div className="partida-cuerpo">
       <main className="contenido partida-lado">
         {error && <p className="error">{error}</p>}
+        {soyMaster && !ancho && (
+          <div className="segmentado vista-partida">
+            <button className={vista === 'jugadores' ? 'activo' : ''} onClick={() => setVista('jugadores')}>👥 {L('Jugadores', 'Игроки')}</button>
+            <button className={vista === 'combate' ? 'activo' : ''} onClick={() => setVista('combate')}>⚔️ {L('Combate', 'Бой')}</button>
+          </div>
+        )}
+        {verCombateMovil ? zonaCombate : <>
         {tarjetaInvitacion}
 
         {yo && !soyMaster && (
@@ -146,21 +125,26 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
                     <span>@{m.alias}{m.usuario === usuario.id ? ` (${L('tú', 'ты')})` : ''}</span>
                     {m.pj && <span>{linea(m.pj)}</span>}
                     {m.pj && <span className="nivel">❤️ {m.pj.pg?.actual ?? 0}/{m.pj.pg?.max ?? 0}{m.pj.pg?.temp ? ` (+${m.pj.pg.temp} ${L('temp.', 'врем.')})` : ''} · 🛡 {m.pj.ca}{m.pj.pm?.max ? ` · 🔷 ${m.pj.pm.actual}/${m.pj.pm.max}` : ''}</span>}
-                    {m.pj && <ChipsEstados estados={m.pj.estados} agotamiento={m.pj.agotamiento} detalles={m.pj.estadosDetalle} />}
+                    {m.pj && !soyMaster && <ChipsEstados estados={m.pj.estados} agotamiento={m.pj.agotamiento} detalles={m.pj.estadosDetalle} />}
                     {m.pj && m.pj.pg?.max > 0 && <div className="barra-vida mini"><div style={{ width: `${Math.max(0, Math.min(100, (100 * m.pj.pg.actual) / m.pj.pg.max))}%` }} /></div>}
                   </div>
                 </button>
+                {soyMaster && !esMaster && <button className="btn peligro pequeno expulsar-lista" onClick={() => expulsar(m)}>{L('Expulsar', 'Исключить')}</button>}
               </div>
             );
           })}
         </div>
-        <div className="pie-partida">
+        {soyMaster && <p className="nota">{L('Como máster puedes abrir y editar la hoja de cualquier jugador.', 'Как мастер ты можешь открыть и править лист любого игрока.')}</p>}
+        {soyMaster && <PanelBotin />}
+        {!soyMaster && <div className="pie-partida">
           <button className="btn peligro" onClick={async () => { if (confirm(L('¿Salir de esta partida?', 'Выйти из этой партии?'))) { try { await quitarMiembro(partida.id, usuario.id); onVolver(); } catch (e) { alert((e as Error).message); } } }}>{L('Salir de la partida', 'Выйти из партии')}</button>
-        </div>
+        </div>}
+        </>}
       </main>
       {ancho && (
         <section className="partida-panel">
-          {sel ? <Ficha key={sel} id={sel} ajeno={miembros.find((m) => m.personaje === sel)?.usuario !== usuario.id} volverTexto={L('Cerrar', 'Закрыть')} onVolver={() => { setSel(null); recargar(); }} />
+          {sel ? <Ficha key={sel} id={sel} ajeno={miembros.find((m) => m.personaje === sel)?.usuario !== usuario.id} volverTexto={soyMaster ? L('Volver al combate', 'Назад к бою') : L('Cerrar', 'Закрыть')} onVolver={() => { setSel(null); recargar(); }} />
+            : soyMaster ? <div className="contenido">{zonaCombate}</div>
             : <div className="panel-vacio"><span>📜</span><p>{L('Elige tu personaje de la lista para abrir su hoja aquí.', 'Выбери своего персонажа слева, чтобы открыть его лист здесь.')}</p></div>}
         </section>
       )}

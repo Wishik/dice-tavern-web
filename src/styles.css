@@ -574,7 +574,7 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .cabecera-combate .ronda { font-size: 26px; font-family: var(--fuente-titulo); }
 .cabecera-combate .fila-botones { margin-top: 0; }
 .panel-combate > .nota { color: #bfa884; }
-.orden-combate { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; align-items: start; }
+.orden-combate { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; gap: 8px; max-width: 640px; }
 .fila-combate { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 10px; border-radius: var(--radio); background: linear-gradient(180deg, var(--pergamino), var(--pergamino-2)); color: var(--tinta); border: 1px solid #c9b182; }
 .fila-combate.grupo { background: linear-gradient(180deg, #f1d9cf, #e2c3b4); }
 .fila-combate.turno { outline: 3px solid var(--oro); box-shadow: 0 0 18px rgba(240,201,106,.45); }
@@ -780,3 +780,10 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .cabecera-combate .nombre-combate { flex: 1 1 100%; }
 .acciones-pj { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .mover-pj { width: auto; min-height: 30px; padding: 2px 6px; font-size: 13px; }
+/* Pestañas de combates */
+.pestanas-combate { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 2px solid rgba(240,201,106,.35); padding-bottom: 6px; }
+.pestanas-combate button { background: rgba(255,255,255,.06); border: 1px solid rgba(240,201,106,.35); color: var(--oro-claro); border-radius: 10px 10px 0 0; padding: 6px 12px; font-family: var(--fuente-titulo); cursor: pointer; }
+.pestanas-combate button.activo { background: var(--oro); color: var(--tinta); border-color: var(--oro); }
+.pestanas-combate button.nueva { font-size: 18px; padding: 4px 12px; }
+.expulsar-lista { position: absolute; right: 8px; top: 8px; }
+.partida-panel .historial-partida { margin-top: 16px; max-width: 640px; }

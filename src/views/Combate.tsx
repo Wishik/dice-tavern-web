@@ -72,7 +72,7 @@ const deLista = (l: CombateUno[], tiradas?: CombateT['tiradas']): CombateT => ({
 const combateDe = (l: CombateUno[], pj: string) => l.find((k) => k.pjs?.includes(pj))?.id ?? PRINCIPAL;
 
 /** Combates del máster (uno o varios a la vez, uno al lado de otro). */
-export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj, onExpulsar }: { partida: Partida; miembros: Miembro[]; onRecargar: () => void; onAbrirPj?: (pj: string) => void; onExpulsar?: (m: Miembro) => void }) {
+export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { partida: Partida; miembros: Miembro[]; onRecargar: () => void; onAbrirPj?: (pj: string) => void }) {
   const monstruos = useDatos<Monstruo[]>('monstruos');
   const [c, setC] = useState<CombateT>(() => cacheCombate.get(partida.id) ?? partida.combate ?? { ronda: 1, turno: null, enemigos: [] });
   useEffect(() => { cacheCombate.set(partida.id, c); }, [c, partida.id]);
@@ -90,7 +90,6 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj, onExpul
   const lista = aLista(c);
   const setLista = (f: (l: CombateUno[]) => CombateUno[]) => setC((x) => deLista(f(aLista(x)), x.tiradas));
   const jugadores = miembros.filter((m) => m.usuario !== partida.master && m.pj && m.personaje);
-  const sinPj = miembros.filter((m) => m.usuario !== partida.master && !(m.pj && m.personaje));
   const jugador = async (m: Miembro, cambios: Record<string, unknown>) => {
     try { await cambiarJugador(m.personaje!, cambios); onRecargar(); } catch (e) { setError((e as Error).message); }
   };
@@ -98,37 +97,38 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj, onExpul
     const sin = (k.pjs ?? []).filter((x) => x !== pj);
     return { ...k, pjs: k.id === destino && destino !== PRINCIPAL ? [...sin, pj] : sin };
   }));
-  const nuevo = () => setLista((l) => [...l, { id: uid(), nombre: `${L('Combate', 'Бой')} ${l.length + 1}`, ronda: 1, turno: null, enemigos: [], pjs: [] }]);
+  const [ver, setVer] = useState(PRINCIPAL);
+  const activo = lista.find((k) => k.id === ver) ?? lista[0];
+  const nuevo = () => { const id = uid(); setLista((l) => [...l, { id, nombre: `${L('Combate', 'Бой')} ${l.length + 1}`, ronda: 1, turno: null, enemigos: [], pjs: [] }]); setVer(id); };
   const nombres = lista.map((k, i) => ({ id: k.id, nombre: k.nombre || `${L('Combate', 'Бой')} ${i + 1}` }));
 
   return (
     <div className="panel-combate">
       {error && <p className="error">{error}</p>}
-      <div className={`combates ${lista.length > 1 ? 'varios' : ''}`}>
-        {lista.map((k, i) => (
+      <div className="pestanas-combate" role="tablist">
+        {nombres.map((x) => <button key={x.id} role="tab" className={x.id === activo.id ? 'activo' : ''} onClick={() => setVer(x.id)}>⚔️ {x.nombre}</button>)}
+        <button className="nueva" onClick={nuevo} title={L('Otro combate a la vez', 'Ещё один бой одновременно')}>＋</button>
+      </div>
+      <div className="combates">
+        {[activo].map((k) => { const i = lista.indexOf(k); return (
           <UnCombate key={k.id} k={k} nombre={nombres[i].nombre} otros={nombres.filter((x) => x.id !== k.id)} monstruos={monstruos}
             jugadores={jugadores.filter((m) => combateDe(lista, m.personaje!) === k.id)}
             set={(f) => setLista((l) => l.map((x) => (x.id === k.id ? f(x) : x)))}
             quitar={k.id === PRINCIPAL ? undefined : () => setLista((l) => l.filter((x) => x.id !== k.id))}
-            jugador={jugador} mover={mover} onRecargar={onRecargar} onAbrirPj={onAbrirPj} onExpulsar={onExpulsar} />
-        ))}
+            jugador={jugador} mover={mover} onRecargar={onRecargar} onAbrirPj={onAbrirPj} />
+        ); })}
       </div>
-      <div className="fila-botones pie-combate"><button className="btn" onClick={nuevo}>⚔️ ＋ {L('Otro combate a la vez', 'Ещё один бой одновременно')}</button></div>
-      {sinPj.length > 0 && <>
-        <h3 className="titulo-fuera">{L('Jugadores sin personaje', 'Игроки без персонажа')}</h3>
-        <ul className="sin-pj">{sinPj.map((m) => <li key={m.usuario}><span>@{m.alias}</span>{onExpulsar && <button className="btn peligro pequeno" onClick={() => onExpulsar(m)}>{L('Expulsar', 'Исключить')}</button>}</li>)}</ul>
-      </>}
       <p className="nota">{L('Los jugadores tiran iniciativa en su hoja (Atributos → Iniciativa) o la tiras tú con 🎲. Con iniciativa 0 no entran en el combate.', 'Игроки бросают инициативу у себя в листе (Характеристики → Инициатива) или ты бросаешь за них через 🎲. С инициативой 0 они не участвуют в бою.')}</p>
     </div>
   );
 }
 
 /** Un combate: orden de iniciativa de sus jugadores y enemigos, vida y estados de cada uno. */
-function UnCombate({ k, nombre, otros, monstruos, jugadores, set, quitar, jugador, mover, onRecargar, onAbrirPj, onExpulsar }: {
+function UnCombate({ k, nombre, otros, monstruos, jugadores, set, quitar, jugador, mover, onRecargar, onAbrirPj }: {
   k: CombateUno; nombre: string; otros: { id: string; nombre: string }[]; monstruos: Monstruo[] | null; jugadores: Miembro[];
   set: (f: (k: CombateUno) => CombateUno) => void; quitar?: () => void;
   jugador: (m: Miembro, cambios: Record<string, unknown>) => Promise<void>; mover: (pj: string, destino: string) => void;
-  onRecargar: () => void; onAbrirPj?: (pj: string) => void; onExpulsar?: (m: Miembro) => void;
+  onRecargar: () => void; onAbrirPj?: (pj: string) => void;
 }) {
   const [anadir, setAnadir] = useState(false);
   const [ficha, setFicha] = useState<{ m: Monstruo; quien: string } | null>(null);
@@ -202,7 +202,6 @@ function UnCombate({ k, nombre, otros, monstruos, jugadores, set, quitar, jugado
               <option value="">{L('Mover a…', 'Перенести в…')}</option>
               {otros.map((o) => <option key={o.id} value={o.id}>{o.nombre}</option>)}
             </select>}
-            {onExpulsar && <button className="btn peligro pequeno expulsar" onClick={() => onExpulsar(f.m)}>{L('Expulsar', 'Исключить')}</button>}
           </div>
         </div>
       ) : (
