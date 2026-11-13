@@ -116,4 +116,4 @@ export const dotesDeClases = (p: Personaje, clase: Clase | null | undefined) =>
   clasesDe(p).reduce((s, c) => s + (datosClase(c.clase, clase)?.tabla.filter((r) => r.nivel <= c.nivel && /Mejora de característica|Don épico/.test(r.rasgos)).length ?? 0), 0);
 
 /** Para listas y la partida (sin traducir): «Pícaro» o «Pícaro / Guerrero». */
-export const textoClasesBreve = (p: Personaje) => (p.multiclase?.length ? [p.clase, ...p.multiclase.map((m) => m.clase)].join(' / ') : p.clase);
+export const textoClasesBreve = (p: Personaje) => (p.multiclase?.length ? clasesDe(p).map((c) => `${c.clase} ${c.nivel}`).join(' / ') : p.clase);

@@ -53,4 +53,4 @@ export const RU_HABILIDADES: Record<string, string> = {
 export const RU_MONEDAS: Record<string, string> = { Mithril: 'Мифрил', Platino: 'Платина', Oro: 'Золото', Electro: 'Электрум', Plata: 'Серебро', Cobre: 'Медь' };
 
 /** Traduce «Pícaro / Guerrero» clase por clase. */
-export const trClases = (s: string) => s.split(' / ').map((c) => T(RU_CLASES, c)).join(' / ');
+export const trClases = (s: string) => s.split(' / ').map((c) => { const m = c.match(/^(.*?)(\s\d+)?$/)!; return T(RU_CLASES, m[1]) + (m[2] ?? ''); }).join(' / ');

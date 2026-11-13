@@ -344,7 +344,9 @@ function Lanzar({ texto: completo, nivel, nombre, atr }: { texto: string; nivel:
   const { p, upd, avisos, ajeno } = useFicha();
   const { tirar, tirarD20 } = useDados();
   const at = ataqueCon(p, atr), cd = cdCon(p, atr);
-  const maxEsp = Math.max(nivel, Math.min(9, avisos.nivelMaxLanzar ?? avisos.nivelMaxConjuro ?? 9));
+  // Se puede elegir cualquier nivel hasta 9; los que pasan de tu nivel máximo salen marcados y piden confirmación.
+  const maxNormal = Math.max(nivel, Math.min(9, avisos.nivelMaxLanzar ?? avisos.nivelMaxConjuro ?? 9));
+  const maxEsp = 9;
   const [espacio, setEspacio] = useState(nivel);
   const [lanzado, setLanzado] = useState('');
   const pideAtaque = /tirada de ataque|ataque de conjuro/i.test(texto);
@@ -364,6 +366,7 @@ function Lanzar({ texto: completo, nivel, nombre, atr }: { texto: string; nivel:
   const mejoraTruco = nivel === 0 && /mejora de truco/i.test(texto) && multiplicadorTruco(p.nivel) > 1;
   const conMana = p.pm.max > 0;
   const lanzar = () => {
+    if (espacio > maxNormal && !confirm(L(`Ahora tu nivel máximo de conjuro es ${maxNormal}. ¿Lanzarlo igualmente a nivel ${espacio}?`, `Сейчас твой максимальный уровень заклинаний — ${maxNormal}. Всё равно наложить на ${espacio} уровне?`))) return;
     if (conMana && p.pm.actual < espacio) { alert(L(`No te queda maná suficiente: necesitas ${espacio} y tienes ${p.pm.actual}.`, `Не хватает маны: нужно ${espacio}, у тебя ${p.pm.actual}.`)); return; }
     if (conMana) upd((x) => { x.pm.actual = Math.max(0, x.pm.actual - espacio); });
     setLanzado(conMana ? L(`Lanzado a nivel ${espacio}: −${espacio} maná (te quedan ${p.pm.actual - espacio}).`, `Наложено на ${espacio} уровне: −${espacio} маны (осталось ${p.pm.actual - espacio}).`) : L(`Lanzado a nivel ${espacio}.`, `Наложено на ${espacio} уровне.`));
@@ -376,7 +379,7 @@ function Lanzar({ texto: completo, nivel, nombre, atr }: { texto: string; nivel:
         <div className="fila-lanzar">
           <label className="etiqueta espacio-conjuro"><span>{L('Lanzar a nivel', 'Накладывать на уровне')}</span>
             <select className="campo" value={espacio} onChange={(e) => { setEspacio(+e.target.value); setLanzado(''); }}>
-              {Array.from({ length: maxEsp - nivel + 1 }, (_, k) => nivel + k).map((n) => <option key={n} value={n}>{L('Nivel', 'Уровень')} {n}{n === nivel ? L(' (base)', ' (базовый)') : ''}{conMana ? ` · ${n} ${L('maná', 'маны')}` : ''}</option>)}
+              {Array.from({ length: maxEsp - nivel + 1 }, (_, k) => nivel + k).map((n) => <option key={n} value={n}>{L('Nivel', 'Уровень')} {n}{n === nivel ? L(' (base)', ' (базовый)') : ''}{conMana ? ` · ${n} ${L('maná', 'маны')}` : ''}{n > maxNormal ? L(' · por encima de tu nivel', ' · выше твоего уровня') : ''}</option>)}
             </select>
           </label>
           {!ajeno && <button className="btn primario" onClick={lanzar}>✨ {L('Lanzar', 'Наложить')}{conMana ? ` (−${espacio} ${L('maná', 'маны')})` : ''}</button>}

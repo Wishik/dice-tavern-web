@@ -19,7 +19,7 @@ describe('multiclase', () => {
     expect(clasesDe(p)).toEqual([{ clase: 'Pícaro', subclase: '', nivel: 3 }, { clase: 'Guerrero', subclase: '', nivel: 1 }]);
     cambiarNivel(p, 5); asignarNivel(p, 'Guerrero');
     expect(clasesDe(p)[1].nivel).toBe(2);
-    expect(textoClasesBreve(p)).toBe('Pícaro / Guerrero');
+    expect(textoClasesBreve(p)).toBe('Pícaro 3 / Guerrero 2');
     cambiarNivel(p, 2); // bajar: la principal se queda al menos con 1
     expect(clasesDe(p)).toEqual([{ clase: 'Pícaro', subclase: '', nivel: 1 }, { clase: 'Guerrero', subclase: '', nivel: 1 }]);
     ajustarMulticlase(p);

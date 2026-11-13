@@ -27,6 +27,13 @@ export interface Backend {
   borrar(id: string): Promise<void>;
 }
 
+/** «Mago 5 / Clérigo 3» si hay multiclase (el nivel de la principal es el total menos el resto). */
+const claseResumen = (r: Record<string, unknown>) => {
+  const clase = (r.clase as string) ?? '', multi = (r.multiclase as { clase: string; nivel: number }[] | null) ?? [];
+  if (!multi.length) return clase;
+  const total = (r.nivel as number) ?? 1;
+  return [`${clase} ${total - multi.reduce((s, m) => s + (m.nivel || 0), 0)}`, ...multi.map((m) => `${m.clase} ${m.nivel}`)].join(' / ');
+};
 const resumen = (p: Personaje): Resumen => ({ id: p.id, nombre: p.nombre, raza: p.raza, clase: textoClasesBreve(p), nivel: p.nivel, foto: p.foto, actualizado: p.actualizado, bloqueado: !!p.bloqueado });
 
 /** Campos de la hoja que el máster puede cambiar (igual que la lista de la función master_guardar en schema.sql). */
@@ -87,9 +94,9 @@ function backendNube(sb: SupabaseClient): Backend {
     async listar() {
       // Solo los míos: con las partidas también se ven los personajes de los compañeros.
       const { data: s } = await sb.auth.getSession();
-      const { data, error } = await sb.from('personajes').select('id, datos->nombre, datos->raza, datos->clase, datos->nivel, datos->foto, datos->bloqueado, actualizado').eq('propietario', s.session?.user.id ?? '').order('actualizado', { ascending: false });
+      const { data, error } = await sb.from('personajes').select('id, datos->nombre, datos->raza, datos->clase, datos->multiclase, datos->nivel, datos->foto, datos->bloqueado, actualizado').eq('propietario', s.session?.user.id ?? '').order('actualizado', { ascending: false });
       if (error) throw new Error(error.message);
-      return (data ?? []).map((r: Record<string, unknown>) => ({ id: r.id as string, nombre: (r.nombre as string) ?? '', raza: (r.raza as string) ?? '', clase: (r.clase as string) ?? '', nivel: (r.nivel as number) ?? 1, foto: (r.foto as string) ?? '', actualizado: r.actualizado as string, bloqueado: !!r.bloqueado }));
+      return (data ?? []).map((r: Record<string, unknown>) => ({ id: r.id as string, nombre: (r.nombre as string) ?? '', raza: (r.raza as string) ?? '', clase: claseResumen(r), nivel: (r.nivel as number) ?? 1, foto: (r.foto as string) ?? '', actualizado: r.actualizado as string, bloqueado: !!r.bloqueado }));
     },
     async cargar(id) {
       const { data, error } = await sb.from('personajes').select('datos').eq('id', id).maybeSingle();
