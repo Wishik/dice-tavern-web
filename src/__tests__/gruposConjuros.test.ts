@@ -25,3 +25,17 @@ describe('grupos de conjuros', () => {
     expect(atributoGrupo(p, { id: 'clase:Mago', tipo: 'clase', clase: 'Mago' }, ['Mago'], null)).toBe('CAR');
   });
 });
+
+import { sincronizarConjuros } from '../conjurosRasgos';
+describe('conjuros de subclase', () => {
+  it('el brujo celestial de nivel 5 conoce los de nivel 3 y 5, agrupados aparte', () => {
+    const p = nuevoPersonaje('x'); p.clase = 'Brujo'; p.subclase = 'Patrón celestial'; p.nivel = 5;
+    const todos = [{ nombre: 'Luz', nivel: 0 }, { nombre: 'Auxilio', nivel: 2 }, { nombre: 'Revivir', nivel: 3 }, { nombre: 'Muro de fuego', nivel: 4 }] as never;
+    sincronizarConjuros(p, null, todos);
+    const n = p.conjuros.map((c) => c.nombre);
+    expect(n).toContain('Luz'); expect(n).toContain('Revivir'); expect(n).not.toContain('Muro de fuego');
+    expect(p.conjuros.every((c) => c.adicional)).toBe(true);
+    expect(gruposOtros(p)[0].g.tipo).toBe('subclase');
+    expect(atributoGrupo(p, gruposOtros(p)[0].g, ['Brujo'], null)).toBe('CAR');
+  });
+});

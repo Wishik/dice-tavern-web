@@ -11,7 +11,7 @@ import { bonoAtaqueConjuro, bonoCdConjuro } from './bonos';
  * los raciales, los de cada dote, las invocaciones de brujo y los adicionales de la lista de una clase.
  * Cada grupo tiene su característica de conjuros (automática, se puede cambiar), su ataque y su CD.
  */
-export type TipoGrupo = 'clase' | 'raza' | 'dote' | 'invocacion' | 'lista' | 'otros';
+export type TipoGrupo = 'clase' | 'subclase' | 'raza' | 'dote' | 'invocacion' | 'lista' | 'otros';
 export interface GrupoConjuros { id: string; tipo: TipoGrupo; clase?: string; rasgo?: string }
 
 const MENTALES: Atributo[] = ['INT', 'SAB', 'CAR'];
@@ -24,6 +24,7 @@ export function grupoDe(p: Personaje, c: ConjuroPersonaje): GrupoConjuros {
   if (!c.adicional) { const clase = claseDeConjuro(p, c); return { id: `clase:${clase}`, tipo: 'clase', clase }; }
   if (c.origen) {
     const f = fuenteDe(c.origen);
+    if (f?.subclase) return { id: `sub:${f.rasgo}`, tipo: 'subclase', clase: f.clase, rasgo: f.rasgo };
     if (f?.invocacion) return { id: 'invocacion', tipo: 'invocacion', clase: 'Brujo' };
     if (f?.dote) return { id: `dote:${f.rasgo}`, tipo: 'dote', rasgo: f.rasgo };
     if (f) return { id: `raza:${f.rasgo}`, tipo: 'raza', rasgo: f.rasgo };
@@ -59,7 +60,7 @@ const mejorMental = (p: Personaje): Atributo => [...MENTALES].sort((a, b) => car
 /** Característica automática del grupo (sin lo que el jugador haya cambiado a mano). */
 export function atributoAuto(p: Personaje, g: GrupoConjuros, lanzadoras: string[], razas: Razas | null): Atributo | '' {
   switch (g.tipo) {
-    case 'clase': case 'lista': case 'invocacion': return CARACTERISTICA_CONJUROS[g.clase ?? ''] ?? '';
+    case 'clase': case 'subclase': case 'lista': case 'invocacion': return CARACTERISTICA_CONJUROS[g.clase ?? ''] ?? '';
     case 'raza': return atributoLanzador(p, lanzadoras) || atributoDeRasgo(textoRasgo(p, razas, g.rasgo ?? '')) || mejorMental(p);
     default: return atributoLanzador(p, lanzadoras) || mejorMental(p);
   }
@@ -80,7 +81,7 @@ export function fijarAtributoGrupo(x: Personaje, g: GrupoConjuros, a: Atributo |
 export const cdCon = (p: Personaje, a: Atributo | '') => (a ? 8 + bonoCompetencia(nivelTotal(p)) + modificador(car(p, a)) + bonoCdConjuro(p) : null);
 export const ataqueCon = (p: Personaje, a: Atributo | '') => (a ? bonoCompetencia(nivelTotal(p)) + modificador(car(p, a)) + bonoAtaqueConjuro(p) : null);
 
-const ORDEN: TipoGrupo[] = ['raza', 'dote', 'invocacion', 'lista', 'otros'];
+const ORDEN: TipoGrupo[] = ['subclase', 'raza', 'dote', 'invocacion', 'lista', 'otros'];
 /** Grupos de «Otros conjuros» que tienen algún conjuro, en orden: raciales, dotes, invocaciones, listas de clase, sin grupo. */
 export function gruposOtros(p: Personaje): { g: GrupoConjuros; idx: number[] }[] {
   const mapa = new Map<string, { g: GrupoConjuros; idx: number[] }>();

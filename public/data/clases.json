@@ -1039,7 +1039,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del filo maléfico",
-      "texto": "La magia de tu patrón garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de brujo especificado en la tabla “Conjuros del filo maléfico”, a partir de entonces siempre conocerás esos conjuros y no contarán para el límite de conjuros conocidos.\nConjuros del filo maléfico Nivel de brujo\nConjuros\nVigor arcano, Maleficio, Arma mágica, Escudo, Castigo furioso\nConjurar descarga de proyectiles, Disipar magia\nLibertad de movimiento, Castigo abrumador\nAnimar objetos, Golpe de viento acerado"
+      "texto": "La magia de tu patrón garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de brujo especificado en la tabla “Conjuros del filo maléfico”, a partir de entonces siempre conocerás esos conjuros y no contarán para el límite de conjuros conocidos.\n■ Conjuros del filo maléfico\n• Nivel de brujo 3. Vigor arcano, Maleficio, Arma mágica, Escudo, Castigo furioso\n• Nivel de brujo 5. Conjurar descarga de proyectiles, Disipar magia\n• Nivel de brujo 7. Libertad de movimiento, Castigo abrumador\n• Nivel de brujo 9. Animar objetos, Golpe de viento acerado"
      },
      {
       "nivel": 3,
@@ -1070,7 +1070,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del celestial",
-      "texto": "La magia de tu patrón garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de brujo especificado en la tabla “Conjuros del celestial”, a partir de entonces siempre conocerás esos conjuros y no contarán para el límite de conjuros conocidos.\nConjuros del celestial Nivel de brujo\nConjuros\nAuxilio, Curar heridas, Llama sagrada, Luz, Restablecimiento menor, Saeta guía\nLuz del día, Revivir\nGuardián de la fe, Muro de fuego\nInvocar celestial, Restablecimiento mayor"
+      "texto": "La magia de tu patrón garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de brujo especificado en la tabla “Conjuros del celestial”, a partir de entonces siempre conocerás esos conjuros y no contarán para el límite de conjuros conocidos.\n■ Conjuros del celestial\n• Nivel de brujo 3. Auxilio, Curar heridas, Llama sagrada, Luz, Restablecimiento menor, Saeta guía\n• Nivel de brujo 5. Luz del día, Revivir\n• Nivel de brujo 7. Guardián de la fe, Muro de fuego\n• Nivel de brujo 9. Invocar celestial, Restablecimiento mayor"
      },
      {
       "nivel": 3,
@@ -1101,7 +1101,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del señor feérico",
-      "texto": "La magia de tu patrón garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de brujo especificado en la tabla “Conjuros del señor feérico”, a partir de entonces siempre conocerás esos conjuros y no contarán para el límite de conjuros conocidos.\nConjuros del señor feérico Nivel de brujo\nConjuros\nCalmar emociones, Dormir, Fuego feérico, Fuerza fantasmal, Paso brumoso\nCrecimiento vegetal, Desplazamiento\nDominar bestia, Invisibilidad mejorada\nApariencia, Dominar persona"
+      "texto": "La magia de tu patrón garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de brujo especificado en la tabla “Conjuros del señor feérico”, a partir de entonces siempre conocerás esos conjuros y no contarán para el límite de conjuros conocidos.\n■ Conjuros del señor feérico\n• Nivel de brujo 3. Calmar emociones, Dormir, Fuego feérico, Fuerza fantasmal, Paso brumoso\n• Nivel de brujo 5. Crecimiento vegetal, Desplazamiento\n• Nivel de brujo 7. Dominar bestia, Invisibilidad mejorada\n• Nivel de brujo 9. Apariencia, Dominar persona"
      },
      {
       "nivel": 3,
@@ -1137,7 +1137,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del infernal",
-      "texto": "La magia de tu patrón garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de brujo especificado en la tabla “Conjuros del infernal”, a partir de entonces siempre conocerás esos conjuros y no contarán para el límite de conjuros conocidos.\nConjuros del infernal Nivel de brujo\nConjuros\nManos ardientes, Orden imperiosa, Rayo abrasador, Sugestión\nBola de fuego, Nube apestosa\nEscudo de fuego, Muro de fuego\nGeas, Plaga de Insectos"
+      "texto": "La magia de tu patrón garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de brujo especificado en la tabla “Conjuros del infernal”, a partir de entonces siempre conocerás esos conjuros y no contarán para el límite de conjuros conocidos.\n■ Conjuros del infernal\n• Nivel de brujo 3. Manos ardientes, Orden imperiosa, Rayo abrasador, Sugestión\n• Nivel de brujo 5. Bola de fuego, Nube apestosa\n• Nivel de brujo 7. Escudo de fuego, Muro de fuego\n• Nivel de brujo 9. Geas, Plaga de insectos"
      },
      {
       "nivel": 6,
@@ -1163,7 +1163,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del primigenio",
-      "texto": "La magia de tu patrón garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de brujo especificado en la tabla “Conjuros del primigenio”, a partir de entonces siempre conocerás esos conjuros y no contarán para el límite de conjuros conocidos.\nConjuros del primigenio Nivel de brujo\nConjuros\nDetectar pensamientos, Fuerza fantasmal, Risa horrible de Tasha, Susurros discordantes\nClarividencia, Hambre de Hadar\nConfusión, Invocar aberración\nAlterar los recuerdos, Telequinesis"
+      "texto": "La magia de tu patrón garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de brujo especificado en la tabla “Conjuros del primigenio”, a partir de entonces siempre conocerás esos conjuros y no contarán para el límite de conjuros conocidos.\n■ Conjuros del primigenio\n• Nivel de brujo 3. Detectar pensamientos, Fuerza fantasmal, Risa horrible de Tasha, Susurros discordantes\n• Nivel de brujo 5. Clarividencia, Hambre de Hadar\n• Nivel de brujo 7. Confusión, Invocar aberración\n• Nivel de brujo 9. Alterar los recuerdos, Telequinesis"
      },
      {
       "nivel": 3,
@@ -1476,7 +1476,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del dominio de la guerra",
-      "texto": "Tu conexión con este dominio divino garantiza que siempre tengas ciertos conjuros conocidos. Cuando alcances un nivel de clérigo especificado en la tabla “Conjuros del dominio de la guerra”, a partir de entonces conocerás los conjuros que se indican. Estos conjuros no cuentan para el límite de conjuros conocidos.\nConjuros del dominio de la guerra Nivel de clérigo\nConjuros\nArma espiritual, arma mágica, escudo de fe, saeta guía\nEspíritus guardianes, Manto del cruzado\nEscudo de fuego, Libertad de movimiento\nGolpe de viento acerado, Inmovilizar monstruo"
+      "texto": "Tu conexión con este dominio divino garantiza que siempre tengas ciertos conjuros conocidos. Cuando alcances un nivel de clérigo especificado en la tabla “Conjuros del dominio de la guerra”, a partir de entonces conocerás los conjuros que se indican. Estos conjuros no cuentan para el límite de conjuros conocidos.\n■ Conjuros del dominio de la guerra\n• Nivel de clérigo 3. Arma espiritual, Arma mágica, Escudo de fe, Saeta guía\n• Nivel de clérigo 5. Espíritus guardianes, Manto del cruzado\n• Nivel de clérigo 7. Escudo de fuego, Libertad de movimiento\n• Nivel de clérigo 9. Golpe de viento acerado, Inmovilizar monstruo"
      },
      {
       "nivel": 3,
@@ -1507,7 +1507,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del dominio de la luz",
-      "texto": "Tu conexión con este dominio divino garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de clérigo especificado en la tabla “Conjuros del dominio de la luz”, a partir de entonces conocerás los conjuros que se indican. Estos conjuros no cuentan para el límite de conjuros conocidos.\nConjuros del dominio de la luz Nivel de clérigo\nConjuros\nFuego feérico, Manos ardientes, Rayo abrasador, Ver invisibilidad\nBola de fuego, Luz del día\nMuro de fuego, Ojo arcano\nEscudriñar, Golpe flamígero"
+      "texto": "Tu conexión con este dominio divino garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de clérigo especificado en la tabla “Conjuros del dominio de la luz”, a partir de entonces conocerás los conjuros que se indican. Estos conjuros no cuentan para el límite de conjuros conocidos.\n■ Conjuros del dominio de la luz\n• Nivel de clérigo 3. Fuego feérico, Manos ardientes, Rayo abrasador, Ver invisibilidad\n• Nivel de clérigo 5. Bola de fuego, Luz del día\n• Nivel de clérigo 7. Muro de fuego, Ojo arcano\n• Nivel de clérigo 9. Escudriñar, Golpe flamígero"
      },
      {
       "nivel": 3,
@@ -1538,7 +1538,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del dominio de la vida",
-      "texto": "Tu conexión con este dominio divino garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de clérigo especificado en la tabla “Conjuros del dominio de la vida”, a partir de entonces conocerás los conjuros que se indican. Estos conjuros no cuentan para el límite de conjuros conocidos.\nConjuros del dominio de la vida Nivel de clérigo\nConjuros\nAuxilio, Bendición, Curar heridas, Restablecimiento menor\nPalabra de curación en masa, Revivir\nAura de vida, Guarda contra la muerte\nCurar heridas en masa, Restablecimiento mayor"
+      "texto": "Tu conexión con este dominio divino garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de clérigo especificado en la tabla “Conjuros del dominio de la vida”, a partir de entonces conocerás los conjuros que se indican. Estos conjuros no cuentan para el límite de conjuros conocidos.\n■ Conjuros del dominio de la vida\n• Nivel de clérigo 3. Auxilio, Bendición, Curar heridas, Restablecimiento menor\n• Nivel de clérigo 5. Palabra de curación en masa, Revivir\n• Nivel de clérigo 7. Aura de vida, Guarda contra la muerte\n• Nivel de clérigo 9. Curar heridas en masa, Restablecimiento mayor"
      },
      {
       "nivel": 3,
@@ -1574,7 +1574,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del dominio del engaño",
-      "texto": "Tu conexión con este dominio divino garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de clérigo especificado en la tabla “Conjuros del dominio del engaño”, a partir de entonces conocerás los conjuros que se indican. Estos conjuros no cuentan para el límite de conjuros conocidos.\nConjuros del dominio del engaño Nivel de clérigo\nConjuros\nDisfrazarse, Hechizar persona, Invisibilidad, Pasar sin rastro\nIndetectable, Patrón hipnótico\nConfusión, Puerta dimensional\nAlterar los recuerdos, Dominar persona"
+      "texto": "Tu conexión con este dominio divino garantiza que siempre tengas ciertos conjuros conocidos cuando alcances un nivel de clérigo especificado en la tabla “Conjuros del dominio del engaño”, a partir de entonces conocerás los conjuros que se indican. Estos conjuros no cuentan para el límite de conjuros conocidos.\n■ Conjuros del dominio del engaño\n• Nivel de clérigo 3. Disfrazarse, Hechizar persona, Invisibilidad, Pasar sin rastro\n• Nivel de clérigo 5. Indetectable, Patrón hipnótico\n• Nivel de clérigo 7. Confusión, Puerta dimensional\n• Nivel de clérigo 9. Alterar los recuerdos, Dominar persona"
      },
      {
       "nivel": 3,
@@ -1885,7 +1885,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del círculo de la luna",
-      "texto": "Cuando alcances un nivel de druida especificado en la tabla “Conjuros del círculo de la luna”, aprendes los conjuros indicados (no cuentan para el límite de con-\njuros conocidos). Además, puedes lanzar los conjuros de este rasgo mientras utilizas tu Forma salvaje.\nConjuros del círculo de la luna Nivel de druida\nConjuros\nCurar heridas, Rayo de luna, Voluta estelar\nConjurar animales\nFuente de luz lunar\nCurar heridas en masa"
+      "texto": "Cuando alcances un nivel de druida especificado en la tabla “Conjuros del círculo de la luna”, aprendes los conjuros indicados (no cuentan para el límite de con-\n■ Conjuros del círculo de la luna\n• Nivel de druida 3. Curar heridas, Rayo de luna, Voluta estelar\n• Nivel de druida 5. Conjurar animales\n• Nivel de druida 7. Fuente de luz lunar\n• Nivel de druida 9. Curar heridas en masa"
      },
      {
       "nivel": 3,
@@ -1921,7 +1921,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del círculo de la tierra",
-      "texto": "Tras finalizar un descanso largo, elige un tipo de terreno: árido, polar, templado o tropical. Conocerás los conjuros del terreno elegido que se mencionan para tu nivel de druida sin que estos cuenten para tu límite de conjuros conocidos.\nConjuros de terreno árido Nivel de druida\nConjuros\nContorno borroso, Descarga de fuego, Manos ardientes\nBola de fuego\nMarchitar\nMuro de piedra\nConjuros de terreno polar Nivel de druida\nConjuros\nInmovilizar personas, Nube de oscurecimiento, Rayo de escarcha\nTormenta de aguanieve\nTormenta de hielo\nCono de frío\nConjuros de terreno templado Nivel de druida\nConjuros\nAgarre electrizante, Dormir, Paso brumoso\nRelámpago\nLibertad de movimiento\nPaso arbóreo\nConjuros de terreno tropical Nivel de druida\nConjuros\nRayo nauseabundo, Salpicadura ácida, Telaraña\nNube apestosa\nPolimorfar\nPlaga de insectos"
+      "texto": "Tras finalizar un descanso largo, elige un tipo de terreno: árido, polar, templado o tropical. Conocerás los conjuros del terreno elegido que se mencionan para tu nivel de druida sin que estos cuenten para tu límite de conjuros conocidos.\n■ Conjuros de terreno árido\n• Nivel de druida 3. Contorno borroso, Descarga de fuego, Manos ardientes\n• Nivel de druida 5. Bola de fuego\n• Nivel de druida 7. Marchitar\n• Nivel de druida 9. Muro de piedra\n■ Conjuros de terreno polar\n• Nivel de druida 3. Inmovilizar persona, Nube de oscurecimiento, Rayo de escarcha\n• Nivel de druida 5. Tormenta de aguanieve\n• Nivel de druida 7. Tormenta de hielo\n• Nivel de druida 9. Cono de frío\n■ Conjuros de terreno templado\n• Nivel de druida 3. Agarre electrizante, Dormir, Paso brumoso\n• Nivel de druida 5. Relámpago\n• Nivel de druida 7. Libertad de movimiento\n• Nivel de druida 9. Paso arbóreo\n■ Conjuros de terreno tropical\n• Nivel de druida 3. Rayo nauseabundo, Salpicadura ácida, Telaraña\n• Nivel de druida 5. Nube apestosa\n• Nivel de druida 7. Polimorfar\n• Nivel de druida 9. Plaga de insectos"
      },
      {
       "nivel": 6,
@@ -1978,7 +1978,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del círculo del mar",
-      "texto": "Cuando alcances un nivel de druida especificado en la tabla “Conjuros del círculo del mar”, aprendes los conjuros indicados (no cuentan para el límite de conjuros conocidos).\nConjuros del círculo del mar Nivel de druida\nConjuros\nHacer añicos, Nube de oscurecimiento, Ola atronadora, Ráfaga de viento, Rayo de escarcha\nRelámpago, Respirar bajo el agua\nControlar agua, Tormenta de hielo\nConjurar elemental, Inmovilizar monstruo"
+      "texto": "Cuando alcances un nivel de druida especificado en la tabla “Conjuros del círculo del mar”, aprendes los conjuros indicados (no cuentan para el límite de conjuros conocidos).\n■ Conjuros del círculo del mar\n• Nivel de druida 3. Hacer añicos, Nube de oscurecimiento, Ola atronadora, Ráfaga de viento, Rayo de escarcha\n• Nivel de druida 5. Relámpago, Respirar bajo el agua\n• Nivel de druida 7. Controlar agua, Tormenta de hielo\n• Nivel de druida 9. Conjurar elemental, Inmovilizar monstruo"
      },
      {
       "nivel": 3,
@@ -2293,7 +2293,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros de acechador en la penumbra",
-      "texto": "Cuando alcances un nivel de explorador especificado en la tabla “Conjuros de acechador en la penumbra”, aprenderás los conjuros que se indican en ella, estos conjuros no cuentan para el límite de conjuros conocidos.\nConjuros de acechador en la penumbra Nivel de explorador\nConjuros\nDisfrazarse\nTruco de la cuerda\nTerror\nInvisibilidad mejorada\nApariencia"
+      "texto": "Cuando alcances un nivel de explorador especificado en la tabla “Conjuros de acechador en la penumbra”, aprenderás los conjuros que se indican en ella, estos conjuros no cuentan para el límite de conjuros conocidos.\n■ Conjuros de acechador en la penumbra\n• Nivel de explorador 3. Disfrazarse\n• Nivel de explorador 5. Truco de la cuerda\n• Nivel de explorador 9. Terror\n• Nivel de explorador 13. Invisibilidad mejorada\n• Nivel de explorador 17. Apariencia"
      },
      {
       "nivel": 3,
@@ -2360,7 +2360,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros de errante feérico",
-      "texto": "Cuando alcances un nivel de explorador especificado en la tabla “Conjuros de errante feérico”, aprenderás los conjuros que se indican en ella, estos conjuros no cuentan para el límite de conjuros conocidos.\nConjuros de errante feérico Nivel de explorador\nConjuros\nHechizar persona\nPaso brumoso\nInvocar feérico\nPuerta dimensional\nEngañar"
+      "texto": "Cuando alcances un nivel de explorador especificado en la tabla “Conjuros de errante feérico”, aprenderás los conjuros que se indican en ella, estos conjuros no cuentan para el límite de conjuros conocidos.\n■ Conjuros de errante feérico\n• Nivel de explorador 3. Hechizar persona\n• Nivel de explorador 5. Paso brumoso\n• Nivel de explorador 9. Invocar feérico\n• Nivel de explorador 13. Puerta dimensional\n• Nivel de explorador 17. Engañar"
      },
      {
       "nivel": 3,
@@ -4541,7 +4541,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del juramento de entrega",
-      "texto": "La magia de tu juramento garantiza que siempre conozcas ciertos conjuros. Cuando alcances un nivel de paladín especificado en la tabla “Conjuros del juramento de entrega”, aprenderás los conjuros indicados en ella y siempre serán conjuros conocidos para ti y no cuentan para el límite de conjuros conocidos.\nConjuros del juramento de entrega Nivel de paladín\nConjuros\nEscudo de fe, Protección contra el bien y el mal\nAuxilio, Zona de la verdad\nDisipar magia, Señal de esperanza\nGuardián de la fe, Libertad de movimiento\nComunión, Golpe flamígero"
+      "texto": "La magia de tu juramento garantiza que siempre conozcas ciertos conjuros. Cuando alcances un nivel de paladín especificado en la tabla “Conjuros del juramento de entrega”, aprenderás los conjuros indicados en ella y siempre serán conjuros conocidos para ti y no cuentan para el límite de conjuros conocidos.\n■ Conjuros del juramento de entrega\n• Nivel de paladín 3. Escudo de fe, Protección contra el bien y el mal\n• Nivel de paladín 5. Auxilio, Zona de la verdad\n• Nivel de paladín 9. Disipar magia, Señal de esperanza\n• Nivel de paladín 13. Guardián de la fe, Libertad de movimiento\n• Nivel de paladín 17. Comunión, Golpe flamígero"
      },
      {
       "nivel": 7,
@@ -4577,7 +4577,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del juramento de gloria",
-      "texto": "La magia de tu juramento garantiza que siempre conozcas ciertos conjuros. Cuando alcances un nivel de paladín especificado en la tabla “Conjuros del juramento de gloria”, aprenderás los conjuros indicados en ella y siempre serán conjuros conocidos para ti y no cuentan para el límite de conjuros conocidos.\nConjuros del juramento de gloria Nivel de paladín\nConjuros\nHeroísmo, Saeta guía\nArma mágica, Potenciar característica\nAcelerar, Protección contra energía\nCompulsión, Libertad de movimiento\nConocer las leyendas, Presencia regia de Yolande"
+      "texto": "La magia de tu juramento garantiza que siempre conozcas ciertos conjuros. Cuando alcances un nivel de paladín especificado en la tabla “Conjuros del juramento de gloria”, aprenderás los conjuros indicados en ella y siempre serán conjuros conocidos para ti y no cuentan para el límite de conjuros conocidos.\n■ Conjuros del juramento de gloria\n• Nivel de paladín 3. Heroísmo, Saeta guía\n• Nivel de paladín 5. Arma mágica, Potenciar característica\n• Nivel de paladín 9. Acelerar, Protección contra energía\n• Nivel de paladín 13. Compulsión, Libertad de movimiento\n• Nivel de paladín 17. Conocer las leyendas, Presencia regia de Yolande"
      },
      {
       "nivel": 7,
@@ -4603,7 +4603,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del juramento de los antiguos",
-      "texto": "La magia de tu juramento garantiza que siempre conozcas ciertos conjuros. Cuando alcances un nivel de paladín especificado en la tabla “Conjuros del juramento de los antiguos”, aprenderás los conjuros indicados en ella y siempre serán conjuros conocidos para ti y no cuentan para el límite de conjuros conocidos.\nConjuros del juramento de los antiguos Nivel de paladín\nConjuros\nGolpe apresador, Hablar con los animales\nPaso brumoso, Rayo de luna\nCrecimiento vegetal, Protección contra energía\nPiel pétrea, Tormenta de hielo\nComunión con la naturaleza, Paso arbóreo"
+      "texto": "La magia de tu juramento garantiza que siempre conozcas ciertos conjuros. Cuando alcances un nivel de paladín especificado en la tabla “Conjuros del juramento de los antiguos”, aprenderás los conjuros indicados en ella y siempre serán conjuros conocidos para ti y no cuentan para el límite de conjuros conocidos.\n■ Conjuros del juramento de los antiguos\n• Nivel de paladín 3. Golpe apresador, Hablar con los animales\n• Nivel de paladín 5. Paso brumoso, Rayo de luna\n• Nivel de paladín 9. Crecimiento vegetal, Protección contra energía\n• Nivel de paladín 13. Piel pétrea, Tormenta de hielo\n• Nivel de paladín 17. Comunión con la naturaleza, Paso arbóreo"
      },
      {
       "nivel": 3,
@@ -4634,7 +4634,7 @@
      {
       "nivel": 3,
       "nombre": "Conjuros del juramento de venganza",
-      "texto": "La magia de tu juramento garantiza que siempre conozcas ciertos conjuros. Cuando alcances un nivel de paladín especificado en la tabla “Conjuros del juramento de venganza”, aprenderás los conjuros indicados en ella y siempre serán conjuros conocidos para ti y no cuentan para el límite de conjuros conocidos.\nConjuros del juramento de venganza Nivel de paladín\nConjuros\nMarca del cazador, Perdición\nInmovilizar persona, Paro brumoso\nAcelerar, Protección contra energía\nDestierro, Puerta dimensional\nEscudriñar, Inmovilizar monstruo"
+      "texto": "La magia de tu juramento garantiza que siempre conozcas ciertos conjuros. Cuando alcances un nivel de paladín especificado en la tabla “Conjuros del juramento de venganza”, aprenderás los conjuros indicados en ella y siempre serán conjuros conocidos para ti y no cuentan para el límite de conjuros conocidos.\n■ Conjuros del juramento de venganza\n• Nivel de paladín 3. Marca del cazador, Perdición\n• Nivel de paladín 5. Inmovilizar persona, Paso brumoso\n• Nivel de paladín 9. Acelerar, Protección contra energía\n• Nivel de paladín 13. Destierro, Puerta dimensional\n• Nivel de paladín 17. Escudriñar, Inmovilizar monstruo"
      },
      {
       "nivel": 3,

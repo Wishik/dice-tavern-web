@@ -7,12 +7,12 @@ import { useDatos, type Conjuro } from '../data';
 import type { ConjuroPersonaje } from '../types';
 import { CARACTERISTICA_CONJUROS, conSigno, dadosConjuro, mejoraCalculada, mejoraNivelSuperior, multiplicadorTruco } from '../rules';
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
-import { esMulticlase } from '../multiclase';
+import { esMulticlase, nivelEn } from '../multiclase';
 import { claseDeConjuro, type MagiaClase } from '../avisos';
 import { tr } from '../ru';
 import { td } from '../datosRu';
 import { atributoAuto, atributoGrupo, ataqueCon, cdCon, fijarAtributoGrupo, grupoDe, gruposOtros, type GrupoConjuros } from '../gruposConjuros';
-import { FUENTES, cantidadEleccion, eleccionesPendientes, opcionesEleccion, concesionesActivas, type Concesion, type Fuente } from '../conjurosRasgos';
+import { TERRENOS, subclaseEn, FUENTES, cantidadEleccion, eleccionesPendientes, opcionesEleccion, concesionesActivas, type Concesion, type Fuente } from '../conjurosRasgos';
 
 const nombreNivel = (i: number) => i === 0 ? L('Trucos', 'Заговоры') : `${L('Nivel', 'Уровень')} ${i}`;
 const CLASES_LANZADORAS = ['Bardo', 'Brujo', 'Clérigo', 'Druida', 'Explorador', 'Hechicero', 'Mago', 'Paladín'];
@@ -68,7 +68,7 @@ export function TabMagia() {
   const nombresLanzadoras = (lanzadoras.length ? lanzadoras : magia.filter((m) => CARACTERISTICA_CONJUROS[m.clase] && (m.nTrucos || m.nConj))).map((m) => m.clase);
   const atrDe = (c: ConjuroPersonaje) => atributoGrupo(p, grupoDe(p, c), nombresLanzadoras, razas);
   const { tirarD20 } = useDados();
-  const tituloGrupo = (g: GrupoConjuros) => g.tipo === 'raza' ? <>{L('Conjuros raciales', 'Расовые заклинания')}{g.rasgo && <small> · {td(g.rasgo)}</small>}</>
+  const tituloGrupo = (g: GrupoConjuros) => g.tipo === 'subclase' ? <>{td(g.rasgo ?? '')}<small> · {L('siempre conocidos', 'всегда известны')}</small></> : g.tipo === 'raza' ? <>{L('Conjuros raciales', 'Расовые заклинания')}{g.rasgo && <small> · {td(g.rasgo)}</small>}</>
     : g.tipo === 'dote' ? <>{L('Dote', 'Черта')}: {td(g.rasgo ?? '')}</>
     : g.tipo === 'invocacion' ? L('Invocaciones de brujo', 'Воззвания колдуна')
     : g.tipo === 'lista' ? L(`Conjuros de ${g.clase}`, `Заклинания: ${T(RU_CLASES, g.clase ?? '')}`)
@@ -154,12 +154,20 @@ export function TabMagia() {
         );
       })}
       <Seccion titulo={L('Otros conjuros', 'Другие заклинания')} aviso={pendientes.length} className="otros-conjuros">
-        <p className="nota pequena">{L('De tu raza, dotes, invocaciones u objetos. No cuentan para el límite de tu clase. Los de tu raza y tus dotes (✨) se añaden solos al llegar al nivel.', 'От расы, черт, воззваний или предметов. Не считаются в лимит класса. Заклинания от расы и черт (✨) добавляются сами, когда доходишь до нужного уровня.')}</p>
+        <p className="nota pequena">{L('De tu subclase, raza, dotes, invocaciones u objetos. No cuentan para el límite de tu clase. Los de tu raza y tus dotes (✨) se añaden solos al llegar al nivel.', 'От расы, черт, воззваний или предметов. Не считаются в лимит класса. Заклинания от расы и черт (✨) добавляются сами, когда доходишь до нужного уровня.')}</p>
         {pendientes.map((c) => (
           <button key={c.id} className="aviso-rojo elegir-conjuro" onClick={() => setElegir(c)}>
             <PuntoRojo /> {L(`«${td(c.fuente.rasgo)}» te deja elegir ${cantidadEleccion(c.elegir!, p) > 1 ? `${cantidadEleccion(c.elegir!, p)} conjuros` : 'un conjuro'}: toca para escoger`, `«${td(c.fuente.rasgo)}» даёт выбрать ${cantidadEleccion(c.elegir!, p) > 1 ? `${cantidadEleccion(c.elegir!, p)} заклинания` : 'заклинание'}: нажми, чтобы выбрать`)}
           </button>
         ))}
+        {nivelEn(p, 'Druida') >= 3 && /tierra/i.test(subclaseEn(p, 'Druida')) && (
+          <label className="etiqueta"><span>{L('Terreno del Círculo de la tierra (se elige tras un descanso largo)', 'Местность Круга земли (выбирается после долгого отдыха)')}</span>
+            <select className="campo" value={p.elecciones?.['Druida:terreno']?.[0] ?? ''} onChange={(e) => upd((x) => { x.elecciones = { ...(x.elecciones ?? {}), 'Druida:terreno': e.target.value ? [e.target.value] : [] }; })}>
+              <option value="">{L('— Elige terreno —', '— Выбери местность —')}</option>
+              {TERRENOS.map((k) => <option key={k} value={k}>{k[0].toUpperCase() + k.slice(1)}</option>)}
+            </select>
+          </label>
+        )}
         {otros.map(({ g, idx }) => {
           const lista = idx.map((i) => ({ c: p.conjuros[i], idx: i })).sort((a, b) => a.c.nivel - b.c.nivel);
           const tr0 = lista.filter(({ c }) => c.nivel === 0), cj = lista.filter(({ c }) => c.nivel > 0);
