@@ -2,6 +2,7 @@ import { nivelEn, nivelTotal } from './multiclase';
 import type { Conjuro, Razas } from './data';
 import type { ConjuroPersonaje, Personaje } from './types';
 import { bonoCompetencia } from './rules';
+import { esMejorable } from './conjurosMejorados';
 
 /**
  * Conjuros que dan los rasgos de raza y las dotes del manual.
@@ -182,7 +183,8 @@ export function sincronizarConjuros(x: Personaje, razas: Razas | null, todos: Co
   for (const d of deseados) {
     if (x.conjuros.some((c) => c.origen === d.origen && igual(c.nombre, d.nombre))) continue;
     // Si ya lo tenía puesto a mano, se pasa a adicionales (así deja libre el hueco de la clase).
-    const yaEsta = x.conjuros.find((c) => !c.origen && igual(c.nombre, d.nombre));
+    // Los mejorables (Bola de fuego) no se fusionan: la copia nueva lo convierte en «Bola de fuego +».
+    const yaEsta = esMejorable(d.nombre) ? undefined : x.conjuros.find((c) => !c.origen && igual(c.nombre, d.nombre));
     if (yaEsta) { yaEsta.adicional = true; yaEsta.origen = d.origen; yaEsta.preparado = undefined; }
     else x.conjuros.push({ nombre: d.nombre, nivel: d.nivel, adicional: true, origen: d.origen } as ConjuroPersonaje);
     cambia = true;

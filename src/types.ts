@@ -159,6 +159,8 @@ export interface Personaje {
   conjuroCaracteristica: '' | Atributo;
   /** Característica cambiada a mano por grupo de conjuros (id de src/gruposConjuros.ts), salvo la clase principal. */
   caracteristicaGrupos?: Record<string, Atributo>;
+  /** Textos editados de los conjuros mejorados («Bola de fuego +», «++»…): nombre en minúsculas → texto por nivel de «+». */
+  mejorasConjuro?: Record<string, string[]>;
   conjurosTurno: { estandar: string; adicional: string };
   salvaciones: Record<Atributo, { comp: boolean; bonus: number }>;
   muerte: { exitos: number; fallos: number };

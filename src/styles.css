@@ -891,3 +891,5 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .grupo-otros { margin: 12px 0; padding: 10px 12px; border: 1.5px solid var(--madera-borde); border-radius: 12px; background: rgba(255,255,255,.18); }
 .titulo-grupo { margin: -2px 0 8px; font-size: 15px; }
 .titulo-grupo small { font-weight: 400; color: var(--tinta-suave); }
+.res-conjuro .ya-tienes { color: var(--oro); font-weight: 600; }
+.nota.mejorado { background: rgba(217,164,65,.15); border-radius: 8px; padding: 6px 10px; }

@@ -12,6 +12,7 @@ import { claseDeConjuro, type MagiaClase } from '../avisos';
 import { tr } from '../ru';
 import { td } from '../datosRu';
 import { atributoAuto, atributoGrupo, ataqueCon, cdCon, fijarAtributoGrupo, grupoDe, gruposOtros, type GrupoConjuros } from '../gruposConjuros';
+import { copias, esMejorable, fijarTextoMejorado, nombreMejorado, quitarCopia, resolverMejorados, textoMejorado } from '../conjurosMejorados';
 import { TERRENOS, subclaseEn, FUENTES, cantidadEleccion, eleccionesPendientes, opcionesEleccion, concesionesActivas, type Concesion, type Fuente } from '../conjurosRasgos';
 
 const nombreNivel = (i: number) => i === 0 ? L('Trucos', 'Заговоры') : `${L('Nivel', 'Уровень')} ${i}`;
@@ -28,7 +29,7 @@ export function TabMagia() {
   const anadir = anadirQue?.tipo ?? null;
   const setAnadir = (t: null | 'truco' | 'conjuro' | 'adicional', clase = p.clase) => setAnadirQue(t ? { tipo: t, clase } : null);
   const [todasClases, setTodasClases] = useState(false);
-  const [ver, setVer] = useState<{ c: ConjuroPersonaje; def?: Conjuro } | null>(null);
+  const [ver, setVer] = useState<{ c: ConjuroPersonaje; def?: Conjuro; plus?: number } | null>(null);
   const [nuevo, setNuevo] = useState<{ nombre: string; nivel: number; adicional: boolean; base?: Conjuro; descripcion: string; clase?: string; lista?: string } | null>(null);
   const [elegirBase, setElegirBase] = useState(false);
   const multi = esMulticlase(p);
@@ -42,16 +43,17 @@ export function TabMagia() {
 
   const ListaConjuros = ({ lista, preparar, m }: { lista: { c: ConjuroPersonaje; idx: number }[]; preparar: boolean; m?: MagiaClase }) => (
     <ul className="lista-conjuros">
-      {lista.map(({ c, idx }) => {
+      {lista.filter(({ idx }) => !ocultos.has(idx)).map(({ c, idx }) => {
         const d = def(c.nombre);
+        const mas = plus.get(idx) ?? 0;
         return (
           <li key={idx}>
             {preparar && <Check valor={!!c.preparado} set={(b) => {
               if (b && m && m.limitePreparados !== null && m.nPrep >= m.limitePreparados) { alert(L(`Ya tienes ${m.limitePreparados} conjuros preparados, el máximo a nivel ${m.nivel}. Desmarca otro primero.`, `Уже подготовлено ${m.limitePreparados} заклинаний — максимум на ${m.nivel} уровне. Сначала сними отметку с другого.`)); return; }
               upd((x) => { x.conjuros[idx].preparado = b; });
             }} titulo="Preparado" />}
-            <button className="conjuro-nombre" onClick={() => setVer({ c, def: d })}>
-              <strong>{td(c.nombre)}{c.adicional ? <small className="etq-nivel"> · {c.nivel ? `${L('Nv', 'Ур')} ${c.nivel}` : L('Truco', 'Заговор')}</small> : null}</strong>
+            <button className="conjuro-nombre" onClick={() => setVer({ c, def: d, plus: mas })}>
+              <strong>{nombreMejorado(td(c.nombre), mas)}{c.adicional ? <small className="etq-nivel"> · {c.nivel ? `${L('Nv', 'Ур')} ${c.nivel}` : L('Truco', 'Заговор')}</small> : null}</strong>
               {c.base && <small>{L('Propio, basado en', 'Своё, на основе')} {td(c.base)}</small>}
               {c.origen && <small className="origen-conjuro">✨ {origenTexto(c.origen)}</small>}
               {d && <small>{td(d.escuela)} · {td(d.tiempo)} · {td(d.alcance)}{/concentración/i.test(d.duracion) ? L(' · Conc.', ' · Конц.') : ''}</small>}
@@ -67,6 +69,8 @@ export function TabMagia() {
   const abrirOtros = (lista: string) => { setListaAnadir(lista); setAnadir('adicional'); };
   const nombresLanzadoras = (lanzadoras.length ? lanzadoras : magia.filter((m) => CARACTERISTICA_CONJUROS[m.clase] && (m.nTrucos || m.nConj))).map((m) => m.clase);
   const atrDe = (c: ConjuroPersonaje) => atributoGrupo(p, grupoDe(p, c), nombresLanzadoras, razas);
+  // Conjuros aprendidos más de una vez: se ven una sola vez («Bola de fuego +») en el grupo con mejor ataque/CD.
+  const { ocultos, plus } = resolverMejorados(p, (i) => { const a = atrDe(p.conjuros[i]); return [ataqueCon(p, a) ?? -99, cdCon(p, a) ?? -99]; });
   const { tirarD20 } = useDados();
   const tituloGrupo = (g: GrupoConjuros) => g.tipo === 'subclase' ? <>{td(g.rasgo ?? '')}<small> · {L('siempre conocidos', 'всегда известны')}</small></> : g.tipo === 'raza' ? <>{L('Conjuros raciales', 'Расовые заклинания')}{g.rasgo && <small> · {td(g.rasgo)}</small>}</>
     : g.tipo === 'dote' ? <>{L('Dote', 'Черта')}: {td(g.rasgo ?? '')}</>
@@ -97,6 +101,8 @@ export function TabMagia() {
   // Nivel máximo de conjuro de la clase a la que se añade (o el general).
   const maxNivelAnadir = (anadirQue ? magia.find((m) => m.clase === anadirQue.clase)?.nivelMaxConjuro : null) ?? avisos.nivelMaxConjuro ?? null;
   const anadirConjuro = (c: Conjuro) => {
+    const ya = copias(p, c.nombre).length;
+    if (ya > 0 && !confirm(L(`Ya tienes «${nombreMejorado(td(c.nombre), ya - 1)}». Si lo aprendes otra vez se convierte en «${nombreMejorado(td(c.nombre), ya)}»: se verá una sola vez, en la clase o rasgo con mejor ataque y CD, y podrás editar su texto. ¿Añadirlo?`, `У тебя уже есть «${nombreMejorado(td(c.nombre), ya - 1)}». Если выучить его ещё раз, оно станет «${nombreMejorado(td(c.nombre), ya)}»: будет показано один раз, там, где лучше атака и Сл, и его текст можно менять. Добавить?`))) return false;
     if (anadir !== 'adicional' && c.nivel > 0 && maxNivelAnadir !== null && c.nivel > maxNivelAnadir
       && !confirm(L(`«${td(c.nombre)}» es de nivel ${c.nivel}, pero ahora solo puedes lanzar conjuros hasta nivel ${maxNivelAnadir}. ¿Añadirlo igualmente?`, `«${td(c.nombre)}» — ${c.nivel} уровня, а сейчас тебе доступны заклинания только до ${maxNivelAnadir} уровня. Всё равно добавить?`))) return false;
     upd((x) => { x.conjuros.push({ nombre: c.nombre, nivel: c.nivel, ...(anadir === 'adicional' ? { adicional: true, ...(listaAnadir ? { lista: listaAnadir } : {}) } : multi ? { clase: anadirQue!.clase } : {}) }); });
@@ -125,7 +131,7 @@ export function TabMagia() {
       </Seccion>
       {grupos.map((m) => {
         const propios = conIdx.filter(({ c }) => !c.adicional && (multi ? claseDeConjuro(p, c) === m.clase : true));
-        const porNivel = NIVELES.map((_, i) => propios.filter(({ c }) => c.nivel === i));
+        const porNivel = NIVELES.map((_, i) => propios.filter(({ c, idx }) => c.nivel === i && !ocultos.has(idx)));
         const faltanT = m.limiteTrucos ? Math.max(0, m.limiteTrucos - m.nTrucos) : 0;
         const faltanC = m.limiteConjuros ? Math.max(0, m.limiteConjuros - m.nConj) : 0;
         const g: GrupoConjuros = { id: `clase:${m.clase}`, tipo: 'clase', clase: m.clase };
@@ -170,7 +176,8 @@ export function TabMagia() {
         )}
         {otros.map(({ g, idx }) => {
           const lista = idx.map((i) => ({ c: p.conjuros[i], idx: i })).sort((a, b) => a.c.nivel - b.c.nivel);
-          const tr0 = lista.filter(({ c }) => c.nivel === 0), cj = lista.filter(({ c }) => c.nivel > 0);
+          const tr0 = lista.filter(({ c, idx }) => c.nivel === 0 && !ocultos.has(idx)), cj = lista.filter(({ c, idx }) => c.nivel > 0 && !ocultos.has(idx));
+          if (!tr0.length && !cj.length && g.tipo !== 'lista' && g.tipo !== 'otros') return null;
           const manual = g.tipo === 'lista' || g.tipo === 'otros' || g.id === 'raza:';
           return (
             <div key={g.id} className="grupo-otros">
@@ -221,8 +228,8 @@ export function TabMagia() {
               filtro={(c) => (anadir === 'adicional' || (anadir === 'truco' ? c.nivel === 0 : c.nivel > 0))
                 && (filtroNivel === null || anadir === 'truco' || c.nivel === filtroNivel)
                 && (anadir === 'adicional' || todasClases || !claseMin || c.clases.includes(claseMin))
-                && !p.conjuros.some((x) => x.nombre === c.nombre)}
-              render={(c) => <span className="res-conjuro"><strong>{td(c.nombre)}</strong><small>{c.nivel ? `${L('Nivel', 'Уровень')} ${c.nivel}` : L('Truco', 'Заговор')} · {td(c.escuela)} · {c.clases.join(', ')}</small></span>}
+                && (esMejorable(c.nombre) || !p.conjuros.some((x) => x.nombre === c.nombre))}
+              render={(c) => <span className="res-conjuro"><strong>{td(c.nombre)}{copias(p, c.nombre).length > 0 && <small className="ya-tienes"> · {L('ya lo tienes: se hará', 'уже есть: станет')} {nombreMejorado('', copias(p, c.nombre).length).trim()}</small>}</strong><small>{c.nivel ? `${L('Nivel', 'Уровень')} ${c.nivel}` : L('Truco', 'Заговор')} · {td(c.escuela)} · {c.clases.join(', ')}</small></span>}
               onElegir={(c) => {
                 if (typeof c === 'string') { setNuevo({ nombre: c, nivel: anadir === 'truco' ? 0 : 1, adicional: anadir === 'adicional', descripcion: '', clase: anadirQue?.clase, lista: listaAnadir }); setAnadir(null); return; }
                 if (anadirConjuro(c)) setAnadir(null);
@@ -264,9 +271,24 @@ export function TabMagia() {
         </Modal>
       )}
       {ver && (
-        <Modal titulo={td(ver.c.nombre)} onClose={() => setVer(null)}
-          pie={ver.c.origen ? <span className="nota">✨ {L('Te lo da', 'Даёт')}: {origenTexto(ver.c.origen)}</span> : <button className="btn peligro" onClick={() => { upd((x) => { const i = x.conjuros.findIndex((c) => c.nombre === ver.c.nombre && c.nivel === ver.c.nivel); if (i >= 0) x.conjuros.splice(i, 1); }); setVer(null); }}>{L('Quitar de la lista', 'Убрать из списка')}</button>}>
+        <Modal titulo={nombreMejorado(td(ver.c.nombre), ver.plus ?? 0)} onClose={() => setVer(null)}
+          pie={ver.plus ? (copias(p, ver.c.nombre).some((i) => !p.conjuros[i].origen)
+              ? <button className="btn peligro" onClick={() => { upd((x) => { quitarCopia(x, ver.c.nombre); }); setVer(null); }}>{L(`Quitar «${nombreMejorado(td(ver.c.nombre), ver.plus)}» (vuelve a ${nombreMejorado(td(ver.c.nombre), ver.plus - 1)})`, `Убрать «${nombreMejorado(td(ver.c.nombre), ver.plus)}» (вернётся ${nombreMejorado(td(ver.c.nombre), ver.plus - 1)})`)}</button>
+              : <span className="nota">✨ {L('Todas las copias te las dan rasgos o dotes', 'Все копии дают умения или черты')}</span>)
+            : ver.c.origen ? <span className="nota">✨ {L('Te lo da', 'Даёт')}: {origenTexto(ver.c.origen)}</span> : <button className="btn peligro" onClick={() => { upd((x) => { const i = x.conjuros.findIndex((c) => c.nombre === ver.c.nombre && c.nivel === ver.c.nivel); if (i >= 0) x.conjuros.splice(i, 1); }); setVer(null); }}>{L('Quitar de la lista', 'Убрать из списка')}</button>}>
           {(() => {
+            if (ver.plus) {
+              const base = ver.def ? `${td(ver.def.tiempo)} · ${td(ver.def.alcance)} · ${td(ver.def.componentes)} · ${td(ver.def.duracion)}\n\n${td(ver.def.descripcion)}` : '';
+              const texto = textoMejorado(p, ver.c.nombre, ver.plus, base);
+              const donde = copias(p, ver.c.nombre).map((i) => { const g = grupoDe(p, p.conjuros[i]); return g.tipo === 'clase' ? T(RU_CLASES, g.clase ?? '') : g.tipo === 'lista' ? L(`lista de ${g.clase}`, `список: ${T(RU_CLASES, g.clase ?? '')}`) : g.tipo === 'invocacion' ? L('invocación', 'воззвание') : g.tipo === 'otros' ? L('otros', 'другое') : td(g.rasgo ?? ''); });
+              return <>
+                <p className="nota mejorado">⭐ {L(`Conjuro mejorado: lo has aprendido ${ver.plus + 1} veces (${donde.join(', ')}). Se lanza con el mejor ataque y CD.`, `Улучшенное заклинание: выучено ${ver.plus + 1} раз (${donde.join(', ')}). Накладывается с лучшей атакой и Сл.`)}</p>
+                <Lanzar texto={texto} nivel={ver.c.nivel} nombre={nombreMejorado(ver.c.nombre, ver.plus)} atr={atrDe(ver.c)} />
+                <label className="etiqueta"><span>{L('Texto de la versión mejorada (cámbialo según la mejora de tu partida)', 'Текст улучшенной версии (поменяй под улучшение в твоей партии)')}</span>
+                  <Texto multilinea filas={10} valor={texto} set={(v) => upd((x) => fijarTextoMejorado(x, ver.c.nombre, ver.plus!, v))} />
+                </label>
+              </>;
+            }
             const mio = p.conjuros.find((c) => c.nombre === ver.c.nombre);
             if (mio && mio.descripcion !== undefined) return <>
               <Lanzar texto={mio.descripcion} nivel={mio.nivel} nombre={mio.nombre} atr={atrDe(mio)} />
