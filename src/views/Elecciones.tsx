@@ -121,7 +121,7 @@ function FilaEleccion({ e }: { e: Eleccion }) {
     cuerpo = (
       <div className="ranuras-eleccion">
         {ranuras.map((v, i) => (
-          <div key={i} className="ranura">
+          <div key={i} className="ranura-sel">
             <select className="campo" value={v} onChange={(ev) => ponerRanura(i, ev.target.value)}>
               <option value="">{L('— Elige —', '— Выбери —')}</option>
               {v && !ops.some((o) => o.valor === v) && <option value={v}>{v}</option>}

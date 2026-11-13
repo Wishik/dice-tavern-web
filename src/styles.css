@@ -730,7 +730,7 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .opcion-eleccion.activo small { color: #3b2a14; }
 .ranuras-eleccion { display: grid; gap: 6px; margin-top: 6px; }
 .maestria-arma { color: #7a5a12; }
-.ranura { display: flex; flex-direction: column; gap: 4px; }
+.ranuras-eleccion .ranura-sel { display: flex; flex-direction: column; gap: 4px; }
 .detalle-eleccion { font-size: 13px; color: #4a3826; background: #fffaf0; border: 1px dashed #c9ad7a; border-radius: 8px; padding: 6px 9px; }
 .detalle-eleccion p { margin: 0 0 4px; } .detalle-eleccion p:last-child { margin: 0; }
 .efecto-eleccion { color: #2f6b2a; font-weight: 600; }
