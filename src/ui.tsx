@@ -167,7 +167,16 @@ export function ListaDatos({ datos }: { datos: Record<string, string> }) {
 }
 
 export function TextoLargo({ texto }: { texto: string }) {
-  return <div className="texto-largo">{td(texto).split('\n').map((p, i) => <p key={i}>{p}</p>)}</div>;
+  let perfil = false;
+  return <div className="texto-largo">{td(texto).split('\n').map((p, i) => {
+    if (p.startsWith('■ En la biblioteca')) return <p key={i} className="perfil-bib">📚 {p.slice(2)}</p>;
+    if (p.startsWith('■ ')) { perfil = true; return <p key={i} className="perfil-tit">{p.slice(2)}</p>; }
+    if (!perfil) return <p key={i}>{p}</p>;
+    if (p.startsWith('• ')) { const k = p.indexOf('. '); return <p key={i} className="perfil-linea">{k > 0 ? <><b>{p.slice(2, k + 1)}</b>{p.slice(k + 1)}</> : p.slice(2)}</p>; }
+    if (/^[A-ZÁÉÍÓÚÑ ]{5,}$/.test(p)) return <p key={i} className="perfil-sec">{p}</p>;
+    const m = p.match(/^([^:]{2,25}):\s(.*)$/);
+    return <p key={i} className="perfil-linea">{m ? <><b>{m[1]}:</b> {m[2]}</> : p}</p>;
+  })}</div>;
 }
 
 /** Comprime una foto a JPEG de como mucho `lado` px para guardarla dentro del personaje. */

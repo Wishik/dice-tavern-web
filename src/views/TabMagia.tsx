@@ -255,7 +255,9 @@ export function FichaConjuro({ c }: { c: Conjuro }) {
 }
 
 /** Lanzar el conjuro: elegir a qué nivel (gasta ese maná), tirada de ataque, CD y dados de daño/curación (con la mejora por nivel). */
-function Lanzar({ texto, nivel, nombre }: { texto: string; nivel: number; nombre: string }) {
+function Lanzar({ texto: completo, nivel, nombre }: { texto: string; nivel: number; nombre: string }) {
+  // El perfil de criatura (líneas «■ …») no cuenta para dados ni mejoras.
+  const texto = completo.split('\n■')[0];
   const { p, upd, avisos, ajeno } = useFicha();
   const { tirar, tirarD20 } = useDados();
   const at = ataqueConjuros(p), cd = cdConjuros(p);

@@ -877,3 +877,8 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .acciones-cab .quitar-enemigo { margin-left: 0; }
 @media (max-width: 600px) { .acciones-cab .mover-pj { max-width: 96px; font-size: 12px; } .cab-compacta { gap: 6px; } }
 .mejora-nivel small { display: block; opacity: .8; margin-top: 2px; } .mejora-calc { color: #2c5aa0; }
+
+.texto-largo .perfil-tit { margin: 14px 0 6px; padding: 6px 10px; border-radius: 8px; background: var(--madera); color: var(--oro-claro); font-weight: 700; letter-spacing: .02em; }
+.texto-largo .perfil-sec { margin: 10px 0 4px; font-weight: 700; font-size: .85em; letter-spacing: .06em; opacity: .75; border-bottom: 1px solid currentColor; }
+.texto-largo .perfil-linea { margin: 0 0 4px; padding-left: 10px; }
+.texto-largo .perfil-bib { margin: 12px 0 6px; padding: 8px 10px; border-radius: 8px; border: 1px dashed var(--madera-borde); background: rgba(217,164,65,.12); }
