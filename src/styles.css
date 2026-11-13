@@ -852,3 +852,6 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .partir-de .sugerencias { list-style: none; padding: 0; margin: 4px 0 0; display: grid; gap: 4px; }
 .partir-de .sugerencias button { width: 100%; text-align: left; border: 1px solid #cdb68a; background: #fffaf0; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
 .bm-tiradas { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 6px 0; }
+.color-grupo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.color-grupo .mover-pj { width: auto; }
+.lado-combatientes > .cabecera-combate { max-width: 640px; }

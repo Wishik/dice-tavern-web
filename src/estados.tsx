@@ -59,6 +59,8 @@ export function pasarRonda(estados: string[], det: DetallesEstados = {}): { esta
 
 /** Fila de chips con los estados activos (y el agotamiento). Tocar abre el editor si hay set. */
 /** Al llegar a 0 PG: los enemigos quedan «Muerto» y los jugadores «Moribundo»; al curarse se quita solo. */
+/** ¿Se acaba de poner el estado «Muerto»? (entonces sus PG pasan a 0). */
+export const muereAhora = (antes: string[], ahora: string[]) => ahora.includes('muerto') && !antes.includes('muerto');
 export function estadosPorVida(estados: string[], pg: number, enemigo: boolean): string[] {
   const id = enemigo ? 'muerto' : 'moribundo';
   if (pg <= 0) return estados.includes(id) ? estados : [...estados.filter((e) => e !== 'inconsciente' || !enemigo), id];

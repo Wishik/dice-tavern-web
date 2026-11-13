@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useFicha } from './Ficha';
 import { calcularCA, car, conSigno, iniciativa, modificador, percepcionPasiva } from '../rules';
-import { ChipsEstados, estadosPorVida } from '../estados';
+import { ChipsEstados, estadosPorVida, muereAhora } from '../estados';
 import { Numero, Seccion } from '../ui';
 import { Contador } from '../dice';
 import { L, RU_ATRIBUTOS, T } from '../i18n';
@@ -12,6 +12,7 @@ import { ListaEfectosCar, NuevoEfectoCar } from '../efectosCar';
 export function TabMaster() {
   const { p, upd } = useFicha();
   const [cant, setCant] = useState(0);
+  const [cantPm, setCantPm] = useState(0);
   const danar = (n: number) => upd((x) => {
     let resto = n;
     const t = Math.min(x.pg.temp, resto); x.pg.temp -= t; resto -= t;
@@ -25,7 +26,7 @@ export function TabMaster() {
   });
   return (
     <div className="tab">
-      <p className="aviso-local">👑 {L('Como máster puedes cambiar la vida, los estados, la iniciativa, el inventario y poner efectos temporales en las características. El resto lo cambia el jugador.', 'Как мастер ты можешь менять хиты, состояния, инициативу, инвентарь и временно менять характеристики. Остальное меняет сам игрок.')}</p>
+      <p className="aviso-local">👑 {L('Como máster puedes cambiar la vida, el maná, los estados, la iniciativa, el inventario y poner efectos temporales en las características. El resto lo cambia el jugador.', 'Как мастер ты можешь менять хиты, ману, состояния, инициативу, инвентарь и временно менять характеристики. Остальное меняет сам игрок.')}</p>
       <div className="fila-3-tarjetas">
         <Seccion titulo="PG (vida)" className="pg">
           <div className="pg-actual">
@@ -40,8 +41,20 @@ export function TabMaster() {
           </div>
           <p className="nota">{L('Temporales', 'Временные')}: <Numero valor={p.pg.temp} min={0} ancho={60} set={(n) => upd((x) => { x.pg.temp = n; })} /></p>
         </Seccion>
+        {p.pm.max > 0 && <Seccion titulo={L('Maná', 'Мана')} className="pg mana">
+          <div className="pg-actual">
+            <Contador valor={p.pm.actual} set={(n) => upd((x) => { x.pm.actual = Math.max(0, Math.min(n, x.pm.max)); })} min={0} max={p.pm.max} />
+            <span className="de">/ {p.pm.max}</span>
+          </div>
+          <div className="barra-vida barra-mana"><div style={{ width: `${Math.max(0, Math.min(100, (p.pm.actual / p.pm.max) * 100))}%` }} /></div>
+          <div className="fila-dano">
+            <Numero valor={cantPm} min={0} set={setCantPm} ancho={70} />
+            <button className="btn peligro" disabled={!cantPm} onClick={() => { upd((x) => { x.pm.actual = Math.max(0, x.pm.actual - cantPm); }); setCantPm(0); }}>− {L('Quitar', 'Убрать')}</button>
+            <button className="btn primario" disabled={!cantPm} onClick={() => { upd((x) => { x.pm.actual = Math.min(x.pm.max, x.pm.actual + cantPm); }); setCantPm(0); }}>+ {L('Devolver', 'Вернуть')}</button>
+          </div>
+        </Seccion>}
         <Seccion titulo="Estados">
-          <ChipsEstados estados={p.estados} agotamiento={p.agotamiento} detalles={p.estadosDetalle} quien={p.nombre} vacio set={(e, a, d) => upd((x) => { x.estados = e; x.agotamiento = a; x.estadosDetalle = d; })} />
+          <ChipsEstados estados={p.estados} agotamiento={p.agotamiento} detalles={p.estadosDetalle} quien={p.nombre} vacio set={(e, a, d) => upd((x) => { if (muereAhora(x.estados, e)) { x.pg.actual = 0; x.pg.temp = 0; } x.estados = e; x.agotamiento = a; x.estadosDetalle = d; })} />
         </Seccion>
         <Seccion titulo="Iniciativa">
           <p className="valor-grande">{p.iniciativaActual ?? '—'}</p>
@@ -61,8 +74,7 @@ export function TabMaster() {
         <div className="resumen-master">
           <span>🛡 {L('CA', 'КД')} <strong>{calcularCA(p).total}</strong></span>
           <span>👁 {L('Percepción pasiva', 'Пассивная внимательность')} <strong>{percepcionPasiva(p)}</strong></span>
-          {p.pm.max > 0 && <span>🔷 {L('Maná', 'Мана')} <strong>{p.pm.actual}/{p.pm.max}</strong></span>}
-          {ATRIBUTOS.map((a) => <span key={a}>{T(RU_ATRIBUTOS, a)} <strong>{car(p, a)}</strong> ({conSigno(modificador(car(p, a)))})</span>)}
+                    {ATRIBUTOS.map((a) => <span key={a}>{T(RU_ATRIBUTOS, a)} <strong>{car(p, a)}</strong> ({conSigno(modificador(car(p, a)))})</span>)}
         </div>
       </Seccion>
     </div>

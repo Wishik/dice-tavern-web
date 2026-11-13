@@ -30,7 +30,7 @@ export interface Backend {
 const resumen = (p: Personaje): Resumen => ({ id: p.id, nombre: p.nombre, raza: p.raza, clase: textoClasesBreve(p), nivel: p.nivel, foto: p.foto, actualizado: p.actualizado, bloqueado: !!p.bloqueado });
 
 /** Campos de la hoja que el máster puede cambiar (igual que la lista de la función master_guardar en schema.sql). */
-export const CAMPOS_MASTER = ['pg', 'equipo', 'mochila', 'cinturon', 'viaje', 'monedas', 'estados', 'estadosDetalle', 'agotamiento', 'iniciativaActual', 'efectosCar', 'actualizado'] as const;
+export const CAMPOS_MASTER = ['pg', 'pm', 'equipo', 'mochila', 'cinturon', 'viaje', 'monedas', 'estados', 'estadosDetalle', 'agotamiento', 'iniciativaActual', 'efectosCar', 'actualizado'] as const;
 
 // ------------------------------------------------------------ Local (sin cuenta)
 const CLAVE = 'dicetavern.personajes.v1';
