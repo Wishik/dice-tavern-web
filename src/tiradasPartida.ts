@@ -14,11 +14,11 @@ export function registrarTirada(t: Tirada) {
     .then(() => {}, () => {});
 }
 
-export interface TiradaPartida { id: number; quien: string; etiqueta: string; formula: string; total: number; detalle: string; modo: string; critico: string | null; creada: string }
+export interface TiradaPartida { id: number; personaje?: string | null; quien: string; etiqueta: string; formula: string; total: number; detalle: string; modo: string; critico: string | null; creada: string }
 
 export async function tiradasPartida(partida: string): Promise<TiradaPartida[]> {
   if (!supabase) return [];
-  const { data, error } = await supabase.from('tiradas').select('id,quien,etiqueta,formula,total,detalle,modo,critico,creada').eq('partida', partida).order('creada', { ascending: false }).limit(100);
+  const { data, error } = await supabase.from('tiradas').select('id,personaje,quien,etiqueta,formula,total,detalle,modo,critico,creada').eq('partida', partida).order('creada', { ascending: false }).limit(100);
   if (error) throw new Error(error.message);
   return data as TiradaPartida[];
 }

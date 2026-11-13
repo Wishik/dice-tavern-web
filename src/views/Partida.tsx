@@ -1,6 +1,5 @@
 import { nombreBotin, useBotin } from '../botin';
 import { td } from '../datosRu';
-import { tiradasPartida, type TiradaPartida } from '../tiradasPartida';
 import { useEffect, useState } from 'react';
 import { backend, type Resumen, type Usuario } from '../store';
 import { cargarPartida, crearPartida, elegirPersonaje, enlaceInvitacion, quitarMiembro, unirse, type Miembro, type Partida } from '../partidas';
@@ -8,8 +7,7 @@ import { L, RU_CLASES, RU_RAZAS, T, trClases } from '../i18n';
 import { Modal } from '../ui';
 import { Ficha } from './Ficha';
 import { ChipsEstados } from '../estados';
-import { PanelCombate, tiradasDelCombate } from './Combate';
-import { escucharTiradas } from '../dice';
+import { PanelCombate } from './Combate';
 
 /** true en pantallas anchas (portátil del máster): la hoja se abre al lado de la lista de jugadores. */
 function useAncho(min = 1000) {
@@ -73,7 +71,7 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
   );
 
   // Máster: a la izquierda los jugadores (como antes), a la derecha los combates con el historial de tiradas debajo.
-  const zonaCombate = soyMaster && <><PanelCombate partida={partida} miembros={miembros} onRecargar={recargar} onAbrirPj={ancho ? setSel : onAbrirFicha} /><HistorialTiradas partida={partida} /></>;
+  const zonaCombate = soyMaster && <PanelCombate partida={partida} miembros={miembros} onRecargar={recargar} onAbrirPj={ancho ? setSel : onAbrirFicha} />;
   const verCombateMovil = soyMaster && !ancho && vista === 'combate';
 
   return (
@@ -166,41 +164,6 @@ function PanelBotin() {
           <li key={it.id}><span>{nombreBotin(it)}</span>
             <button className="quitar-recurso" title={L('Eliminar', 'Удалить')} onClick={() => confirm(L(`¿Eliminar ${it.nombre} del botín?`, `Удалить «${it.nombre}» из добычи?`)) && cambiar((l) => l.filter((x) => x.id !== it.id))}>✕</button></li>))}</ul>}
       {items && items.length > 0 && <p className="nota pequena">{L('Para dárselo a un jugador: abre su inventario, pulsa «Añadir» y elige el objeto de tu botín.', 'Чтобы отдать игроку: открой его инвентарь, нажми «Добавить» и выбери предмет из добычи.')}</p>}
-    </section>
-  );
-}
-
-/** Lo que no es de combate, salvación ni habilidad (tiradas antiguas, de antes de filtrar al tirar). */
-const NO_HISTORIAL = /^(Prueba de|Проверка|Dado de golpe|Кость хитов|PG al subir|Хиты за уровень|\d+d\d+)/i;
-
-/** Historial de tiradas (solo lo ve el máster): las de los jugadores (combate, salvaciones, habilidades) y las de los enemigos. */
-function HistorialTiradas({ partida }: { partida: Partida }) {
-  const [l, setL] = useState<TiradaPartida[] | null>(null);
-  const [error, setError] = useState('');
-  const [, refrescar] = useState(0);
-  useEffect(() => {
-    const f = () => { if (document.visibilityState === 'visible') tiradasPartida(partida.id).then((x) => { setL(x); setError(''); }).catch((e) => setError(e.message)); };
-    f(); const t = setInterval(f, 4000);
-    return () => clearInterval(t);
-  }, [partida.id]);
-  // Las del máster (enemigos) se ven al momento.
-  useEffect(() => escucharTiradas(() => setTimeout(() => refrescar((n) => n + 1), 50)), []);
-  const hora = (s: string) => new Date(s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const todas = l && [...l.filter((t) => !NO_HISTORIAL.test(t.etiqueta)).map((t) => ({ ...t, id: String(t.id), master: false })), ...tiradasDelCombate(partida).map((t) => ({ ...t, master: true }))]
-    .sort((a, b) => b.creada.localeCompare(a.creada)).slice(0, 100);
-  return (
-    <section className="tarjeta historial-partida">
-      <h3>{L("Historial de tiradas", "История бросков")}</h3>
-      {error && <p className="error">{error}</p>}
-      {!todas ? <p className="nota">{L('Cargando…', 'Загрузка…')}</p> : todas.length === 0
-        ? <p className="nota">{L('Aún no hay tiradas. Aquí salen los ataques, el daño, las salvaciones y las habilidades de los jugadores, y lo que tires por los enemigos.', 'Бросков пока нет. Здесь будут атаки, урон, спасброски и навыки игроков, а также твои броски за врагов.')}</p>
-        : <ul className="historial">{todas.map((t) => (
-          <li key={(t.master ? 'm' : 'j') + t.id} className={`${t.critico ? `critico-${t.critico}` : ''} ${t.master ? 'de-master' : ''}`}>
-            <small className="hora">{hora(t.creada)}</small>
-            <span className="ht-texto"><b>{t.master ? '👑' : (t.quien || '?')}</b> · {t.etiqueta}{t.modo !== 'normal' && <small> ({t.modo === 'ventaja' ? L('ventaja', 'преимущество') : L('desventaja', 'помеха')})</small>}
-              <small className="ht-detalle">{t.formula}: {t.detalle}</small></span>
-            <strong>{t.total}</strong>
-          </li>))}</ul>}
     </section>
   );
 }

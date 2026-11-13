@@ -782,8 +782,19 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .mover-pj { width: auto; min-height: 30px; padding: 2px 6px; font-size: 13px; }
 /* Pestañas de combates */
 .pestanas-combate { display: flex; gap: 6px; flex-wrap: wrap; border-bottom: 2px solid rgba(240,201,106,.35); padding-bottom: 6px; }
-.pestanas-combate button { background: rgba(255,255,255,.06); border: 1px solid rgba(240,201,106,.35); color: var(--oro-claro); border-radius: 10px 10px 0 0; padding: 6px 12px; font-family: var(--fuente-titulo); cursor: pointer; }
-.pestanas-combate button.activo { background: var(--oro); color: var(--tinta); border-color: var(--oro); }
-.pestanas-combate button.nueva { font-size: 18px; padding: 4px 12px; }
+.pestana { display: inline-flex; align-items: stretch; border: 1px solid rgba(240,201,106,.35); border-radius: 10px 10px 0 0; background: rgba(255,255,255,.06); overflow: hidden; }
+.pestana.activo { background: var(--oro); border-color: var(--oro); }
+.pestana button, .pestanas-combate button.nueva { background: none; border: none; color: var(--oro-claro); padding: 6px 12px; font-family: var(--fuente-titulo); cursor: pointer; }
+.pestana.activo button { color: var(--tinta); }
+.pestana .cerrar-pestana { padding: 6px 9px; border-left: 1px solid rgba(0,0,0,.15); font-weight: 700; }
+.pestana .cerrar-pestana:hover { background: rgba(160,30,20,.25); }
+.pestanas-combate button.nueva { font-size: 18px; padding: 4px 12px; border: 1px solid rgba(240,201,106,.35); border-radius: 10px 10px 0 0; }
+.pestana-edit { font-family: var(--fuente-titulo); font-size: 15px; padding: 5px 10px; border-radius: 10px 10px 0 0; border: 2px solid var(--oro); background: #fffaf0; color: var(--tinta); width: 180px; }
+.cuerpo-combate { display: grid; grid-template-columns: 1fr; gap: 14px; align-items: start; }
+@media (min-width: 1250px) { .cuerpo-combate { grid-template-columns: minmax(0, 1fr) minmax(280px, 380px); } .cuerpo-combate .historial-partida { position: sticky; top: 8px; max-height: calc(100vh - 120px); overflow-y: auto; } }
+.cuerpo-combate .historial-partida { margin: 0; max-width: none; }
+.lado-combatientes { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.lista-anadir-pj { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.lista-anadir-pj small { color: #7a6450; }
 .expulsar-lista { position: absolute; right: 8px; top: 8px; }
 .partida-panel .historial-partida { margin-top: 16px; max-width: 640px; }
