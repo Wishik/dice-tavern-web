@@ -5,7 +5,7 @@ import { Modal, Numero } from '../ui';
 import { ChipsEstados, estadosPorVida, pasarRonda } from '../estados';
 import { escucharTiradas, useDados } from '../dice';
 import { detalleTirada } from '../tiradasPartida';
-import { cambiarJugador, guardarCombate, type Combate as CombateT, type Enemigo, type Miembro, type Partida } from '../partidas';
+import { cambiarJugador, guardarCombate, type Combate as CombateT, type CombateUno, type Enemigo, type Miembro, type Partida } from '../partidas';
 
 export interface Monstruo {
   id: string; en: string; es: string; ru: string; tam: [string, string]; tipo: [string, string];
@@ -65,15 +65,18 @@ const enCombate = (ini: number | null) => ini !== null && ini !== 0;
 /** Tiradas del máster en el combate de esta partida (las de los enemigos), lo más reciente primero. */
 export const tiradasDelCombate = (partida: Partida) => (cacheCombate.get(partida.id) ?? partida.combate)?.tiradas ?? [];
 
-/** Combate del máster: orden de iniciativa de jugadores y enemigos, vida y estados de cada uno. */
+const PRINCIPAL = 'principal';
+const aLista = (c: CombateT): CombateUno[] => [{ id: PRINCIPAL, nombre: c.nombre, ronda: c.ronda, turno: c.turno, enemigos: c.enemigos }, ...(c.otros ?? [])];
+const deLista = (l: CombateUno[], tiradas?: CombateT['tiradas']): CombateT => ({ ronda: l[0].ronda, turno: l[0].turno, enemigos: l[0].enemigos, nombre: l[0].nombre, otros: l.slice(1), tiradas });
+/** En qué combate está un jugador: el que lo tenga en `pjs`, si no, el primero. */
+const combateDe = (l: CombateUno[], pj: string) => l.find((k) => k.pjs?.includes(pj))?.id ?? PRINCIPAL;
+
+/** Combates del máster (uno o varios a la vez, uno al lado de otro). */
 export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj, onExpulsar }: { partida: Partida; miembros: Miembro[]; onRecargar: () => void; onAbrirPj?: (pj: string) => void; onExpulsar?: (m: Miembro) => void }) {
   const monstruos = useDatos<Monstruo[]>('monstruos');
   const [c, setC] = useState<CombateT>(() => cacheCombate.get(partida.id) ?? partida.combate ?? { ronda: 1, turno: null, enemigos: [] });
   useEffect(() => { cacheCombate.set(partida.id, c); }, [c, partida.id]);
-  const [anadir, setAnadir] = useState(false);
-  const [ficha, setFicha] = useState<{ m: Monstruo; quien: string } | null>(null);
   const [error, setError] = useState('');
-  const { tirar, tirarD20 } = useDados();
   const primera = useRef(true);
   // Se guarda en la partida un momento después de cada cambio (solo el máster escribe aquí).
   useEffect(() => {
@@ -84,60 +87,103 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj, onExpul
   // Las tiradas que hace el máster aquí (ataques y daño de los enemigos…) van al historial de la partida.
   useEffect(() => escucharTiradas((t) => setC((x) => ({ ...x, tiradas: [{ id: uid(), quien: L('Máster', 'Мастер'), etiqueta: t.etiqueta, formula: t.formula, total: t.total, detalle: detalleTirada(t), modo: t.modo, critico: t.critico ?? null, creada: new Date().toISOString() }, ...(x.tiradas ?? [])].slice(0, 60) }))), []);
 
+  const lista = aLista(c);
+  const setLista = (f: (l: CombateUno[]) => CombateUno[]) => setC((x) => deLista(f(aLista(x)), x.tiradas));
   const jugadores = miembros.filter((m) => m.usuario !== partida.master && m.pj && m.personaje);
   const sinPj = miembros.filter((m) => m.usuario !== partida.master && !(m.pj && m.personaje));
-  const filas: Fila[] = useMemo(() => {
-    const grupos = new Map<string, Enemigo[]>();
-    for (const e of c.enemigos) { const k = e.grupo ?? e.id; grupos.set(k, [...(grupos.get(k) ?? []), e]); }
-    const f: Fila[] = [
-      ...jugadores.map((m) => ({ tipo: 'pj' as const, clave: 'pj:' + m.personaje, ini: m.pj!.iniciativaActual, m })),
-      ...[...grupos.entries()].map(([k, es]) => ({ tipo: 'grupo' as const, clave: 'g:' + k, ini: es[0].ini, enemigos: es })),
-    ];
-    return f.sort((a, b) => (b.ini ?? -100) - (a.ini ?? -100));
-  }, [c.enemigos, jugadores]);
-  const dentro = filas.filter((f) => enCombate(f.ini));
-  const fuera = filas.filter((f) => !enCombate(f.ini));
-
-  const setEnemigos = (f: (es: Enemigo[]) => Enemigo[]) => setC((x) => ({ ...x, enemigos: f(x.enemigos) }));
-  const cambiarEnemigo = (id: string, f: (e: Enemigo) => Enemigo) => setEnemigos((es) => es.map((e) => (e.id === id ? f(e) : e)));
-  const cambiarGrupo = (clave: string, f: (e: Enemigo) => Enemigo) => setEnemigos((es) => es.map((e) => ('g:' + (e.grupo ?? e.id) === clave ? f(e) : e)));
   const jugador = async (m: Miembro, cambios: Record<string, unknown>) => {
     try { await cambiarJugador(m.personaje!, cambios); onRecargar(); } catch (e) { setError((e as Error).message); }
   };
+  const mover = (pj: string, destino: string) => setLista((l) => l.map((k) => {
+    const sin = (k.pjs ?? []).filter((x) => x !== pj);
+    return { ...k, pjs: k.id === destino && destino !== PRINCIPAL ? [...sin, pj] : sin };
+  }));
+  const nuevo = () => setLista((l) => [...l, { id: uid(), nombre: `${L('Combate', 'Бой')} ${l.length + 1}`, ronda: 1, turno: null, enemigos: [], pjs: [] }]);
+  const nombres = lista.map((k, i) => ({ id: k.id, nombre: k.nombre || `${L('Combate', 'Бой')} ${i + 1}` }));
+
+  return (
+    <div className="panel-combate">
+      {error && <p className="error">{error}</p>}
+      <div className={`combates ${lista.length > 1 ? 'varios' : ''}`}>
+        {lista.map((k, i) => (
+          <UnCombate key={k.id} k={k} nombre={nombres[i].nombre} otros={nombres.filter((x) => x.id !== k.id)} monstruos={monstruos}
+            jugadores={jugadores.filter((m) => combateDe(lista, m.personaje!) === k.id)}
+            set={(f) => setLista((l) => l.map((x) => (x.id === k.id ? f(x) : x)))}
+            quitar={k.id === PRINCIPAL ? undefined : () => setLista((l) => l.filter((x) => x.id !== k.id))}
+            jugador={jugador} mover={mover} onRecargar={onRecargar} onAbrirPj={onAbrirPj} onExpulsar={onExpulsar} />
+        ))}
+      </div>
+      <div className="fila-botones pie-combate"><button className="btn" onClick={nuevo}>⚔️ ＋ {L('Otro combate a la vez', 'Ещё один бой одновременно')}</button></div>
+      {sinPj.length > 0 && <>
+        <h3 className="titulo-fuera">{L('Jugadores sin personaje', 'Игроки без персонажа')}</h3>
+        <ul className="sin-pj">{sinPj.map((m) => <li key={m.usuario}><span>@{m.alias}</span>{onExpulsar && <button className="btn peligro pequeno" onClick={() => onExpulsar(m)}>{L('Expulsar', 'Исключить')}</button>}</li>)}</ul>
+      </>}
+      <p className="nota">{L('Los jugadores tiran iniciativa en su hoja (Atributos → Iniciativa) o la tiras tú con 🎲. Con iniciativa 0 no entran en el combate.', 'Игроки бросают инициативу у себя в листе (Характеристики → Инициатива) или ты бросаешь за них через 🎲. С инициативой 0 они не участвуют в бою.')}</p>
+    </div>
+  );
+}
+
+/** Un combate: orden de iniciativa de sus jugadores y enemigos, vida y estados de cada uno. */
+function UnCombate({ k, nombre, otros, monstruos, jugadores, set, quitar, jugador, mover, onRecargar, onAbrirPj, onExpulsar }: {
+  k: CombateUno; nombre: string; otros: { id: string; nombre: string }[]; monstruos: Monstruo[] | null; jugadores: Miembro[];
+  set: (f: (k: CombateUno) => CombateUno) => void; quitar?: () => void;
+  jugador: (m: Miembro, cambios: Record<string, unknown>) => Promise<void>; mover: (pj: string, destino: string) => void;
+  onRecargar: () => void; onAbrirPj?: (pj: string) => void; onExpulsar?: (m: Miembro) => void;
+}) {
+  const [anadir, setAnadir] = useState(false);
+  const [ficha, setFicha] = useState<{ m: Monstruo; quien: string } | null>(null);
+  const { tirar, tirarD20 } = useDados();
+  const filas: Fila[] = useMemo(() => {
+    const grupos = new Map<string, Enemigo[]>();
+    for (const e of k.enemigos) { const g = e.grupo ?? e.id; grupos.set(g, [...(grupos.get(g) ?? []), e]); }
+    const f: Fila[] = [
+      ...jugadores.map((m) => ({ tipo: 'pj' as const, clave: 'pj:' + m.personaje, ini: m.pj!.iniciativaActual, m })),
+      ...[...grupos.entries()].map(([g, es]) => ({ tipo: 'grupo' as const, clave: 'g:' + g, ini: es[0].ini, enemigos: es })),
+    ];
+    return f.sort((a, b) => (b.ini ?? -100) - (a.ini ?? -100));
+  }, [k.enemigos, jugadores]);
+  const dentro = filas.filter((f) => enCombate(f.ini));
+  const fuera = filas.filter((f) => !enCombate(f.ini));
+
+  const setEnemigos = (f: (es: Enemigo[]) => Enemigo[]) => set((x) => ({ ...x, enemigos: f(x.enemigos) }));
+  const cambiarEnemigo = (id: string, f: (e: Enemigo) => Enemigo) => setEnemigos((es) => es.map((e) => (e.id === id ? f(e) : e)));
+  const cambiarGrupo = (clave: string, f: (e: Enemigo) => Enemigo) => setEnemigos((es) => es.map((e) => ('g:' + (e.grupo ?? e.id) === clave ? f(e) : e)));
   const tirarEnemigos = () => setEnemigos((es) => {
     const porGrupo = new Map<string, number>();
     return es.map((e) => {
       if (enCombate(e.ini)) return e;
-      const k = e.grupo ?? e.id;
-      if (!porGrupo.has(k)) porGrupo.set(k, d20() + e.bonoIni);
-      return { ...e, ini: porGrupo.get(k)! };
+      const g = e.grupo ?? e.id;
+      if (!porGrupo.has(g)) porGrupo.set(g, d20() + e.bonoIni);
+      return { ...e, ini: porGrupo.get(g)! };
     });
   });
   const siguiente = () => {
     const vivas = dentro.filter((f) => f.tipo === 'pj' || f.enemigos.some((e) => e.pg > 0));
     if (!vivas.length) return;
-    const i = vivas.findIndex((f) => f.clave === c.turno);
+    const i = vivas.findIndex((f) => f.clave === k.turno);
     const sig = i < 0 ? 0 : (i + 1) % vivas.length;
     const nuevaRonda = i >= 0 && sig === 0;
-    setC((x) => ({
+    set((x) => ({
       ...x, turno: vivas[sig].clave, ronda: nuevaRonda ? x.ronda + 1 : x.ronda,
       // Al empezar una ronda nueva se descuenta la duración de los estados y se quitan los que terminan.
       enemigos: nuevaRonda ? x.enemigos.map((e) => { const r = pasarRonda(e.estados, e.estadosDetalle); return r ? { ...e, estados: r.estados, estadosDetalle: r.detalles } : e; }) : x.enemigos,
     }));
     if (nuevaRonda) {
       const cambios = jugadores.map((m) => [m, pasarRonda(m.pj!.estados, m.pj!.estadosDetalle)] as const).filter(([, r]) => r);
-      if (cambios.length) Promise.all(cambios.map(([m, r]) => cambiarJugador(m.personaje!, { estados: r!.estados, estadosDetalle: r!.detalles }))).then(onRecargar).catch((e) => setError(e.message));
+      if (cambios.length) Promise.all(cambios.map(([m, r]) => cambiarJugador(m.personaje!, { estados: r!.estados, estadosDetalle: r!.detalles }))).then(onRecargar).catch(() => {});
     }
   };
   const terminar = async () => {
-    if (!confirm(L('¿Terminar el combate? Se quitan los enemigos y la iniciativa de todos.', 'Закончить бой? Враги и инициатива у всех будут сброшены.'))) return;
-    setC((x) => ({ ronda: 1, turno: null, enemigos: [], tiradas: x.tiradas }));
+    if (!confirm(quitar
+      ? L(`¿Terminar «${nombre}»? Se quitan sus enemigos y sus jugadores vuelven al primer combate sin iniciativa.`, `Закончить «${nombre}»? Его враги уберутся, а игроки вернутся в первый бой без инициативы.`)
+      : L('¿Terminar el combate? Se quitan los enemigos y la iniciativa de sus jugadores.', 'Закончить бой? Враги и инициатива его игроков будут сброшены.'))) return;
+    if (quitar) quitar(); else set((x) => ({ ...x, ronda: 1, turno: null, enemigos: [] }));
     await Promise.all(jugadores.filter((m) => m.pj!.iniciativaActual !== null).map((m) => cambiarJugador(m.personaje!, { iniciativaActual: null }).catch(() => {})));
     onRecargar();
   };
 
   const tarjeta = (f: Fila) => (
-    <li key={f.clave} className={`fila-combate ${f.tipo} ${c.turno === f.clave ? 'turno' : ''}`}>
+    <li key={f.clave} className={`fila-combate ${f.tipo} ${k.turno === f.clave ? 'turno' : ''}`}>
       <div className="ini-caja">
         <Numero valor={f.ini ?? 0} ancho={52} set={(n) => f.tipo === 'pj' ? jugador(f.m, { iniciativaActual: n }) : cambiarGrupo(f.clave, (e) => ({ ...e, ini: n }))} />
         {f.tipo === 'pj' && <button className="btn pequeno tirar-ini" title={L('Tirar iniciativa por el jugador', 'Бросить инициативу за игрока')}
@@ -151,7 +197,13 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj, onExpul
           </div>
           <VidaFila pg={f.m.pj!.pg.actual} max={f.m.pj!.pg.max} temp={f.m.pj!.pg.temp ?? 0} set={(pg, temp) => jugador(f.m, { pg: { ...f.m.pj!.pg, actual: pg, temp }, estados: estadosPorVida(f.m.pj!.estados, pg, false) })} />
           <ChipsEstados estados={f.m.pj!.estados} agotamiento={f.m.pj!.agotamiento} detalles={f.m.pj!.estadosDetalle} quien={f.m.pj!.nombre || f.m.alias} vacio set={(e, a, d) => jugador(f.m, { estados: e, agotamiento: a, estadosDetalle: d })} />
-          {onExpulsar && <button className="btn peligro pequeno expulsar" onClick={() => onExpulsar(f.m)}>{L('Expulsar', 'Исключить')}</button>}
+          <div className="acciones-pj">
+            {otros.length > 0 && <select className="campo mover-pj" value="" onChange={(ev) => ev.target.value && mover(f.m.personaje!, ev.target.value)}>
+              <option value="">{L('Mover a…', 'Перенести в…')}</option>
+              {otros.map((o) => <option key={o.id} value={o.id}>{o.nombre}</option>)}
+            </select>}
+            {onExpulsar && <button className="btn peligro pequeno expulsar" onClick={() => onExpulsar(f.m)}>{L('Expulsar', 'Исключить')}</button>}
+          </div>
         </div>
       ) : (
         <div className="combatiente">
@@ -175,36 +227,28 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj, onExpul
   );
 
   return (
-    <div className="panel-combate">
+    <section className="un-combate">
       <div className="cabecera-combate">
-        <div><span className="etq-pequena">{L('Ronda', 'Раунд')}</span> <strong className="ronda">{c.ronda}</strong></div>
+        <input className="nombre-combate" value={k.nombre ?? nombre} onChange={(ev) => set((x) => ({ ...x, nombre: ev.target.value }))} aria-label={L('Nombre del combate', 'Название боя')} />
+        <div><span className="etq-pequena">{L('Ronda', 'Раунд')}</span> <strong className="ronda">{k.ronda}</strong></div>
         <div className="fila-botones">
           <button className="btn primario" onClick={siguiente}>▶ {L('Siguiente turno', 'Следующий ход')}</button>
-          <button className="btn" onClick={tirarEnemigos} disabled={!c.enemigos.some((e) => !enCombate(e.ini))}>🎲 {L('Iniciativa enemigos', 'Инициатива врагов')}</button>
+          <button className="btn" onClick={tirarEnemigos} disabled={!k.enemigos.some((e) => !enCombate(e.ini))}>🎲 {L('Iniciativa enemigos', 'Инициатива врагов')}</button>
         </div>
       </div>
-      {error && <p className="error">{error}</p>}
-
       <ol className="orden-combate">{dentro.map(tarjeta)}</ol>
-      {!filas.length && <p className="vacio">{L('Aún no hay nadie en el combate. Añade enemigos o pide a los jugadores que tiren iniciativa.', 'В бою пока никого. Добавь врагов или попроси игроков бросить инициативу.')}</p>}
+      {!filas.length && <p className="vacio">{L('Aún no hay nadie en este combate. Añade enemigos o mueve aquí a algún jugador.', 'В этом бою пока никого. Добавь врагов или перенеси сюда игрока.')}</p>}
       {fuera.length > 0 && <>
         <h3 className="titulo-fuera">{L('Fuera del combate (sin iniciativa)', 'Не в бою (без инициативы)')}</h3>
         <ol className="orden-combate fuera">{fuera.map(tarjeta)}</ol>
       </>}
-      {sinPj.length > 0 && <>
-        <h3 className="titulo-fuera">{L('Jugadores sin personaje', 'Игроки без персонажа')}</h3>
-        <ul className="sin-pj">{sinPj.map((m) => <li key={m.usuario}><span>@{m.alias}</span>{onExpulsar && <button className="btn peligro pequeno" onClick={() => onExpulsar(m)}>{L('Expulsar', 'Исключить')}</button>}</li>)}</ul>
-      </>}
-
       <div className="fila-botones pie-combate">
         <button className="btn primario" onClick={() => setAnadir(true)}>＋ {L('Añadir enemigos', 'Добавить врагов')}</button>
         <button className="btn peligro" onClick={terminar}>{L('Terminar combate', 'Закончить бой')}</button>
       </div>
-      <p className="nota">{L('Los jugadores tiran iniciativa en su hoja (Atributos → Iniciativa) o la tiras tú con 🎲. Con iniciativa 0 no entran en el combate.', 'Игроки бросают инициативу у себя в листе (Характеристики → Инициатива) или ты бросаешь за них через 🎲. С инициативой 0 они не участвуют в бою.')}</p>
-
       {anadir && monstruos && <ModalAnadirEnemigos monstruos={monstruos} onClose={() => setAnadir(false)} onAnadir={(es) => { setEnemigos((x) => [...x, ...es]); setAnadir(false); }} onVer={(m) => setFicha({ m, quien: nombreM(m) })} />}
       {ficha && <Modal titulo={ficha.quien} onClose={() => setFicha(null)}><BloqueMonstruo m={ficha.m} quien={ficha.quien} tirar={tirar} /></Modal>}
-    </div>
+    </section>
   );
 }
 

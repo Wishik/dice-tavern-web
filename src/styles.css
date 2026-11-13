@@ -770,3 +770,13 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .pie-combate { margin-top: 18px; justify-content: center; }
 .chip-quitar-todos { border: 1px solid var(--rojo); background: #fff3ef; color: var(--rojo); border-radius: 999px; font-size: 12px; padding: 2px 8px; cursor: pointer; }
 .historial li.de-master b { font-size: 15px; }
+/* Varios combates a la vez */
+.combates { display: grid; gap: 14px; grid-template-columns: 1fr; }
+.combates.varios { grid-template-columns: repeat(auto-fit, minmax(330px, 1fr)); align-items: start; }
+.combates.varios .orden-combate { grid-template-columns: 1fr; }
+.un-combate { display: flex; flex-direction: column; gap: 10px; }
+.combates.varios .un-combate { border: 1px solid rgba(240,201,106,.35); border-radius: var(--radio); padding: 10px; background: rgba(255,255,255,.03); }
+.nombre-combate { background: transparent; border: none; border-bottom: 1px dashed rgba(240,201,106,.5); color: var(--oro-claro); font-family: var(--fuente-titulo); font-size: 18px; min-width: 0; width: 100%; padding: 2px 0; }
+.cabecera-combate .nombre-combate { flex: 1 1 100%; }
+.acciones-pj { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.mover-pj { width: auto; min-height: 30px; padding: 2px 6px; font-size: 13px; }

@@ -11,7 +11,10 @@ export interface Partida { id: string; nombre: string; codigo: string; master: s
 export interface Enemigo { id: string; monstruo: string | null; nombre: string; grupo: string | null; ini: number | null; bonoIni: number; pg: number; pgMax: number; temp?: number; ca: number; estados: string[]; agotamiento?: number; estadosDetalle?: Personaje['estadosDetalle'] }
 /** Tirada del máster en el combate (enemigos), para el historial. */
 export interface TiradaMaster { id: string; quien: string; etiqueta: string; formula: string; total: number; detalle: string; modo: string; critico: string | null; creada: string }
-export interface Combate { ronda: number; turno: string | null; enemigos: Enemigo[]; tiradas?: TiradaMaster[] }
+/** Un combate. Los jugadores van al primero salvo que estén en `pjs` de otro. */
+export interface CombateUno { id: string; nombre?: string; ronda: number; turno: string | null; enemigos: Enemigo[]; pjs?: string[] }
+/** Lo guardado en la partida: el primer combate en la raíz (como antes) y los demás en `otros`. */
+export interface Combate { ronda: number; turno: string | null; enemigos: Enemigo[]; nombre?: string; tiradas?: TiradaMaster[]; otros?: CombateUno[] }
 export interface Miembro {
   usuario: string;
   alias: string;
