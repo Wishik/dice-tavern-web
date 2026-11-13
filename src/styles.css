@@ -882,3 +882,12 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .texto-largo .perfil-sec { margin: 10px 0 4px; font-weight: 700; font-size: .85em; letter-spacing: .06em; opacity: .75; border-bottom: 1px solid currentColor; }
 .texto-largo .perfil-linea { margin: 0 0 4px; padding-left: 10px; }
 .texto-largo .perfil-bib { margin: 12px 0 6px; padding: 8px 10px; border-radius: 8px; border: 1px dashed var(--madera-borde); background: rgba(217,164,65,.12); }
+/* Conjuros agrupados por clase / origen */
+.cabecera-grupo { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: end; padding-bottom: 10px; border-bottom: 1px solid #c3a978; }
+.cabecera-grupo .valores-conjuro { display: flex; gap: 14px; }
+.cabecera-grupo .valores-conjuro strong, .cabecera-grupo .lt-valor { font-size: 22px; }
+.sub-grupo .nivel-conjuro { display: flex; align-items: center; gap: 8px; }
+.nivel-sub { margin: 10px 0 2px; font-size: 12px; color: var(--tinta-suave); font-weight: 600; }
+.grupo-otros { margin: 12px 0; padding: 10px 12px; border: 1.5px solid var(--madera-borde); border-radius: 12px; background: rgba(255,255,255,.18); }
+.titulo-grupo { margin: -2px 0 8px; font-size: 15px; }
+.titulo-grupo small { font-weight: 400; color: var(--tinta-suave); }

@@ -56,6 +56,8 @@ export interface ConjuroPersonaje {
   origen?: string;
   /** Multiclase: clase por la que se aprendió (sin valor: la principal). */
   clase?: string;
+  /** Conjuro adicional puesto a mano: de qué lista viene (nombre de clase o 'raza'), para agruparlo en «Otros conjuros». */
+  lista?: string;
 }
 
 /** Recurso añadido a mano. `recupera`: con qué descanso vuelve entero (corto, largo o ambos). */
@@ -155,6 +157,8 @@ export interface Personaje {
   ataquesTurno: { habil: number; torpe: number };
   ataques: { nombre: string; ataque: string; dano: string }[];
   conjuroCaracteristica: '' | Atributo;
+  /** Característica cambiada a mano por grupo de conjuros (id de src/gruposConjuros.ts), salvo la clase principal. */
+  caracteristicaGrupos?: Record<string, Atributo>;
   conjurosTurno: { estandar: string; adicional: string };
   salvaciones: Record<Atributo, { comp: boolean; bonus: number }>;
   muerte: { exitos: number; fallos: number };

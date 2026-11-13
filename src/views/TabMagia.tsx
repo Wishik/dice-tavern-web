@@ -5,15 +5,17 @@ import { Contador, useDados } from '../dice';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo } from '../types';
 import { useDatos, type Conjuro } from '../data';
 import type { ConjuroPersonaje } from '../types';
-import { CARACTERISTICA_CONJUROS, ataqueConjuros, cdConjuros, conSigno, dadosConjuro, mejoraCalculada, mejoraNivelSuperior, multiplicadorTruco } from '../rules';
+import { CARACTERISTICA_CONJUROS, conSigno, dadosConjuro, mejoraCalculada, mejoraNivelSuperior, multiplicadorTruco } from '../rules';
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
 import { esMulticlase } from '../multiclase';
 import { claseDeConjuro, type MagiaClase } from '../avisos';
 import { tr } from '../ru';
 import { td } from '../datosRu';
+import { atributoAuto, atributoGrupo, ataqueCon, cdCon, fijarAtributoGrupo, grupoDe, gruposOtros, type GrupoConjuros } from '../gruposConjuros';
 import { FUENTES, cantidadEleccion, eleccionesPendientes, opcionesEleccion, concesionesActivas, type Concesion, type Fuente } from '../conjurosRasgos';
 
 const nombreNivel = (i: number) => i === 0 ? L('Trucos', 'Заговоры') : `${L('Nivel', 'Уровень')} ${i}`;
+const CLASES_LANZADORAS = ['Bardo', 'Brujo', 'Clérigo', 'Druida', 'Explorador', 'Hechicero', 'Mago', 'Paladín'];
 const NIVELES = Array.from({ length: 10 }, (_, i) => i);
 
 export function TabMagia() {
@@ -27,7 +29,7 @@ export function TabMagia() {
   const setAnadir = (t: null | 'truco' | 'conjuro' | 'adicional', clase = p.clase) => setAnadirQue(t ? { tipo: t, clase } : null);
   const [todasClases, setTodasClases] = useState(false);
   const [ver, setVer] = useState<{ c: ConjuroPersonaje; def?: Conjuro } | null>(null);
-  const [nuevo, setNuevo] = useState<{ nombre: string; nivel: number; adicional: boolean; base?: Conjuro; descripcion: string; clase?: string } | null>(null);
+  const [nuevo, setNuevo] = useState<{ nombre: string; nivel: number; adicional: boolean; base?: Conjuro; descripcion: string; clase?: string; lista?: string } | null>(null);
   const [elegirBase, setElegirBase] = useState(false);
   const multi = esMulticlase(p);
   const claseMin = (anadirQue?.clase ?? p.clase).toLowerCase();
@@ -60,39 +62,54 @@ export function TabMagia() {
     </ul>
   );
   const conIdx = p.conjuros.map((c, idx) => ({ c, idx }));
-  const adicionales = conIdx.filter(({ c }) => c.adicional).sort((a, b) => a.c.nivel - b.c.nivel);
-  const trucosAd = adicionales.filter(({ c }) => c.nivel === 0), conjAd = adicionales.filter(({ c }) => c.nivel > 0);
-
-  const cd = cdConjuros(p), at = ataqueConjuros(p);
-  const auto = CARACTERISTICA_CONJUROS[p.clase];
+  const otros = gruposOtros(p);
+  const [listaAnadir, setListaAnadir] = useState('');
+  const abrirOtros = (lista: string) => { setListaAnadir(lista); setAnadir('adicional'); };
+  const nombresLanzadoras = (lanzadoras.length ? lanzadoras : magia.filter((m) => CARACTERISTICA_CONJUROS[m.clase] && (m.nTrucos || m.nConj))).map((m) => m.clase);
+  const atrDe = (c: ConjuroPersonaje) => atributoGrupo(p, grupoDe(p, c), nombresLanzadoras, razas);
   const { tirarD20 } = useDados();
+  const tituloGrupo = (g: GrupoConjuros) => g.tipo === 'raza' ? <>{L('Conjuros raciales', 'Расовые заклинания')}{g.rasgo && <small> · {td(g.rasgo)}</small>}</>
+    : g.tipo === 'dote' ? <>{L('Dote', 'Черта')}: {td(g.rasgo ?? '')}</>
+    : g.tipo === 'invocacion' ? L('Invocaciones de brujo', 'Воззвания колдуна')
+    : g.tipo === 'lista' ? L(`Conjuros de ${g.clase}`, `Заклинания: ${T(RU_CLASES, g.clase ?? '')}`)
+    : L('Otros', 'Другие');
+  const CabeceraGrupo = ({ g }: { g: GrupoConjuros }) => {
+    const auto = atributoAuto(p, g, nombresLanzadoras, razas);
+    const mano = g.tipo === 'clase' && g.clase === p.clase ? p.conjuroCaracteristica : p.caracteristicaGrupos?.[g.id] ?? '';
+    const a = mano || auto;
+    const at = ataqueCon(p, a), cd = cdCon(p, a);
+    return (
+      <div className="cabecera-grupo">
+        <Etiqueta texto="Característica de conjuro">
+          <select className="campo" value={mano} onChange={(e) => upd((x) => fijarAtributoGrupo(x, g, e.target.value as Atributo | ''))}>
+            <option value="">{auto ? L(`${NOMBRE_ATRIBUTO[auto]} (automática)`, `${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[auto])} (авто)`) : L('— Ninguna —', '— Нет —')}</option>
+            {ATRIBUTOS.map((k) => <option key={k} value={k}>{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[k])}</option>)}
+          </select>
+        </Etiqueta>
+        <div className="valores-conjuro">
+          <div><small>{L('Ataque', 'Атака')}</small>{at !== null ? <button className="lt-valor" onClick={() => tirarD20(L('Ataque de conjuro', 'Атака заклинанием'), at, [], undefined, 'combate')}>{conSigno(at)}</button> : <strong>—</strong>}</div>
+          <div><small>{L('CD', 'Сл')}</small><strong>{cd ?? '—'}</strong></div>
+        </div>
+      </div>
+    );
+  };
   const [filtroNivel, setFiltroNivel] = useState<number | null>(null);
   // Nivel máximo de conjuro de la clase a la que se añade (o el general).
   const maxNivelAnadir = (anadirQue ? magia.find((m) => m.clase === anadirQue.clase)?.nivelMaxConjuro : null) ?? avisos.nivelMaxConjuro ?? null;
   const anadirConjuro = (c: Conjuro) => {
     if (anadir !== 'adicional' && c.nivel > 0 && maxNivelAnadir !== null && c.nivel > maxNivelAnadir
       && !confirm(L(`«${td(c.nombre)}» es de nivel ${c.nivel}, pero ahora solo puedes lanzar conjuros hasta nivel ${maxNivelAnadir}. ¿Añadirlo igualmente?`, `«${td(c.nombre)}» — ${c.nivel} уровня, а сейчас тебе доступны заклинания только до ${maxNivelAnadir} уровня. Всё равно добавить?`))) return false;
-    upd((x) => { x.conjuros.push({ nombre: c.nombre, nivel: c.nivel, ...(anadir === 'adicional' ? { adicional: true } : multi ? { clase: anadirQue!.clase } : {}) }); });
+    upd((x) => { x.conjuros.push({ nombre: c.nombre, nivel: c.nivel, ...(anadir === 'adicional' ? { adicional: true, ...(listaAnadir ? { lista: listaAnadir } : {}) } : multi ? { clase: anadirQue!.clase } : {}) }); });
     return true;
   };
 
   return (
     <div className="tab">
       <Seccion titulo={L('Lanzamiento', 'Колдовство')} className="lanzamiento">
-        <Etiqueta texto="Característica de conjuros">
-          <select className="campo" value={p.conjuroCaracteristica} onChange={(e) => upd((x) => { x.conjuroCaracteristica = e.target.value as Atributo | ''; })}>
-            <option value="">{auto ? L(`Automática: ${NOMBRE_ATRIBUTO[auto]} (${p.clase})`, `Автоматически: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[auto])} (${T(RU_CLASES, p.clase)})`) : L('— Ninguna —', '— Нет —')}</option>
-            {ATRIBUTOS.map((a) => <option key={a} value={a}>{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}</option>)}
-          </select>
-        </Etiqueta>
         <h4 className="subtitulo-campos">{L('Conjuros por turno', 'Заклинаний за ход')}</h4>
         <div className="fila-2 alineada">
-          <Etiqueta texto="Estándar"><Texto valor={p.conjurosTurno.estandar} set={(s) => upd((x) => { x.conjurosTurno.estandar = s; })} /></Etiqueta>
-          <Etiqueta texto="Adicional"><Texto valor={p.conjurosTurno.adicional} set={(s) => upd((x) => { x.conjurosTurno.adicional = s; })} /></Etiqueta>
-        </div>
-        <div className="fila-2 valores-conjuro">
-          <div><small>{L('CD de conjuros', 'Сл заклинаний')}</small><strong>{cd ?? '—'}</strong></div>
-          <div><small>{L('Ataque de conjuro', 'Атака заклинанием')}</small>{at !== null ? <button className="lt-valor" onClick={() => tirarD20(L('Ataque de conjuro', 'Атака заклинанием'), at, [], undefined, 'combate')}>{conSigno(at)}</button> : <strong>—</strong>}</div>
+          <Etiqueta texto="Estándar"><Texto valor={p.conjurosTurno.estandar || '1'} set={(s) => upd((x) => { x.conjurosTurno.estandar = s; })} /></Etiqueta>
+          <Etiqueta texto="Adicional"><Texto valor={p.conjurosTurno.adicional || '1'} set={(s) => upd((x) => { x.conjurosTurno.adicional = s; })} /></Etiqueta>
         </div>
         {p.pm.max > 0 && (
           <div className="mana-magia">
@@ -111,38 +128,53 @@ export function TabMagia() {
         const porNivel = NIVELES.map((_, i) => propios.filter(({ c }) => c.nivel === i));
         const faltanT = m.limiteTrucos ? Math.max(0, m.limiteTrucos - m.nTrucos) : 0;
         const faltanC = m.limiteConjuros ? Math.max(0, m.limiteConjuros - m.nConj) : 0;
-        const de = multi ? ` · ${T(RU_CLASES, m.clase)} ${m.nivel}` : '';
+        const g: GrupoConjuros = { id: `clase:${m.clase}`, tipo: 'clase', clase: m.clase };
         return (
-          <Fragment key={m.clase}>
-            <Seccion titulo={L('Trucos', 'Заговоры') + de} aviso={faltanT} extra={m.limiteTrucos !== null && <span className="contador-limite">{m.nTrucos}/{m.limiteTrucos}</span>}>
-              <BotonAnadir aviso={faltanT > 0} onClick={() => m.limiteTrucos !== null && m.nTrucos >= m.limiteTrucos ? lleno('trucos', m.limiteTrucos, m.nivel) : setAnadir('truco', m.clase)}>Añadir truco</BotonAnadir>
+          <Seccion key={m.clase} className="grupo-conjuros" titulo={m.clase ? L(`Conjuros de ${m.clase}`, `Заклинания: ${T(RU_CLASES, m.clase)}`) + (multi ? ` ${m.nivel}` : '') : L('Conjuros', 'Заклинания')} aviso={faltanT + faltanC}>
+            <CabeceraGrupo g={g} />
+            <div className="sub-grupo">
+              <h4 className="nivel-conjuro">{L('Trucos', 'Заговоры')}{m.limiteTrucos !== null && <span className="contador-limite">{m.nTrucos}/{m.limiteTrucos}</span>}{faltanT > 0 && <PuntoRojo n={faltanT} />}</h4>
               {porNivel[0].length > 0 && <ListaConjuros lista={porNivel[0]} preparar={false} />}
-            </Seccion>
-            <Seccion titulo={L('Conjuros', 'Заклинания') + de} aviso={faltanC} extra={m.limiteConjuros !== null && <span className="contador-limite">{m.nConj}/{m.limiteConjuros}</span>}>
-              <BotonAnadir aviso={faltanC > 0} onClick={() => m.limiteConjuros !== null && !m.conjurosAbierto && m.nConj >= m.limiteConjuros ? lleno('conjuros', m.limiteConjuros, m.nivel) : setAnadir('conjuro', m.clase)}>Añadir conjuro</BotonAnadir>
+              <BotonAnadir aviso={faltanT > 0} onClick={() => m.limiteTrucos !== null && m.nTrucos >= m.limiteTrucos ? lleno('trucos', m.limiteTrucos, m.nivel) : setAnadir('truco', m.clase)}>Añadir truco</BotonAnadir>
+            </div>
+            <div className="sub-grupo">
+              <h4 className="nivel-conjuro">{L('Conjuros', 'Заклинания')}{m.limiteConjuros !== null && <span className="contador-limite">{m.nConj}/{m.limiteConjuros}</span>}{faltanC > 0 && <PuntoRojo n={faltanC} />}</h4>
               {m.limitePreparados !== null && m.nConj > 0 && <p className={`nota ${m.nPrep > m.limitePreparados ? 'error' : ''}`}>{L('Preparados', 'Подготовлено')}: {m.nPrep}/{m.limitePreparados}</p>}
               {m.nivelMaxConjuro !== null && <p className="nota">{L('Nivel máximo de conjuro', 'Максимальный уровень заклинаний')}: {m.nivelMaxConjuro}</p>}
               {porNivel.slice(1).map((lista, k) => lista.length > 0 && (
                 <div key={k}>
-                  <h4 className="nivel-conjuro">{nombreNivel(k + 1)}</h4>
+                  <h5 className="nivel-sub">{nombreNivel(k + 1)}</h5>
                   <ListaConjuros lista={lista} preparar m={m} />
                 </div>
               ))}
+              <BotonAnadir aviso={faltanC > 0} onClick={() => m.limiteConjuros !== null && !m.conjurosAbierto && m.nConj >= m.limiteConjuros ? lleno('conjuros', m.limiteConjuros, m.nivel) : setAnadir('conjuro', m.clase)}>Añadir conjuro</BotonAnadir>
               {m.nConj > 0 && <p className="nota pequena">{L('● = preparado: los que tienes listos para lanzar hoy. Márcalos tras un descanso largo si tu clase prepara conjuros.', '● = подготовлено: то, что готово к накладыванию сегодня. Отмечай после долгого отдыха, если твой класс готовит заклинания.')}</p>}
-            </Seccion>
-          </Fragment>
+            </div>
+          </Seccion>
         );
       })}
-      <Seccion titulo={L('Adicionales', 'Дополнительные')} aviso={pendientes.length}>
-        <p className="nota pequena">{L('De tu raza, dotes, objetos o rasgos. No cuentan para el límite de tu clase. Los de tu raza y tus dotes (✨) se añaden solos al llegar al nivel.', 'От расы, черт, предметов или умений. Не считаются в лимит класса. Заклинания от расы и черт (✨) добавляются сами, когда доходишь до нужного уровня.')}</p>
+      <Seccion titulo={L('Otros conjuros', 'Другие заклинания')} aviso={pendientes.length} className="otros-conjuros">
+        <p className="nota pequena">{L('De tu raza, dotes, invocaciones u objetos. No cuentan para el límite de tu clase. Los de tu raza y tus dotes (✨) se añaden solos al llegar al nivel.', 'От расы, черт, воззваний или предметов. Не считаются в лимит класса. Заклинания от расы и черт (✨) добавляются сами, когда доходишь до нужного уровня.')}</p>
         {pendientes.map((c) => (
           <button key={c.id} className="aviso-rojo elegir-conjuro" onClick={() => setElegir(c)}>
             <PuntoRojo /> {L(`«${td(c.fuente.rasgo)}» te deja elegir ${cantidadEleccion(c.elegir!, p) > 1 ? `${cantidadEleccion(c.elegir!, p)} conjuros` : 'un conjuro'}: toca para escoger`, `«${td(c.fuente.rasgo)}» даёт выбрать ${cantidadEleccion(c.elegir!, p) > 1 ? `${cantidadEleccion(c.elegir!, p)} заклинания` : 'заклинание'}: нажми, чтобы выбрать`)}
           </button>
         ))}
-        {trucosAd.length > 0 && <><h4 className="nivel-conjuro">{L('Trucos adicionales', 'Дополнительные заговоры')}</h4><ListaConjuros lista={trucosAd} preparar={false} /></>}
-        {conjAd.length > 0 && <><h4 className="nivel-conjuro">{L('Conjuros adicionales', 'Дополнительные заклинания')}</h4><ListaConjuros lista={conjAd} preparar={false} /></>}
-        <BotonAnadir onClick={() => setAnadir('adicional')}>Añadir conjuro adicional</BotonAnadir>
+        {otros.map(({ g, idx }) => {
+          const lista = idx.map((i) => ({ c: p.conjuros[i], idx: i })).sort((a, b) => a.c.nivel - b.c.nivel);
+          const tr0 = lista.filter(({ c }) => c.nivel === 0), cj = lista.filter(({ c }) => c.nivel > 0);
+          const manual = g.tipo === 'lista' || g.tipo === 'otros' || g.id === 'raza:';
+          return (
+            <div key={g.id} className="grupo-otros">
+              <h4 className="titulo-grupo">{tituloGrupo(g)}</h4>
+              <CabeceraGrupo g={g} />
+              {tr0.length > 0 && <div className="sub-grupo"><h4 className="nivel-conjuro">{L('Trucos', 'Заговоры')}</h4><ListaConjuros lista={tr0} preparar={false} /></div>}
+              {cj.length > 0 && <div className="sub-grupo"><h4 className="nivel-conjuro">{L('Conjuros', 'Заклинания')}</h4><ListaConjuros lista={cj} preparar={false} /></div>}
+              {manual && <BotonAnadir onClick={() => abrirOtros(g.tipo === 'lista' ? g.clase! : g.tipo === 'raza' ? 'raza' : '')}>{L('Añadir aquí', 'Добавить сюда')}</BotonAnadir>}
+            </div>
+          );
+        })}
+        <BotonAnadir onClick={() => abrirOtros('')}>{L('Añadir a otros conjuros', 'Добавить в другие заклинания')}</BotonAnadir>
         {conElecciones.length > pendientes.length && <p className="nota pequena"><button className="btn enlace pequeno" onClick={() => setElegir(conElecciones.find((c) => !pendientes.includes(c))!)}>{L('Cambiar conjuros elegidos de raza o dote', 'Поменять выбранные заклинания расы или черты')}</button></p>}
       </Seccion>
       {elegir && todos && <ModalElegir c={elegir} todos={todos} otras={conElecciones} onCambiar={setElegir} onClose={() => setElegir(null)} />}
@@ -154,6 +186,15 @@ export function TabMagia() {
         <Modal titulo={tr(anadir === 'truco' ? 'Añadir truco' : anadir === 'adicional' ? 'Añadir conjuro adicional' : 'Añadir conjuro')} onClose={() => setAnadir(null)}>
           {claseMin && anadir !== 'adicional' && (
             <label className="interruptor"><input type="checkbox" checked={todasClases} onChange={(e) => setTodasClases(e.target.checked)} /> {anadir === 'truco' ? L('Mostrar trucos de todas las clases', 'Показать заговоры всех классов') : L('Mostrar conjuros de todas las clases', 'Показать заклинания всех классов')}</label>
+          )}
+          {anadir === 'adicional' && (
+            <label className="etiqueta"><span>{L('¿De dónde viene? (para agruparlo)', 'Откуда оно? (для группировки)')}</span>
+              <select className="campo" value={listaAnadir} onChange={(e) => setListaAnadir(e.target.value)}>
+                <option value="">{L('Otros (objeto, rasgo…)', 'Другое (предмет, умение…)')}</option>
+                <option value="raza">{L('De mi raza', 'От расы')}</option>
+                {CLASES_LANZADORAS.map((k) => <option key={k} value={k}>{L(`Lista de ${k}`, `Список: ${T(RU_CLASES, k)}`)}</option>)}
+              </select>
+            </label>
           )}
           {anadir !== 'truco' && (
             <div className="filtro-nivel" role="group" aria-label={L('Filtrar por nivel', 'Фильтр по уровню')}>
@@ -175,19 +216,19 @@ export function TabMagia() {
                 && !p.conjuros.some((x) => x.nombre === c.nombre)}
               render={(c) => <span className="res-conjuro"><strong>{td(c.nombre)}</strong><small>{c.nivel ? `${L('Nivel', 'Уровень')} ${c.nivel}` : L('Truco', 'Заговор')} · {td(c.escuela)} · {c.clases.join(', ')}</small></span>}
               onElegir={(c) => {
-                if (typeof c === 'string') { setNuevo({ nombre: c, nivel: anadir === 'truco' ? 0 : 1, adicional: anadir === 'adicional', descripcion: '', clase: anadirQue?.clase }); setAnadir(null); return; }
+                if (typeof c === 'string') { setNuevo({ nombre: c, nivel: anadir === 'truco' ? 0 : 1, adicional: anadir === 'adicional', descripcion: '', clase: anadirQue?.clase, lista: listaAnadir }); setAnadir(null); return; }
                 if (anadirConjuro(c)) setAnadir(null);
               }}
             />
           )}
-          <button className="btn crear-propio" onClick={() => { setNuevo({ nombre: '', nivel: anadir === 'truco' ? 0 : 1, adicional: anadir === 'adicional', descripcion: '', clase: anadirQue?.clase }); setAnadir(null); }}>✏️ {L('Crear conjuro propio (puede basarse en otro)', 'Создать своё заклинание (можно на основе другого)')}</button>
+          <button className="btn crear-propio" onClick={() => { setNuevo({ nombre: '', nivel: anadir === 'truco' ? 0 : 1, adicional: anadir === 'adicional', descripcion: '', clase: anadirQue?.clase, lista: listaAnadir }); setAnadir(null); }}>✏️ {L('Crear conjuro propio (puede basarse en otro)', 'Создать своё заклинание (можно на основе другого)')}</button>
 
         </Modal>
       )}
       {nuevo && (
         <Modal titulo="Crear conjuro propio" onClose={() => setNuevo(null)}
           pie={<button className="btn primario" disabled={!nuevo.nombre.trim()} onClick={() => {
-            upd((x) => { x.conjuros.push({ nombre: nuevo.nombre.trim(), nivel: nuevo.nivel, ...(nuevo.adicional ? { adicional: true } : {}), ...(nuevo.base ? { base: nuevo.base.nombre } : {}), ...(multi && !nuevo.adicional && nuevo.clase ? { clase: nuevo.clase } : {}), descripcion: nuevo.descripcion }); });
+            upd((x) => { x.conjuros.push({ nombre: nuevo.nombre.trim(), nivel: nuevo.nivel, ...(nuevo.adicional ? { adicional: true, ...(nuevo.lista ? { lista: nuevo.lista } : {}) } : {}), ...(nuevo.base ? { base: nuevo.base.nombre } : {}), ...(multi && !nuevo.adicional && nuevo.clase ? { clase: nuevo.clase } : {}), descripcion: nuevo.descripcion }); });
             setNuevo(null);
           }}>{L('Guardar conjuro', 'Сохранить заклинание')}</button>}>
           <label className="etiqueta"><span>{L('Nombre de tu conjuro', 'Название твоего заклинания')}</span>
@@ -220,14 +261,14 @@ export function TabMagia() {
           {(() => {
             const mio = p.conjuros.find((c) => c.nombre === ver.c.nombre);
             if (mio && mio.descripcion !== undefined) return <>
-              <Lanzar texto={mio.descripcion} nivel={mio.nivel} nombre={mio.nombre} />
+              <Lanzar texto={mio.descripcion} nivel={mio.nivel} nombre={mio.nombre} atr={atrDe(mio)} />
               <p className="subtitulo">{L('Conjuro propio', 'Своё заклинание')}{mio.base ? L(` basado en ${mio.base}`, ` на основе «${mio.base}»`) : ''}</p>
               <label className="etiqueta"><span>{L('Descripción (puedes cambiarla)', 'Описание (можно менять)')}</span>
                 <Texto multilinea filas={8} valor={mio.descripcion} set={(v) => upd((x) => { const c = x.conjuros.find((c) => c.nombre === ver.c.nombre); if (c) c.descripcion = v; })} />
               </label>
             </>;
             return <>
-              <Lanzar texto={ver.def?.descripcion ?? ''} nivel={ver.c.nivel} nombre={ver.c.nombre} />
+              <Lanzar texto={ver.def?.descripcion ?? ''} nivel={ver.c.nivel} nombre={ver.c.nombre} atr={atrDe(p.conjuros.find((c) => c.nombre === ver.c.nombre) ?? ver.c)} />
               {ver.def ? <FichaConjuro c={ver.def} /> : <p className="nota">{L('Conjuro personalizado (no está en la base).', 'Своё заклинание (нет в базе).')}</p>}
             </>;
           })()}
@@ -255,12 +296,12 @@ export function FichaConjuro({ c }: { c: Conjuro }) {
 }
 
 /** Lanzar el conjuro: elegir a qué nivel (gasta ese maná), tirada de ataque, CD y dados de daño/curación (con la mejora por nivel). */
-function Lanzar({ texto: completo, nivel, nombre }: { texto: string; nivel: number; nombre: string }) {
+function Lanzar({ texto: completo, nivel, nombre, atr }: { texto: string; nivel: number; nombre: string; atr: Atributo | '' }) {
   // El perfil de criatura (líneas «■ …») no cuenta para dados ni mejoras.
   const texto = completo.split('\n■')[0];
   const { p, upd, avisos, ajeno } = useFicha();
   const { tirar, tirarD20 } = useDados();
-  const at = ataqueConjuros(p), cd = cdConjuros(p);
+  const at = ataqueCon(p, atr), cd = cdCon(p, atr);
   const maxEsp = Math.max(nivel, Math.min(9, avisos.nivelMaxConjuro ?? 9));
   const [espacio, setEspacio] = useState(nivel);
   const [lanzado, setLanzado] = useState('');
@@ -305,7 +346,7 @@ function Lanzar({ texto: completo, nivel, nombre }: { texto: string; nivel: numb
             <small>{td(mejora)}</small></div>
         : <p className="nota pequena">{L('Este conjuro no cambia al lanzarlo a más nivel (solo gasta más maná).', 'Это заклинание не меняется на более высоком уровне (тратит только больше маны).')}</p>)}
       {hayTiradas && at === null && dados.length === 0
-        ? <p className="nota">{L('Para lanzar con ataque, elige la «Característica de conjuros» arriba, en «Lanzamiento».', 'Чтобы атаковать заклинанием, выбери «Заклинательную характеристику» вверху, в «Колдовстве».')}</p>
+        ? <p className="nota">{L('Para lanzar con ataque, elige la «Característica de conjuro» de su grupo en la lista.', 'Чтобы атаковать заклинанием, выбери заклинательную характеристику его группы в списке.')}</p>
         : <div className="fila-botones">
             {at !== null && pideAtaque && <button className="btn primario" onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${nombre}`, at, [], undefined, 'combate')}>🎲 {L('Ataque', 'Атака')} {conSigno(at)}{proy ? ` (${L('uno por', 'по одной на')} ${proy.nombre.replace(/s$/, '')} · ×${proy.n})` : ''}</button>}
             {cd !== null && pideSalvacion && <span className="cd-chip">{L('El objetivo salva contra CD', 'Цель делает спасбросок, Сл')} <strong>{cd}</strong></span>}
