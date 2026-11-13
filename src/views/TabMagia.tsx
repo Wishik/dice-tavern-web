@@ -274,6 +274,7 @@ function Lanzar({ texto, nivel, nombre }: { texto: string; nivel: number; nombre
   const proy = calc?.proyectiles ?? (() => { const b = texto.match(/\b(tres|dos|cuatro) (dardos|rayos)\b/i); return b && /adicional por cada nivel/i.test(texto) ? { n: ({ dos: 2, tres: 3, cuatro: 4 } as Record<string, number>)[b[1].toLowerCase()], nombre: b[2].toLowerCase() } : undefined; })();
   let dados = hace ? dadosConjuro(texto, nivel, p.nivel, espacio) : [];
   // Sin tirada de ataque (Proyectil mágico): se tiran todos juntos, N × el daño de uno.
+  const uno = proy && !pideAtaque ? dados[0] : undefined;
   if (proy && !pideAtaque && dados[0]) { const m = dados[0].match(/^(\d+)d(\d+)(?:\+(\d+))?$/); if (m) dados = [`${Number(m[1]) * proy.n}d${m[2]}${m[3] ? `+${Number(m[3]) * proy.n}` : ''}`, ...dados.slice(1)]; }
   const mejoraTruco = nivel === 0 && /mejora de truco/i.test(texto) && multiplicadorTruco(p.nivel) > 1;
   const conMana = p.pm.max > 0;
@@ -307,7 +308,8 @@ function Lanzar({ texto, nivel, nombre }: { texto: string; nivel: number; nombre
             {at !== null && pideAtaque && <button className="btn primario" onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${nombre}`, at, [], undefined, 'combate')}>🎲 {L('Ataque', 'Атака')} {conSigno(at)}{proy ? ` (${L('uno por', 'по одной на')} ${proy.nombre.replace(/s$/, '')} · ×${proy.n})` : ''}</button>}
             {cd !== null && pideSalvacion && <span className="cd-chip">{L('El objetivo salva contra CD', 'Цель делает спасбросок, Сл')} <strong>{cd}</strong></span>}
             {dados.map((d, i) => <button key={d} className="btn" onClick={() => tirar(`${nombre}${nivel > 0 ? ` (${L('nivel', 'ур.')} ${espacio})` : ''} (${d})`, d, 'normal', 'combate')}>🎲 {i === 0 && nivel > 0 ? `${cura && !pideAtaque && !pideSalvacion ? L('Curación', 'Лечение') : L('Daño', 'Урон')} ${L('a nivel', 'на ур.')} ${espacio}${proy ? (pideAtaque ? ` (${L('por', 'за')} ${proy.nombre.replace(/s$/, '')})` : ` (${proy.n} ${proy.nombre})`) : ''}: ` : ''}{d}</button>)}
-            {proy && <p className="nota pequena">{pideAtaque ? L(`Lanzas ${proy.n} ${proy.nombre}: haz una tirada de ataque por cada uno y tira el daño de los que acierten.`, `${proy.n}: совершай атаку за каждый и бросай урон за попавшие.`) : L(`${proy.n} ${proy.nombre}: el botón tira el daño de todos juntos.`, `${proy.n}: кнопка бросает урон всех сразу.`)}</p>}
+            {uno && <button className="btn" onClick={() => tirar(`${nombre}: 1 ${proy!.nombre.replace(/s$/, '')}`, uno, 'normal', 'combate')}>🎲 {L(`1 ${proy!.nombre.replace(/s$/, '')}`, '1 шт.')}: {uno}</button>}
+            {proy && <p className="nota pequena">{pideAtaque ? L(`Lanzas ${proy.n} ${proy.nombre}: haz una tirada de ataque por cada uno y tira el daño de los que acierten.`, `${proy.n}: совершай атаку за каждый и бросай урон за попавшие.`) : L(`${proy.n} ${proy.nombre}: tira todos juntos o de uno en uno si van a enemigos distintos.`, `${proy.n}: бросай все сразу или по одному, если цели разные.`)}</p>}
           </div>}
       {mejoraTruco && <p className="nota pequena">{L(`Daño mejorado por tu nivel ${p.nivel} (trucos: ×2 a nivel 5, ×3 a nivel 11, ×4 a nivel 17).`, `Урон усилен за твой ${p.nivel} уровень (заговоры: ×2 на 5, ×3 на 11, ×4 на 17 уровне).`)}</p>}
     </div>
