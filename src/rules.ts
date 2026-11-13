@@ -496,3 +496,50 @@ export const idiomasDeTexto = (t: string) => t.split(/,|\s+y\s+|\s+e\s+/).map((x
 /** Todos los idiomas que salen en las razas (para elegir de una lista), Común primero. */
 export const listaIdiomas = (razas: { razas: { idiomas: string }[] } | null) =>
   [...new Set((razas?.razas ?? []).flatMap((r) => idiomasDeTexto(r.idiomas)))].sort((a, b) => (a === 'Común' ? -1 : b === 'Común' ? 1 : a.localeCompare(b, 'es')));
+
+// ---------------------------------------------------------------- Mejora por nivel de espacio
+const NUM_PALABRA: Record<string, number> = { un: 1, una: 1, uno: 1, dos: 2, tres: 3, cuatro: 4, cinco: 5, seis: 6, siete: 7, ocho: 8, nueve: 9, diez: 10 };
+const aNumero = (s: string) => NUM_PALABRA[s.toLowerCase()] ?? parseFloat(s.replace(',', '.'));
+const plural = (w: string) => (/[aeiouáéíóú]$/i.test(w) ? w + 's' : w + 'es');
+export interface MejoraCalculada {
+  /** Lo que se gana en total a ese nivel, ya calculado (p. ej. «+3 dardos: 6 en total»). */
+  texto: string;
+  /** Proyectiles (dardos, rayos…) en total, si el conjuro los cuenta. */
+  proyectiles?: { n: number; nombre: string };
+}
+/** Calcula lo que añade «Con un espacio de conjuro de nivel superior» al lanzarlo a `espacio` (más dardos, objetivos, metros, PG…). */
+export function mejoraCalculada(texto: string, nivel: number, espacio: number): MejoraCalculada | null {
+  const dif = espacio - nivel;
+  if (nivel <= 0 || dif <= 0) return null;
+  const i = texto.search(/con un espacio de conjuro de nivel superior/i);
+  if (i < 0) return null;
+  const mej = texto.slice(i);
+  const cuerpo = texto.slice(0, i);
+  // «un dardo adicional», «una criatura adicional», «dos criaturas muertas vivientes adicionales», «un relámpago adicional»…
+  const a = mej.match(/\b(un|una|uno|dos|tres|cuatro|\d+) ((?:[a-záéíóúñ]+ ){0,2}?[a-záéíóúñ]+) adicional(?:es)?\b[^.]*?por cada nivel/i);
+  if (a) {
+    const n = aNumero(a[1]) * dif;
+    const nombre = a[2].toLowerCase();
+    const base1 = nombre.split(' ')[0].replace(/(es|s)$/, '');
+    const pl = n === 1 ? nombre : nombre.split(' ').map((w, k) => (k === 0 && aNumero(a[1]) === 1 ? plural(w) : w)).join(' ');
+    // Cuántos había: «tres dardos», «tres rayos»…
+    const b = cuerpo.match(new RegExp(`\\b(un|una|dos|tres|cuatro|cinco|\\d+) (${base1}(?:es|s)?)\\b`, 'i'));
+    if (b && /^(dardo|rayo|proyectil|flecha|esfera|orbe)/i.test(base1)) {
+      const total = aNumero(b[1]) + n;
+      return { texto: `+${n} ${pl}: ${total} ${plural(base1)} en total`, proyectiles: { n: total, nombre: plural(base1) } };
+    }
+    return { texto: `+${n} ${pl}` };
+  }
+  // «aumenta(n) en 1,5 m / 5 / 1 hora / 48 horas / uno por cada nivel»
+  const c = mej.match(/aumentan? en (\d+(?:,\d+)?|uno|una|dos|tres) ?(m|metros?|horas?|minutos?|días?)?(?: adicionales)? por cada nivel/i);
+  if (c) {
+    const v = aNumero(c[1]) * dif;
+    const qué = mej.slice(44).match(/^\s*(?:El |La |Los |Las )?([^.]*?) aumentan? en/i)?.[1] ?? '';
+    const unidad = c[2] ? ` ${/^hora/.test(c[2]) && v !== 1 ? 'horas' : c[2]}` : '';
+    return { texto: `${qué && !/\d/.test(qué) ? qué[0].toUpperCase() + qué.slice(1) + ': ' : ''}+${String(v).replace('.', ',')}${unidad}` };
+  }
+  // «Obtienes 5 puntos de golpe temporales adicionales por cada nivel»
+  const d = mej.match(/(\d+) ([a-záéíóúñ ]+?) adicionales por cada nivel/i);
+  if (d) return { texto: `+${Number(d[1]) * dif} ${d[2]}` };
+  return null;
+}

@@ -5,7 +5,7 @@ import { Contador, useDados } from '../dice';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo } from '../types';
 import { useDatos, type Conjuro } from '../data';
 import type { ConjuroPersonaje } from '../types';
-import { CARACTERISTICA_CONJUROS, ataqueConjuros, cdConjuros, conSigno, dadosConjuro, mejoraNivelSuperior, multiplicadorTruco } from '../rules';
+import { CARACTERISTICA_CONJUROS, ataqueConjuros, cdConjuros, conSigno, dadosConjuro, mejoraCalculada, mejoraNivelSuperior, multiplicadorTruco } from '../rules';
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
 import { esMulticlase } from '../multiclase';
 import { claseDeConjuro, type MagiaClase } from '../avisos';
@@ -269,7 +269,12 @@ function Lanzar({ texto, nivel, nombre }: { texto: string; nivel: number; nombre
   // Solo hay botón de dados si el conjuro hace daño o cura de verdad (no p. ej. Alterar el propio aspecto, que cambia tu ataque sin armas).
   const cura = /recupera[n]? (una cantidad de )?puntos de golpe|recupera[n]? \d+d\d+|puntos de golpe temporales|cantidad de puntos de golpe igual/i.test(texto);
   const hace = pideAtaque || pideSalvacion || cura || /\b(inflig|recib|sufr|caus)(e|en|es|ir[áa]n?|iréis|a|an|ar[áa]n?|aréis)(?![a-záéíóúñ])[^.]{0,40}\d+d\d+|\d+d\d+[^.]{0,30}de daño[^.]{0,30}(a cada|al objetivo|a la criatura|a todas)|\b(recupera|restaura|cura)[a-záéíóúñ]*[^.]{0,60}\d+d\d+|\d+d\d+[^.]{0,25}daño [a-záéíóúñ]* ?(adicional|extra)|\b(tira|tirar|suma|sumar|añade|añadir)\b[^.]{0,15}\d+d\d+/i.test(texto);
-  const dados = hace ? dadosConjuro(texto, nivel, p.nivel, espacio) : [];
+  const calc = mejoraCalculada(texto, nivel, espacio);
+  // Dardos/rayos: todos los proyectiles que hay a ese nivel (también a nivel base, p. ej. «tres dardos»).
+  const proy = calc?.proyectiles ?? (() => { const b = texto.match(/\b(tres|dos|cuatro) (dardos|rayos)\b/i); return b && /adicional por cada nivel/i.test(texto) ? { n: ({ dos: 2, tres: 3, cuatro: 4 } as Record<string, number>)[b[1].toLowerCase()], nombre: b[2].toLowerCase() } : undefined; })();
+  let dados = hace ? dadosConjuro(texto, nivel, p.nivel, espacio) : [];
+  // Sin tirada de ataque (Proyectil mágico): se tiran todos juntos, N × el daño de uno.
+  if (proy && !pideAtaque && dados[0]) { const m = dados[0].match(/^(\d+)d(\d+)(?:\+(\d+))?$/); if (m) dados = [`${Number(m[1]) * proy.n}d${m[2]}${m[3] ? `+${Number(m[3]) * proy.n}` : ''}`, ...dados.slice(1)]; }
   const mejoraTruco = nivel === 0 && /mejora de truco/i.test(texto) && multiplicadorTruco(p.nivel) > 1;
   const conMana = p.pm.max > 0;
   const lanzar = () => {
@@ -293,14 +298,16 @@ function Lanzar({ texto, nivel, nombre }: { texto: string; nivel: number; nombre
       )}
       {lanzado && <p className="nota lanzado">✓ {lanzado}</p>}
       {nivel > 0 && espacio > nivel && (mejora
-        ? <p className="mejora-nivel">⬆️ <strong>{L(`A nivel ${espacio}`, `На ${espacio} уровне`)}{sube ? L(' (los dados ya están sumados)', ' (кости уже прибавлены)') : ''}:</strong> {td(mejora)}</p>
+        ? <div className="mejora-nivel">⬆️ <strong>{L(`A nivel ${espacio}`, `На ${espacio} уровне`)}:</strong> {calc ? <strong className="mejora-calc">{calc.texto}</strong> : sube ? L('los dados ya están sumados.', 'кости уже прибавлены.') : null}
+            <small>{td(mejora)}</small></div>
         : <p className="nota pequena">{L('Este conjuro no cambia al lanzarlo a más nivel (solo gasta más maná).', 'Это заклинание не меняется на более высоком уровне (тратит только больше маны).')}</p>)}
       {hayTiradas && at === null && dados.length === 0
         ? <p className="nota">{L('Para lanzar con ataque, elige la «Característica de conjuros» arriba, en «Lanzamiento».', 'Чтобы атаковать заклинанием, выбери «Заклинательную характеристику» вверху, в «Колдовстве».')}</p>
         : <div className="fila-botones">
-            {at !== null && pideAtaque && <button className="btn primario" onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${nombre}`, at, [], undefined, 'combate')}>🎲 {L('Ataque', 'Атака')} {conSigno(at)}</button>}
+            {at !== null && pideAtaque && <button className="btn primario" onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${nombre}`, at, [], undefined, 'combate')}>🎲 {L('Ataque', 'Атака')} {conSigno(at)}{proy ? ` (${L('uno por', 'по одной на')} ${proy.nombre.replace(/s$/, '')} · ×${proy.n})` : ''}</button>}
             {cd !== null && pideSalvacion && <span className="cd-chip">{L('El objetivo salva contra CD', 'Цель делает спасбросок, Сл')} <strong>{cd}</strong></span>}
-            {dados.map((d, i) => <button key={d} className="btn" onClick={() => tirar(`${nombre}${nivel > 0 ? ` (${L('nivel', 'ур.')} ${espacio})` : ''} (${d})`, d, 'normal', 'combate')}>🎲 {i === 0 && nivel > 0 ? `${cura && !pideAtaque && !pideSalvacion ? L('Curación', 'Лечение') : L('Daño', 'Урон')} ${L('a nivel', 'на ур.')} ${espacio}: ` : ''}{d}</button>)}
+            {dados.map((d, i) => <button key={d} className="btn" onClick={() => tirar(`${nombre}${nivel > 0 ? ` (${L('nivel', 'ур.')} ${espacio})` : ''} (${d})`, d, 'normal', 'combate')}>🎲 {i === 0 && nivel > 0 ? `${cura && !pideAtaque && !pideSalvacion ? L('Curación', 'Лечение') : L('Daño', 'Урон')} ${L('a nivel', 'на ур.')} ${espacio}${proy ? (pideAtaque ? ` (${L('por', 'за')} ${proy.nombre.replace(/s$/, '')})` : ` (${proy.n} ${proy.nombre})`) : ''}: ` : ''}{d}</button>)}
+            {proy && <p className="nota pequena">{pideAtaque ? L(`Lanzas ${proy.n} ${proy.nombre}: haz una tirada de ataque por cada uno y tira el daño de los que acierten.`, `${proy.n}: совершай атаку за каждый и бросай урон за попавшие.`) : L(`${proy.n} ${proy.nombre}: el botón tira el daño de todos juntos.`, `${proy.n}: кнопка бросает урон всех сразу.`)}</p>}
           </div>}
       {mejoraTruco && <p className="nota pequena">{L(`Daño mejorado por tu nivel ${p.nivel} (trucos: ×2 a nivel 5, ×3 a nivel 11, ×4 a nivel 17).`, `Урон усилен за твой ${p.nivel} уровень (заговоры: ×2 на 5, ×3 на 11, ×4 на 17 уровне).`)}</p>}
     </div>
