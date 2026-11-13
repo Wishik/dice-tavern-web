@@ -7,11 +7,14 @@ import { Ficha } from './views/Ficha';
 import { Modal } from './ui';
 import { borrarPartida, misPartidas, type Partida } from './partidas';
 import { ModalCrearPartida, ModalUnirse, PantallaPartida } from './views/Partida';
+import { guardarCriaturaDeUrl, hayCriaturaRecibida } from './views/CriaturasPropias';
 import { L, RU_CLASES, RU_RAZAS, T, cambiarIdioma, useIdioma, trClases } from './i18n';
 
 // Código del enlace de invitación (?unirse=…). Se lee una sola vez al cargar: la pantalla puede montarse varias veces
 // (al cambiar de idioma), y hasta entrar en la cuenta hay que conservarlo.
 let codigoInvitacion: string | null = new URLSearchParams(location.search).get('unirse');
+// Criatura recibida por enlace o QR (?criatura=…): se guarda para añadirla desde una partida.
+guardarCriaturaDeUrl();
 
 export default function App() {
   const idioma = useIdioma();
@@ -42,6 +45,7 @@ export default function App() {
     if (abierto) url.searchParams.set('p', abierto); else url.searchParams.delete('p');
     if (partida) url.searchParams.set('g', partida); else url.searchParams.delete('g');
     url.searchParams.delete('unirse');
+    url.searchParams.delete('criatura');
     history.replaceState(null, '', url);
   }, [abierto, partida]);
   const [ajeno, setAjeno] = useState(false);
@@ -243,6 +247,7 @@ function Lista({ usuario, onUsuario, onAbrir, onPartida, onSalir }: { usuario: U
         </div>
       </header>
       <main className="contenido">
+        {hayCriaturaRecibida() && <p className="aviso-local">📥 {L('Has recibido una criatura. Abre una partida en la que seas máster: te saldrá arriba del combate para añadirla.', 'Тебе передали существо. Открой партию, где ты мастер: предложение добавить его появится над боем.')}</p>}
         {backend.modo === 'local' && <p className="aviso-local">{L('Modo local: los personajes se guardan solo en este navegador.', 'Локальный режим: персонажи хранятся только в этом браузере.')}</p>}
         <h2 className="titulo-seccion">{L('Tus personajes', 'Твои персонажи')}</h2>
         {error && <p className="error">{error}</p>}

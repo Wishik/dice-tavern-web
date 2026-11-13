@@ -4,17 +4,18 @@ import { L } from './i18n';
 import type { Personaje } from './types';
 import { normalizar } from './personaje';
 import { calcularCA, iniciativa } from './rules';
+import type { Monstruo } from './views/Combate';
 
 export interface Partida { id: string; nombre: string; codigo: string; master: string; creada: string; combate?: Combate | null }
 
 /** Enemigo en el combate. Los de un mismo grupo comparten iniciativa. */
-export interface Enemigo { id: string; monstruo: string | null; nombre: string; grupo: string | null; /** Bando: 'aliado' o una letra de grupo enemigo ('A', 'B'…). Sin bando = 'A'. */ bando?: string; ini: number | null; bonoIni: number; pg: number; pgMax: number; temp?: number; ca: number; estados: string[]; agotamiento?: number; estadosDetalle?: Personaje['estadosDetalle'] }
+export interface Enemigo { id: string; monstruo: string | null; nombre: string; grupo: string | null; /** Color de bando (ver COLORES en Combate.tsx). Sin color = rojo. */ bando?: string; ini: number | null; bonoIni: number; pg: number; pgMax: number; temp?: number; ca: number; estados: string[]; agotamiento?: number; estadosDetalle?: Personaje['estadosDetalle'] }
 /** Tirada del máster en el combate (enemigos), para el historial. */
 export interface TiradaMaster { id: string; combate?: string; quien: string; etiqueta: string; formula: string; total: number; detalle: string; modo: string; critico: string | null; creada: string }
 /** Un combate. Los jugadores van al primero salvo que estén en `pjs` de otro. */
-export interface CombateUno { id: string; nombre?: string; ronda: number; turno: string | null; enemigos: Enemigo[]; pjs?: string[]; /** El historial de tiradas empieza aquí (se pone al terminar el combate). */ desde?: string }
+export interface CombateUno { id: string; nombre?: string; ronda: number; turno: string | null; enemigos: Enemigo[]; pjs?: string[]; /** El historial de tiradas empieza aquí (se pone al terminar el combate). */ desde?: string; /** Color de bando de cada jugador (por id de personaje). */ colores?: Record<string, string> }
 /** Lo guardado en la partida: el primer combate en la raíz (como antes) y los demás en `otros`. */
-export interface Combate { ronda: number; turno: string | null; enemigos: Enemigo[]; nombre?: string; desde?: string; pjs?: string[]; tiradas?: TiradaMaster[]; otros?: CombateUno[] }
+export interface Combate { ronda: number; turno: string | null; enemigos: Enemigo[]; nombre?: string; desde?: string; pjs?: string[]; colores?: Record<string, string>; tiradas?: TiradaMaster[]; otros?: CombateUno[]; /** Criaturas creadas por el máster para esta partida. */ criaturas?: Monstruo[] }
 export interface Miembro {
   usuario: string;
   alias: string;

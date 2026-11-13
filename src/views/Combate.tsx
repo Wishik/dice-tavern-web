@@ -6,6 +6,8 @@ import { ChipsEstados, estadosPorVida, pasarRonda } from '../estados';
 import { escucharTiradas, useDados } from '../dice';
 import { detalleTirada } from '../tiradasPartida';
 import { HistorialTiradas } from './Historial';
+import { HABILIDADES } from '../rules';
+import { AvisoCriaturaRecibida, BibliotecaCriaturas } from './CriaturasPropias';
 import { cambiarJugador, guardarCombate, type Combate as CombateT, type CombateUno, type TiradaMaster, type Enemigo, type Miembro, type Partida } from '../partidas';
 
 export interface Monstruo {
@@ -15,6 +17,10 @@ export interface Monstruo {
   rasgos: Accion[]; acciones: Accion[]; adicionales: Accion[]; reacciones: Accion[]; legendarias: Accion[];
   /** Ataques y efectos con tirada: bono de ataque o CD de salvación, y dados de daño (el primero es el normal). */
   atq?: { es: string; ru: string; bono?: number; cd?: number; sal?: number | null; dano: { d: string; t: [string, string] }[] }[];
+  /** Solo en criaturas propias: bono de salvación por característica (null = sin competencia) y habilidades. */
+  salv?: (number | null)[]; hab?: { id: string; v: number }[];
+  /** Creada por el máster para esta partida. */
+  propia?: boolean;
 }
 
 /** Botones para tirar el ataque y el daño de un monstruo directamente desde el combate. */
@@ -67,28 +73,48 @@ const enCombate = (ini: number | null) => ini !== null && ini !== 0;
 export const tiradasDelCombate = (partida: Partida) => (cacheCombate.get(partida.id) ?? partida.combate)?.tiradas ?? [];
 
 const PRINCIPAL = 'principal';
-/** Bandos de las criaturas, cada uno con su color. */
-export const BANDOS = [
-  { id: 'aliado', es: 'Aliado', ru: 'Союзник', color: '#4f9a4a' },
-  { id: 'A', es: 'Enemigo A', ru: 'Враг A', color: '#b8322a' },
-  { id: 'B', es: 'Enemigo B', ru: 'Враг B', color: '#d9822b' },
-  { id: 'C', es: 'Enemigo C', ru: 'Враг C', color: '#7b4fb3' },
-  { id: 'D', es: 'Enemigo D', ru: 'Враг D', color: '#2f6fb0' },
+/** Colores de bando (sin nombres: cada uno decide qué significa). */
+export const COLORES = [
+  { id: 'rojo', es: 'rojo', ru: 'красный', color: '#c0392b' },
+  { id: 'naranja', es: 'naranja', ru: 'оранжевый', color: '#e67e22' },
+  { id: 'amarillo', es: 'amarillo', ru: 'жёлтый', color: '#d4a20f' },
+  { id: 'verde', es: 'verde', ru: 'зелёный', color: '#3f9a43' },
+  { id: 'turquesa', es: 'turquesa', ru: 'бирюзовый', color: '#169a8c' },
+  { id: 'azul', es: 'azul', ru: 'синий', color: '#2f6fb0' },
+  { id: 'morado', es: 'morado', ru: 'фиолетовый', color: '#8344b0' },
+  { id: 'rosa', es: 'rosa', ru: 'розовый', color: '#d24f8e' },
+  { id: 'gris', es: 'gris', ru: 'серый', color: '#6f7b80' },
 ];
-const bandoDe = (id?: string) => BANDOS.find((b) => b.id === (id ?? 'A')) ?? BANDOS[1];
+// Bandos de antes (con nombre) → su color.
+const ANTIGUOS: Record<string, string> = { aliado: 'verde', A: 'rojo', B: 'naranja', C: 'morado', D: 'azul' };
+const COLOR_CRIATURA = 'rojo';
+const COLOR_JUGADOR = 'verde';
+export const colorDe = (id: string | undefined, def = COLOR_CRIATURA) => { const x = ANTIGUOS[id ?? ''] ?? id ?? def; return COLORES.find((c) => c.id === x) ?? COLORES.find((c) => c.id === def)!; };
+const estiloColor = (id: string) => ({ ['--c' as string]: colorDe(id).color });
 
-/** Elegir bando tocando el color. */
-function SelectorBando({ valor, set }: { valor?: string; set: (b: string) => void }) {
+/** Elegir color tocando una de las 9 muestras. */
+function SelectorColor({ valor, set }: { valor: string; set: (c: string) => void }) {
+  const v = colorDe(valor).id;
   return (
-    <div className="selector-bando" role="radiogroup" aria-label={L('Bando', 'Сторона')}>
-      {BANDOS.map((b) => (
-        <button key={b.id} type="button" role="radio" aria-checked={(valor ?? 'A') === b.id} className={(valor ?? 'A') === b.id ? 'activo' : ''} style={{ ['--c' as string]: b.color }} onClick={() => set(b.id)}>{L(b.es, b.ru)}</button>
+    <div className="selector-color" role="radiogroup" aria-label={L('Color', 'Цвет')}>
+      {COLORES.map((c) => (
+        <button key={c.id} type="button" role="radio" aria-checked={v === c.id} aria-label={L(c.es, c.ru)} title={L(c.es, c.ru)} className={v === c.id ? 'activo' : ''} style={{ ['--c' as string]: c.color }} onClick={() => set(c.id)} />
       ))}
     </div>
   );
 }
-const aLista = (c: CombateT): CombateUno[] => [{ id: PRINCIPAL, nombre: c.nombre, ronda: c.ronda, turno: c.turno, enemigos: c.enemigos, pjs: c.pjs, desde: c.desde }, ...(c.otros ?? [])];
-const deLista = (l: CombateUno[], tiradas?: CombateT['tiradas']): CombateT => ({ ronda: l[0].ronda, turno: l[0].turno, enemigos: l[0].enemigos, nombre: l[0].nombre, pjs: l[0].pjs, desde: l[0].desde, otros: l.slice(1), tiradas });
+/** Punto de color que al tocarlo abre las 9 muestras. */
+function ChipColor({ valor, set }: { valor: string; set: (c: string) => void }) {
+  const [abierto, setAbierto] = useState(false);
+  return (
+    <span className="chip-color">
+      <button type="button" className="punto-color" style={estiloColor(valor)} aria-label={L(`Color: ${colorDe(valor).es}. Cambiar`, `Цвет: ${colorDe(valor).ru}. Изменить`)} onClick={() => setAbierto(!abierto)} />
+      {abierto && <span className="paleta-flotante"><SelectorColor valor={valor} set={(c) => { set(c); setAbierto(false); }} /></span>}
+    </span>
+  );
+}
+const aLista = (c: CombateT): CombateUno[] => [{ id: PRINCIPAL, nombre: c.nombre, ronda: c.ronda, turno: c.turno, enemigos: c.enemigos, pjs: c.pjs, desde: c.desde, colores: c.colores }, ...(c.otros ?? [])];
+const deLista = (l: CombateUno[], base: CombateT): CombateT => ({ ...base, ronda: l[0].ronda, turno: l[0].turno, enemigos: l[0].enemigos, nombre: l[0].nombre, pjs: l[0].pjs, desde: l[0].desde, colores: l[0].colores, otros: l.slice(1) });
 /** En qué combate está un jugador (solo si el máster lo ha añadido). */
 const combateDe = (l: CombateUno[], pj: string) => l.find((k) => k.pjs?.includes(pj))?.id ?? null;
 
@@ -110,16 +136,21 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
   useEffect(() => escucharTiradas((t) => setC((x) => ({ ...x, tiradas: [{ id: uid(), combate: verRef.current, quien: L('Máster', 'Мастер'), etiqueta: t.etiqueta, formula: t.formula, total: t.total, detalle: detalleTirada(t), modo: t.modo, critico: t.critico ?? null, creada: new Date().toISOString() }, ...(x.tiradas ?? [])].slice(0, 60) }))), []);
 
   const lista = aLista(c);
-  const setLista = (f: (l: CombateUno[]) => CombateUno[]) => setC((x) => deLista(f(aLista(x)), x.tiradas));
+  const setLista = (f: (l: CombateUno[]) => CombateUno[]) => setC((x) => deLista(f(aLista(x)), x));
   const jugadores = miembros.filter((m) => m.usuario !== partida.master && m.pj && m.personaje);
   const jugador = async (m: Miembro, cambios: Record<string, unknown>) => {
     try { await cambiarJugador(m.personaje!, cambios); onRecargar(); } catch (e) { setError((e as Error).message); }
   };
   /** Pone a esos jugadores en `destino` (y los saca de cualquier otro combate); destino null = fuera de todos. */
-  const mover = (pjs: string[], destino: string | null) => setLista((l) => l.map((k) => {
+  const mover = (pjs: string[], destino: string | null, colores?: Record<string, string>) => setLista((l) => l.map((k) => {
     const sin = (k.pjs ?? []).filter((x) => !pjs.includes(x));
-    return { ...k, pjs: k.id === destino ? [...sin, ...pjs] : sin };
+    return { ...k, pjs: k.id === destino ? [...sin, ...pjs] : sin, colores: k.id === destino && colores ? { ...k.colores, ...colores } : k.colores };
   }));
+  // Criaturas propias de esta partida (van primero en la lista del «Encuentro»).
+  const criaturas = useMemo(() => c.criaturas ?? [], [c.criaturas]);
+  const setCriaturas = (f: (l: Monstruo[]) => Monstruo[]) => setC((x) => ({ ...x, criaturas: f(x.criaturas ?? []) }));
+  const todosMonstruos = useMemo(() => (monstruos ? [...criaturas, ...monstruos] : null), [monstruos, criaturas]);
+  const [biblio, setBiblio] = useState(false);
   const [ver, setVerE] = useState(PRINCIPAL);
   const setVer = (id: string) => { verRef.current = id; setVerE(id); };
   const activo = lista.find((k) => k.id === ver) ?? lista[0];
@@ -132,6 +163,7 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
   return (
     <div className="panel-combate">
       {error && <p className="error">{error}</p>}
+      <AvisoCriaturaRecibida onAnadir={(m) => setCriaturas((l) => [...l, m])} />
       <div className="pestanas-combate" role="tablist">
         {nombres.map((x) => x.id === activo.id && editando
           ? <input key={x.id} className="pestana-edit" autoFocus defaultValue={x.nombre} onBlur={(ev) => { const v = ev.target.value.trim(); setLista((l) => l.map((k) => (k.id === x.id ? { ...k, nombre: v || x.nombre } : k))); setEditando(false); }} onKeyDown={(ev) => { if (ev.key === 'Enter') (ev.target as HTMLInputElement).blur(); if (ev.key === 'Escape') setEditando(false); }} />
@@ -143,7 +175,7 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
       </div>
       <div className="combates">
         {[activo].map((k) => { const i = lista.indexOf(k); return (
-          <UnCombate key={k.id} k={k} nombre={nombres[i].nombre} otros={nombres.filter((x) => x.id !== k.id)} monstruos={monstruos}
+          <UnCombate key={k.id} k={k} nombre={nombres[i].nombre} otros={nombres.filter((x) => x.id !== k.id)} monstruos={todosMonstruos} onBiblioteca={() => setBiblio(true)}
             jugadores={jugadores.filter((m) => combateDe(lista, m.personaje!) === k.id)}
             todos={jugadores.map((m) => ({ m, en: nombres.find((x) => x.id === combateDe(lista, m.personaje!))?.nombre ?? null }))}
             partidaId={partida.id} tiradasMaster={(c.tiradas ?? []).filter((t) => (t.combate ?? PRINCIPAL) === k.id)}
@@ -151,19 +183,22 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
             jugador={jugador} mover={mover} onRecargar={onRecargar} onAbrirPj={onAbrirPj} />
         ); })}
       </div>
+      {biblio && <BibliotecaCriaturas criaturas={criaturas} set={setCriaturas} monstruos={monstruos ?? []} onClose={() => setBiblio(false)} />}
       <p className="nota">{L('Los jugadores tiran iniciativa en su hoja (Atributos → Iniciativa) o la tiras tú con 🎲. Con iniciativa 0 no entran en el combate.', 'Игроки бросают инициативу у себя в листе (Характеристики → Инициатива) или ты бросаешь за них через 🎲. С инициативой 0 они не участвуют в бою.')}</p>
     </div>
   );
 }
 
 /** Un combate: orden de iniciativa de sus jugadores y enemigos, vida y estados de cada uno. */
-function UnCombate({ k, nombre, otros, monstruos, jugadores, todos, partidaId, tiradasMaster, set, jugador, mover, onRecargar, onAbrirPj }: {
+function UnCombate({ k, nombre, otros, monstruos, jugadores, todos, partidaId, tiradasMaster, set, jugador, mover, onRecargar, onAbrirPj, onBiblioteca }: {
   k: CombateUno; nombre: string; otros: { id: string; nombre: string }[]; monstruos: Monstruo[] | null; jugadores: Miembro[];
   todos: { m: Miembro; en: string | null }[]; partidaId: string; tiradasMaster: TiradaMaster[];
   set: (f: (k: CombateUno) => CombateUno) => void;
-  jugador: (m: Miembro, cambios: Record<string, unknown>) => Promise<void>; mover: (pjs: string[], destino: string | null) => void;
-  onRecargar: () => void; onAbrirPj?: (pj: string) => void;
+  jugador: (m: Miembro, cambios: Record<string, unknown>) => Promise<void>; mover: (pjs: string[], destino: string | null, colores?: Record<string, string>) => void;
+  onRecargar: () => void; onAbrirPj?: (pj: string) => void; onBiblioteca: () => void;
 }) {
+  const [terminando, setTerminando] = useState(false);
+  const colorPj = (pj: string) => colorDe(k.colores?.[pj], COLOR_JUGADOR).id;
   const [anadir, setAnadir] = useState(false);
   const [anadirPj, setAnadirPj] = useState(false);
   const [ficha, setFicha] = useState<{ m: Monstruo; quien: string } | null>(null);
@@ -208,16 +243,20 @@ function UnCombate({ k, nombre, otros, monstruos, jugadores, todos, partidaId, t
       if (cambios.length) Promise.all(cambios.map(([m, r]) => cambiarJugador(m.personaje!, { estados: r!.estados, estadosDetalle: r!.detalles }))).then(onRecargar).catch(() => {});
     }
   };
-  const terminar = async () => {
-    if (!confirm(L(`¿Terminar «${nombre}»? Se quitan los enemigos, la iniciativa de sus jugadores y su historial de tiradas. El combate se queda en la lista.`, `Закончить «${nombre}»? Враги, инициатива его игроков и история бросков будут сброшены. Бой останется в списке.`))) return;
-    set((x) => ({ ...x, ronda: 1, turno: null, enemigos: [], desde: new Date().toISOString() }));
+  /** Termina el combate quitando las criaturas (y sacando a los jugadores) de los colores elegidos. El resto se queda sin iniciativa. */
+  const terminar = async (quitar: string[]) => {
+    setTerminando(false);
+    const fuera = jugadores.map((m) => m.personaje!).filter((pj) => quitar.includes(colorPj(pj)));
+    set((x) => ({ ...x, ronda: 1, turno: null, desde: new Date().toISOString(),
+      enemigos: x.enemigos.filter((e) => !quitar.includes(colorDe(e.bando).id)).map((e) => ({ ...e, ini: null })) }));
+    if (fuera.length) mover(fuera, null);
     await Promise.all(jugadores.filter((m) => m.pj!.iniciativaActual !== null).map((m) => cambiarJugador(m.personaje!, { iniciativaActual: null }).catch(() => {})));
     onRecargar();
   };
 
   const tarjeta = (f: Fila) => (
-    <li key={f.clave} className={`fila-combate ${f.tipo} ${f.tipo === 'grupo' ? 'bando-' + bandoDe(f.enemigos[0].bando).id : ''} ${k.turno === f.clave ? 'turno' : ''}`}
-      style={f.tipo === 'grupo' ? { ['--c' as string]: bandoDe(f.enemigos[0].bando).color } : undefined}>
+    <li key={f.clave} className={`fila-combate ${f.tipo} con-color ${k.turno === f.clave ? 'turno' : ''}`}
+      style={estiloColor(f.tipo === 'grupo' ? colorDe(f.enemigos[0].bando).id : colorPj(f.m.personaje!))}>
       <div className="ini-caja">
         <Numero valor={f.ini ?? 0} ancho={52} set={(n) => f.tipo === 'pj' ? jugador(f.m, { iniciativaActual: n }) : cambiarGrupo(f.clave, (e) => ({ ...e, ini: n }))} />
         {f.tipo === 'pj' && <button className="btn pequeno tirar-ini" title={L('Tirar iniciativa por el jugador', 'Бросить инициативу за игрока')}
@@ -226,6 +265,7 @@ function UnCombate({ k, nombre, otros, monstruos, jugadores, todos, partidaId, t
       {f.tipo === 'pj' ? (
         <div className="combatiente">
           <div className="comb-cab">
+            <ChipColor valor={colorPj(f.m.personaje!)} set={(c) => set((x) => ({ ...x, colores: { ...x.colores, [f.m.personaje!]: c } }))} />
             <button className="btn enlace nombre-comb" onClick={() => onAbrirPj?.(f.m.personaje!)}>{f.m.pj!.nombre || f.m.alias}</button>
             <span className="nota">@{f.m.alias} · 🛡 {f.m.pj!.ca}</span>
           </div>
@@ -241,9 +281,7 @@ function UnCombate({ k, nombre, otros, monstruos, jugadores, todos, partidaId, t
         </div>
       ) : (
         <div className="combatiente">
-          <select className="campo chip-bando" value={bandoDe(f.enemigos[0].bando).id} onChange={(ev) => cambiarGrupo(f.clave, (e) => ({ ...e, bando: ev.target.value }))} aria-label={L('Bando', 'Сторона')}>
-            {BANDOS.map((b) => <option key={b.id} value={b.id}>{L(b.es, b.ru)}</option>)}
-          </select>
+          <div className="color-grupo"><ChipColor valor={colorDe(f.enemigos[0].bando).id} set={(c) => cambiarGrupo(f.clave, (e) => ({ ...e, bando: c }))} /></div>
           {f.enemigos.map((e) => {
             const mo = monstruos?.find((m) => m.id === e.monstruo);
             return (
@@ -282,12 +320,15 @@ function UnCombate({ k, nombre, otros, monstruos, jugadores, todos, partidaId, t
       </>}
       <div className="fila-botones pie-combate">
         <button className="btn primario" onClick={() => setAnadirPj(true)}>⚔️ {L('Encuentro', 'Встреча')}</button>
-        <button className="btn peligro" onClick={terminar}>{L('Terminar combate', 'Закончить бой')}</button>
+        <button className="btn" onClick={onBiblioteca}>🐉 {L('Criaturas propias', 'Свои существа')}</button>
+        <button className="btn peligro" onClick={() => setTerminando(true)}>{L('Terminar combate', 'Закончить бой')}</button>
       </div>
       </div>
       <HistorialTiradas partida={partidaId} pjs={jugadores.map((m) => m.personaje!)} master={tiradasMaster} desde={k.desde} />
       </div>
-      {anadirPj && <ModalAnadirJugadores todos={todos} enEste={jugadores.map((m) => m.personaje!)} nombre={nombre} pestanas={<PestanasEncuentro en="jugadores" ir={() => { setAnadirPj(false); setAnadir(true); }} />} onClose={() => setAnadirPj(false)} onAnadir={(ids) => { mover(ids, k.id); setAnadirPj(false); }} />}
+      {anadirPj && <ModalAnadirJugadores todos={todos} enEste={jugadores.map((m) => m.personaje!)} colorDe={colorPj} nombre={nombre} pestanas={<PestanasEncuentro en="jugadores" ir={() => { setAnadirPj(false); setAnadir(true); }} />} onClose={() => setAnadirPj(false)}
+        onAnadir={(ids, colores) => { if (ids.length) mover(ids, k.id); set((x) => ({ ...x, colores: { ...x.colores, ...colores } })); setAnadirPj(false); }} />}
+      {terminando && <ModalTerminar nombre={nombre} enemigos={k.enemigos} pjs={jugadores.map((m) => ({ id: m.personaje!, nombre: m.pj!.nombre || m.alias, color: colorPj(m.personaje!) }))} onClose={() => setTerminando(false)} onTerminar={terminar} />}
       {anadir && monstruos && <ModalAnadirEnemigos monstruos={monstruos} pestanas={<PestanasEncuentro en="criaturas" ir={() => { setAnadir(false); setAnadirPj(true); }} />} onClose={() => setAnadir(false)} onAnadir={(es) => { setEnemigos((x) => [...x, ...es]); setAnadir(false); }} onVer={(m) => setFicha({ m, quien: nombreM(m) })} />}
       {ficha && <Modal titulo={ficha.quien} onClose={() => setFicha(null)}><BloqueMonstruo m={ficha.m} quien={ficha.quien} tirar={tirar} /></Modal>}
     </section>
@@ -329,90 +370,121 @@ function PestanasEncuentro({ en, ir }: { en: 'jugadores' | 'criaturas'; ir: () =
   );
 }
 
-/** Elegir qué jugadores entran en este combate (los que estén en otro se mueven aquí). */
-function ModalAnadirJugadores({ todos, enEste, nombre, pestanas, onClose, onAnadir }: { todos: { m: Miembro; en: string | null }[]; enEste: string[]; nombre: string; pestanas: React.ReactNode; onClose: () => void; onAnadir: (ids: string[]) => void }) {
+/** Elegir qué jugadores entran en este combate (los que estén en otro se mueven aquí) y el color de bando de cada uno. */
+function ModalAnadirJugadores({ todos, enEste, colorDe: colorIni, nombre, pestanas, onClose, onAnadir }: { todos: { m: Miembro; en: string | null }[]; enEste: string[]; colorDe: (pj: string) => string; nombre: string; pestanas: React.ReactNode; onClose: () => void; onAnadir: (ids: string[], colores: Record<string, string>) => void }) {
   const libres = todos.filter((x) => !enEste.includes(x.m.personaje!));
   const [sel, setSel] = useState<string[]>(() => libres.filter((x) => !x.en).map((x) => x.m.personaje!));
+  const [colores, setColores] = useState<Record<string, string>>(() => Object.fromEntries(todos.map((x) => [x.m.personaje!, colorIni(x.m.personaje!)])));
   const cambiar = (id: string) => setSel((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]));
+  const cambiados = todos.some((x) => colores[x.m.personaje!] !== colorIni(x.m.personaje!));
   return (
     <Modal titulo={L(`Encuentro: ${nombre}`, `Встреча: ${nombre}`)} onClose={onClose}
-      pie={<><button className="btn" onClick={() => setSel(sel.length === libres.length ? [] : libres.map((x) => x.m.personaje!))}>{sel.length === libres.length ? L('Ninguno', 'Никого') : L('Todos', 'Все')}</button>
-        <button className="btn primario" disabled={!sel.length} onClick={() => onAnadir(sel)}>{L('Añadir', 'Добавить')} ({sel.length})</button></>}>
+      pie={<>{libres.length > 0 && <button className="btn" onClick={() => setSel(sel.length === libres.length ? [] : libres.map((x) => x.m.personaje!))}>{sel.length === libres.length ? L('Ninguno', 'Никого') : L('Todos', 'Все')}</button>}
+        <button className="btn primario" disabled={!sel.length && !cambiados} onClick={() => onAnadir(sel, colores)}>{sel.length ? `${L('Añadir', 'Добавить')} (${sel.length})` : L('Guardar colores', 'Сохранить цвета')}</button></>}>
       {pestanas}
-      {libres.length === 0 ? <p className="nota">{L('Todos los jugadores con personaje ya están en este combate.', 'Все игроки с персонажами уже в этом бою.')}</p> : (
+      <p className="nota">{L('Toca el círculo para cambiar el color de bando (por ejemplo, si un jugador traiciona al grupo).', 'Нажми на кружок, чтобы сменить цвет стороны (например, если игрок предал отряд).')}</p>
+      {todos.length === 0 ? <p className="nota">{L('Aún no hay jugadores con personaje en la partida.', 'В партии пока нет игроков с персонажами.')}</p> : (
         <ul className="lista-anadir-pj">
-          {libres.map(({ m, en }) => (
-            <li key={m.personaje}>
-              <label className="interruptor"><input type="checkbox" checked={sel.includes(m.personaje!)} onChange={() => cambiar(m.personaje!)} />
-                <span><strong>{m.pj!.nombre || m.alias}</strong> <small>@{m.alias} · ❤️ {m.pj!.pg.actual}/{m.pj!.pg.max}{en ? ` · ${L('ahora en', 'сейчас в')} «${en}»` : ''}</small></span></label>
-            </li>
-          ))}
+          {todos.map(({ m, en }) => {
+            const ya = enEste.includes(m.personaje!);
+            return (
+              <li key={m.personaje} style={estiloColor(colores[m.personaje!])} className="con-color">
+                <ChipColor valor={colores[m.personaje!]} set={(c) => setColores({ ...colores, [m.personaje!]: c })} />
+                <label className="interruptor"><input type="checkbox" disabled={ya} checked={ya || sel.includes(m.personaje!)} onChange={() => cambiar(m.personaje!)} />
+                  <span><strong>{m.pj!.nombre || m.alias}</strong> <small>@{m.alias} · ❤️ {m.pj!.pg.actual}/{m.pj!.pg.max}{ya ? ` · ${L('ya está en este combate', 'уже в этом бою')}` : en ? ` · ${L('ahora en', 'сейчас в')} «${en}»` : ''}</small></span></label>
+              </li>
+            );
+          })}
         </ul>
       )}
     </Modal>
   );
 }
 
+/** Al terminar: elegir qué colores salen del combate (sus criaturas se quitan y sus jugadores salen). */
+function ModalTerminar({ nombre, enemigos, pjs, onClose, onTerminar }: { nombre: string; enemigos: Enemigo[]; pjs: { id: string; nombre: string; color: string }[]; onClose: () => void; onTerminar: (quitar: string[]) => void }) {
+  const grupos = COLORES.map((c) => ({ c, cri: enemigos.filter((e) => colorDe(e.bando).id === c.id), pj: pjs.filter((p) => p.color === c.id) })).filter((g) => g.cri.length || g.pj.length);
+  const [quitar, setQuitar] = useState<string[]>(() => grupos.filter((g) => g.cri.length && !g.pj.length).map((g) => g.c.id));
+  const cambiar = (id: string) => setQuitar((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]));
+  return (
+    <Modal titulo={L(`Terminar «${nombre}»`, `Закончить «${nombre}»`)} onClose={onClose}
+      pie={<><button className="btn" onClick={onClose}>{L('Cancelar', 'Отмена')}</button><button className="btn peligro" onClick={() => onTerminar(quitar)}>{L('Terminar combate', 'Закончить бой')}</button></>}>
+      <p>{L('¿Qué colores quitas del combate? Las criaturas marcadas se eliminan y los jugadores marcados salen del combate. Los demás se quedan, sin iniciativa.', 'Какие цвета убрать из боя? Отмеченные существа удаляются, отмеченные игроки выходят из боя. Остальные остаются, без инициативы.')}</p>
+      {grupos.length === 0 ? <p className="nota">{L('No hay nadie en este combate.', 'В этом бою никого нет.')}</p> : (
+        <ul className="lista-terminar">
+          {grupos.map((g) => (
+            <li key={g.c.id} className="con-color" style={estiloColor(g.c.id)}>
+              <label className="interruptor"><input type="checkbox" checked={quitar.includes(g.c.id)} onChange={() => cambiar(g.c.id)} />
+                <span className="punto-color fijo" />
+                <span>{[...g.pj.map((p) => `👤 ${p.nombre}`), ...g.cri.map((e) => `${e.pg <= 0 ? '💀' : '🐾'} ${e.nombre}`)].join(' · ')}</span></label>
+            </li>
+          ))}
+        </ul>
+      )}
+      <p className="nota">{L('Siempre se reinician la ronda, los turnos, la iniciativa y el historial de tiradas.', 'Раунд, ходы, инициатива и история бросков всегда сбрасываются.')}</p>
+    </Modal>
+  );
+}
+
+/** PG de una criatura según sus dados de golpe: media, tirados o máximos. */
+export function pgSegun(dg: string | undefined, media: number, modo: 'media' | 'tirar' | 'max') {
+  const m = (dg ?? '').replace(/\s/g, '').match(/^(\d+)d(\d+)([+-]\d+)?$/);
+  if (!m || modo === 'media') return media;
+  const n = Number(m[1]), caras = Number(m[2]), b = Number(m[3] ?? 0);
+  if (modo === 'max') return Math.max(1, n * caras + b);
+  let t = b; for (let i = 0; i < n; i++) t += 1 + Math.floor(Math.random() * caras);
+  return Math.max(1, t);
+}
+
 function ModalAnadirEnemigos({ monstruos, pestanas, onClose, onAnadir, onVer }: { monstruos: Monstruo[]; pestanas: React.ReactNode; onClose: () => void; onAnadir: (es: Enemigo[]) => void; onVer: (m: Monstruo) => void }) {
   const [q, setQ] = useState('');
-  const [bando, setBando] = useState('A');
+  const [color, setColor] = useState(COLOR_CRIATURA);
   const [sel, setSel] = useState<Monstruo | null>(null);
   const [cant, setCant] = useState(1);
   const [grupo, setGrupo] = useState(true);
-  const [pgTirados, setPgTirados] = useState(false);
-  const [propio, setPropio] = useState({ nombre: '', ca: 12, pg: 10, bono: 0 });
+  const [modoPg, setModoPg] = useState<'media' | 'tirar' | 'max'>('media');
   const lista = useMemo(() => {
     const t = q.trim().toLowerCase();
-    return monstruos.filter((m) => !t || [m.es, m.ru, m.en].some((s) => s.toLowerCase().includes(t))).sort((a, b) => a.vd - b.vd || nombreM(a).localeCompare(nombreM(b)));
+    return monstruos.filter((m) => !t || [m.es, m.ru, m.en].some((s) => s.toLowerCase().includes(t)))
+      .sort((a, b) => Number(!!b.propia) - Number(!!a.propia) || a.vd - b.vd || nombreM(a).localeCompare(nombreM(b)));
   }, [q, monstruos]);
-  const tirarPg = (dg: string) => {
-    const m = dg.replace(/\s/g, '').match(/^(\d+)d(\d+)([+-]\d+)?$/);
-    if (!m) return null;
-    let t = Number(m[3] ?? 0); for (let i = 0; i < Number(m[1]); i++) t += 1 + Math.floor(Math.random() * Number(m[2]));
-    return Math.max(1, t);
-  };
-  const crear = (base: { nombre: string; ca: number; pg: number; bono: number; dg?: string; id: string | null }) => {
+  const crear = (base: Monstruo) => {
     const g = cant > 1 && grupo ? uid() : null;
     return Array.from({ length: cant }, (_, i) => {
-      const pg = pgTirados && base.dg ? tirarPg(base.dg) ?? base.pg : base.pg;
-      return { id: uid(), monstruo: base.id, nombre: cant > 1 ? `${base.nombre} ${i + 1}` : base.nombre, grupo: g, ini: null, bonoIni: base.bono, pg, pgMax: pg, temp: 0, ca: base.ca, estados: [], bando } as Enemigo;
+      const pg = pgSegun(base.dg, base.pg, modoPg);
+      return { id: uid(), monstruo: base.id, nombre: cant > 1 ? `${nombreM(base)} ${i + 1}` : nombreM(base), grupo: g, ini: null, bonoIni: mod(base.car[1]), pg, pgMax: pg, temp: 0, ca: base.ca, estados: [], bando: color } as Enemigo;
     });
   };
   return (
     <Modal titulo={L('Encuentro', 'Встреча')} onClose={onClose}
       pie={<>
         <span className="contador-enemigos">× <Numero valor={cant} min={1} max={30} ancho={56} set={setCant} /></span>
-        <button className="btn primario" disabled={!sel && !propio.nombre.trim()} onClick={() => onAnadir(sel
-          ? crear({ id: sel.id, nombre: nombreM(sel), ca: sel.ca, pg: sel.pg, dg: sel.dg, bono: mod(sel.car[1]) })
-          : crear({ id: null, nombre: propio.nombre.trim(), ca: propio.ca, pg: propio.pg, bono: propio.bono }))}>{L('Añadir', 'Добавить')}</button>
+        <button className="btn primario" disabled={!sel} onClick={() => sel && onAnadir(crear(sel))}>{L('Añadir', 'Добавить')}</button>
       </>}>
       {pestanas}
-      <p className="etq-pequena">{L('¿De qué bando?', 'На чьей стороне?')}</p>
-      <SelectorBando valor={bando} set={setBando} />
+      <p className="etq-pequena">{L('Color de bando', 'Цвет стороны')}</p>
+      <SelectorColor valor={color} set={setColor} />
       <input className="campo" autoFocus placeholder={L('Buscar: goblin, lobo, dragón…', 'Поиск: гоблин, волк, дракон…')} value={q} onChange={(e) => { setQ(e.target.value); setSel(null); }} />
-      <p className="nota">{L(`${lista.length} de ${monstruos.length} monstruos`, `${lista.length} из ${monstruos.length} монстров`)}</p>
+      <p className="nota">{L(`${lista.length} de ${monstruos.length} criaturas`, `${lista.length} из ${monstruos.length} существ`)}</p>
       <ul className="lista-monstruos">
         {lista.map((m) => (
           <li key={m.id} className={sel?.id === m.id ? 'sel' : ''}>
             <button type="button" onClick={() => setSel(m)}>
-              <strong>{nombreM(m)}</strong>
-              <small>{L('VD', 'ПО')} {vdTexto(m.vd)} · 🛡 {m.ca} · ❤️ {m.pg} · {idioma() === 'ru' ? m.tipo[1] : m.tipo[0]}</small>
+              <strong>{m.propia ? '⭐ ' : ''}{nombreM(m)}</strong>
+              <small>{L('VD', 'ПО')} {vdTexto(m.vd)} · 🛡 {m.ca} · ❤️ {m.pg} · {idioma() === 'ru' ? m.tipo[1] : m.tipo[0]}{m.propia ? ` · ${L('de esta partida', 'из этой партии')}` : ''}</small>
             </button>
             <button type="button" className="btn enlace" onClick={() => onVer(m)}>ⓘ</button>
           </li>
         ))}
       </ul>
       <label className="interruptor"><input type="checkbox" checked={grupo} onChange={(e) => setGrupo(e.target.checked)} /> {L('Grupo: una sola iniciativa para todos', 'Группа: одна инициатива на всех')}</label>
-      <label className="interruptor"><input type="checkbox" checked={pgTirados} onChange={(e) => setPgTirados(e.target.checked)} /> {L('Tirar los PG de cada uno (si no, la media)', 'Бросать хиты каждому (иначе — среднее)')}</label>
-      <details className="enemigo-propio">
-        <summary>{L('…o un enemigo propio', '…или свой враг')}</summary>
-        <div className="fila-3">
-          <label className="etiqueta"><span>{L('Nombre', 'Имя')}</span><input className="campo" value={propio.nombre} onChange={(e) => { setPropio({ ...propio, nombre: e.target.value }); setSel(null); }} /></label>
-          <label className="etiqueta"><span>{L('CA', 'КД')}</span><Numero valor={propio.ca} min={0} set={(n) => setPropio({ ...propio, ca: n })} /></label>
-          <label className="etiqueta"><span>{L('PG', 'Хиты')}</span><Numero valor={propio.pg} min={1} set={(n) => setPropio({ ...propio, pg: n })} /></label>
-          <label className="etiqueta"><span>{L('Bono de iniciativa', 'Бонус инициативы')}</span><Numero valor={propio.bono} set={(n) => setPropio({ ...propio, bono: n })} /></label>
-        </div>
-      </details>
+      <p className="etq-pequena">{L('Puntos de golpe', 'Хиты')}</p>
+      <div className="segmentado modo-pg">
+        {([['media', L('Media', 'Среднее')], ['tirar', L('Tirar cada uno', 'Бросить каждому')], ['max', L('Máximos', 'Максимум')]] as const).map(([v, t]) => (
+          <button key={v} type="button" className={modoPg === v ? 'activo' : ''} onClick={() => setModoPg(v)}>{t}</button>
+        ))}
+      </div>
+      {sel && <p className="nota">{sel.dg ? `${nombreM(sel)}: ${sel.dg} → ${modoPg === 'media' ? sel.pg : modoPg === 'max' ? pgSegun(sel.dg, sel.pg, 'max') : L('al azar', 'случайно')}` : ''}</p>}
     </Modal>
   );
 }
@@ -442,6 +514,16 @@ export function BloqueMonstruo({ m, tirar, quien }: { m: Monstruo; tirar?: (etq:
           </button>
         ))}
       </div>
+      {m.salv?.some((v) => v !== null) && (
+        <div className="bm-tiradas"><span className="etq-pequena">{L('Salvaciones', 'Спасброски')}</span>
+          {m.salv.map((v, i) => v === null ? null : <button key={i} type="button" className="btn pequeno" onClick={() => tirar?.(`${quien ?? nombreM(m)}: ${L('salvación', 'спасбросок')} ${ATR()[i]}`, `1d20${signo(v)}`)}>{ATR()[i]} {signo(v)}</button>)}
+        </div>
+      )}
+      {m.hab && m.hab.length > 0 && (
+        <div className="bm-tiradas"><span className="etq-pequena">{L('Habilidades', 'Навыки')}</span>
+          {m.hab.map((h) => { const n = HABILIDADES.find((x) => x.id === h.id)?.nombre ?? h.id; return <button key={h.id} type="button" className="btn pequeno" onClick={() => tirar?.(`${quien ?? nombreM(m)}: ${n}`, `1d20${signo(h.v)}`)}>{n} {signo(h.v)}</button>; })}
+        </div>
+      )}
       <p className="nota">
         {Object.entries(m.sentidos).map(([k, v]) => `${SENT[k]?.[ru ? 1 : 0] ?? k} ${pies(v)}`).join(' · ')}
         {m.idiomas && <><br />{L('Idiomas', 'Языки')}: {m.idiomas}</>}
