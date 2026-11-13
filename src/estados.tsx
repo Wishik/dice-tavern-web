@@ -25,6 +25,7 @@ export const ESTADOS: { id: string; icono: string; es: string; ru: string; efEs:
   { id: 'paralizado', icono: '⚡', es: 'Paralizado', ru: 'Парализованный', efEs: 'Incapacitado. Fallas las TS de Fuerza y Destreza. Ataques contra ti con ventaja; los que aciertan son críticos.', efRu: 'Недееспособен. Проваливает спасброски СИЛ и ЛОВ. Атаки по нему с преимуществом, все попадания критические.' },
   { id: 'petrificado', icono: '🗿', es: 'Petrificado', ru: 'Окаменевший', efEs: 'Convertido en piedra (peso ×10), incapacitado, no envejeces. Ataques contra ti con ventaja. Fallas TS de FUE y DES. Resistencia a todo el daño, inmune a envenenado.', efRu: 'Превращён в камень (вес ×10), недееспособен, не стареет. Атаки по нему с преимуществом. Проваливает спасброски СИЛ и ЛОВ. Сопротивление всему урону, иммунитет к отравлению.' },
   { id: 'sangrando', icono: '🩸', dano: '1d4', es: 'Sangrando', ru: 'Кровотечение', efEs: '1d4 PG de daño al inicio de cada turno (o lo que diga el efecto). Termina con curación mágica o con Medicina CD 17 tuya o de un aliado a 5 pies (con útiles de sanador, sin tirada).', efRu: '1к4 урона в начале каждого хода (или сколько сказано в эффекте). Прекращается от магического лечения или проверки Медицины Сл 17 (своей или союзника в 5 фт; с набором целителя — без броска).' },
+  { id: 'muerto', icono: '⚰️', es: 'Muerto', ru: 'Мёртв', efEs: 'Sus PG han llegado a 0. Si se cura, el estado se quita solo.', efRu: 'Хиты упали до 0. Если его вылечить, статус снимется сам.' },
   { id: 'concentrado', icono: '🎯', es: 'Concentrado', ru: 'Концентрация', efEs: 'Mantiene un conjuro de concentración. Al recibir daño, salvación de CON (CD 10 o la mitad del daño).', efRu: 'Поддерживает заклинание с концентрацией. При уроне — спасбросок ТЕЛ (Сл 10 или половина урона).' },
 ];
 export const nombreEstado = (id: string) => { const e = ESTADOS.find((x) => x.id === id); return e ? (idioma() === 'ru' ? e.ru : e.es) : id; };
@@ -57,6 +58,13 @@ export function pasarRonda(estados: string[], det: DetallesEstados = {}): { esta
 }
 
 /** Fila de chips con los estados activos (y el agotamiento). Tocar abre el editor si hay set. */
+/** Al llegar a 0 PG: los enemigos quedan «Muerto» y los jugadores «Moribundo»; al curarse se quita solo. */
+export function estadosPorVida(estados: string[], pg: number, enemigo: boolean): string[] {
+  const id = enemigo ? 'muerto' : 'moribundo';
+  if (pg <= 0) return estados.includes(id) ? estados : [...estados.filter((e) => e !== 'inconsciente' || !enemigo), id];
+  return estados.filter((e) => e !== id);
+}
+
 export function ChipsEstados({ estados, agotamiento, detalles = {}, set, vacio, quien }: { estados: string[]; agotamiento: number; detalles?: DetallesEstados; set?: SetEstados; vacio?: boolean; quien?: string }) {
   const [abierto, setAbierto] = useState(false);
   const hay = estados.length > 0 || agotamiento > 0;
@@ -70,6 +78,7 @@ export function ChipsEstados({ estados, agotamiento, detalles = {}, set, vacio, 
         })}
         {agotamiento > 0 && <span className="chip-estado e-agotamiento">😩 {L('Agotamiento', 'Истощение')} {agotamiento}</span>}
         {!hay && set && <span className="chip-estado vacio">＋ {L('Estado', 'Состояние')}</span>}
+        {hay && set && <button type="button" className="chip-quitar-todos" title={L('Quitar todos los estados', 'Убрать все состояния')} onClick={(ev) => { ev.stopPropagation(); if (confirm(L('¿Quitar todos los estados?', 'Убрать все состояния?'))) set([], 0, {}); }}>✕ {L('Todos', 'Все')}</button>}
       </div>
       {abierto && set && <ModalEstados estados={estados} agotamiento={agotamiento} detalles={detalles} quien={quien} onClose={() => setAbierto(false)} set={set} />}
     </>
@@ -90,7 +99,8 @@ function ModalEstados({ estados, agotamiento, detalles, set, onClose, quien }: {
     set(estados, agotamiento, { ...detalles, [id]: d });
   };
   return (
-    <Modal titulo={L('Estados', 'Состояния')} onClose={onClose}>
+    <Modal titulo={L('Estados', 'Состояния')} onClose={onClose}
+      pie={<>{(estados.length > 0 || agotamiento > 0) && <button type="button" className="btn peligro" onClick={() => set([], 0, {})}>{L('Quitar todos', 'Убрать все')}</button>}<button type="button" className="btn primario" onClick={onClose}>{L('Listo', 'Готово')}</button></>}>
       <ul className="lista-estados">
         {ESTADOS.map((e) => {
           const activo = estados.includes(e.id);

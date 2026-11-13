@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useFicha } from './Ficha';
 import { calcularCA, car, conSigno, iniciativa, modificador, percepcionPasiva } from '../rules';
-import { ChipsEstados } from '../estados';
+import { ChipsEstados, estadosPorVida } from '../estados';
 import { Numero, Seccion } from '../ui';
 import { Contador } from '../dice';
 import { L, RU_ATRIBUTOS, T } from '../i18n';
@@ -16,12 +16,12 @@ export function TabMaster() {
     let resto = n;
     const t = Math.min(x.pg.temp, resto); x.pg.temp -= t; resto -= t;
     x.pg.actual = Math.max(0, x.pg.actual - resto);
-    if (x.pg.actual === 0 && !x.estados.includes('inconsciente')) x.estados = [...x.estados, 'inconsciente'];
+    x.estados = estadosPorVida(x.estados, x.pg.actual, false);
   });
   const curar = (n: number) => upd((x) => {
     const antes = x.pg.actual;
     x.pg.actual = Math.min(x.pg.max, Math.max(0, x.pg.actual) + n);
-    if (antes <= 0 && x.pg.actual > 0) x.estados = x.estados.filter((e) => e !== 'inconsciente');
+    if (antes <= 0 && x.pg.actual > 0) x.estados = estadosPorVida(x.estados, x.pg.actual, false);
   });
   return (
     <div className="tab">
@@ -29,7 +29,7 @@ export function TabMaster() {
       <div className="fila-3-tarjetas">
         <Seccion titulo="PG (vida)" className="pg">
           <div className="pg-actual">
-            <Contador valor={p.pg.actual} set={(n) => upd((x) => { x.pg.actual = Math.min(n, x.pg.max); })} min={-99} max={p.pg.max} />
+            <Contador valor={p.pg.actual} set={(n) => upd((x) => { x.pg.actual = Math.min(n, x.pg.max); x.estados = estadosPorVida(x.estados, x.pg.actual, false); })} min={-99} max={p.pg.max} />
             <span className="de">/ {p.pg.max}</span>
           </div>
           <div className="barra-vida"><div style={{ width: `${p.pg.max ? Math.max(0, Math.min(100, (p.pg.actual / p.pg.max) * 100)) : 0}%` }} /></div>

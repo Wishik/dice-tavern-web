@@ -574,7 +574,7 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .cabecera-combate .ronda { font-size: 26px; font-family: var(--fuente-titulo); }
 .cabecera-combate .fila-botones { margin-top: 0; }
 .panel-combate > .nota { color: #bfa884; }
-.orden-combate { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.orden-combate { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; align-items: start; }
 .fila-combate { display: grid; grid-template-columns: 64px 1fr; gap: 10px; padding: 10px; border-radius: var(--radio); background: linear-gradient(180deg, var(--pergamino), var(--pergamino-2)); color: var(--tinta); border: 1px solid #c9b182; }
 .fila-combate.grupo { background: linear-gradient(180deg, #f1d9cf, #e2c3b4); }
 .fila-combate.turno { outline: 3px solid var(--oro); box-shadow: 0 0 18px rgba(240,201,106,.45); }
@@ -585,7 +585,7 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .enemigo.caido { opacity: .55; }
 .comb-cab { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .nombre-comb { font-family: var(--fuente-titulo); font-size: 16px; padding: 0; color: #3a2717 !important; text-decoration: none; }
-.quitar-enemigo { margin-left: auto; text-decoration: none; }
+.quitar-enemigo { margin-left: auto; width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--rojo); background: #fff3ef; color: var(--rojo); font-size: 16px; font-weight: 700; line-height: 1; padding: 0; cursor: pointer; flex: none; }
 .vida-fila { display: grid; grid-template-columns: auto 1fr auto auto auto; gap: 6px; align-items: center; }
 .vida-fila .barra-vida.mini { margin: 0; }
 .vida-fila .btn { min-height: 34px; padding: 4px 12px; }
@@ -759,3 +759,14 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .lt-valor.con-bonus { border-color: #2e7d32; }
 .fila-base { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0 8px; font-weight: 600; }
 .tirable-no { cursor: pointer; font-family: inherit; }
+/* Combate del máster */
+.fila-combate { grid-template-columns: 56px 1fr; padding: 8px; }
+.tirar-ini { padding: 2px 6px; min-height: 30px; }
+.expulsar { align-self: flex-start; }
+.titulo-fuera { font-family: var(--fuente-titulo); font-size: 14px; color: var(--pergamino); opacity: .85; margin: 18px 0 8px; border-top: 1px dashed rgba(240,201,106,.4); padding-top: 12px; }
+.orden-combate.fuera .fila-combate { opacity: .75; }
+.sin-pj { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.sin-pj li { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--pergamino); color: var(--tinta); border-radius: 10px; padding: 6px 10px; }
+.pie-combate { margin-top: 18px; justify-content: center; }
+.chip-quitar-todos { border: 1px solid var(--rojo); background: #fff3ef; color: var(--rojo); border-radius: 999px; font-size: 12px; padding: 2px 8px; cursor: pointer; }
+.historial li.de-master b { font-size: 15px; }

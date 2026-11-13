@@ -157,7 +157,7 @@ export function TabAtributos() {
 
       <div className="fila-3-tarjetas">
         <Seccion titulo="Iniciativa">
-          <button className="valor-grande tirable" onClick={() => tirarD20(L('Iniciativa', 'Инициатива'), iniciativa(p), avisosTirada(p, 'prueba', 'DES'), (t) => upd((x) => { x.iniciativaActual = t; }))}>{conSigno(iniciativa(p))}</button>
+          <button className="valor-grande tirable" onClick={() => tirarD20(L('Iniciativa', 'Инициатива'), iniciativa(p), avisosTirada(p, 'prueba', 'DES'), (t) => upd((x) => { x.iniciativaActual = t; }), 'combate')}>{conSigno(iniciativa(p))}</button>
           {p.iniciativaActual !== null && <p className="nota centro">{L('En este combate', 'В этом бою')}: <strong>{p.iniciativaActual}</strong> <button className="btn enlace pequeno" onClick={() => upd((x) => { x.iniciativaActual = null; })}>✕</button></p>}
           <Etiqueta texto="Bonus extra"><Numero valor={p.bonusIniciativa} set={(n) => upd((x) => { x.bonusIniciativa = n; })} /></Etiqueta>
         </Seccion>

@@ -74,7 +74,7 @@ export function TabCombate() {
             const versatilArma = (it.detalles?.['Propiedades'] ?? '').match(/vers[aá]til\s*\((\d+d\d+)\)/i)?.[1];
             const versatil = versatilArma && dadoMayor(versatilArma, artes) !== dado ? dadoMayor(versatilArma, artes) : undefined;
             const formula = (d: string) => sumarDano(/d/.test(d) ? `${d}${mod ? conSigno(mod) : ''}` : `${Math.max(1, parseInt(d, 10) + mod)}`, [...(extra ? [extra] : []), ...(it.danoExtra ? [`+${it.danoExtra.split(' ')[0]}`] : []), ...extrasDano(act)]);
-            const tirarDano = (titulo: string, f: string) => { tirar(`${titulo}: ${td(it.nombre)}${nombres(act)}`, f); upd((x) => apagarDeUnGolpe(x, act)); };
+            const tirarDano = (titulo: string, f: string) => { tirar(`${titulo}: ${td(it.nombre)}${nombres(act)}`, f, 'normal', 'combate'); upd((x) => apagarDeUnGolpe(x, act)); };
             const municion = usaMunicion(it);
             const sinMunicion = municion && !(it.municion ?? 0);
             return (
@@ -101,7 +101,7 @@ export function TabCombate() {
                 <div className="ataque-fila">
                   <button className="btn primario" disabled={sinMunicion} onClick={() => {
                     if (municion) upd((x) => { const y = ref(x); if (y) y.municion = Math.max(0, (y.municion ?? 0) - 1); });
-                    tirarD20(`${L('Ataque', 'Атака')}: ${td(it.nombre)}${nombres(act.filter((x) => x.ataque))}`, ataque, avisosTirada(p, 'ataque', atr));
+                    tirarD20(`${L('Ataque', 'Атака')}: ${td(it.nombre)}${nombres(act.filter((x) => x.ataque))}`, ataque, avisosTirada(p, 'ataque', atr), undefined, 'combate');
                   }}>🎲 {L('Ataque', 'Атака')} {conSigno(ataque)}</button>
                   {dado && <button className="btn" onClick={() => tirarDano(L('Daño', 'Урон'), formula(dado))}>🎲 {formula(dado)}</button>}
                   {versatil && <button className="btn" onClick={() => tirarDano(L('Daño a dos manos', 'Урон двумя руками'), formula(versatil))}>🎲 {L('A dos manos', 'Двумя руками')} {formula(versatil)}</button>}
@@ -135,11 +135,11 @@ export function TabCombate() {
                 <div className="ataque-fila">
                   <label>{L('Ataque', 'Атака')}<span className="con-mas"><span>+</span><input className="campo" inputMode="numeric" value={isNaN(bonBase) ? '' : String(Math.abs(bonBase))} placeholder="0"
                     onChange={(e) => { const v = e.target.value.replace(/\D/g, ''); upd((x) => { x.ataques[i].ataque = v ? `+${v}` : ''; }); }} /></span></label>
-                  <button className="btn" disabled={isNaN(bon)} onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${a.nombre || L('arma', 'оружие')}${nombres(act.filter((x) => x.ataque))}`, bon, avisosTirada(p, 'ataque', null))}>🎲 d20{act.some((x) => x.ataque) && !isNaN(bon) ? ` ${conSigno(bon)}` : ''}</button>
+                  <button className="btn" disabled={isNaN(bon)} onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${a.nombre || L('arma', 'оружие')}${nombres(act.filter((x) => x.ataque))}`, bon, avisosTirada(p, 'ataque', null), undefined, 'combate')}>🎲 d20{act.some((x) => x.ataque) && !isNaN(bon) ? ` ${conSigno(bon)}` : ''}</button>
                 </div>
                 <div className="ataque-fila">
                   <label>{L('Daño', 'Урон')}<SelectorDano valor={a.dano} set={(v) => upd((x) => { x.ataques[i].dano = v; })} /></label>
-                  <button className="btn" disabled={!danoOk} onClick={() => { tirar(`${L('Daño', 'Урон')}: ${a.nombre || L('arma', 'оружие')}${nombres(act)}`, danoTot); upd((x) => apagarDeUnGolpe(x, act)); }}>🎲 {act.some((x) => x.dano) ? danoTot : L('Daño', 'Урон')}</button>
+                  <button className="btn" disabled={!danoOk} onClick={() => { tirar(`${L('Daño', 'Урон')}: ${a.nombre || L('arma', 'оружие')}${nombres(act)}`, danoTot, 'normal', 'combate'); upd((x) => apagarDeUnGolpe(x, act)); }}>🎲 {act.some((x) => x.dano) ? danoTot : L('Daño', 'Урон')}</button>
                 </div>
                 {pots.length > 0 && chips(pots)}
                 <div className="ataque-fila derecha">
@@ -169,7 +169,7 @@ export function TabCombate() {
         </div>
         <div className="fila-2 valores-conjuro">
           <div><small>{L('CD de conjuros', 'Сл заклинаний')}</small><strong>{cd ?? '—'}</strong></div>
-          <div><small>{L('Ataque de conjuro', 'Атака заклинанием')}</small>{at !== null ? <button className="lt-valor" onClick={() => tirarD20(L('Ataque de conjuro', 'Атака заклинанием'), at)}>{conSigno(at)}</button> : <strong>—</strong>}</div>
+          <div><small>{L('Ataque de conjuro', 'Атака заклинанием')}</small>{at !== null ? <button className="lt-valor" onClick={() => tirarD20(L('Ataque de conjuro', 'Атака заклинанием'), at, [], undefined, 'combate')}>{conSigno(at)}</button> : <strong>—</strong>}</div>
         </div>
       </Seccion>
     </div>

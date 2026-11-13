@@ -9,7 +9,9 @@ export interface Partida { id: string; nombre: string; codigo: string; master: s
 
 /** Enemigo en el combate. Los de un mismo grupo comparten iniciativa. */
 export interface Enemigo { id: string; monstruo: string | null; nombre: string; grupo: string | null; ini: number | null; bonoIni: number; pg: number; pgMax: number; temp?: number; ca: number; estados: string[]; agotamiento?: number; estadosDetalle?: Personaje['estadosDetalle'] }
-export interface Combate { ronda: number; turno: string | null; enemigos: Enemigo[] }
+/** Tirada del máster en el combate (enemigos), para el historial. */
+export interface TiradaMaster { id: string; quien: string; etiqueta: string; formula: string; total: number; detalle: string; modo: string; critico: string | null; creada: string }
+export interface Combate { ronda: number; turno: string | null; enemigos: Enemigo[]; tiradas?: TiradaMaster[] }
 export interface Miembro {
   usuario: string;
   alias: string;

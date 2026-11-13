@@ -84,7 +84,7 @@ export function TabHabilidades() {
                 <Check valor={p.salvaciones[a].comp} set={(b) => upd((x) => { x.salvaciones[a].comp = b; })} titulo="Competencia" />
                 <span className="lt-nombre">{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}</span>
                 <BotonBonus donde={`salv:${a}`} />
-                <button className={`lt-valor ${bonosManoEn(p, `salv:${a}`).length ? 'con-bonus' : ''}`} onClick={() => tirarD20(L(`Salvación de ${NOMBRE_ATRIBUTO[a]}`, `Спасбросок: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}`), v, avisosTirada(p, 'salvacion', a))}>{conSigno(v)}</button>
+                <button className={`lt-valor ${bonosManoEn(p, `salv:${a}`).length ? 'con-bonus' : ''}`} onClick={() => tirarD20(L(`Salvación de ${NOMBRE_ATRIBUTO[a]}`, `Спасбросок: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}`), v, avisosTirada(p, 'salvacion', a), undefined, 'salvacion')}>{conSigno(v)}</button>
               </li>
             );
           })}
@@ -97,7 +97,7 @@ export function TabHabilidades() {
           <div className="fila-muerte">
             {[0, 1, 2].map((i) => <button key={'f' + i} className={`calavera ${p.muerte.fallos > i ? 'on' : ''}`} onClick={() => upd((x) => { x.muerte.fallos = x.muerte.fallos > i ? i : i + 1; })}>{'\u2620\uFE0E'}</button>)}
           </div>
-          <button className="btn" onClick={() => tirarD20(L('Salvación contra muerte', 'Спасбросок от смерти'), 0)}>{L('Tirar', 'Бросить')}</button>
+          <button className="btn" onClick={() => tirarD20(L('Salvación contra muerte', 'Спасбросок от смерти'), 0, [], undefined, 'salvacion')}>{L('Tirar', 'Бросить')}</button>
         </div>
       </Seccion>
       <p className="nota">{L('C = competencia, P = pericia. El botón ＋ junto al número enseña de dónde sale y deja añadir, cambiar o quitar bonus a mano (✎). Si hay bonus a mano, el número sale en verde. Los bonos de raza y dotes ya se suman solos: no los repitas.', 'В = владение, К = компетентность. Кнопка ＋ рядом с числом показывает, из чего оно складывается, и позволяет добавить, изменить или убрать свои бонусы (✎). Если есть свои бонусы, число зелёное. Бонусы расы и черт уже прибавлены сами: не дублируй их.')}</p>
@@ -134,7 +134,7 @@ function Grupo({ grupo, titulo, sugeridas }: { grupo: string; titulo: string; su
               <span className="lt-nombre">{T(RU_HABILIDADES, h.id) === h.id ? h.nombre : T(RU_HABILIDADES, h.id)} <small>({T(RU_ATRIBUTOS, h.atributo.slice(0, 3))})</small>{sugeridas.has(h.id) && !st.comp && !r.comp && <span className="sugerida">◆</span>}
                 </span>
               <BotonBonus donde={`hab:${h.id}`} />
-              <button className={`lt-valor ${bonosManoEn(p, `hab:${h.id}`).length ? 'con-bonus' : ''}`} onClick={() => tirarD20(T(RU_HABILIDADES, h.id) === h.id ? h.nombre : T(RU_HABILIDADES, h.id), v, [...r.notas, ...avisosTirada(p, 'habilidad', h.atributo, h.id)])}>{conSigno(v)}</button>
+              <button className={`lt-valor ${bonosManoEn(p, `hab:${h.id}`).length ? 'con-bonus' : ''}`} onClick={() => tirarD20(T(RU_HABILIDADES, h.id) === h.id ? h.nombre : T(RU_HABILIDADES, h.id), v, [...r.notas, ...avisosTirada(p, 'habilidad', h.atributo, h.id)], undefined, 'habilidad')}>{conSigno(v)}</button>
             </li>
           );
         })}

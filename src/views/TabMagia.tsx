@@ -229,9 +229,9 @@ function Lanzar({ texto, nivel, nombre }: { texto: string; nivel: number; nombre
           </select>
         </label>
       )}
-      {at !== null && pideAtaque && <button className="btn primario" onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${nombre}`, at)}>🎲 {L('Ataque', 'Атака')} {conSigno(at)}</button>}
+      {at !== null && pideAtaque && <button className="btn primario" onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${nombre}`, at, [], undefined, 'combate')}>🎲 {L('Ataque', 'Атака')} {conSigno(at)}</button>}
       {cd !== null && pideSalvacion && <span className="cd-chip">{L('El objetivo salva contra CD', 'Цель делает спасбросок, Сл')} <strong>{cd}</strong></span>}
-      {dados.map((d) => <button key={d} className="btn" onClick={() => tirar(`${nombre} (${d})`, d)}>🎲 {d}</button>)}
+      {dados.map((d) => <button key={d} className="btn" onClick={() => tirar(`${nombre} (${d})`, d, 'normal', 'combate')}>🎲 {d}</button>)}
       {mejoraTruco && <p className="nota pequena">{L(`Daño mejorado por tu nivel ${p.nivel} (trucos: ×2 a nivel 5, ×3 a nivel 11, ×4 a nivel 17).`, `Урон усилен за твой ${p.nivel} уровень (заговоры: ×2 на 5, ×3 на 11, ×4 на 17 уровне).`)}</p>}
       {at === null && (pideAtaque || pideSalvacion) && <p className="nota">{L('Elige la «Característica de conjuros» en Combate para ver tu ataque y CD.', 'Выбери «Заклинательную характеристику» во вкладке «Бой», чтобы видеть атаку и Сл.')}</p>}
     </div>

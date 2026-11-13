@@ -5,7 +5,7 @@ import { cargarRu } from './datosRu';
 import { DiceProvider, PanelDados, DadoIcono } from './dice';
 import { Ficha } from './views/Ficha';
 import { Modal } from './ui';
-import { misPartidas, type Partida } from './partidas';
+import { borrarPartida, misPartidas, type Partida } from './partidas';
 import { ModalCrearPartida, ModalUnirse, PantallaPartida } from './views/Partida';
 import { L, RU_CLASES, RU_RAZAS, T, cambiarIdioma, useIdioma, trClases } from './i18n';
 
@@ -268,10 +268,20 @@ function Lista({ usuario, onUsuario, onAbrir, onPartida, onSalir }: { usuario: U
           {errPartidas && <p className="error">{errPartidas}</p>}
           <div className="rejilla-personajes">
             {partidas?.map((g) => (
-              <button key={g.id} className="tarjeta-personaje" onClick={() => onPartida(g.id)}>
-                <div className="retrato"><span>{g.master === usuario.id ? '👑' : '⚔️'}</span></div>
-                <div className="tp-texto"><strong>{g.nombre}</strong><span>{g.master === usuario.id ? L('Eres el máster', 'Ты мастер') : L('Juegas como jugador', 'Ты игрок')}</span><span className="nivel">{L('Código', 'Код')}: {g.codigo}</span></div>
-              </button>
+              <div key={g.id} className="tarjeta-personaje miembro">
+                <button className="miembro-cuerpo" onClick={() => onPartida(g.id)}>
+                  <div className="retrato"><span>{g.master === usuario.id ? '👑' : '⚔️'}</span></div>
+                  <div className="tp-texto"><strong>{g.nombre}</strong><span>{g.master === usuario.id ? L('Eres el máster', 'Ты мастер') : L('Juegas como jugador', 'Ты игрок')}</span><span className="nivel">{L('Código', 'Код')}: {g.codigo}</span></div>
+                </button>
+                {g.master === usuario.id && (
+                  <div className="acciones-tarjeta">
+                    <button className="btn-icono" title={L('Borrar partida', 'Удалить партию')} aria-label={L('Borrar partida', 'Удалить партию')} onClick={async () => {
+                      if (!confirm(L(`¿Borrar la partida «${g.nombre}»? Los personajes no se borran.`, `Удалить партию «${g.nombre}»? Персонажи останутся.`))) return;
+                      try { await borrarPartida(g.id); setPartidas((l) => l?.filter((x) => x.id !== g.id) ?? null); } catch (e) { alert((e as Error).message); }
+                    }}>🗑️</button>
+                  </div>
+                )}
+              </div>
             ))}
           </div>
           <div className="fila-botones espacio-arriba">

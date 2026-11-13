@@ -4,6 +4,8 @@ import { L } from './i18n';
 import { registrarTirada } from './tiradasPartida';
 
 export type Modo = 'normal' | 'ventaja' | 'desventaja';
+/** Tiradas que el máster ve en el historial de la partida: combate, salvaciones y habilidades. */
+export type TipoTirada = 'combate' | 'salvacion' | 'habilidad';
 export interface Tirada {
   id: number;
   etiqueta: string;
@@ -14,12 +16,17 @@ export interface Tirada {
   modo: Modo;
   critico?: 'exito' | 'fallo';
   hora: number;
+  tipo?: TipoTirada;
 }
 
+/** Quien quiera enterarse de cada tirada (el combate del máster apunta las de los enemigos). */
+const oyentes = new Set<(t: Tirada) => void>();
+export const escucharTiradas = (f: (t: Tirada) => void) => { oyentes.add(f); return () => { oyentes.delete(f); }; };
+
 interface Ctx {
-  tirar: (etiqueta: string, formula: string, modo?: Modo) => Tirada | null;
+  tirar: (etiqueta: string, formula: string, modo?: Modo, tipo?: TipoTirada) => Tirada | null;
   /** `avisos`: motivos de ventaja/desventaja que se muestran antes de tirar. */
-  tirarD20: (etiqueta: string, mod: number, avisos?: string[], alTirar?: (total: number) => void) => void;
+  tirarD20: (etiqueta: string, mod: number, avisos?: string[], alTirar?: (total: number) => void, tipo?: TipoTirada) => void;
   historial: Tirada[];
   limpiar: () => void;
 }
@@ -32,9 +39,9 @@ let contador = 0;
 export function DiceProvider({ children }: { children: ReactNode }) {
   const [historial, setHistorial] = useState<Tirada[]>([]);
   const [actual, setActual] = useState<Tirada | null>(null);
-  const [pendiente, setPendiente] = useState<{ etiqueta: string; mod: number; avisos: string[]; alTirar?: (total: number) => void } | null>(null);
+  const [pendiente, setPendiente] = useState<{ etiqueta: string; mod: number; avisos: string[]; alTirar?: (total: number) => void; tipo?: TipoTirada } | null>(null);
 
-  const tirar = useCallback((etiqueta: string, formula: string, modo: Modo = 'normal') => {
+  const tirar = useCallback((etiqueta: string, formula: string, modo: Modo = 'normal', tipo?: TipoTirada) => {
     const f = parseFormula(formula);
     if (!f) return null;
     const dados: Tirada['dados'] = [];
@@ -48,15 +55,16 @@ export function DiceProvider({ children }: { children: ReactNode }) {
     }
     const total = dados.filter((x) => !x.descartado).reduce((s, x) => s + x.valor, 0) + f.mod;
     const d20 = dados.find((x) => x.caras === 20 && !x.descartado);
-    const t: Tirada = { id: ++contador, etiqueta, formula, dados, mod: f.mod, total, modo, hora: Date.now(),
+    const t: Tirada = { id: ++contador, etiqueta, formula, dados, mod: f.mod, total, modo, hora: Date.now(), tipo,
       critico: d20 && f.dados.length === 1 ? (d20.valor === 20 ? 'exito' : d20.valor === 1 ? 'fallo' : undefined) : undefined };
     setHistorial((h) => [t, ...h].slice(0, 50));
     setActual(t);
-    registrarTirada(t);
+    if (tipo) registrarTirada(t);
+    oyentes.forEach((o) => o(t));
     return t;
   }, []);
 
-  const tirarD20 = useCallback((etiqueta: string, mod: number, avisos: string[] = [], alTirar?: (total: number) => void) => setPendiente({ etiqueta, mod, avisos, alTirar }), []);
+  const tirarD20 = useCallback((etiqueta: string, mod: number, avisos: string[] = [], alTirar?: (total: number) => void, tipo?: TipoTirada) => setPendiente({ etiqueta, mod, avisos, alTirar, tipo }), []);
 
   return (
     <DiceCtx.Provider value={{ tirar, tirarD20, historial, limpiar: () => setHistorial([]) }}>
@@ -70,7 +78,7 @@ export function DiceProvider({ children }: { children: ReactNode }) {
             <div className="fila-botones">
               {(['desventaja', 'normal', 'ventaja'] as Modo[]).map((m) => (
                 <button key={m} className={`${m === 'normal' ? 'btn primario' : 'btn'}${m !== 'normal' && pendiente.avisos.some((a) => (m === 'ventaja' ? /^(ventaja|преимущество)/i : /^(desventaja|помеха)/i).test(a)) ? ' sugerido' : ''}`}
-                  onClick={() => { const t = tirar(pendiente.etiqueta, `1d20${conSigno(pendiente.mod)}`, m); if (t) pendiente.alTirar?.(t.total); setPendiente(null); }}>
+                  onClick={() => { const t = tirar(pendiente.etiqueta, `1d20${conSigno(pendiente.mod)}`, m, pendiente.tipo); if (t) pendiente.alTirar?.(t.total); setPendiente(null); }}>
                   {m === 'normal' ? L('Tirar', 'Бросить') : m === 'ventaja' ? L('Ventaja', 'Преимущество') : L('Desventaja', 'Помеха')}
                 </button>
               ))}
