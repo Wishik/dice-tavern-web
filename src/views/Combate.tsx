@@ -270,48 +270,48 @@ function UnCombate({ k, nombre, otros, monstruos, jugadores, todos, partidaId, t
       </div>
       {f.tipo === 'pj' ? (
         <div className="combatiente">
-          <div className="comb-cab">
+          <div className="comb-cab cab-compacta">
             <ChipColor valor={colorPj(f.m.personaje!)} set={(c) => set((x) => ({ ...x, colores: { ...x.colores, [f.m.personaje!]: c } }))} />
             <button className="btn enlace nombre-comb" onClick={() => onAbrirPj?.(f.m.personaje!)}>{f.m.pj!.nombre || f.m.alias}</button>
-            <span className="nota">@{f.m.alias} · 🛡 {f.m.pj!.ca}</span>
+            <span className="ca-comb" title={L('Clase de armadura', 'Класс доспеха')}>🛡 {f.m.pj!.ca}</span>
+            <span className="acciones-cab">
+              {otros.length > 0 && (
+                <select className="campo mover-pj" value="" onChange={(ev) => { const v = ev.target.value; if (v) mover([f.m.personaje!], v); }}>
+                  <option value="">{L('Mover…', 'Перенести…')}</option>
+                  {otros.map((o) => <option key={o.id} value={o.id}>→ {o.nombre}</option>)}
+                </select>
+              )}
+              <button className="quitar-enemigo" title={L('Sacar de este combate', 'Убрать из этого боя')} aria-label={L('Sacar de este combate', 'Убрать из этого боя')} onClick={() => mover([f.m.personaje!], null)}>✕</button>
+            </span>
           </div>
           <VidaFila pg={f.m.pj!.pg.actual} max={f.m.pj!.pg.max} temp={f.m.pj!.pg.temp ?? 0} set={(pg, temp) => jugador(f.m, { pg: { ...f.m.pj!.pg, actual: pg, temp }, estados: estadosPorVida(f.m.pj!.estados, pg, false) })} />
           {f.m.pj!.pm.max > 0 && <ManaFila pm={f.m.pj!.pm.actual} max={f.m.pj!.pm.max} set={(n) => jugador(f.m, { pm: { ...f.m.pj!.pm, actual: n } })} />}
           <ChipsEstados estados={f.m.pj!.estados} agotamiento={f.m.pj!.agotamiento} detalles={f.m.pj!.estadosDetalle} quien={f.m.pj!.nombre || f.m.alias} vacio set={(e, a, d) => jugador(f.m, { estados: e, agotamiento: a, estadosDetalle: d, ...(muereAhora(f.m.pj!.estados, e) ? { pg: { ...f.m.pj!.pg, actual: 0, temp: 0 } } : {}) })} />
-          <div className="acciones-pj">
-            <select className="campo mover-pj" value="" onChange={(ev) => { const v = ev.target.value; if (v) mover([f.m.personaje!], v === '__fuera' ? null : v); }}>
-              <option value="">{L('Mover…', 'Перенести…')}</option>
-              {otros.map((o) => <option key={o.id} value={o.id}>→ {o.nombre}</option>)}
-              <option value="__fuera">✕ {L('Sacar de este combate', 'Убрать из этого боя')}</option>
-            </select>
-          </div>
         </div>
       ) : (
         <div className="combatiente">
-          <div className="color-grupo">
-            <ChipColor valor={colorDe(f.enemigos[0].bando).id} set={(c) => cambiarGrupo(f.clave, (e) => ({ ...e, bando: c }))} />
-          </div>
           {f.enemigos.map((e) => {
             const mo = monstruos?.find((m) => m.id === e.monstruo);
             const varios = f.enemigos.length > 1;
             return (
               <div key={e.id} className={`enemigo ${e.pg <= 0 ? 'caido' : ''}`}>
-                <div className="comb-cab">
+                <div className="comb-cab cab-compacta">
+                  <ChipColor valor={colorDe(e.bando).id} set={(c) => cambiarGrupo(f.clave, (x) => ({ ...x, bando: c }))} />
                   <button className="btn enlace nombre-comb" disabled={!mo} onClick={() => mo && setFicha({ m: mo, quien: e.nombre })}>{e.nombre}{mo ? ' ⓘ' : ''}</button>
-                  <span className="nota">🛡 {e.ca}</span>
+                  <span className="ca-comb" title={L('Clase de armadura', 'Класс доспеха')}>🛡 {e.ca}</span>
+                  <span className="acciones-cab">
+                    {otros.length > 0 && (
+                      <select className="campo mover-pj" value="" onChange={(ev) => { const v = ev.target.value; if (!v) return; const [destino, todo] = v.split('|'); moverCriaturas(todo ? f.enemigos.map((x) => x.id) : [e.id], destino); }}>
+                        <option value="">{L('Mover…', 'Перенести…')}</option>
+                        {otros.map((o) => <option key={o.id} value={o.id}>→ {o.nombre}{varios ? L(' (solo este)', ' (только этого)') : ''}</option>)}
+                        {varios && otros.map((o) => <option key={o.id + '|g'} value={o.id + '|g'}>→ {o.nombre} {L('(todo el grupo)', '(всю группу)')}</option>)}
+                      </select>
+                    )}
+                    <button className="quitar-enemigo" title={L('Quitar del combate', 'Убрать из боя')} aria-label={L('Quitar del combate', 'Убрать из боя')} onClick={() => setEnemigos((es) => es.filter((x) => x.id !== e.id))}>✕</button>
+                  </span>
                 </div>
                 <VidaFila pg={e.pg} max={e.pgMax} temp={e.temp ?? 0} set={(pg, temp) => cambiarEnemigo(e.id, (x) => ({ ...x, pg, temp, estados: estadosPorVida(x.estados, pg, true) }))} />
                 <ChipsEstados estados={e.estados} agotamiento={e.agotamiento ?? 0} detalles={e.estadosDetalle} quien={e.nombre} vacio set={(es, a, d) => cambiarEnemigo(e.id, (x) => ({ ...x, estados: es, agotamiento: a, estadosDetalle: d, ...(muereAhora(x.estados, es) ? { pg: 0, temp: 0 } : {}) }))} />
-                <div className="acciones-pj">
-                  {otros.length > 0 && (
-                    <select className="campo mover-pj" value="" onChange={(ev) => { const v = ev.target.value; if (!v) return; const [destino, todo] = v.split('|'); moverCriaturas(todo ? f.enemigos.map((x) => x.id) : [e.id], destino); }}>
-                      <option value="">{L('Mover…', 'Перенести…')}</option>
-                      {otros.map((o) => <option key={o.id} value={o.id}>→ {o.nombre}{varios ? L(' (solo este)', ' (только этого)') : ''}</option>)}
-                      {varios && otros.map((o) => <option key={o.id + '|g'} value={o.id + '|g'}>→ {o.nombre} {L('(todo el grupo)', '(всю группу)')}</option>)}
-                    </select>
-                  )}
-                  <button className="quitar-enemigo" title={L('Quitar del combate', 'Убрать из боя')} aria-label={L('Quitar del combate', 'Убрать из боя')} onClick={() => setEnemigos((es) => es.filter((x) => x.id !== e.id))}>✕</button>
-                </div>
               </div>
             );
           })}

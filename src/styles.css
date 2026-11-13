@@ -869,3 +869,10 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .mejora-nivel { background: rgba(44,90,160,.1); border-left: 4px solid #2c5aa0; border-radius: 6px; padding: 6px 10px; margin: 4px 0; font-size: 14px; }
 .mana-magia { border-top: 1px dashed #c9b083; margin-top: 10px; padding-top: 8px; display: grid; gap: 4px; }
 .acciones-pj .quitar-enemigo { margin-left: 0; }
+.cab-compacta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cab-compacta .nombre-comb { font-size: 17px; }
+.ca-comb { font-size: 17px; font-weight: 700; color: var(--tinta); white-space: nowrap; }
+.acciones-cab { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; }
+.acciones-cab .mover-pj { width: auto; min-height: 30px; padding: 2px 26px 2px 8px; font-size: 13px; }
+.acciones-cab .quitar-enemigo { margin-left: 0; }
+@media (max-width: 600px) { .acciones-cab .mover-pj { max-width: 96px; font-size: 12px; } .cab-compacta { gap: 6px; } }
