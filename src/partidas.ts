@@ -8,7 +8,7 @@ import { calcularCA, iniciativa } from './rules';
 export interface Partida { id: string; nombre: string; codigo: string; master: string; creada: string; combate?: Combate | null }
 
 /** Enemigo en el combate. Los de un mismo grupo comparten iniciativa. */
-export interface Enemigo { id: string; monstruo: string | null; nombre: string; grupo: string | null; ini: number | null; bonoIni: number; pg: number; pgMax: number; temp?: number; ca: number; estados: string[]; agotamiento?: number; estadosDetalle?: Personaje['estadosDetalle'] }
+export interface Enemigo { id: string; monstruo: string | null; nombre: string; grupo: string | null; /** Bando: 'aliado' o una letra de grupo enemigo ('A', 'B'…). Sin bando = 'A'. */ bando?: string; ini: number | null; bonoIni: number; pg: number; pgMax: number; temp?: number; ca: number; estados: string[]; agotamiento?: number; estadosDetalle?: Personaje['estadosDetalle'] }
 /** Tirada del máster en el combate (enemigos), para el historial. */
 export interface TiradaMaster { id: string; combate?: string; quien: string; etiqueta: string; formula: string; total: number; detalle: string; modo: string; critico: string | null; creada: string }
 /** Un combate. Los jugadores van al primero salvo que estén en `pjs` de otro. */

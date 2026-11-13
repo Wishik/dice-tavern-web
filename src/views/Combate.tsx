@@ -67,6 +67,26 @@ const enCombate = (ini: number | null) => ini !== null && ini !== 0;
 export const tiradasDelCombate = (partida: Partida) => (cacheCombate.get(partida.id) ?? partida.combate)?.tiradas ?? [];
 
 const PRINCIPAL = 'principal';
+/** Bandos de las criaturas, cada uno con su color. */
+export const BANDOS = [
+  { id: 'aliado', es: 'Aliado', ru: 'Союзник', color: '#4f9a4a' },
+  { id: 'A', es: 'Enemigo A', ru: 'Враг A', color: '#b8322a' },
+  { id: 'B', es: 'Enemigo B', ru: 'Враг B', color: '#d9822b' },
+  { id: 'C', es: 'Enemigo C', ru: 'Враг C', color: '#7b4fb3' },
+  { id: 'D', es: 'Enemigo D', ru: 'Враг D', color: '#2f6fb0' },
+];
+const bandoDe = (id?: string) => BANDOS.find((b) => b.id === (id ?? 'A')) ?? BANDOS[1];
+
+/** Elegir bando tocando el color. */
+function SelectorBando({ valor, set }: { valor?: string; set: (b: string) => void }) {
+  return (
+    <div className="selector-bando" role="radiogroup" aria-label={L('Bando', 'Сторона')}>
+      {BANDOS.map((b) => (
+        <button key={b.id} type="button" role="radio" aria-checked={(valor ?? 'A') === b.id} className={(valor ?? 'A') === b.id ? 'activo' : ''} style={{ ['--c' as string]: b.color }} onClick={() => set(b.id)}>{L(b.es, b.ru)}</button>
+      ))}
+    </div>
+  );
+}
 const aLista = (c: CombateT): CombateUno[] => [{ id: PRINCIPAL, nombre: c.nombre, ronda: c.ronda, turno: c.turno, enemigos: c.enemigos, pjs: c.pjs, desde: c.desde }, ...(c.otros ?? [])];
 const deLista = (l: CombateUno[], tiradas?: CombateT['tiradas']): CombateT => ({ ronda: l[0].ronda, turno: l[0].turno, enemigos: l[0].enemigos, nombre: l[0].nombre, pjs: l[0].pjs, desde: l[0].desde, otros: l.slice(1), tiradas });
 /** En qué combate está un jugador (solo si el máster lo ha añadido). */
@@ -196,7 +216,8 @@ function UnCombate({ k, nombre, otros, monstruos, jugadores, todos, partidaId, t
   };
 
   const tarjeta = (f: Fila) => (
-    <li key={f.clave} className={`fila-combate ${f.tipo} ${k.turno === f.clave ? 'turno' : ''}`}>
+    <li key={f.clave} className={`fila-combate ${f.tipo} ${f.tipo === 'grupo' ? 'bando-' + bandoDe(f.enemigos[0].bando).id : ''} ${k.turno === f.clave ? 'turno' : ''}`}
+      style={f.tipo === 'grupo' ? { ['--c' as string]: bandoDe(f.enemigos[0].bando).color } : undefined}>
       <div className="ini-caja">
         <Numero valor={f.ini ?? 0} ancho={52} set={(n) => f.tipo === 'pj' ? jugador(f.m, { iniciativaActual: n }) : cambiarGrupo(f.clave, (e) => ({ ...e, ini: n }))} />
         {f.tipo === 'pj' && <button className="btn pequeno tirar-ini" title={L('Tirar iniciativa por el jugador', 'Бросить инициативу за игрока')}
@@ -220,6 +241,9 @@ function UnCombate({ k, nombre, otros, monstruos, jugadores, todos, partidaId, t
         </div>
       ) : (
         <div className="combatiente">
+          <select className="campo chip-bando" value={bandoDe(f.enemigos[0].bando).id} onChange={(ev) => cambiarGrupo(f.clave, (e) => ({ ...e, bando: ev.target.value }))} aria-label={L('Bando', 'Сторона')}>
+            {BANDOS.map((b) => <option key={b.id} value={b.id}>{L(b.es, b.ru)}</option>)}
+          </select>
           {f.enemigos.map((e) => {
             const mo = monstruos?.find((m) => m.id === e.monstruo);
             return (
@@ -245,27 +269,26 @@ function UnCombate({ k, nombre, otros, monstruos, jugadores, todos, partidaId, t
         <div><span className="etq-pequena">{L('Ronda', 'Раунд')}</span> <strong className="ronda">{k.ronda}</strong></div>
         <div className="fila-botones">
           <button className="btn primario" onClick={siguiente}>▶ {L('Siguiente turno', 'Следующий ход')}</button>
-          <button className="btn" onClick={tirarEnemigos} disabled={!k.enemigos.some((e) => !enCombate(e.ini))}>🎲 {L('Iniciativa enemigos', 'Инициатива врагов')}</button>
+          <button className="btn" onClick={tirarEnemigos} disabled={!k.enemigos.some((e) => !enCombate(e.ini))}>🎲 {L('Iniciativa criaturas', 'Инициатива существ')}</button>
         </div>
       </div>
       <div className="cuerpo-combate">
       <div className="lado-combatientes">
       <ol className="orden-combate">{dentro.map(tarjeta)}</ol>
-      {!filas.length && <p className="vacio">{L('Aún no hay nadie en este combate. Añade jugadores y enemigos con los botones de abajo.', 'В этом бою пока никого. Добавь игроков и врагов кнопками ниже.')}</p>}
+      {!filas.length && <p className="vacio">{L('Aún no hay nadie en este combate. Añade jugadores y criaturas con el botón «Encuentro».', 'В этом бою пока никого. Добавь игроков и существ кнопкой «Встреча».')}</p>}
       {fuera.length > 0 && <>
         <h3 className="titulo-fuera">{L('Fuera del combate (sin iniciativa)', 'Не в бою (без инициативы)')}</h3>
         <ol className="orden-combate fuera">{fuera.map(tarjeta)}</ol>
       </>}
       <div className="fila-botones pie-combate">
-        <button className="btn primario" onClick={() => setAnadirPj(true)}>👥 {L('Añadir jugadores', 'Добавить игроков')}</button>
-        <button className="btn primario" onClick={() => setAnadir(true)}>＋ {L('Añadir enemigos', 'Добавить врагов')}</button>
+        <button className="btn primario" onClick={() => setAnadirPj(true)}>⚔️ {L('Encuentro', 'Встреча')}</button>
         <button className="btn peligro" onClick={terminar}>{L('Terminar combate', 'Закончить бой')}</button>
       </div>
       </div>
       <HistorialTiradas partida={partidaId} pjs={jugadores.map((m) => m.personaje!)} master={tiradasMaster} desde={k.desde} />
       </div>
-      {anadirPj && <ModalAnadirJugadores todos={todos} enEste={jugadores.map((m) => m.personaje!)} nombre={nombre} onClose={() => setAnadirPj(false)} onAnadir={(ids) => { mover(ids, k.id); setAnadirPj(false); }} />}
-      {anadir && monstruos && <ModalAnadirEnemigos monstruos={monstruos} onClose={() => setAnadir(false)} onAnadir={(es) => { setEnemigos((x) => [...x, ...es]); setAnadir(false); }} onVer={(m) => setFicha({ m, quien: nombreM(m) })} />}
+      {anadirPj && <ModalAnadirJugadores todos={todos} enEste={jugadores.map((m) => m.personaje!)} nombre={nombre} pestanas={<PestanasEncuentro en="jugadores" ir={() => { setAnadirPj(false); setAnadir(true); }} />} onClose={() => setAnadirPj(false)} onAnadir={(ids) => { mover(ids, k.id); setAnadirPj(false); }} />}
+      {anadir && monstruos && <ModalAnadirEnemigos monstruos={monstruos} pestanas={<PestanasEncuentro en="criaturas" ir={() => { setAnadir(false); setAnadirPj(true); }} />} onClose={() => setAnadir(false)} onAnadir={(es) => { setEnemigos((x) => [...x, ...es]); setAnadir(false); }} onVer={(m) => setFicha({ m, quien: nombreM(m) })} />}
       {ficha && <Modal titulo={ficha.quien} onClose={() => setFicha(null)}><BloqueMonstruo m={ficha.m} quien={ficha.quien} tirar={tirar} /></Modal>}
     </section>
   );
@@ -296,15 +319,26 @@ function VidaFila({ pg, max, temp, set }: { pg: number; max: number; temp: numbe
   );
 }
 
+/** Pestañas del «Encuentro»: jugadores o criaturas (aliados y enemigos). */
+function PestanasEncuentro({ en, ir }: { en: 'jugadores' | 'criaturas'; ir: () => void }) {
+  return (
+    <div className="segmentado vista-partida">
+      <button type="button" className={en === 'jugadores' ? 'activo' : ''} onClick={en === 'jugadores' ? undefined : ir}>👥 {L('Jugadores', 'Игроки')}</button>
+      <button type="button" className={en === 'criaturas' ? 'activo' : ''} onClick={en === 'criaturas' ? undefined : ir}>🐉 {L('Criaturas', 'Существа')}</button>
+    </div>
+  );
+}
+
 /** Elegir qué jugadores entran en este combate (los que estén en otro se mueven aquí). */
-function ModalAnadirJugadores({ todos, enEste, nombre, onClose, onAnadir }: { todos: { m: Miembro; en: string | null }[]; enEste: string[]; nombre: string; onClose: () => void; onAnadir: (ids: string[]) => void }) {
+function ModalAnadirJugadores({ todos, enEste, nombre, pestanas, onClose, onAnadir }: { todos: { m: Miembro; en: string | null }[]; enEste: string[]; nombre: string; pestanas: React.ReactNode; onClose: () => void; onAnadir: (ids: string[]) => void }) {
   const libres = todos.filter((x) => !enEste.includes(x.m.personaje!));
   const [sel, setSel] = useState<string[]>(() => libres.filter((x) => !x.en).map((x) => x.m.personaje!));
   const cambiar = (id: string) => setSel((l) => (l.includes(id) ? l.filter((x) => x !== id) : [...l, id]));
   return (
-    <Modal titulo={L(`Añadir jugadores a «${nombre}»`, `Добавить игроков в «${nombre}»`)} onClose={onClose}
+    <Modal titulo={L(`Encuentro: ${nombre}`, `Встреча: ${nombre}`)} onClose={onClose}
       pie={<><button className="btn" onClick={() => setSel(sel.length === libres.length ? [] : libres.map((x) => x.m.personaje!))}>{sel.length === libres.length ? L('Ninguno', 'Никого') : L('Todos', 'Все')}</button>
         <button className="btn primario" disabled={!sel.length} onClick={() => onAnadir(sel)}>{L('Añadir', 'Добавить')} ({sel.length})</button></>}>
+      {pestanas}
       {libres.length === 0 ? <p className="nota">{L('Todos los jugadores con personaje ya están en este combate.', 'Все игроки с персонажами уже в этом бою.')}</p> : (
         <ul className="lista-anadir-pj">
           {libres.map(({ m, en }) => (
@@ -319,8 +353,9 @@ function ModalAnadirJugadores({ todos, enEste, nombre, onClose, onAnadir }: { to
   );
 }
 
-function ModalAnadirEnemigos({ monstruos, onClose, onAnadir, onVer }: { monstruos: Monstruo[]; onClose: () => void; onAnadir: (es: Enemigo[]) => void; onVer: (m: Monstruo) => void }) {
+function ModalAnadirEnemigos({ monstruos, pestanas, onClose, onAnadir, onVer }: { monstruos: Monstruo[]; pestanas: React.ReactNode; onClose: () => void; onAnadir: (es: Enemigo[]) => void; onVer: (m: Monstruo) => void }) {
   const [q, setQ] = useState('');
+  const [bando, setBando] = useState('A');
   const [sel, setSel] = useState<Monstruo | null>(null);
   const [cant, setCant] = useState(1);
   const [grupo, setGrupo] = useState(true);
@@ -340,17 +375,20 @@ function ModalAnadirEnemigos({ monstruos, onClose, onAnadir, onVer }: { monstruo
     const g = cant > 1 && grupo ? uid() : null;
     return Array.from({ length: cant }, (_, i) => {
       const pg = pgTirados && base.dg ? tirarPg(base.dg) ?? base.pg : base.pg;
-      return { id: uid(), monstruo: base.id, nombre: cant > 1 ? `${base.nombre} ${i + 1}` : base.nombre, grupo: g, ini: null, bonoIni: base.bono, pg, pgMax: pg, temp: 0, ca: base.ca, estados: [] } as Enemigo;
+      return { id: uid(), monstruo: base.id, nombre: cant > 1 ? `${base.nombre} ${i + 1}` : base.nombre, grupo: g, ini: null, bonoIni: base.bono, pg, pgMax: pg, temp: 0, ca: base.ca, estados: [], bando } as Enemigo;
     });
   };
   return (
-    <Modal titulo={L('Añadir enemigos', 'Добавить врагов')} onClose={onClose}
+    <Modal titulo={L('Encuentro', 'Встреча')} onClose={onClose}
       pie={<>
         <span className="contador-enemigos">× <Numero valor={cant} min={1} max={30} ancho={56} set={setCant} /></span>
         <button className="btn primario" disabled={!sel && !propio.nombre.trim()} onClick={() => onAnadir(sel
           ? crear({ id: sel.id, nombre: nombreM(sel), ca: sel.ca, pg: sel.pg, dg: sel.dg, bono: mod(sel.car[1]) })
           : crear({ id: null, nombre: propio.nombre.trim(), ca: propio.ca, pg: propio.pg, bono: propio.bono }))}>{L('Añadir', 'Добавить')}</button>
       </>}>
+      {pestanas}
+      <p className="etq-pequena">{L('¿De qué bando?', 'На чьей стороне?')}</p>
+      <SelectorBando valor={bando} set={setBando} />
       <input className="campo" autoFocus placeholder={L('Buscar: goblin, lobo, dragón…', 'Поиск: гоблин, волк, дракон…')} value={q} onChange={(e) => { setQ(e.target.value); setSel(null); }} />
       <p className="nota">{L(`${lista.length} de ${monstruos.length} monstruos`, `${lista.length} из ${monstruos.length} монстров`)}</p>
       <ul className="lista-monstruos">

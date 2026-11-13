@@ -798,3 +798,9 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .lista-anadir-pj small { color: #7a6450; }
 .expulsar-lista { position: absolute; right: 8px; top: 8px; }
 .partida-panel .historial-partida { margin-top: 16px; max-width: 640px; }
+/* Bandos (aliado, enemigo A, B…) */
+.fila-combate.grupo { border-left: 8px solid var(--c, #b8322a); background: linear-gradient(180deg, color-mix(in srgb, var(--c, #b8322a) 14%, #fbf3e0), color-mix(in srgb, var(--c, #b8322a) 24%, #ead8b8)); }
+.chip-bando { align-self: flex-start; width: auto; min-height: 28px; padding: 2px 8px; font-size: 13px; font-weight: 700; color: #fff; background: var(--c, #b8322a); border-color: var(--c, #b8322a); }
+.selector-bando { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+.selector-bando button { border: 2px solid var(--c); background: #fffaf0; color: var(--c); border-radius: 999px; padding: 4px 12px; font-weight: 700; cursor: pointer; }
+.selector-bando button.activo { background: var(--c); color: #fff; }
