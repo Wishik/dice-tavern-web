@@ -393,6 +393,11 @@ export const multiplicadorTruco = (nivel: number) => 1 + [5, 11, 17].filter((n) 
  * Dados de un conjuro listos para tirar: el primer dado del texto escalado por nivel de personaje (trucos)
  * o por espacio de conjuro («aumenta en XdY por cada nivel por encima de N»).
  */
+/** Texto de «Con un espacio de conjuro de nivel superior…» (lo que cambia al lanzarlo a más nivel). */
+export function mejoraNivelSuperior(texto: string): string {
+  const i = texto.search(/con un espacio de conjuro de nivel superior/i);
+  return i < 0 ? '' : texto.slice(i).replace(/^con un espacio de conjuro de nivel superior\.?\s*/i, '').trim();
+}
 export function dadosConjuro(texto: string, nivelConjuro: number, nivelPersonaje: number, espacio: number): string[] {
   // Los dados de «Mejora de truco» y «Con un espacio de nivel superior» son el incremento, no se tiran sueltos.
   const corte = texto.search(/mejora de truco|con un espacio de conjuro de nivel superior/i);
@@ -400,16 +405,19 @@ export function dadosConjuro(texto: string, nivelConjuro: number, nivelPersonaje
   const extra = corte >= 0 ? texto.slice(corte) : '';
   const todos = [...new Set((cuerpo.match(/\b\d+d\d+(?:\s*\+\s*\d+)?/gi) ?? []).map((d) => d.replace(/\s+/g, '').toLowerCase()))];
   if (!todos.length) return [];
-  const m = todos[0].match(/^(\d+)d(\d+)(.*)$/)!;
-  let n = parseInt(m[1], 10);
-  const caras = m[2], resto = m[3];
+  const lista = todos.slice(0, 3);
   if (nivelConjuro === 0) {
-    if (/mejora de truco/i.test(extra)) n *= multiplicadorTruco(nivelPersonaje);
-  } else {
-    const sube = extra.match(/aumenta en (\d+)d(\d+) por cada nivel por encima de/i);
-    if (sube && sube[2] === caras) n += parseInt(sube[1], 10) * Math.max(0, espacio - nivelConjuro);
+    if (/mejora de truco/i.test(extra)) { const m = lista[0].match(/^(\d+)d(\d+)(.*)$/)!; lista[0] = `${parseInt(m[1], 10) * multiplicadorTruco(nivelPersonaje)}d${m[2]}${m[3]}`; }
+    return lista;
   }
-  return [`${n}d${caras}${resto}`, ...todos.slice(1, 3)];
+  // «El daño (inicial, adicional…) / La curación aumenta en XdY por cada nivel por encima de N»: se suma al dado con las mismas caras.
+  const sube = extra.match(/aumentan? en (\d+)d(\d+) por cada nivel (?:de espacio )?por encima/i);
+  if (sube) {
+    const i = Math.max(0, lista.findIndex((d) => d.match(/^\d+d(\d+)/)![1] === sube[2]));
+    const m = lista[i].match(/^(\d+)d(\d+)(.*)$/)!;
+    if (m[2] === sube[2]) lista[i] = `${parseInt(m[1], 10) + parseInt(sube[1], 10) * Math.max(0, espacio - nivelConjuro)}d${m[2]}${m[3]}`;
+  }
+  return lista;
 }
 
 // ---------------------------------------------------------------- Avisos de ventaja/desventaja

@@ -1,11 +1,12 @@
 import { Fragment, useState } from 'react';
 import { useFicha } from './Ficha';
-import { BotonAnadir, Buscador, Check, Modal, PuntoRojo, Seccion, Texto, TextoLargo } from '../ui';
+import { BotonAnadir, Buscador, Check, Etiqueta, Modal, PuntoRojo, Seccion, Texto, TextoLargo } from '../ui';
+import { Contador, useDados } from '../dice';
+import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo } from '../types';
 import { useDatos, type Conjuro } from '../data';
 import type { ConjuroPersonaje } from '../types';
-import { useDados } from '../dice';
-import { ataqueConjuros, cdConjuros, conSigno, dadosConjuro, multiplicadorTruco } from '../rules';
-import { L, T, RU_CLASES } from '../i18n';
+import { CARACTERISTICA_CONJUROS, ataqueConjuros, cdConjuros, conSigno, dadosConjuro, mejoraNivelSuperior, multiplicadorTruco } from '../rules';
+import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
 import { esMulticlase } from '../multiclase';
 import { claseDeConjuro, type MagiaClase } from '../avisos';
 import { tr } from '../ru';
@@ -62,8 +63,49 @@ export function TabMagia() {
   const adicionales = conIdx.filter(({ c }) => c.adicional).sort((a, b) => a.c.nivel - b.c.nivel);
   const trucosAd = adicionales.filter(({ c }) => c.nivel === 0), conjAd = adicionales.filter(({ c }) => c.nivel > 0);
 
+  const cd = cdConjuros(p), at = ataqueConjuros(p);
+  const auto = CARACTERISTICA_CONJUROS[p.clase];
+  const { tirarD20 } = useDados();
+  const [filtroNivel, setFiltroNivel] = useState<number | null>(null);
+  // Nivel máximo de conjuro de la clase a la que se añade (o el general).
+  const maxNivelAnadir = (anadirQue ? magia.find((m) => m.clase === anadirQue.clase)?.nivelMaxConjuro : null) ?? avisos.nivelMaxConjuro ?? null;
+  const anadirConjuro = (c: Conjuro) => {
+    if (anadir !== 'adicional' && c.nivel > 0 && maxNivelAnadir !== null && c.nivel > maxNivelAnadir
+      && !confirm(L(`«${td(c.nombre)}» es de nivel ${c.nivel}, pero ahora solo puedes lanzar conjuros hasta nivel ${maxNivelAnadir}. ¿Añadirlo igualmente?`, `«${td(c.nombre)}» — ${c.nivel} уровня, а сейчас тебе доступны заклинания только до ${maxNivelAnadir} уровня. Всё равно добавить?`))) return false;
+    upd((x) => { x.conjuros.push({ nombre: c.nombre, nivel: c.nivel, ...(anadir === 'adicional' ? { adicional: true } : multi ? { clase: anadirQue!.clase } : {}) }); });
+    return true;
+  };
+
   return (
     <div className="tab">
+      <Seccion titulo={L('Lanzamiento', 'Колдовство')} className="lanzamiento">
+        <Etiqueta texto="Característica de conjuros">
+          <select className="campo" value={p.conjuroCaracteristica} onChange={(e) => upd((x) => { x.conjuroCaracteristica = e.target.value as Atributo | ''; })}>
+            <option value="">{auto ? L(`Automática: ${NOMBRE_ATRIBUTO[auto]} (${p.clase})`, `Автоматически: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[auto])} (${T(RU_CLASES, p.clase)})`) : L('— Ninguna —', '— Нет —')}</option>
+            {ATRIBUTOS.map((a) => <option key={a} value={a}>{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}</option>)}
+          </select>
+        </Etiqueta>
+        <h4 className="subtitulo-campos">{L('Conjuros por turno', 'Заклинаний за ход')}</h4>
+        <div className="fila-2 alineada">
+          <Etiqueta texto="Estándar"><Texto valor={p.conjurosTurno.estandar} set={(s) => upd((x) => { x.conjurosTurno.estandar = s; })} /></Etiqueta>
+          <Etiqueta texto="Adicional"><Texto valor={p.conjurosTurno.adicional} set={(s) => upd((x) => { x.conjurosTurno.adicional = s; })} /></Etiqueta>
+        </div>
+        <div className="fila-2 valores-conjuro">
+          <div><small>{L('CD de conjuros', 'Сл заклинаний')}</small><strong>{cd ?? '—'}</strong></div>
+          <div><small>{L('Ataque de conjuro', 'Атака заклинанием')}</small>{at !== null ? <button className="lt-valor" onClick={() => tirarD20(L('Ataque de conjuro', 'Атака заклинанием'), at, [], undefined, 'combate')}>{conSigno(at)}</button> : <strong>—</strong>}</div>
+        </div>
+        {p.pm.max > 0 && (
+          <div className="mana-magia">
+            <small>🔷 {L('Maná', 'Мана')}</small>
+            <div className="pg-actual">
+              <Contador valor={p.pm.actual} set={(n) => upd((x) => { x.pm.actual = Math.max(0, Math.min(n, x.pm.max)); })} min={0} max={p.pm.max} />
+              <span className="de">/ {p.pm.max}</span>
+            </div>
+            <div className="barra-vida barra-mana"><div style={{ width: `${Math.max(0, Math.min(100, (p.pm.actual / p.pm.max) * 100))}%` }} /></div>
+            <p className="nota pequena">{L('Un conjuro gasta tanto maná como el nivel al que lo lanzas (los trucos no gastan).', 'Заклинание тратит столько маны, на каком уровне ты его накладываешь (заговоры бесплатны).')}</p>
+          </div>
+        )}
+      </Seccion>
       {grupos.map((m) => {
         const propios = conIdx.filter(({ c }) => !c.adicional && (multi ? claseDeConjuro(p, c) === m.clase : true));
         const porNivel = NIVELES.map((_, i) => propios.filter(({ c }) => c.nivel === i));
@@ -113,19 +155,28 @@ export function TabMagia() {
           {claseMin && anadir !== 'adicional' && (
             <label className="interruptor"><input type="checkbox" checked={todasClases} onChange={(e) => setTodasClases(e.target.checked)} /> {anadir === 'truco' ? L('Mostrar trucos de todas las clases', 'Показать заговоры всех классов') : L('Mostrar conjuros de todas las clases', 'Показать заклинания всех классов')}</label>
           )}
+          {anadir !== 'truco' && (
+            <div className="filtro-nivel" role="group" aria-label={L('Filtrar por nivel', 'Фильтр по уровню')}>
+              <button type="button" className={`chip ${filtroNivel === null ? 'activo' : ''}`} onClick={() => setFiltroNivel(null)}>{L('Todos', 'Все')}</button>
+              {(anadir === 'adicional' ? NIVELES : NIVELES.slice(1)).map((n) => (
+                <button key={n} type="button" className={`chip ${filtroNivel === n ? 'activo' : ''} ${anadir !== 'adicional' && maxNivelAnadir !== null && n > maxNivelAnadir ? 'fuera-nivel' : ''}`} onClick={() => setFiltroNivel(n)}>{n === 0 ? L('Truco', 'Заговор') : n}</button>
+              ))}
+            </div>
+          )}
+          {anadir === 'conjuro' && maxNivelAnadir !== null && <p className="nota pequena">{L(`Ahora puedes lanzar hasta nivel ${maxNivelAnadir}. Los niveles en gris son superiores: si eliges uno, te avisaré.`, `Сейчас доступно до ${maxNivelAnadir} уровня. Серые уровни выше — если выберешь такое, я предупрежу.`)}</p>}
           {!todos ? <p>{L('Cargando…', 'Загрузка…')}</p> : (
             <Buscador<Conjuro>
               items={todos}
               texto={(c) => c.nombre}
               placeholder={anadir === 'truco' ? L('Escribe el nombre del truco…', 'Напиши название заговора…') : L('Escribe el nombre del conjuro…', 'Напиши название заклинания…')}
               filtro={(c) => (anadir === 'adicional' || (anadir === 'truco' ? c.nivel === 0 : c.nivel > 0))
+                && (filtroNivel === null || anadir === 'truco' || c.nivel === filtroNivel)
                 && (anadir === 'adicional' || todasClases || !claseMin || c.clases.includes(claseMin))
                 && !p.conjuros.some((x) => x.nombre === c.nombre)}
               render={(c) => <span className="res-conjuro"><strong>{td(c.nombre)}</strong><small>{c.nivel ? `${L('Nivel', 'Уровень')} ${c.nivel}` : L('Truco', 'Заговор')} · {td(c.escuela)} · {c.clases.join(', ')}</small></span>}
               onElegir={(c) => {
                 if (typeof c === 'string') { setNuevo({ nombre: c, nivel: anadir === 'truco' ? 0 : 1, adicional: anadir === 'adicional', descripcion: '', clase: anadirQue?.clase }); setAnadir(null); return; }
-                upd((x) => { x.conjuros.push({ nombre: c.nombre, nivel: c.nivel, ...(anadir === 'adicional' ? { adicional: true } : multi ? { clase: anadirQue!.clase } : {}) }); });
-                setAnadir(null);
+                if (anadirConjuro(c)) setAnadir(null);
               }}
             />
           )}
@@ -203,37 +254,52 @@ export function FichaConjuro({ c }: { c: Conjuro }) {
   );
 }
 
-/** Botones para usar el conjuro: tirada de ataque, CD de la salvación y dados de daño/curación (con la mejora por nivel). */
+/** Lanzar el conjuro: elegir a qué nivel (gasta ese maná), tirada de ataque, CD y dados de daño/curación (con la mejora por nivel). */
 function Lanzar({ texto, nivel, nombre }: { texto: string; nivel: number; nombre: string }) {
-  const { p, avisos } = useFicha();
+  const { p, upd, avisos, ajeno } = useFicha();
   const { tirar, tirarD20 } = useDados();
   const at = ataqueConjuros(p), cd = cdConjuros(p);
   const maxEsp = Math.max(nivel, Math.min(9, avisos.nivelMaxConjuro ?? 9));
   const [espacio, setEspacio] = useState(nivel);
+  const [lanzado, setLanzado] = useState('');
   const pideAtaque = /tirada de ataque|ataque de conjuro/i.test(texto);
   const pideSalvacion = /tirada de salvaci[oó]n/i.test(texto);
-  const sube = nivel > 0 && /aumenta en \d+d\d+ por cada nivel por encima/i.test(texto);
+  const sube = nivel > 0 && /aumentan? en \d+d\d+ por cada nivel (?:de espacio )?por encima/i.test(texto);
+  const mejora = nivel > 0 ? mejoraNivelSuperior(texto) : '';
   const dados = dadosConjuro(texto, nivel, p.nivel, espacio);
   const mejoraTruco = nivel === 0 && /mejora de truco/i.test(texto) && multiplicadorTruco(p.nivel) > 1;
-  // Conjuros sin ataque, sin salvación y sin dados (Armadura de mago…): no hay nada que tirar.
-  if (!pideAtaque && !pideSalvacion && dados.length === 0) return null;
-  if (at === null && dados.length === 0) {
-    return <p className="nota">{L('Para lanzar con ataque, elige la «Característica de conjuros» en la pestaña Combate.', 'Чтобы атаковать заклинанием, выбери «Заклинательную характеристику» на вкладке «Бой».')}</p>;
-  }
+  const conMana = p.pm.max > 0;
+  const lanzar = () => {
+    if (conMana && p.pm.actual < espacio) { alert(L(`No te queda maná suficiente: necesitas ${espacio} y tienes ${p.pm.actual}.`, `Не хватает маны: нужно ${espacio}, у тебя ${p.pm.actual}.`)); return; }
+    if (conMana) upd((x) => { x.pm.actual = Math.max(0, x.pm.actual - espacio); });
+    setLanzado(conMana ? L(`Lanzado a nivel ${espacio}: −${espacio} maná (te quedan ${p.pm.actual - espacio}).`, `Наложено на ${espacio} уровне: −${espacio} маны (осталось ${p.pm.actual - espacio}).`) : L(`Lanzado a nivel ${espacio}.`, `Наложено на ${espacio} уровне.`));
+  };
+  const hayTiradas = pideAtaque || pideSalvacion || dados.length > 0;
+  if (nivel === 0 && !hayTiradas) return null;
   return (
     <div className="lanzar">
-      {sube && (
-        <label className="etiqueta espacio-conjuro"><span>{L('Espacio de conjuro', 'Ячейка заклинания')}</span>
-          <select className="campo" value={espacio} onChange={(e) => setEspacio(+e.target.value)}>
-            {Array.from({ length: maxEsp - nivel + 1 }, (_, k) => nivel + k).map((n) => <option key={n} value={n}>{L('Nivel', 'Уровень')} {n}{n === nivel ? L(' (base)', ' (базовый)') : ''}</option>)}
-          </select>
-        </label>
+      {nivel > 0 && (
+        <div className="fila-lanzar">
+          <label className="etiqueta espacio-conjuro"><span>{L('Lanzar a nivel', 'Накладывать на уровне')}</span>
+            <select className="campo" value={espacio} onChange={(e) => { setEspacio(+e.target.value); setLanzado(''); }}>
+              {Array.from({ length: maxEsp - nivel + 1 }, (_, k) => nivel + k).map((n) => <option key={n} value={n}>{L('Nivel', 'Уровень')} {n}{n === nivel ? L(' (base)', ' (базовый)') : ''}{conMana ? ` · ${n} ${L('maná', 'маны')}` : ''}</option>)}
+            </select>
+          </label>
+          {!ajeno && <button className="btn primario" onClick={lanzar}>✨ {L('Lanzar', 'Наложить')}{conMana ? ` (−${espacio} ${L('maná', 'маны')})` : ''}</button>}
+        </div>
       )}
-      {at !== null && pideAtaque && <button className="btn primario" onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${nombre}`, at, [], undefined, 'combate')}>🎲 {L('Ataque', 'Атака')} {conSigno(at)}</button>}
-      {cd !== null && pideSalvacion && <span className="cd-chip">{L('El objetivo salva contra CD', 'Цель делает спасбросок, Сл')} <strong>{cd}</strong></span>}
-      {dados.map((d) => <button key={d} className="btn" onClick={() => tirar(`${nombre} (${d})`, d, 'normal', 'combate')}>🎲 {d}</button>)}
+      {lanzado && <p className="nota lanzado">✓ {lanzado}</p>}
+      {nivel > 0 && espacio > nivel && (mejora
+        ? <p className="mejora-nivel">⬆️ <strong>{L(`A nivel ${espacio}`, `На ${espacio} уровне`)}{sube ? L(' (los dados ya están sumados)', ' (кости уже прибавлены)') : ''}:</strong> {td(mejora)}</p>
+        : <p className="nota pequena">{L('Este conjuro no cambia al lanzarlo a más nivel (solo gasta más maná).', 'Это заклинание не меняется на более высоком уровне (тратит только больше маны).')}</p>)}
+      {hayTiradas && at === null && dados.length === 0
+        ? <p className="nota">{L('Para lanzar con ataque, elige la «Característica de conjuros» arriba, en «Lanzamiento».', 'Чтобы атаковать заклинанием, выбери «Заклинательную характеристику» вверху, в «Колдовстве».')}</p>
+        : <div className="fila-botones">
+            {at !== null && pideAtaque && <button className="btn primario" onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${nombre}`, at, [], undefined, 'combate')}>🎲 {L('Ataque', 'Атака')} {conSigno(at)}</button>}
+            {cd !== null && pideSalvacion && <span className="cd-chip">{L('El objetivo salva contra CD', 'Цель делает спасбросок, Сл')} <strong>{cd}</strong></span>}
+            {dados.map((d) => <button key={d} className="btn" onClick={() => tirar(`${nombre}${espacio > nivel ? ` (${L('nivel', 'ур.')} ${espacio})` : ''} (${d})`, d, 'normal', 'combate')}>🎲 {d}</button>)}
+          </div>}
       {mejoraTruco && <p className="nota pequena">{L(`Daño mejorado por tu nivel ${p.nivel} (trucos: ×2 a nivel 5, ×3 a nivel 11, ×4 a nivel 17).`, `Урон усилен за твой ${p.nivel} уровень (заговоры: ×2 на 5, ×3 на 11, ×4 на 17 уровне).`)}</p>}
-      {at === null && (pideAtaque || pideSalvacion) && <p className="nota">{L('Elige la «Característica de conjuros» en Combate para ver tu ataque y CD.', 'Выбери «Заклинательную характеристику» во вкладке «Бой», чтобы видеть атаку и Сл.')}</p>}
     </div>
   );
 }

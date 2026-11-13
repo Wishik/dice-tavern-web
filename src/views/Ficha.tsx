@@ -158,6 +158,10 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
           <div className="titulo-ficha">
             <strong>{p.nombre || L('Sin nombre', 'Без имени')}</strong>
             <span>{[T(RU_RAZAS, p.raza), p.clase && textoClases(p)].filter(Boolean).join(' · ')}</span>
+            <span className="indicadores-cab">
+              <span className={p.pg.actual <= 0 ? 'cero' : ''}>❤️ {p.pg.actual}/{p.pg.max}{p.pg.temp ? ` +${p.pg.temp}` : ''}</span>
+              {p.pm.max > 0 && <span className="mana">🔷 {p.pm.actual}/{p.pm.max}</span>}
+            </span>
           </div>
           {ajeno && <span className="sello-master">👑</span>}
           <span className={`estado-guardado ${estado}`}>{estado === 'guardado' ? L('✓ Guardado', '✓ Сохранено') : estado === 'error' ? L('⚠ Sin guardar', '⚠ Не сохранено') : '…'}</span>

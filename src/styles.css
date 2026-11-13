@@ -855,3 +855,17 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .color-grupo { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .color-grupo .mover-pj { width: auto; }
 .lado-combatientes > .cabecera-combate { max-width: 640px; }
+.titulo-ficha .indicadores-cab { display: flex; gap: 6px; margin: 3px 0 0; font-family: var(--fuente-texto, inherit); font-size: 13px; font-weight: 600; letter-spacing: 0; text-transform: none; vertical-align: middle; }
+.titulo-ficha .indicadores-cab span { background: rgba(0,0,0,.3); color: #f3d9c9; border-radius: 999px; padding: 1px 8px; white-space: nowrap; overflow: visible; }
+.titulo-ficha .indicadores-cab .mana { color: #b9d0f5; }
+.titulo-ficha .indicadores-cab .cero { background: #7d1a12; color: #fff; }
+.filtro-nivel { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.filtro-nivel .chip { border: 1px solid #a3865a; background: #fffaf0; border-radius: 999px; padding: 4px 12px; font-size: 13px; cursor: pointer; color: var(--tinta); min-width: 36px; }
+.filtro-nivel .chip.activo { background: #7a4b1c; color: #fff; border-color: #7a4b1c; }
+.filtro-nivel .chip.fuera-nivel:not(.activo) { opacity: .5; }
+.fila-lanzar { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; }
+.fila-lanzar .espacio-conjuro { margin: 0; }
+.lanzado { color: #2c5aa0; font-weight: 600; }
+.mejora-nivel { background: rgba(44,90,160,.1); border-left: 4px solid #2c5aa0; border-radius: 6px; padding: 6px 10px; margin: 4px 0; font-size: 14px; }
+.mana-magia { border-top: 1px dashed #c9b083; margin-top: 10px; padding-top: 8px; display: grid; gap: 4px; }
+.acciones-pj .quitar-enemigo { margin-left: 0; }
