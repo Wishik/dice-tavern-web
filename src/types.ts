@@ -31,12 +31,18 @@ export interface Item {
   danoExtra?: string;
 }
 
-export type RanuraEquipo = 'yelmo' | 'amuleto' | 'armadura' | 'capa' | 'manoHabil' | 'manoTorpe';
+export type RanuraEquipo = 'yelmo' | 'amuleto' | 'armadura' | 'capa' | 'brazalete' | 'guantes' | 'anillo1' | 'anillo2' | 'cinto' | 'botas' | 'manoHabil' | 'manoTorpe';
 export const RANURAS_EQUIPO: { id: RanuraEquipo; nombre: string; icono: string }[] = [
   { id: 'yelmo', nombre: 'Yelmo', icono: '⛑️' },
   { id: 'amuleto', nombre: 'Amuleto', icono: '📿' },
   { id: 'armadura', nombre: 'Armadura', icono: '🛡️' },
   { id: 'capa', nombre: 'Capa', icono: '🧥' },
+  { id: 'brazalete', nombre: 'Brazalete', icono: '⭕' },
+  { id: 'guantes', nombre: 'Guantes', icono: '🧤' },
+  { id: 'anillo1', nombre: 'Anillo', icono: '💍' },
+  { id: 'anillo2', nombre: 'Anillo', icono: '💍' },
+  { id: 'cinto', nombre: 'Cinturón', icono: '🎗️' },
+  { id: 'botas', nombre: 'Botas', icono: '🥾' },
   { id: 'manoHabil', nombre: 'Mano hábil', icono: '🗡️' },
   { id: 'manoTorpe', nombre: 'Mano torpe', icono: '🔰' },
 ];

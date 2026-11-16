@@ -417,7 +417,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
       {!base ? <p>{L('Cargando base de objetos…', 'Загружаю базу предметов…')}</p> : (
         <Buscador<ObjetoBase>
           items={base} texto={(o) => o.nombre} placeholder="Escribe el nombre del objeto…"
-          filtro={(o) => destino.zona !== 'equipo' || !['yelmo', 'amuleto', 'capa'].includes(destino.r) || o.tipo === 'otro'}
+          filtro={(o) => destino.zona !== 'equipo' || !['yelmo', 'amuleto', 'capa', 'brazalete', 'guantes', 'anillo1', 'anillo2', 'cinto', 'botas'].includes(destino.r) || o.tipo === 'otro'}
           render={(o) => <span className="res-conjuro"><strong>{td(o.nombre)}</strong><small>{td(o.categoria)}{o.precio ? ` · ${o.precio}` : ''}{o.detalles?.['Daño'] ? ` · ${o.detalles['Daño']}` : ''}{o.detalles?.['Clase de armadura'] ? ` · ${L('CA', 'КД')} ${o.detalles['Clase de armadura']}` : ''}</small></span>}
           onElegir={(o) => setBorrador(typeof o === 'string'
             ? { id: uid(), nombre: o, descripcion: '', precio: '', cantidad: 1, tipo: 'otro' }
