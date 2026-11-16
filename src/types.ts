@@ -53,7 +53,7 @@ export const CATEGORIAS_ITEM: { id: TipoItem; nombre: string; ru: string }[] = [
 /** `dado` (p. ej. «1d4»): en vez de un número fijo, se tira y se suma (entonces `valor` no cuenta). */
 export interface BonoItem { donde: string; valor: number; dado?: string }
 
-export type RanuraEquipo = 'yelmo' | 'amuleto' | 'armadura' | 'capa' | 'brazalete' | 'guantes' | 'anillo1' | 'anillo2' | 'cinto' | 'botas' | 'manoHabil' | 'manoTorpe';
+export type RanuraEquipo = 'yelmo' | 'amuleto' | 'armadura' | 'capa' | 'brazalete' | 'guantes' | 'anillo1' | 'anillo2' | 'cinto' | 'botas' | 'carcaj' | 'manoHabil' | 'manoTorpe';
 export const RANURAS_EQUIPO: { id: RanuraEquipo; nombre: string; icono: string }[] = [
   { id: 'yelmo', nombre: 'Yelmo', icono: '⛑️' },
   { id: 'amuleto', nombre: 'Amuleto', icono: '📿' },
@@ -65,6 +65,7 @@ export const RANURAS_EQUIPO: { id: RanuraEquipo; nombre: string; icono: string }
   { id: 'anillo2', nombre: 'Anillo', icono: '💍' },
   { id: 'cinto', nombre: 'Cinturón', icono: '🎗️' },
   { id: 'botas', nombre: 'Botas', icono: '🥾' },
+  { id: 'carcaj', nombre: 'Contenedor de munición', icono: '🏹' },
   { id: 'manoHabil', nombre: 'Mano hábil', icono: '🗡️' },
   { id: 'manoTorpe', nombre: 'Mano torpe', icono: '🔰' },
 ];
@@ -73,7 +74,7 @@ export type TamanoCinturon = 'pequeño' | 'mediano' | 'grande';
 /** Qué categoría de objeto va en cada hueco del equipo (las manos aceptan cualquiera). */
 export const TIPO_RANURA: Partial<Record<RanuraEquipo, TipoItem>> = {
   yelmo: 'yelmo', amuleto: 'amuleto', armadura: 'armadura', capa: 'capa', brazalete: 'brazalete', guantes: 'guantes',
-  anillo1: 'anillo', anillo2: 'anillo', cinto: 'cinturon', botas: 'botas',
+  anillo1: 'anillo', anillo2: 'anillo', cinto: 'cinturon', botas: 'botas', carcaj: 'contenedorMunicion',
 };
 export const cabeEnRanura = (r: RanuraEquipo, t: TipoItem) => !TIPO_RANURA[r] || TIPO_RANURA[r] === t;
 

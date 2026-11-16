@@ -44,7 +44,7 @@ const RU: Record<string, string> = {
   'INT 5+': 'ИНТ 5+', 'INT 10+': 'ИНТ 10+', 'INT 14+ (aprendido)': 'ИНТ 14+ (выучен)', 'INT 17+ (aprendido)': 'ИНТ 17+ (выучен)',
   'INT 19+ (aprendido)': 'ИНТ 19+ (выучен)', 'SAB 5+': 'МДР 5+', 'SAB 12+ (aprendido)': 'МДР 12+ (выучено)', 'SAB 18+ (aprendido)': 'МДР 18+ (выучено)',
   'INT 12+ (aprendida)': 'ИНТ 12+ (выучена)', 'INT 18+ (aprendida)': 'ИНТ 18+ (выучена)',
-  'Yelmo': 'Шлем', 'Brazalete': 'Браслет', 'Guantes': 'Перчатки', 'Anillo': 'Кольцо', 'Cinturón': 'Пояс', 'Botas': 'Сапоги', 'Amuleto': 'Амулет', 'Armadura': 'Доспех', 'Capa': 'Плащ', 'Cáñamo': 'Пенька', 'Seda': 'Шёлк', 'Seda de araña': 'Паучий шёлк',
+  'Yelmo': 'Шлем', 'Brazalete': 'Браслет', 'Guantes': 'Перчатки', 'Anillo': 'Кольцо', 'Cinturón': 'Пояс', 'Botas': 'Сапоги', 'Contenedor de munición': 'Контейнер для боеприпасов', 'Amuleto': 'Амулет', 'Armadura': 'Доспех', 'Capa': 'Плащ', 'Cáñamo': 'Пенька', 'Seda': 'Шёлк', 'Seda de araña': 'Паучий шёлк',
   'Clima templado': 'Умеренный климат', 'Clima frío': 'Холодный климат', 'Clima cálido': 'Жаркий климат',
   'Desventaja en TS y habilidades de Fuerza y Destreza': 'Помеха на спасброски и навыки Силы и Ловкости',
   'Desventaja en todas las tiradas de Fuerza y Destreza': 'Помеха на все броски Силы и Ловкости',

@@ -26,7 +26,7 @@ export function opcionesBono(habilidades: { id: string; nombre: string }[]): { i
   ];
 }
 
-const RANURAS: RanuraEquipo[] = ['yelmo', 'amuleto', 'armadura', 'capa', 'brazalete', 'guantes', 'anillo1', 'anillo2', 'cinto', 'botas', 'manoHabil', 'manoTorpe'];
+const RANURAS: RanuraEquipo[] = ['yelmo', 'amuleto', 'armadura', 'capa', 'brazalete', 'guantes', 'anillo1', 'anillo2', 'cinto', 'botas', 'carcaj', 'manoHabil', 'manoTorpe'];
 
 /** Todas las mejoras de lo que llevas puesto (sin el ataque/daño propio de las armas). */
 export function bonosEquipo(p: Personaje): BonoEquipo[] {

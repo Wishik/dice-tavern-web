@@ -67,11 +67,11 @@ export function poner(p: Personaje, it: Item, d: Destino) {
   else (d.zona === 'mochila' ? p.mochila : p.cinturon.items).push(it);
 }
 /**
- * Al equipar o pasar al cinturón solo se mueve una unidad del montón (la munición, lo que cabe en un espacio).
- * A la mochila se mueve todo. Devuelve false si no cabe.
+ * Al equipar o pasar al cinturón solo se mueve una unidad del montón (también la munición: para llevar
+ * un montón de 20, se lleva el contenedor). A la mochila se mueve todo. Devuelve false si no cabe.
  */
 function moverParte(p: Personaje, upd: (f: (x: Personaje) => void) => void, it: Item, desde: Lugar, d: Destino): boolean {
-  const parte = d.zona !== 'mochila' && it.cantidad > 1 ? (it.maxPorEspacio ? Math.min(it.cantidad, it.maxPorEspacio) : 1) : it.cantidad;
+  const parte = d.zona !== 'mochila' && it.cantidad > 1 ? 1 : it.cantidad;
   const todo = parte >= it.cantidad;
   if (!cabe(p, { ...it, cantidad: parte }, d, todo ? desde : undefined)) return false;
   upd((x) => { const y = sacarDe(desde)(x, parte); if (y) poner(x, y, d); });
