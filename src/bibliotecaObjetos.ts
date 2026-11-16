@@ -1,7 +1,7 @@
 import { supabase } from './store';
 import { cambiarItems, type Alijo } from './alijos';
 import { uid } from './rules';
-import type { Item } from './types';
+import type { Item, Personaje } from './types';
 
 /**
  * Biblioteca de objetos de la partida: los objetos que crea cualquier jugador (o el máster) se guardan aquí
@@ -12,6 +12,13 @@ export const NOMBRE_BIBLIOTECA = '__biblioteca__';
 export const esBiblioteca = (a: Alijo) => !a.suelo && a.nombre === NOMBRE_BIBLIOTECA;
 
 const clave = (n: string) => n.trim().toLocaleLowerCase('es');
+
+/** Objetos de un personaje que van a la biblioteca: los creados o editados por los jugadores. */
+export function objetosPropios(p: Personaje): Item[] {
+  const todos = [...p.mochila, ...p.cinturon.items, ...Object.values(p.equipo), ...(p.suelo ?? [])].filter(Boolean) as Item[];
+  // Los objetos de antes de esta marca: los que tienen mejoras, +N o daño extra.
+  return todos.filter((it) => !it.bolsa && (it.propio || it.bonos?.length || it.magico || it.danoExtra));
+}
 
 /** Copia limpia para la biblioteca: sin cantidades, munición ni a quién se robó. */
 export function paraBiblioteca(it: Item): Item {
@@ -33,16 +40,21 @@ export async function bibliotecaDe(partida: string): Promise<Alijo> {
 /** Añade objetos (o los reemplaza si ya hay uno con el mismo nombre). Devuelve cuántos eran nuevos. */
 export async function guardarEnBiblioteca(partida: string, items: Item[]): Promise<number> {
   const b = await bibliotecaDe(partida);
-  let nuevos = 0;
-  await cambiarItems(b.id, (l) => {
+  const mezclar = (l: Item[]) => {
     const out = [...l];
+    let nuevos = 0;
     for (const it of items) {
+      if (!it.nombre.trim()) continue;
       const limpio = paraBiblioteca(it);
       const i = out.findIndex((x) => clave(x.nombre) === clave(limpio.nombre));
       if (i >= 0) out[i] = { ...limpio, id: out[i].id }; else { out.push(limpio); nuevos++; }
     }
-    return out.sort((a, c) => a.nombre.localeCompare(c.nombre, 'es'));
-  });
+    return { out: out.sort((a, c) => a.nombre.localeCompare(c.nombre, 'es')), nuevos };
+  };
+  // Si ya está todo igual, no se escribe nada.
+  if (JSON.stringify(mezclar(b.items).out) === JSON.stringify(b.items)) return 0;
+  let nuevos = 0;
+  await cambiarItems(b.id, (l) => { const r = mezclar(l); nuevos = r.nuevos; return r.out; });
   window.dispatchEvent(new Event('alijos-cambio'));
   return nuevos;
 }

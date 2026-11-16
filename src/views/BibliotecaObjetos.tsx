@@ -21,7 +21,7 @@ export function SeccionBiblioteca() {
   return (
     <Seccion titulo={L('Biblioteca de objetos', 'Библиотека предметов')}>
       {!partida ? <p className="nota pequena">{L('La biblioteca es de la partida: entra con este personaje en una partida y los objetos que creéis se guardarán aquí.', 'Библиотека общая для партии: войди этим персонажем в партию, и созданные предметы будут сохраняться здесь.')}</p> : <>
-        <p className="nota pequena">{L('Aquí se guardan los objetos que crea cualquiera de la partida. Salen primero (con 📚) al añadir un objeto. Con «Exportar» te llevas toda la biblioteca a otra partida.', 'Здесь хранятся предметы, созданные кем-либо в партии. Они идут первыми (с 📚) при добавлении предмета. «Экспорт» переносит всю библиотеку в другую партию.')}</p>
+        <p className="nota pequena">{L('Aquí se guardan solos los objetos que crea (o modifica) cualquiera de la partida. Salen primero (con 📚) al añadir un objeto. Con «Exportar» te llevas toda la biblioteca a otra partida.', 'Здесь хранятся предметы, созданные кем-либо в партии. Они идут первыми (с 📚) при добавлении предмета. «Экспорт» переносит всю библиотеку в другую партию.')}</p>
         {error && <p className="error">{error}</p>}
         {items.length === 0 ? <p className="vacio">{L('Aún no hay objetos creados.', 'Созданных предметов пока нет.')}</p> : (
           <ul className="lista-alijo">

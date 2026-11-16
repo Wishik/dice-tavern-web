@@ -24,6 +24,8 @@ export interface Item {
   bonos?: BonoItem[];
   /** Solo cinturones: tamaño (cuántos espacios de acceso rápido da). */
   cinturon?: TamanoCinturon;
+  /** Creado (o editado) por un jugador: se guarda solo en la biblioteca de objetos de la partida. */
+  propio?: boolean;
   /** Bolsa llena de monedas que sale de las bolsas de monedas al pasar de 500. */
   bolsa?: { moneda: Moneda; cantidad: number };
   /** Datos extra mostrados en la ficha del objeto (daño, CA, propiedades...). */

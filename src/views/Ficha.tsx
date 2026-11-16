@@ -22,6 +22,8 @@ import { TabMaster } from './TabMaster';
 import { ChipsEstados } from '../estados';
 import { L, T, RU_ATRIBUTOS, RU_CLASES, RU_RAZAS, } from '../i18n';
 import { eleccionesPendientes, sincronizarConjuros } from '../conjurosRasgos';
+import { guardarEnBiblioteca, objetosPropios, paraBiblioteca } from '../bibliotecaObjetos';
+import { partidaDe } from '../alijos';
 
 interface FichaCtx {
   p: Personaje;
@@ -187,6 +189,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
         <SincronizarMana />
         {!ajeno && <SincronizarConjuros />}
         {!ajeno && <SincronizarCinturon />}
+        <SincronizarBiblioteca />
         {dados && <Modal titulo={L('Dados', 'Кубики')} onClose={() => setDados(false)}><PanelDados /></Modal>}
       </div>
     </Ctx.Provider>
@@ -244,6 +247,23 @@ function SincronizarMana() {
     if (!clases || max === p.pm.max) return;
     upd((x) => { const d = max - x.pm.max; x.pm.max = max; x.pm.actual = Math.max(0, Math.min(max, x.pm.actual + Math.max(0, d))); });
   }, [max, p.pm.max, clases, upd]);
+  return null;
+}
+
+/** Los objetos creados o editados por los jugadores se guardan solos (unos segundos después) en la biblioteca de la partida. */
+function SincronizarBiblioteca() {
+  const { p } = useFicha();
+  const [partida, setPartida] = useState<string | null>(null);
+  useEffect(() => { let vivo = true; partidaDe(p.id).then((x) => vivo && setPartida(x)); return () => { vivo = false; }; }, [p.id]);
+  const propios = objetosPropios(p);
+  const firma = JSON.stringify(propios.map((it) => paraBiblioteca({ ...it, id: '' })).map(({ id: _i, ...r }) => r));
+  const hecho = useRef('');
+  useEffect(() => {
+    if (!partida || !propios.length || hecho.current === firma) return;
+    const t = setTimeout(() => { guardarEnBiblioteca(partida, propios).then(() => { hecho.current = firma; }).catch(() => {}); }, 2500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [partida, firma]);
   return null;
 }
 

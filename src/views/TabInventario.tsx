@@ -15,7 +15,6 @@ import { EditorBonos, EditorObjeto } from './EditorObjeto';
 import { opcionesBono } from '../bonosObjetos';
 import { ModalDejar, SeccionAlijos, useAlijos } from './Alijos';
 import { SeccionBiblioteca } from './BibliotecaObjetos';
-import { guardarEnBiblioteca } from '../bibliotecaObjetos';
 
 /** Saca n unidades del objeto de la hoja (todo si n ≥ cantidad) y devuelve esa parte. */
 const sacarDe = (lugar: Lugar) => (x: Personaje, n: number): Item | null => {
@@ -229,12 +228,6 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
   const usable = it.tipo === 'pocion' || it.tipo === 'consumible';
   const [vender, setVender] = useState(false);
   const [dejar, setDejar] = useState(false);
-  const { partida } = useAlijos();
-  const aBiblioteca = async () => {
-    if (!partida) return;
-    try { const n = await guardarEnBiblioteca(partida, [it]); alert(n ? L(`«${it.nombre}» guardado en la biblioteca de la partida.`, `«${it.nombre}» сохранён в библиотеке партии.`) : L(`«${it.nombre}» actualizado en la biblioteca.`, `«${it.nombre}» обновлён в библиотеке.`)); }
-    catch (e) { alert((e as Error).message); }
-  };
   if (it.bolsa) return <ModalBolsa lugar={lugar} onClose={onClose} />;
   return (
     <Modal titulo={td(it.nombre)} onClose={onClose}
@@ -247,7 +240,6 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
         {lugar.zona === 'mochila' && <button className="btn" onClick={() => mover({ zona: 'cinturon' })}>{L('Al cinturón', 'На пояс')}</button>}
         {lugar.zona === 'cinturon' && <button className="btn" onClick={() => mover({ zona: 'mochila' })}>{L('A la mochila', 'В рюкзак')}</button>}
         <button className="btn" onClick={() => setDejar(true)}>🪨 {L('Tirar o dejar en alijo', 'Бросить или в тайник')}</button>
-        {partida && <button className="btn" onClick={aBiblioteca}>📚 {L('Guardar en la biblioteca', 'В библиотеку')}</button>}
         {ajeno && <button className="btn robar" onClick={robar}>🫳 {L('Robar', 'Украсть')}</button>}
         <button className="btn vender" onClick={() => setVender(true)}>{L('Vender', 'Продать')}</button>
         <button className="btn peligro" onClick={() => { if (confirm(L(`¿Tirar ${it.nombre}?`, `Выбросить «${it.nombre}»?`))) { upd((x) => { quitar(x, lugar); }); onClose(); } }}>{L('Tirar', 'Выбросить')}</button>
@@ -263,8 +255,8 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
       </div>
       {lugar.zona === 'equipo' && TIPO_RANURA[lugar.r] && <p className="nota pequena">{L('Para cambiarle la categoría, quítatelo primero del equipo.', 'Чтобы сменить категорию, сначала сними предмет.')}</p>}
       {editar ? <>
-        {tieneEditor(it.tipo) && <EditorObjeto it={it} set={set} />}
-        <EditorBonos it={it} set={set} />
+        {tieneEditor(it.tipo) && <EditorObjeto it={it} set={(f) => set((y) => { f(y); y.propio = true; })} />}
+        <EditorBonos it={it} set={(f) => set((y) => { f(y); y.propio = true; })} />
       </> : <>
         {it.bonos?.length ? <p className="mejoras-item">✨ {textoBonos(it)}</p> : null}
         <button className="btn pequeno" onClick={() => setEditar(true)}>✎ {tieneEditor(it.tipo) ? L('Editar daño, propiedades, mejoras (+1 a la CA, al daño…)', 'Изменить урон, свойства, бонусы (+1 к КД, урону…)') : L('Editar mejoras (+1 a la CA, al daño, a una salvación…)', 'Изменить бонусы (+1 к КД, урону, спасброску…)')}</button>
@@ -410,7 +402,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
   const [borrador, setBorrador] = useState<Item | null>(null);
   /** Objeto creado ahora (no sale de la base): al añadirlo se guarda en la biblioteca de la partida. */
   const [nuevo, setNuevo] = useState(false);
-  const { partida, biblioteca } = useAlijos();
+  const { biblioteca } = useAlijos();
   const deBiblioteca: ObjetoBase[] = (biblioteca?.items ?? []).map((it) => ({ nombre: it.nombre, descripcion: it.descripcion, precio: it.precio, tipo: it.tipo, categoria: L('📚 Biblioteca de la partida', '📚 Библиотека партии'), detalles: it.detalles, maxPorEspacio: it.maxPorEspacio, item: it }));
   useEffect(() => { cargarObjetos().then(setBase); }, []);
   const sueltos = destino.zona === 'equipo' ? [...p.mochila.map((it, i) => ({ it, l: { zona: 'mochila' as const, i } })), ...p.cinturon.items.map((it, i) => ({ it, l: { zona: 'cinturon' as const, i } }))].filter(({ it }) => !it.bolsa && cabeEnRanura(destino.r, it.tipo)) : [];
@@ -422,8 +414,8 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
     <Modal titulo={L(`Añadir a ${nombreDestino}`, `Добавить: ${nombreDestino}`)} onClose={onClose}
       pie={<button className="btn primario" disabled={!borrador.nombre.trim()} onClick={() => {
         if (!cabe(p, borrador, destino)) return;
-        upd((x) => poner(x, borrador, destino));
-        if (nuevo && partida) guardarEnBiblioteca(partida, [borrador]).catch(() => {});
+        // Los objetos creados (o editados) se marcan «propio» y van solos a la biblioteca de la partida.
+        upd((x) => poner(x, nuevo || borrador.bonos?.length ? { ...borrador, propio: true } : borrador, destino));
         onClose();
       }}>{L('Añadir', 'Добавить')}</button>}>
       <div className="rejilla-campos">
