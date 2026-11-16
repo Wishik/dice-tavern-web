@@ -8,6 +8,7 @@ import { BotonAnadir, Etiqueta, Modal, Numero, Seccion, Texto } from '../ui';
 import { Contador, useDados } from '../dice';
 import { car, CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosIniciativa, avisosTirada, pgExtra, bonoCompetencia, calcularCA, conDados, conSigno, textoMod, desgloseCar, uid, type LineaDesglose, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto, valorPrueba } from '../rules';
 import { bonoVelocidad, velocidadRasgo } from '../bonos';
+import { sumaEquipo } from '../bonosObjetos';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo, type RecursoExtra } from '../types';
 import { buscarClase } from '../avisos';
 import { descansoCorto, descansoLargo, dgRecuperados, extraDadoGolpe, recursosPersonaje, recuperaExtra, resumenCorto } from '../recursos';
@@ -35,9 +36,10 @@ export function TabAtributos() {
   const extraDg = extraDadoGolpe(p);
   const pen = carga.penalizacion;
   const vel = bonoVelocidad(p);
-  const ajusteVel = (base: number, mult: number) => {
-    const d = vel * mult + pen * mult;
-    return d !== 0 && <b className={d < 0 ? 'penal' : 'extra'}> ({[vel && `+${vel * mult} ${L('bonos', 'бонусы')}`, pen && `${pen * mult} ${L('carga', 'груз')}`].filter(Boolean).join(', ')}) = {Math.max(0, base + d)}</b>;
+  const ajusteVel = (base: number, mult: number, extra = 0) => {
+    const b = vel * mult + extra;
+    const d = b + pen * mult;
+    return (b !== 0 || pen !== 0) && <b className={d < 0 ? 'penal' : 'extra'}> ({[b && `${b > 0 ? '+' : ''}${b} ${L('bonos', 'бонусы')}`, pen && `${pen * mult} ${L('carga', 'груз')}`].filter(Boolean).join(', ')}) = {Math.max(0, base + d)}</b>;
   };
   const [corregir, setCorregir] = useState(false);
   const ca = calcularCA(p);
@@ -186,11 +188,14 @@ export function TabAtributos() {
             <li><span>{L('Andando', 'Шагом')}</span><Numero valor={p.velocidad.andando} min={0} set={(n) => upd((x) => { x.velocidad.andando = n; })} ancho={64} />
               <span className="pies">{L('pies', 'фт')}{ajusteVel(p.velocidad.andando, 1)}</span></li>
             <li><span>{L('Corriendo', 'Бегом')}</span><Numero valor={p.velocidad.corriendo} min={0} set={(n) => upd((x) => { x.velocidad.corriendo = n; })} ancho={64} />
-              <span className="pies">{L('pies', 'фт')}{ajusteVel(p.velocidad.corriendo, 2)}</span></li>
+              <span className="pies">{L('pies', 'фт')}{ajusteVel(p.velocidad.corriendo, 2, sumaEquipo(p, 'vel:corriendo'))}</span></li>
             {([['trepando', 'trepar', L('Trepando', 'Лазая')], ['nadando', 'nadar', L('Nadando', 'Плавая')], ['volando', 'volar', L('Volando', 'Летая')]] as const).map(([campo, k, txt]) => {
               // Si un rasgo da esta velocidad (Trepadores, Anfibio, Alas…) y no has escrito otra, sale sola.
               const auto = velocidadRasgo(p, k);
-              return <li key={campo}><span>{txt}</span><Texto valor={p.velocidad[campo]} placeholder={auto ? `${auto.pies} ${L('pies', 'фт')} (${auto.origen})` : ''} set={(s) => upd((x) => { x.velocidad[campo] = s; })} /></li>;
+              const eq = sumaEquipo(p, `vel:${campo}`);
+              const base = parseInt(p.velocidad[campo], 10) || auto?.pies || 0;
+              return <li key={campo}><span>{txt}</span><Texto valor={p.velocidad[campo]} placeholder={auto ? `${auto.pies} ${L('pies', 'фт')} (${auto.origen})` : ''} set={(s) => upd((x) => { x.velocidad[campo] = s; })} />
+                {eq !== 0 && <span className="pies"><b className={eq < 0 ? 'penal' : 'extra'}> ({eq > 0 ? '+' : ''}{eq} 🎒) = {Math.max(0, base + eq)}</b></span>}</li>;
             })}
           </ul>
           {pen < 0 && <p className="aviso-carga">{L('Mochila sobrecargada', 'Рюкзак перегружен')} ({carga.usados}/{carga.libres} {L('espacios', 'ячеек')}). {carga.efecto}</p>}

@@ -9,6 +9,8 @@ import { L, T, RU_CLASES, RU_RAZAS } from '../i18n';
 import { td } from '../datosRu';
 import { clasesDe } from '../multiclase';
 import { eleccionesDe, elegido } from '../elecciones';
+import { mejoraDe, mejoraPendiente, opcionesMejora } from '../mejoras';
+import { ModalElegirMejora, ModalMejoraNivel, mejorasPendientes } from './MejoraNivel';
 
 export function TabRasgos() {
   const { p, upd, razas, clases, dotes, trasfondos, avisos } = useFicha();
@@ -21,6 +23,9 @@ export function TabRasgos() {
     }));
   const [modal, setModal] = useState<null | 'rasgoRaza' | 'dote' | 'rasgo'>(null);
   const [ver, setVer] = useState<{ titulo: string; texto: string; quitar?: () => void } | null>(null);
+  const [mejoraDote, setMejoraDote] = useState<number | null>(null);
+  const [mejoraNivel, setMejoraNivel] = useState(false);
+  const pendientesMejora = mejorasPendientes(p, clases, trasfondos);
   const [editar, setEditar] = useState<{ lista: 'dotes' | 'rasgos'; i: number; e: EntradaTexto } | null>(null);
   const raza = buscarRaza(razas, p.raza);
   const clase = buscarClase(clases, p.clase);
@@ -51,8 +56,17 @@ export function TabRasgos() {
       <Seccion titulo="Dotes" aviso={avisos.dotes}>
         {p.dotes.length === 0 && <p className="vacio">{L('Sin dotes.', 'Нет черт.')}</p>}
         <ul className="lista-rasgos">
-          {p.dotes.map((d, i) => <li key={i}><button onClick={() => setEditar({ lista: 'dotes', i, e: d })}><strong>{td(d.nombre)}</strong><span>{td(d.texto).slice(0, 120)}{d.texto.length > 120 ? '…' : ''}</span></button></li>)}
+          {p.dotes.map((d, i) => {
+            const op = opcionesMejora(d);
+            const m = mejoraDe(d);
+            return <li key={i} className={op ? 'con-mejora' : ''}><button onClick={() => setEditar({ lista: 'dotes', i, e: d })}><strong>{td(d.nombre)}</strong><span>{td(d.texto).slice(0, 120)}{d.texto.length > 120 ? '…' : ''}</span></button>
+              {op && (mejoraPendiente(d)
+                ? <button className="btn enlace pequeno mejora-dote falta" onClick={() => setMejoraDote(i)}>⚠ {L('Elige a qué característica va el +1', 'Выбери характеристику для +1')}{op.cantidad > 1 ? ' (×2)' : ''}</button>
+                : <button className="btn enlace pequeno mejora-dote" disabled={op.atrs.length === 1} onClick={() => setMejoraDote(i)}>📈 {[...new Set(m)].map((a) => `+${m.filter((x) => x === a).length} ${a}`).join(', ')}{op.atrs.length > 1 ? ` · ${L('cambiar', 'изменить')}` : ''}</button>)}
+            </li>;
+          })}
         </ul>
+        {pendientesMejora > 0 && <button className="btn primario" onClick={() => setMejoraNivel(true)}><PuntoRojo /> 📈 {L(`Mejora de característica o dote (${pendientesMejora})`, `Увеличение характеристик или черта (${pendientesMejora})`)}</button>}
         <BotonAnadir aviso={avisos.dotes > 0} onClick={() => setModal('dote')}>Añadir dote</BotonAnadir>
         {avisos.dotes > 0 && <p className="nota">{L(`Te ${avisos.dotes > 1 ? `faltan ${avisos.dotes} dotes` : 'falta 1 dote'}`, `Не хватает черт: ${avisos.dotes}`)}{tras ? L(` (de origen por ${tras.nombre}: ${tras.dotes.map(td).join(', ')})`, ` (черта происхождения от «${tras.nombre}»: ${tras.dotes.map(td).join(', ')})`) : ''}{clase ? L('; las «Mejora de característica» de tu clase también cuentan', '; «Увеличение характеристик» класса тоже считается') : ''}.</p>}
       </Seccion>
@@ -116,11 +130,14 @@ export function TabRasgos() {
               const e = typeof d === 'string' ? { nombre: d, texto: '' } : { nombre: d.nombre, texto: d.descripcion, origen: d.categoria };
               upd((x) => { x.dotes.push(e); }); setModal(null);
               if (typeof d === 'string') setEditar({ lista: 'dotes', i: p.dotes.length, e });
+              else if (mejoraPendiente(e)) setMejoraDote(p.dotes.length);
             }}
           />
           {tras && <p className="nota">{L('★ = dote de origen de tu trasfondo.', '★ = черта происхождения твоей предыстории.')}</p>}
         </Modal>
       )}
+      {mejoraDote !== null && <ModalElegirMejora i={mejoraDote} onClose={() => setMejoraDote(null)} />}
+      {mejoraNivel && <ModalMejoraNivel onClose={() => setMejoraNivel(false)} />}
       {ver && (
         <Modal titulo={ver.titulo} onClose={() => setVer(null)} pie={ver.quitar && <button className="btn peligro" onClick={() => { ver.quitar!(); setVer(null); }}>{L('Quitar', 'Убрать')}</button>}>
           <TextoLargo texto={ver.texto || L('Sin descripción.', 'Нет описания.')} />

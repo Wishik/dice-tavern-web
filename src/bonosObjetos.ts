@@ -18,7 +18,11 @@ export function opcionesBono(habilidades: { id: string; nombre: string }[]): { i
     { id: 'ataqueConjuro', es: 'Ataque de conjuros', ru: 'Атака заклинаниями', grupo: 'Combate' },
     { id: 'cdConjuro', es: 'CD de conjuros', ru: 'СЛ заклинаний', grupo: 'Combate' },
     { id: 'iniciativa', es: 'Iniciativa', ru: 'Инициатива', grupo: 'Combate' },
-    { id: 'velocidad', es: 'Velocidad (pies)', ru: 'Скорость (фт)', grupo: 'Combate' },
+    { id: 'velocidad', es: 'Velocidad andando (pies; corriendo ×2)', ru: 'Скорость шагом (фт; бегом ×2)', grupo: 'Velocidad' },
+    { id: 'vel:corriendo', es: 'Velocidad corriendo (pies)', ru: 'Скорость бегом (фт)', grupo: 'Velocidad' },
+    { id: 'vel:trepando', es: 'Velocidad trepando (pies)', ru: 'Скорость лазания (фт)', grupo: 'Velocidad' },
+    { id: 'vel:nadando', es: 'Velocidad nadando (pies)', ru: 'Скорость плавания (фт)', grupo: 'Velocidad' },
+    { id: 'vel:volando', es: 'Velocidad volando (pies)', ru: 'Скорость полёта (фт)', grupo: 'Velocidad' },
     ...ATRIBUTOS.map((a) => ({ id: a, es: NOMBRE_ATRIBUTO[a], ru: a, grupo: 'Características' })),
     { id: 'salv:todas', es: 'Todas las salvaciones', ru: 'Все спасброски', grupo: 'Salvaciones' },
     ...ATRIBUTOS.map((a) => ({ id: `salv:${a}`, es: `Salvación de ${NOMBRE_ATRIBUTO[a]}`, ru: `Спасбросок ${a}`, grupo: 'Salvaciones' })),
@@ -53,7 +57,7 @@ export const dadosEquipo = (p: Personaje, donde: string) => todosEn(p, donde).fi
 /** Dados del propio arma para su ataque o su daño. */
 export const dadosPropioArma = (it: Item, que: 'ataque' | 'dano') => (it.bonos ?? []).filter((b) => b.donde === que && b.dado).map((b) => b.dado!);
 /** Mejoras que solo pueden ser un número (no se tiran): CA, CD, velocidad y características. */
-export const soloFijo = (donde: string) => ['CA', 'cdConjuro', 'velocidad', ...ATRIBUTOS].includes(donde);
+export const soloFijo = (donde: string) => ['CA', 'cdConjuro', 'velocidad', ...ATRIBUTOS].includes(donde) || donde.startsWith('vel:');
 export const DADOS_BONO = ['1d4', '1d6', '1d8', '1d10', '1d12', '2d4', '2d6', '2d8', '1d20'];
 export const sumaEquipo = (p: Personaje, donde: string) => bonosEquipoEn(p, donde).reduce((s, b) => s + b.valor, 0);
 

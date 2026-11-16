@@ -5,13 +5,14 @@ import { NOMBRE_ATRIBUTO } from './types';
 import { bonoPropioArma, bonosEquipoEn, sumaEquipo } from './bonosObjetos';
 import { L, T, RU_NOMBRE_ATRIBUTO } from './i18n';
 import { tr } from './ru';
+import { aumentosDotes } from './mejoras';
 
 
 /** Valor de una característica con los efectos temporales del máster (entre 1 y 30). */
 export function car(p: Personaje, a: Atributo): number {
   const extra = (p.efectosCar ?? []).filter((e) => e.atributo === a).reduce((s, e) => s + e.valor, 0)
     + (p.bonosExtra ?? []).filter((b) => b.donde === a).reduce((s, b) => s + (b.valor || 0), 0)
-    + sumaEquipo(p, a) + aumentoClase(p, a).reduce((s, x) => s + x.valor, 0);
+    + sumaEquipo(p, a) + aumentoClase(p, a).reduce((s, x) => s + x.valor, 0) + aumentosDotes(p, a).reduce((s, x) => s + x.valor, 0);
   return extra ? Math.max(1, Math.min(30, p.caracteristicas[a] + extra)) : p.caracteristicas[a];
 }
 /** Aumentos de nivel 20: Campeón primordial (bárbaro, FUE y CON +4) y Cuerpo y mente (monje, DES y SAB +4), hasta 25. */
@@ -32,6 +33,7 @@ export function desgloseCar(p: Personaje, a: Atributo): LineaDesglose[] {
   return [
     { texto: L('Puntuación base', 'Базовое значение'), valor: p.caracteristicas[a], base: true },
     ...(p.bonosExtra ?? []).filter((b) => b.donde === a).map((b) => ({ texto: b.origen || L('Bonus', 'Бонус'), valor: b.valor, id: b.id })),
+    ...aumentosDotes(p, a),
     ...lineasEquipo(p, a),
     ...aumentoClase(p, a),
     ...(p.efectosCar ?? []).filter((e) => e.atributo === a).map((e) => ({ texto: L('Máster', 'Мастер'), valor: e.valor, nota: e.nota })),

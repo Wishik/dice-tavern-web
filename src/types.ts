@@ -78,7 +78,7 @@ export const TIPO_RANURA: Partial<Record<RanuraEquipo, TipoItem>> = {
 };
 export const cabeEnRanura = (r: RanuraEquipo, t: TipoItem) => !TIPO_RANURA[r] || TIPO_RANURA[r] === t;
 
-export interface EntradaTexto { nombre: string; texto: string; origen?: string }
+export interface EntradaTexto { nombre: string; texto: string; origen?: string; /** Dotes: características elegidas para su +1 (Mejora de Característica: dos). */ mejora?: Atributo[] }
 
 export interface NivelClase { clase: string; subclase: string; nivel: number }
 

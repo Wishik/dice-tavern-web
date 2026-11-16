@@ -6,6 +6,7 @@ import { backend } from '../store';
 import { useDatos, type Clase, type Conjuro, type Dote, type Razas, type Trasfondo } from '../data';
 import { calcularAvisos, manaMaximo, type Avisos } from '../avisos';
 import { DadoIcono, PanelDados, useDados } from '../dice';
+import { ModalMejoraNivel, mejorasPendientes } from './MejoraNivel';
 import { ajustarCinturon, capacidadCinturon, car, conSigno, espaciosUsados, modificador, pgExtra } from '../rules';
 import { Etiqueta, Modal, PuntoRojo } from '../ui';
 import { GANAS_MULTICLASE, asignarNivel, clasesDe, cumpleRequisito, fijarClases, textoClases, textoRequisito } from '../multiclase';
@@ -188,6 +189,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
         <SubidaNivel />
         <SincronizarMana />
         <SincronizarPG />
+        {!ajeno && !bloqueado && <AvisoMejora />}
         {!ajeno && <SincronizarConjuros />}
         {!ajeno && <SincronizarCinturon />}
         <SincronizarBiblioteca />
@@ -249,6 +251,16 @@ function SincronizarMana() {
     upd((x) => { const d = max - x.pm.max; x.pm.max = max; x.pm.actual = Math.max(0, Math.min(max, x.pm.actual + Math.max(0, d))); });
   }, [max, p.pm.max, clases, upd]);
   return null;
+}
+
+/** Al llegar a un nivel con «Mejora de característica» se pregunta: ¿características o dote? */
+function AvisoMejora() {
+  const { p, clases, trasfondos } = useFicha();
+  const n = clases ? mejorasPendientes(p, clases, trasfondos) : 0;
+  const [cerrado, setCerrado] = useState(-1);
+  // Se vuelve a preguntar si aparece otra pendiente (otro nivel); «más tarde» la deja en Rasgos → Dotes.
+  if (!n || p.subidasPendientes || cerrado >= n) return null;
+  return <ModalMejoraNivel key={n} onClose={() => {}} onMasTarde={() => setCerrado(n)} />;
 }
 
 /** PG extra de dotes y rasgos (Duro, Don de la fortaleza, Resistencia dracónica): se suma o se quita solo la diferencia. */

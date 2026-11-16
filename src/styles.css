@@ -920,3 +920,11 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .editor-bonos .fila-bono .donde-bono { flex: 1 1 100%; order: -1; }
 .editor-bonos .fila-bono .valor-bono { flex: 0 0 110px; }
 .editor-bonos .fila-bono .btn.peligro { margin-left: auto; }
+.opciones-mejora { display: grid; gap: 10px; margin: 12px 0; }
+.opciones-mejora .btn { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 100%; }
+.opciones-mejora .btn small { font-size: 12px; opacity: .8; text-transform: none; letter-spacing: 0; }
+.elegir-mejora .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.mejora-dote { margin: 2px 0 6px 10px; }
+.lista-rasgos li.con-mejora { flex-direction: column; align-items: stretch; }
+.mejora-dote { align-self: flex-start; }
+.mejora-dote.falta { color: #b3261e; }
