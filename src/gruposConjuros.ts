@@ -24,8 +24,9 @@ export function grupoDe(p: Personaje, c: ConjuroPersonaje): GrupoConjuros {
   if (!c.adicional) { const clase = claseDeConjuro(p, c); return { id: `clase:${clase}`, tipo: 'clase', clase }; }
   if (c.origen) {
     const f = fuenteDe(c.origen);
-    if (f?.subclase) return { id: `sub:${f.rasgo}`, tipo: 'subclase', clase: f.clase, rasgo: f.rasgo };
-    if (f?.invocacion) return { id: 'invocacion', tipo: 'invocacion', clase: 'Brujo' };
+    // Los de subclase y las invocaciones van con los de su clase («Conjuros de Brujo»).
+    if (f?.subclase) return { id: `lista:${f.clase}`, tipo: 'lista', clase: f.clase };
+    if (f?.invocacion) return { id: 'lista:Brujo', tipo: 'lista', clase: 'Brujo' };
     if (f?.dote) return { id: `dote:${f.rasgo}`, tipo: 'dote', rasgo: f.rasgo };
     if (f) return { id: `raza:${f.rasgo}`, tipo: 'raza', rasgo: f.rasgo };
   }
@@ -81,8 +82,8 @@ export function fijarAtributoGrupo(x: Personaje, g: GrupoConjuros, a: Atributo |
 export const cdCon = (p: Personaje, a: Atributo | '') => (a ? 8 + bonoCompetencia(nivelTotal(p)) + modificador(car(p, a)) + bonoCdConjuro(p) : null);
 export const ataqueCon = (p: Personaje, a: Atributo | '') => (a ? bonoCompetencia(nivelTotal(p)) + modificador(car(p, a)) + bonoAtaqueConjuro(p) : null);
 
-const ORDEN: TipoGrupo[] = ['subclase', 'raza', 'dote', 'invocacion', 'lista', 'otros'];
-/** Grupos de «Otros conjuros» que tienen algún conjuro, en orden: raciales, dotes, invocaciones, listas de clase, sin grupo. */
+const ORDEN: TipoGrupo[] = ['raza', 'subclase', 'invocacion', 'lista', 'dote', 'otros'];
+/** Grupos de «Otros conjuros» que tienen algún conjuro, en orden: raciales, los de cada clase (subclase, invocaciones, su lista), dotes, otros. */
 export function gruposOtros(p: Personaje): { g: GrupoConjuros; idx: number[] }[] {
   const mapa = new Map<string, { g: GrupoConjuros; idx: number[] }>();
   p.conjuros.forEach((c, i) => {

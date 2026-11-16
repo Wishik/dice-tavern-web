@@ -35,7 +35,7 @@ describe('conjuros de subclase', () => {
     const n = p.conjuros.map((c) => c.nombre);
     expect(n).toContain('Luz'); expect(n).toContain('Revivir'); expect(n).not.toContain('Muro de fuego');
     expect(p.conjuros.every((c) => c.adicional)).toBe(true);
-    expect(gruposOtros(p)[0].g.tipo).toBe('subclase');
+    expect(gruposOtros(p)[0].g.id).toBe('lista:Brujo');
     expect(atributoGrupo(p, gruposOtros(p)[0].g, ['Brujo'], null)).toBe('CAR');
   });
 });

@@ -133,7 +133,7 @@ export function TabMagia() {
         )}
       </Seccion>
       {grupos.map((m) => {
-        const propios = conIdx.filter(({ c }) => !c.adicional && (multi ? claseDeConjuro(p, c) === m.clase : true));
+        const propios = conIdx.filter(({ c }) => !c.adicional && (multi ? claseDeConjuro(p, c) === m.clase : true)).sort((a, b) => a.c.nombre.localeCompare(b.c.nombre, 'es'));
         const porNivel = NIVELES.map((_, i) => propios.filter(({ c, idx }) => c.nivel === i && !ocultos.has(idx)));
         const faltanT = m.limiteTrucos ? Math.max(0, m.limiteTrucos - m.nTrucos) : 0;
         const faltanC = m.limiteConjuros ? Math.max(0, m.limiteConjuros - m.nConj) : 0;
@@ -178,7 +178,7 @@ export function TabMagia() {
           </label>
         )}
         {otros.map(({ g, idx }) => {
-          const lista = idx.map((i) => ({ c: p.conjuros[i], idx: i })).sort((a, b) => a.c.nivel - b.c.nivel);
+          const lista = idx.map((i) => ({ c: p.conjuros[i], idx: i })).sort((a, b) => a.c.nivel - b.c.nivel || a.c.nombre.localeCompare(b.c.nombre, 'es'));
           const tr0 = lista.filter(({ c, idx }) => c.nivel === 0 && !ocultos.has(idx)), cj = lista.filter(({ c, idx }) => c.nivel > 0 && !ocultos.has(idx));
           if (!tr0.length && !cj.length && g.tipo !== 'lista' && g.tipo !== 'otros') return null;
           const manual = g.tipo === 'lista' || g.tipo === 'otros' || g.id === 'raza:';
