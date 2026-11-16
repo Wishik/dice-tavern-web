@@ -13,7 +13,9 @@ import { td } from '../datosRu';
 import { nombreBotin, useBotin } from '../botin';
 import { EditorBonos, EditorObjeto } from './EditorObjeto';
 import { opcionesBono } from '../bonosObjetos';
-import { ModalDejar, SeccionAlijos } from './Alijos';
+import { ModalDejar, SeccionAlijos, useAlijos } from './Alijos';
+import { SeccionBiblioteca } from './BibliotecaObjetos';
+import { guardarEnBiblioteca } from '../bibliotecaObjetos';
 
 /** Saca n unidades del objeto de la hoja (todo si n ≥ cantidad) y devuelve esa parte. */
 const sacarDe = (lugar: Lugar) => (x: Personaje, n: number): Item | null => {
@@ -138,6 +140,7 @@ export function TabInventario() {
       <EquipoViaje />
       <Monedas />
       <SeccionAlijos />
+      <SeccionBiblioteca />
 
       {abierto && leer(p, abierto) && <ModalItem lugar={abierto} onClose={() => setAbierto(null)} />}
       {anadir && <ModalAnadir destino={anadir} onClose={() => setAnadir(null)} />}
@@ -226,6 +229,12 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
   const usable = it.tipo === 'pocion' || it.tipo === 'consumible';
   const [vender, setVender] = useState(false);
   const [dejar, setDejar] = useState(false);
+  const { partida } = useAlijos();
+  const aBiblioteca = async () => {
+    if (!partida) return;
+    try { const n = await guardarEnBiblioteca(partida, [it]); alert(n ? L(`«${it.nombre}» guardado en la biblioteca de la partida.`, `«${it.nombre}» сохранён в библиотеке партии.`) : L(`«${it.nombre}» actualizado en la biblioteca.`, `«${it.nombre}» обновлён в библиотеке.`)); }
+    catch (e) { alert((e as Error).message); }
+  };
   if (it.bolsa) return <ModalBolsa lugar={lugar} onClose={onClose} />;
   return (
     <Modal titulo={td(it.nombre)} onClose={onClose}
@@ -238,6 +247,7 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
         {lugar.zona === 'mochila' && <button className="btn" onClick={() => mover({ zona: 'cinturon' })}>{L('Al cinturón', 'На пояс')}</button>}
         {lugar.zona === 'cinturon' && <button className="btn" onClick={() => mover({ zona: 'mochila' })}>{L('A la mochila', 'В рюкзак')}</button>}
         <button className="btn" onClick={() => setDejar(true)}>🪨 {L('Tirar o dejar en alijo', 'Бросить или в тайник')}</button>
+        {partida && <button className="btn" onClick={aBiblioteca}>📚 {L('Guardar en la biblioteca', 'В библиотеку')}</button>}
         {ajeno && <button className="btn robar" onClick={robar}>🫳 {L('Robar', 'Украсть')}</button>}
         <button className="btn vender" onClick={() => setVender(true)}>{L('Vender', 'Продать')}</button>
         <button className="btn peligro" onClick={() => { if (confirm(L(`¿Tirar ${it.nombre}?`, `Выбросить «${it.nombre}»?`))) { upd((x) => { quitar(x, lugar); }); onClose(); } }}>{L('Tirar', 'Выбросить')}</button>
@@ -398,6 +408,10 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
   };
   const [base, setBase] = useState<ObjetoBase[] | null>(null);
   const [borrador, setBorrador] = useState<Item | null>(null);
+  /** Objeto creado ahora (no sale de la base): al añadirlo se guarda en la biblioteca de la partida. */
+  const [nuevo, setNuevo] = useState(false);
+  const { partida, biblioteca } = useAlijos();
+  const deBiblioteca: ObjetoBase[] = (biblioteca?.items ?? []).map((it) => ({ nombre: it.nombre, descripcion: it.descripcion, precio: it.precio, tipo: it.tipo, categoria: L('📚 Biblioteca de la partida', '📚 Библиотека партии'), detalles: it.detalles, maxPorEspacio: it.maxPorEspacio, item: it }));
   useEffect(() => { cargarObjetos().then(setBase); }, []);
   const sueltos = destino.zona === 'equipo' ? [...p.mochila.map((it, i) => ({ it, l: { zona: 'mochila' as const, i } })), ...p.cinturon.items.map((it, i) => ({ it, l: { zona: 'cinturon' as const, i } }))].filter(({ it }) => !it.bolsa && cabeEnRanura(destino.r, it.tipo)) : [];
   /** Hueco que solo acepta una categoría (yelmo, anillo…): el objeto nuevo será de esa categoría. */
@@ -406,7 +420,12 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
 
   if (borrador) return (
     <Modal titulo={L(`Añadir a ${nombreDestino}`, `Добавить: ${nombreDestino}`)} onClose={onClose}
-      pie={<button className="btn primario" disabled={!borrador.nombre.trim()} onClick={() => { if (!cabe(p, borrador, destino)) return; upd((x) => poner(x, borrador, destino)); onClose(); }}>{L('Añadir', 'Добавить')}</button>}>
+      pie={<button className="btn primario" disabled={!borrador.nombre.trim()} onClick={() => {
+        if (!cabe(p, borrador, destino)) return;
+        upd((x) => poner(x, borrador, destino));
+        if (nuevo && partida) guardarEnBiblioteca(partida, [borrador]).catch(() => {});
+        onClose();
+      }}>{L('Añadir', 'Добавить')}</button>}>
       <div className="rejilla-campos">
         <Etiqueta texto="Nombre"><input className="campo" value={borrador.nombre} onChange={(e) => setBorrador({ ...borrador, nombre: e.target.value })} /></Etiqueta>
         <Etiqueta texto="Cantidad"><Numero valor={borrador.cantidad} min={1} set={(n) => setBorrador({ ...borrador, cantidad: n })} /></Etiqueta>
@@ -442,12 +461,13 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
       )}
       {!base ? <p>{L('Cargando base de objetos…', 'Загружаю базу предметов…')}</p> : (
         <Buscador<ObjetoBase>
-          items={base} texto={(o) => o.nombre} placeholder="Escribe el nombre del objeto…"
+          items={[...deBiblioteca, ...base]} texto={(o) => o.nombre} placeholder="Escribe el nombre del objeto…"
           filtro={(o) => !tipoFijo || o.tipo === tipoFijo}
-          render={(o) => <span className="res-conjuro"><strong>{td(o.nombre)}</strong><small>{td(o.categoria)}{o.precio ? ` · ${o.precio}` : ''}{o.detalles?.['Daño'] ? ` · ${o.detalles['Daño']}` : ''}{o.detalles?.['Clase de armadura'] ? ` · ${L('CA', 'КД')} ${o.detalles['Clase de armadura']}` : ''}</small></span>}
-          onElegir={(o) => setBorrador(typeof o === 'string'
+          render={(o) => <span className="res-conjuro"><strong>{o.item ? '📚 ' : ''}{td(o.nombre)}</strong><small>{td(o.categoria)}{o.precio ? ` · ${o.precio}` : ''}{o.detalles?.['Daño'] ? ` · ${o.detalles['Daño']}` : ''}{o.detalles?.['Clase de armadura'] ? ` · ${L('CA', 'КД')} ${o.detalles['Clase de armadura']}` : ''}</small></span>}
+          onElegir={(o) => { setNuevo(typeof o === 'string'); setBorrador(typeof o === 'string'
             ? conTipo({ id: uid(), nombre: o, descripcion: '', precio: '', cantidad: 1, tipo: 'otro' }, tipoFijo ?? 'otro')
-            : { id: uid(), nombre: o.nombre, descripcion: o.descripcion, precio: o.precio, cantidad: o.maxPorEspacio ? 20 : 1, tipo: o.tipo, detalles: o.detalles, maxPorEspacio: o.maxPorEspacio })}
+            : o.item ? { ...structuredClone(o.item), id: uid(), cantidad: 1 }
+            : { id: uid(), nombre: o.nombre, descripcion: o.descripcion, precio: o.precio, cantidad: o.maxPorEspacio ? 20 : 1, tipo: o.tipo, detalles: o.detalles, maxPorEspacio: o.maxPorEspacio }); }}
         />
       )}
     </Modal>

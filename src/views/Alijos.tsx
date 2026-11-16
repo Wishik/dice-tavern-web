@@ -8,6 +8,7 @@ import { supabase } from '../store';
 import { cargarPartida, type Miembro } from '../partidas';
 import { borrarAlijo, cambiarAlijo, cambiarItems, cargarAlijos, crearAlijo, partidaDe, sueloDe, yo, type Alijo } from '../alijos';
 import { nombreBotin } from '../botin';
+import { esBiblioteca } from '../bibliotecaObjetos';
 import type { Item, Personaje } from '../types';
 import { cabe, poner } from './TabInventario';
 
@@ -37,7 +38,8 @@ export function useAlijos() {
     return () => { clearInterval(t); window.removeEventListener('alijos-cambio', f); };
   }, [recargar]);
   const suelo = alijos?.find((a) => a.suelo) ?? null;
-  return { partida, alijos: alijos?.filter((a) => !a.suelo) ?? null, suelo, miembros, master, mio, error, recargar };
+  const biblioteca = alijos?.find(esBiblioteca) ?? null;
+  return { partida, alijos: alijos?.filter((a) => !a.suelo && !esBiblioteca(a)) ?? null, suelo, biblioteca, miembros, master, mio, error, recargar };
 }
 
 const nombreMiembro = (m: Miembro) => `${m.alias}${m.pj ? ` (${m.pj.nombre})` : ''}`;

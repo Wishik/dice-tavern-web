@@ -4,7 +4,7 @@ import type { Item, TamanoCinturon } from '../types';
 import { CINTURON_ESPACIOS, HABILIDADES } from '../rules';
 import { opcionesBono, soloFijo } from '../bonosObjetos';
 
-const CARAS_BONO = [4, 6, 8, 10, 12, 20, 100];
+const CARAS_BONO = [2, 4, 6, 8, 10, 12];
 import { tr } from '../ru';
 
 /**

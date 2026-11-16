@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import type { TipoItem } from './types';
+import type { Item, TipoItem } from './types';
 
 export interface Conjuro { nombre: string; nivel: number; escuela: string; clases: string[]; tiempo: string; alcance: string; componentes: string; duracion: string; descripcion: string }
 export interface RasgoDef { nombre: string; texto: string }
@@ -30,7 +30,7 @@ export function useDatos<T>(archivo: string): T | null {
 }
 
 /** Base de objetos unificada para el buscador del inventario. */
-export interface ObjetoBase { nombre: string; descripcion: string; precio: string; tipo: TipoItem; categoria: string; detalles?: Record<string, string>; maxPorEspacio?: number }
+export interface ObjetoBase { nombre: string; descripcion: string; precio: string; tipo: TipoItem; categoria: string; detalles?: Record<string, string>; maxPorEspacio?: number; /** Objeto de la biblioteca de la partida (completo). */ item?: Item }
 let baseObjetos: Promise<ObjetoBase[]> | null = null;
 export function cargarObjetos(): Promise<ObjetoBase[]> {
   if (!baseObjetos) baseObjetos = Promise.all([cargar<(Arma | Armadura)[]>('armas'), cargar<Equipo[]>('gear')]).then(([aa, gg]) => {
