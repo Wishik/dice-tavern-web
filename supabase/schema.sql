@@ -186,3 +186,32 @@ alter table public.botin enable row level security;
 grant select, insert, update, delete on public.botin to authenticated;
 drop policy if exists "mi botín" on public.botin;
 create policy "mi botín" on public.botin for all to authenticated using (usuario = auth.uid()) with check (usuario = auth.uid());
+
+-- Alijos de la partida (públicos o privados) y el «suelo» (objetos tirados que cualquiera puede recoger).
+create table if not exists public.alijos (
+  id uuid primary key default gen_random_uuid(),
+  partida uuid not null references public.partidas(id) on delete cascade,
+  creador uuid not null default auth.uid() references auth.users(id) on delete cascade,
+  nombre text not null default '',
+  suelo boolean not null default false,
+  publico boolean not null default true,
+  acceso uuid[] not null default '{}',
+  items jsonb not null default '[]'::jsonb,
+  actualizado timestamptz not null default now()
+);
+create unique index if not exists alijos_un_suelo on public.alijos(partida) where suelo;
+alter table public.alijos enable row level security;
+grant select, insert, update, delete on public.alijos to authenticated;
+drop policy if exists "ver alijos" on public.alijos;
+drop policy if exists "crear alijo" on public.alijos;
+drop policy if exists "usar alijo" on public.alijos;
+drop policy if exists "borrar alijo" on public.alijos;
+-- Lo ve el máster siempre; los jugadores, si es público, si lo crearon o si están en la lista de acceso.
+create policy "ver alijos" on public.alijos for select to authenticated using (
+  public.es_master(partida) or (public.es_miembro(partida) and (publico or suelo or creador = auth.uid() or auth.uid() = any(acceso))));
+create policy "crear alijo" on public.alijos for insert to authenticated with check (
+  creador = auth.uid() and (public.es_miembro(partida) or public.es_master(partida)));
+create policy "usar alijo" on public.alijos for update to authenticated using (
+  public.es_master(partida) or (public.es_miembro(partida) and (publico or suelo or creador = auth.uid() or auth.uid() = any(acceso))));
+create policy "borrar alijo" on public.alijos for delete to authenticated using (
+  not suelo and (creador = auth.uid() or public.es_master(partida)));

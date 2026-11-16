@@ -12,6 +12,15 @@ import { tr } from '../ru';
 import { td } from '../datosRu';
 import { nombreBotin, useBotin } from '../botin';
 import { EditorObjeto } from './EditorObjeto';
+import { ModalDejar, SeccionAlijos } from './Alijos';
+
+/** Saca n unidades del objeto de la hoja (todo si n ≥ cantidad) y devuelve esa parte. */
+const sacarDe = (lugar: Lugar) => (x: Personaje, n: number): Item | null => {
+  const y = leer(x, lugar); if (!y) return null;
+  if (n >= y.cantidad) return quitar(x, lugar);
+  y.cantidad -= n;
+  return { ...structuredClone(y), id: uid(), cantidad: n };
+};
 
 /** Al cambiar el tipo de un objeto propio, le damos los datos mínimos para que funcione como arma, armadura o escudo. */
 function conTipo(it: Item, tipo: Item['tipo']): Item {
@@ -46,13 +55,13 @@ function quitar(p: Personaje, l: Lugar): Item | null {
   const arr = l.zona === 'mochila' ? p.mochila : p.cinturon.items;
   return arr.splice(l.i, 1)[0] ?? null;
 }
-function poner(p: Personaje, it: Item, d: Destino) {
+export function poner(p: Personaje, it: Item, d: Destino) {
   if (d.zona === 'equipo') { const prev = p.equipo[d.r]; if (prev) p.mochila.push(prev); p.equipo[d.r] = it; }
   else (d.zona === 'mochila' ? p.mochila : p.cinturon.items).push(it);
 }
 const mochilaLlena = () => L(`La mochila está llena: como máximo ${MOCHILA_MAX} espacios. Saca, vende o tira algo antes.`, `Рюкзак полон: максимум ${MOCHILA_MAX} ячеек. Сначала вынь, продай или выброси что-нибудь.`);
 /** ¿Se puede hacer el movimiento sin pasar de 22 espacios en la mochila? Si no, avisa. */
-function cabe(p: Personaje, it: Item, d: Destino, desde?: Lugar): boolean {
+export function cabe(p: Personaje, it: Item, d: Destino, desde?: Lugar): boolean {
   if (desde?.zona === 'mochila' && d.zona === 'mochila') return true;
   let necesita: Item | null = null;
   if (d.zona === 'mochila') necesita = it;
@@ -116,6 +125,7 @@ export function TabInventario() {
 
       <EquipoViaje />
       <Monedas />
+      <SeccionAlijos />
 
       {abierto && leer(p, abierto) && <ModalItem lugar={abierto} onClose={() => setAbierto(null)} />}
       {anadir && <ModalAnadir destino={anadir} onClose={() => setAnadir(null)} />}
@@ -198,6 +208,7 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
   const mover = (d: Destino) => { if (!cabe(p, it, d, lugar)) return; upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, d); }); onClose(); };
   const usable = it.tipo === 'pocion' || it.tipo === 'consumible';
   const [vender, setVender] = useState(false);
+  const [dejar, setDejar] = useState(false);
   if (it.bolsa) return <ModalBolsa lugar={lugar} onClose={onClose} />;
   return (
     <Modal titulo={td(it.nombre)} onClose={onClose}
@@ -209,6 +220,7 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
         {lugar.zona === 'equipo' && <button className="btn" onClick={() => mover({ zona: 'mochila' })}>{L('Quitar del equipo', 'Снять')}</button>}
         {lugar.zona === 'mochila' && <button className="btn" onClick={() => mover({ zona: 'cinturon' })}>{L('Al cinturón', 'На пояс')}</button>}
         {lugar.zona === 'cinturon' && <button className="btn" onClick={() => mover({ zona: 'mochila' })}>{L('A la mochila', 'В рюкзак')}</button>}
+        <button className="btn" onClick={() => setDejar(true)}>🪨 {L('Tirar o dejar en alijo', 'Бросить или в тайник')}</button>
         {ajeno && <button className="btn robar" onClick={robar}>🫳 {L('Robar', 'Украсть')}</button>}
         <button className="btn vender" onClick={() => setVender(true)}>{L('Vender', 'Продать')}</button>
         <button className="btn peligro" onClick={() => { if (confirm(L(`¿Tirar ${it.nombre}?`, `Выбросить «${it.nombre}»?`))) { upd((x) => { quitar(x, lugar); }); onClose(); } }}>{L('Tirar', 'Выбросить')}</button>
@@ -243,6 +255,7 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
           </div>
         </Modal>
       )}
+      {dejar && <ModalDejar it={it} sacar={sacarDe(lugar)} onClose={() => { setDejar(false); onClose(); }} />}
     </Modal>
   );
 }
@@ -285,6 +298,7 @@ function ModalVender({ lugar, onClose, onVendido }: { lugar: Lugar; onClose: () 
 function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
   const { p, upd, ajeno } = useFicha();
   const botin = useBotin(false);
+  const [dejarB, setDejarB] = useState(false);
   const it = leer(p, lugar)!;
   const [txtRobo, setTxtRobo] = useState(String(it.bolsa!.cantidad));
   const nRobo = parseInt(txtRobo, 10);
@@ -324,6 +338,7 @@ function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
     <Modal titulo={td(it.nombre)} onClose={onClose}
       pie={<div className="acciones-item">
         {!ajeno && <button className="btn primario" disabled={!ok} onClick={sacar}>{L('Pasar a mis monedas', 'Переложить в мои монеты')}</button>}
+        <button className="btn" onClick={() => setDejarB(true)}>🪨 {L('Tirar o dejar en alijo', 'Бросить или в тайник')}</button>
         {ajeno && <button className="btn robar" disabled={!okRobo} onClick={robarBolsa}>🫳 {okRobo && nRobo === b.cantidad ? L('Robar toda la bolsa', 'Украсть весь кошель') : L(`Robar ${okRobo ? nRobo : ''} ${b.moneda}`, `Украсть ${okRobo ? nRobo : ''} ${b.moneda}`)}</button>}
         {lugar.zona === 'mochila' && <button className="btn" onClick={() => { upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'cinturon' }); }); onClose(); }}>{L('Al cinturón', 'На пояс')}</button>}
         {lugar.zona === 'cinturon' && <button className="btn" onClick={() => { if (!cabe(p, it, { zona: 'mochila' }, lugar)) return; upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'mochila' }); }); onClose(); }}>{L('A la mochila', 'В рюкзак')}</button>}
@@ -343,6 +358,7 @@ function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
           {ok && <p className="formula-grande">{p.monedas[b.moneda]} + {n} = <strong>{p.monedas[b.moneda] + n} {b.moneda}</strong></p>}
         </>
       )}
+      {dejarB && <ModalDejar it={it} sacar={sacarDe(lugar)} onClose={() => { setDejarB(false); onClose(); }} />}
     </Modal>
   );
 }

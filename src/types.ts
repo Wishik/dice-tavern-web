@@ -181,6 +181,8 @@ export interface Personaje {
   // Equipo e inventario
   equipo: Record<RanuraEquipo, Item | null>;
   mochila: Item[];
+  /** Objetos tirados al suelo cuando el personaje no está en ninguna partida (en partida, el suelo es compartido). */
+  suelo?: Item[];
   cinturon: { tamano: TamanoCinturon; items: Item[] };
   viaje: Viaje;
   monedas: Record<Moneda, number>;
