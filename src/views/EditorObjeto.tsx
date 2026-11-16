@@ -2,7 +2,9 @@ import { Etiqueta } from '../ui';
 import { L } from '../i18n';
 import type { Item, TamanoCinturon } from '../types';
 import { CINTURON_ESPACIOS, HABILIDADES } from '../rules';
-import { DADOS_BONO, opcionesBono, soloFijo } from '../bonosObjetos';
+import { opcionesBono, soloFijo } from '../bonosObjetos';
+
+const CARAS_BONO = [4, 6, 8, 10, 12, 20, 100];
 import { tr } from '../ru';
 
 /**
@@ -51,18 +53,24 @@ export function EditorBonos({ it, set }: { it: Item; set: (f: (y: Item) => void)
       {bonos.length === 0 && <p className="nota pequena">{L('Ninguna. Añade una si da algo: +1 a la CA, al ataque, al daño, a una característica, a una salvación, a una habilidad…', 'Ничего. Добавь, если предмет что-то даёт: +1 к КД, атаке, урону, характеристике, спасброску, навыку…')}</p>}
       {bonos.map((b, i) => (
         <div key={i} className="fila-bono">
-          <select className="campo valor-bono" value={b.dado ? `d:${b.dado}` : b.valor} onChange={(e) => {
+          <select className="campo valor-bono" value={b.dado ? 'dados' : b.valor} onChange={(e) => {
             const v = e.target.value;
-            set((y) => { const l = [...(y.bonos ?? [])]; l[i] = v.startsWith('d:') ? { donde: l[i].donde, valor: 0, dado: v.slice(2) } : { donde: l[i].donde, valor: +v }; y.bonos = l; });
+            set((y) => { const l = [...(y.bonos ?? [])]; l[i] = v === 'dados' ? { donde: l[i].donde, valor: 0, dado: '1d4' } : { donde: l[i].donde, valor: +v }; y.bonos = l; });
           }}>
-            <optgroup label={L('Fijo', 'Число')}>
-              {[-5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 10].map((v) => <option key={v} value={v}>{v > 0 ? `+${v}` : v}</option>)}
-            </optgroup>
-            {!soloFijo(b.donde) && <optgroup label={L('Dados (se tiran y se suman)', 'Кости (бросаются и прибавляются)')}>
-              {DADOS_BONO.map((d) => <option key={d} value={`d:${d}`}>+{d}</option>)}
-            </optgroup>}
+            {Array.from({ length: 21 }, (_, k) => k - 10).filter((v) => v !== 0).map((v) => <option key={v} value={v}>{v > 0 ? `+${v}` : v}</option>)}
+            {!soloFijo(b.donde) && <option value="dados">🎲 {L('Dados', 'Кости')}</option>}
           </select>
-          <select className="campo" value={b.donde} onChange={(e) => {
+          {b.dado && (() => {
+            const [n, c] = b.dado.split('d').map((x) => parseInt(x, 10));
+            const fijar = (nn: number, cc: number) => set((y) => { const l = [...(y.bonos ?? [])]; l[i] = { ...l[i], dado: `${nn}d${cc}` }; y.bonos = l; });
+            return (
+              <span className="selector-dano dado-bono">
+                <select className="campo" value={n} onChange={(e) => fijar(+e.target.value, c)}>{Array.from({ length: 10 }, (_, k) => k + 1).map((k) => <option key={k} value={k}>{k}</option>)}</select>
+                <select className="campo" value={c} onChange={(e) => fijar(n, +e.target.value)}>{CARAS_BONO.map((k) => <option key={k} value={k}>d{k}</option>)}</select>
+              </span>
+            );
+          })()}
+          <select className="campo donde-bono" value={b.donde} onChange={(e) => {
             const donde = e.target.value;
             // La CA, la CD, la velocidad y las características no se tiran: si tenía dado, pasa a +1.
             set((y) => { const l = [...(y.bonos ?? [])]; l[i] = soloFijo(donde) && l[i].dado ? { donde, valor: 1 } : { ...l[i], donde }; y.bonos = l; });
