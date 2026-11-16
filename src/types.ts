@@ -9,6 +9,8 @@ export const MONEDAS: Moneda[] = ['PM', 'PL', 'PO', 'PE', 'PP', 'PC'];
 
 export interface Item {
   id: string;
+  /** Solo en el botín del máster: nombre del personaje al que se le robó. */
+  robadoA?: string;
   nombre: string;
   descripcion: string;
   /** Precio libre, p. ej. "25po". Vacío si no se conoce. */

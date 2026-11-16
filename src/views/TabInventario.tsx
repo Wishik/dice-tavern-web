@@ -98,7 +98,7 @@ export function TabInventario() {
           ? <p className="aviso-carga">{L('Velocidad', 'Скорость')} {carga.penalizacion} {L('pies', 'фт')}. {carga.efecto}</p>
           : <p className="nota">{MOCHILA_BASE} {L('espacios', 'ячеек')} + {espaciosPorFuerza(car(p, 'FUE'))} {L('por Fuerza', 'за Силу')} ({UMBRALES_FUERZA.map((u) => `${u}+`).join(', ')}).</p>}
         {carga.sobreMaximo && <p className="error">{L(`Llevas ${carga.usados} espacios y el máximo es ${MOCHILA_MAX}. Toca una bolsa de monedas para eliminarla (o todas las de esa moneda) o saca cosas.`, `Занято ${carga.usados} ячеек, а максимум ${MOCHILA_MAX}. Нажми на кошель с монетами, чтобы удалить его (или все такие), или вынь вещи.`)}</p>}
-        <ListaItems items={p.mochila} libres={carga.libres} onAbrir={(i) => setAbierto({ zona: 'mochila', i })} mostrarTramos />
+        <ListaItems items={p.mochila} libres={carga.libres} onAbrir={(i) => setAbierto({ zona: 'mochila', i })} mostrarTramos onMover={(de, a) => upd((x) => { const [y] = x.mochila.splice(de, 1); x.mochila.splice(a, 0, y); })} />
         <BotonAnadir onClick={() => carga.usados >= MOCHILA_MAX ? alert(mochilaLlena()) : setAnadir({ zona: 'mochila' })}>Añadir a la mochila</BotonAnadir>
       </Seccion>
 
@@ -110,7 +110,7 @@ export function TabInventario() {
         </div>
         <p className="nota">{L('Estos espacios pueden usarse para armas y escudos. No cuentan para la carga.', 'Эти ячейки — для оружия и щитов. В груз не считаются.')}</p>
         {usadosCint > capCint && <p className="error">{L('El cinturón está lleno: pasa algo a la mochila.', 'Пояс полон: переложи что-нибудь в рюкзак.')}</p>}
-        <ListaItems items={p.cinturon.items} libres={capCint} onAbrir={(i) => setAbierto({ zona: 'cinturon', i })} />
+        <ListaItems items={p.cinturon.items} libres={capCint} onAbrir={(i) => setAbierto({ zona: 'cinturon', i })} onMover={(de, a) => upd((x) => { const [y] = x.cinturon.items.splice(de, 1); x.cinturon.items.splice(a, 0, y); })} />
         <BotonAnadir onClick={() => setAnadir({ zona: 'cinturon' })}>Añadir al cinturón</BotonAnadir>
       </Seccion>
 
@@ -141,7 +141,17 @@ function BarraCarga({ usados, libres }: { usados: number; libres: number }) {
   );
 }
 
-function ListaItems({ items, libres, onAbrir, mostrarTramos }: { items: Item[]; libres: number; onAbrir: (i: number) => void; mostrarTramos?: boolean }) {
+function ListaItems({ items, libres, onAbrir, mostrarTramos, onMover }: { items: Item[]; libres: number; onAbrir: (i: number) => void; mostrarTramos?: boolean; onMover?: (de: number, a: number) => void }) {
+  // Arrastrar para ordenar: se coge del asa ⠿ (funciona con el dedo y con el ratón).
+  const [arrastre, setArrastre] = useState<{ de: number; a: number } | null>(null);
+  const sobre = (x: number, y: number) => { const li = document.elementFromPoint(x, y)?.closest('li[data-i]'); return li ? Number(li.getAttribute('data-i')) : null; };
+  const asa = (i: number) => onMover && items.length > 1 && (
+    <span className="asa-arrastre" title={L('Arrastra para ordenar', 'Перетащи, чтобы упорядочить')}
+      onPointerDown={(e) => { e.preventDefault(); (e.target as Element).setPointerCapture(e.pointerId); setArrastre({ de: i, a: i }); }}
+      onPointerMove={(e) => { if (!arrastre) return; const a = sobre(e.clientX, e.clientY); if (a !== null && a !== arrastre.a) setArrastre({ ...arrastre, a }); }}
+      onPointerUp={() => { if (arrastre && arrastre.a !== arrastre.de) onMover(arrastre.de, arrastre.a); setArrastre(null); }}
+      onPointerCancel={() => setArrastre(null)}>⠿</span>
+  );
   let pos = 0;
   if (items.length === 0) return <p className="vacio">{L('Vacío.', 'Пусто.')}</p>;
   return (
@@ -152,7 +162,8 @@ function ListaItems({ items, libres, onAbrir, mostrarTramos }: { items: Item[]; 
         const exceso = pos - libres;
         const tramo = mostrarTramos && exceso > 0 ? TRAMOS_SOBRECARGA.findIndex((t) => exceso <= t.hasta) : -1;
         return (
-          <li key={it.id} className={tramo >= 0 ? `sobre t${tramo}` : desde > libres ? 'sobre' : ''}>
+          <li key={it.id} data-i={i} className={`${tramo >= 0 ? `sobre t${tramo}` : desde > libres ? 'sobre' : ''}${arrastre?.de === i ? ' arrastrando' : ''}${arrastre && arrastre.a === i && arrastre.de !== i ? (arrastre.de < i ? ' destino-abajo' : ' destino-arriba') : ''}`}>
+            {asa(i)}
             <span className="num">{n > 1 ? `${desde}-${pos}` : desde}</span>
             <button className="item-boton" onClick={() => onAbrir(i)}>{td(it.nombre)}{resumenItem(it)}</button>
             {tramo >= 0 && <span className="etq-penal">{TRAMOS_SOBRECARGA[tramo].velocidad}p</span>}
@@ -175,7 +186,7 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
       n = Math.max(1, Math.min(it.cantidad, parseInt(r, 10) || 0));
       if (!n) return;
     }
-    const robado: Item = { ...structuredClone(it), id: uid(), cantidad: n };
+    const robado: Item = { ...structuredClone(it), id: uid(), cantidad: n, robadoA: p.nombre || undefined };
     if (!(await botin.cambiar((l) => [...l, robado]))) return;
     upd((x) => { const y = leer(x, lugar); if (!y) return; if (n >= y.cantidad) quitar(x, lugar); else y.cantidad -= n; });
     onClose();
@@ -282,7 +293,7 @@ function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
   const robarBolsa = async () => {
     if (!okRobo) return;
     const m = it.bolsa!.moneda;
-    if (!(await botin.cambiar((l) => [...l, bolsaMonedas(m, nRobo)]))) return;
+    if (!(await botin.cambiar((l) => [...l, { ...bolsaMonedas(m, nRobo), robadoA: p.nombre || undefined }]))) return;
     upd((x) => {
       const y = leer(x, lugar); if (!y?.bolsa) return;
       y.bolsa.cantidad -= nRobo;
@@ -343,7 +354,8 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
   const dar = async (it: Item) => {
     if (!cabe(p, it, destino)) return;
     if (!(await botin.cambiar((l) => l.filter((x) => x.id !== it.id)))) return;
-    upd((x) => poner(x, { ...it, id: uid() }, destino));
+    const { robadoA: _r, ...limpio } = it; // a quién se robó solo lo ve el máster en su botín
+    upd((x) => poner(x, { ...limpio, id: uid() }, destino));
     onClose();
   };
   const [base, setBase] = useState<ObjetoBase[] | null>(null);
@@ -373,7 +385,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
           <h4>👑 {L('Tu botín de máster', 'Твоя добыча мастера')}</h4>
           {botin.error ? <p className="error">{botin.error}</p> : !botin.items ? <p className="nota">{L('Cargando…', 'Загрузка…')}</p>
             : botin.items.length === 0 ? <p className="nota">{L('Vacío. Roba algo desde el inventario de un jugador (botón «Robar»).', 'Пусто. Укради что-нибудь из инвентаря игрока (кнопка «Украсть»).')}</p>
-            : <div className="lista-opciones">{botin.items.map((it) => <button key={it.id} className="btn" onClick={() => dar(it)}>{nombreBotin(it)}</button>)}</div>}
+            : <div className="lista-opciones">{botin.items.map((it) => <button key={it.id} className="btn" onClick={() => dar(it)}>{nombreBotin(it)}{it.robadoA && <small className="robado-a"> · {L('de', 'у')} {it.robadoA}</small>}</button>)}</div>}
           {sueltos.length === 0 && <h4>{L('Nuevo objeto', 'Новый предмет')}</h4>}
         </>
       )}
@@ -508,7 +520,7 @@ function ModalRobarMonedas({ onClose }: { onClose: () => void }) {
   const ok = !isNaN(n) && n > 0 && n <= p.monedas[m];
   const robar = async () => {
     if (!ok) return;
-    if (!(await botin.cambiar((l) => [...l, bolsaMonedas(m, n)]))) return;
+    if (!(await botin.cambiar((l) => [...l, { ...bolsaMonedas(m, n), robadoA: p.nombre || undefined }]))) return;
     upd((x) => { x.monedas[m] = Math.max(0, x.monedas[m] - n); });
     onClose();
   };
