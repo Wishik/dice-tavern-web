@@ -1,4 +1,4 @@
-import { ATRIBUTOS, type Atributo, type Montura, type Personaje } from './types';
+import { ATRIBUTOS, TIPO_RANURA, type Atributo, type Montura, type Personaje, type RanuraEquipo } from './types';
 import { HABILIDADES, uid } from './rules';
 
 export function nuevoPersonaje(nombre = ''): Personaje {
@@ -21,7 +21,7 @@ export function nuevoPersonaje(nombre = ''): Personaje {
     habilidades: Object.fromEntries(HABILIDADES.map((h) => [h.id, { comp: false, pericia: false, bonus: 0 }])),
     rasgosRaza: [], eleccionesConjuros: {}, rasgos: [], dotes: [], conjuros: [],
     equipo: { yelmo: null, amuleto: null, armadura: null, capa: null, brazalete: null, guantes: null, anillo1: null, anillo2: null, cinto: null, botas: null, manoHabil: null, manoTorpe: null },
-    mochila: [], cinturon: { tamano: 'pequeño', items: [] },
+    mochila: [], cinturon: { items: [] },
     viaje: { raciones: 0, odre: 0, pedernal: 0, antorchas: 0, cuerda: '', ropa: '', sacoDormir: false, manta: false, tienda: '' },
     monedas: { PM: 0, PL: 0, PO: 0, PE: 0, PP: 0, PC: 0 },
     monturas: [],
@@ -59,9 +59,32 @@ export function normalizar(p: Partial<Personaje>): Personaje {
     out.salvaciones = Object.fromEntries(Object.entries(out.salvaciones).map(([a, x]) => { if (x?.bonus) mano.push({ id: `aj-s${a}-${Date.now().toString(36)}`, donde: `salv:${a}`, valor: x.bonus, origen: 'Ajuste' }); return [a, x ? { ...x, bonus: 0 } : x]; })) as typeof out.salvaciones;
   }
   if (mano.length) out.bonosExtra = [...(out.bonosExtra ?? []), ...mano];
+  migrarObjetos(out);
   // Los PG actuales nunca pueden pasar de los máximos: si pasa (datos antiguos), el máximo sube.
   if (out.pg.actual > out.pg.max) out.pg.max = out.pg.actual;
   return out;
+}
+
+/**
+ * Objetos de versiones anteriores: las pociones pasan a «Consumible»; lo que estaba en yelmo, amuleto, capa…
+ * como «Objeto» toma la categoría de su hueco; y el antiguo selector de tamaño del cinturón se convierte
+ * en un cinturón equipado de ese tamaño (si tenías algo en él o habías elegido mediano/grande).
+ */
+function migrarObjetos(out: Personaje) {
+  const todos = [...out.mochila ?? [], ...out.cinturon?.items ?? [], ...Object.values(out.equipo ?? {})];
+  for (const it of todos) if (it && it.tipo === 'pocion') it.tipo = 'consumible';
+  for (const [r, t] of Object.entries(TIPO_RANURA) as [RanuraEquipo, NonNullable<(typeof TIPO_RANURA)[RanuraEquipo]>][]) {
+    const it = out.equipo[r];
+    if (it && it.tipo === 'otro') it.tipo = t;
+  }
+  const viejo = out.cinturon?.tamano;
+  if (viejo) {
+    if (!out.equipo.cinto && (out.cinturon.items.length || viejo !== 'pequeño'))
+      out.equipo.cinto = { id: `cint${Date.now().toString(36)}`, nombre: 'Cinturón', descripcion: '', precio: '', cantidad: 1, tipo: 'cinturon', cinturon: viejo };
+    const { tamano: _t, ...resto } = out.cinturon;
+    out.cinturon = resto;
+  }
+  if (out.equipo.cinto && out.equipo.cinto.tipo === 'cinturon' && !out.equipo.cinto.cinturon) out.equipo.cinto.cinturon = 'pequeño';
 }
 
 export function nuevaMontura(nombre = ''): Montura {

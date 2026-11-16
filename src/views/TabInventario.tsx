@@ -3,15 +3,16 @@ import { useFicha } from './Ficha';
 import { BotonAnadir, Buscador, Etiqueta, ListaDatos, Modal, Numero, Seccion, Texto, TextoLargo } from '../ui';
 import { cargarObjetos, type ObjetoBase } from '../data';
 import {
-  CINTURON_ESPACIOS, MAX_MONEDAS, MAX_MUNICION, MOCHILA_BASE, MOCHILA_MAX, NOMBRE_MONEDA, TRAMOS_SOBRECARGA, UMBRALES_FUERZA, VALOR_PC,
+  HABILIDADES, capacidadCinturon, MAX_MONEDAS, MAX_MUNICION, MOCHILA_BASE, MOCHILA_MAX, NOMBRE_MONEDA, TRAMOS_SOBRECARGA, UMBRALES_FUERZA, VALOR_PC,
   bolsaMonedas, cabeEnMochila, car, convertir, embolsarExceso, espaciosItem, espaciosLibresMochila, espaciosPorFuerza, espaciosUsados, estadoCarga, leerPrecio, uid, usaMunicion,
 } from '../rules';
-import { MONEDAS, RANURAS_EQUIPO, type Item, type Moneda, type Personaje, type RanuraEquipo, type TamanoCinturon } from '../types';
+import { CATEGORIAS_ITEM, MONEDAS, RANURAS_EQUIPO, TIPO_RANURA, cabeEnRanura, type Item, type Moneda, type Personaje, type RanuraEquipo } from '../types';
 import { L, T, idioma, RU_MONEDAS } from '../i18n';
 import { tr } from '../ru';
 import { td } from '../datosRu';
 import { nombreBotin, useBotin } from '../botin';
-import { EditorObjeto } from './EditorObjeto';
+import { EditorBonos, EditorObjeto } from './EditorObjeto';
+import { opcionesBono } from '../bonosObjetos';
 import { ModalDejar, SeccionAlijos } from './Alijos';
 
 /** Saca n unidades del objeto de la hoja (todo si n ≥ cantidad) y devuelve esa parte. */
@@ -28,20 +29,25 @@ function conTipo(it: Item, tipo: Item['tipo']): Item {
   if (tipo === 'arma' && !y.detalles!['Daño']) Object.assign(y.detalles!, { 'Daño': '1d6 Cortante', 'Propiedades': y.detalles!['Propiedades'] ?? '' });
   if (tipo === 'armadura' && !/^\d/.test(y.detalles!['Clase de armadura'] ?? '')) Object.assign(y.detalles!, { 'Clase de armadura': '11 + modificador de Destreza', 'Fuerza': '--', 'Sigilo': '--' });
   if (tipo === 'escudo' && !y.detalles!['Clase de armadura']) y.detalles!['Clase de armadura'] = '+2';
+  if (tipo === 'cinturon') y.cinturon = y.cinturon ?? 'pequeño'; else delete y.cinturon;
   if (!Object.keys(y.detalles!).length) delete y.detalles;
   return y;
 }
 
-function SelectorTipo({ valor, set }: { valor: Item['tipo']; set: (t: Item['tipo']) => void }) {
+/** Categoría del objeto. `fija`: va en un hueco del equipo que solo acepta esa categoría (no se puede cambiar). */
+function SelectorTipo({ valor, set, fija }: { valor: Item['tipo']; set: (t: Item['tipo']) => void; fija?: boolean }) {
+  const v = valor === 'pocion' ? 'consumible' : valor;
   return (
     <Etiqueta texto={L('Categoría', 'Категория')}>
-      <select className="campo" value={valor} onChange={(e) => set(e.target.value as Item['tipo'])}>
-        <option value="otro">{L('Objeto', 'Предмет')}</option><option value="pocion">{L('Poción', 'Зелье')}</option><option value="consumible">{L('Consumible', 'Расходник')}</option>
-        <option value="arma">{L('Arma', 'Оружие')}</option><option value="armadura">{L('Armadura', 'Доспех')}</option><option value="escudo">{L('Escudo', 'Щит')}</option><option value="herramienta">{L('Herramienta', 'Инструмент')}</option>
+      <select className="campo" value={v} disabled={fija} onChange={(e) => set(e.target.value as Item['tipo'])}>
+        {CATEGORIAS_ITEM.map((c) => <option key={c.id} value={c.id}>{L(c.nombre, c.ru)}</option>)}
       </select>
     </Etiqueta>
   );
 }
+const tieneEditor = (t: Item['tipo']) => t === 'arma' || t === 'armadura' || t === 'escudo' || t === 'cinturon';
+const sinCinturon = () => L('No llevas cinturón: equipa uno en «Equipo» → «Cinturón» para tener espacios de acceso rápido.', 'Пояса нет: надень его в «Снаряжение» → «Пояс», чтобы появились ячейки быстрого доступа.');
+const nombreRanura = (r: RanuraEquipo) => tr(RANURAS_EQUIPO.find((x) => x.id === r)!.nombre);
 
 type Lugar = { zona: 'mochila' | 'cinturon'; i: number } | { zona: 'equipo'; r: RanuraEquipo };
 type Destino = { zona: 'mochila' | 'cinturon' } | { zona: 'equipo'; r: RanuraEquipo };
@@ -62,6 +68,15 @@ export function poner(p: Personaje, it: Item, d: Destino) {
 const mochilaLlena = () => L(`La mochila está llena: como máximo ${MOCHILA_MAX} espacios. Saca, vende o tira algo antes.`, `Рюкзак полон: максимум ${MOCHILA_MAX} ячеек. Сначала вынь, продай или выброси что-нибудь.`);
 /** ¿Se puede hacer el movimiento sin pasar de 22 espacios en la mochila? Si no, avisa. */
 export function cabe(p: Personaje, it: Item, d: Destino, desde?: Lugar): boolean {
+  if (d.zona === 'equipo' && !cabeEnRanura(d.r, it.tipo)) {
+    alert(L(`En «${nombreRanura(d.r)}» solo puedes equipar objetos de esa categoría.`, `В слот «${nombreRanura(d.r)}» можно надеть только предметы этой категории.`));
+    return false;
+  }
+  if (d.zona === 'cinturon' && desde?.zona !== 'cinturon') {
+    const cap = capacidadCinturon(p);
+    if (!cap) { alert(sinCinturon()); return false; }
+    if (espaciosUsados(p.cinturon.items) + espaciosItem(it) > cap) { alert(L(`No cabe en el cinturón (${espaciosUsados(p.cinturon.items)}/${cap} espacios).`, `Не помещается на пояс (${espaciosUsados(p.cinturon.items)}/${cap} ячеек).`)); return false; }
+  }
   if (desde?.zona === 'mochila' && d.zona === 'mochila') return true;
   let necesita: Item | null = null;
   if (d.zona === 'mochila') necesita = it;
@@ -78,7 +93,7 @@ export function TabInventario() {
   const [abierto, setAbierto] = useState<Lugar | null>(null);
   const [anadir, setAnadir] = useState<Destino | null>(null);
   const carga = estadoCarga(p);
-  const capCint = CINTURON_ESPACIOS[p.cinturon.tamano];
+  const capCint = capacidadCinturon(p);
   const usadosCint = espaciosUsados(p.cinturon.items);
 
   return (
@@ -112,15 +127,12 @@ export function TabInventario() {
       </Seccion>
 
       <Seccion titulo="Cinturón (acceso rápido)" extra={<span className={`contador-limite ${usadosCint > capCint ? 'malo' : ''}`}>{usadosCint}/{capCint}</span>}>
-        <div className="segmentado">
-          {(Object.keys(CINTURON_ESPACIOS) as TamanoCinturon[]).map((t) => (
-            <button key={t} className={p.cinturon.tamano === t ? 'activo' : ''} onClick={() => upd((x) => { x.cinturon.tamano = t; })}>{t === 'pequeño' ? L('Pequeño', 'Малый') : t === 'mediano' ? L('Mediano', 'Средний') : L('Grande', 'Большой')} ({CINTURON_ESPACIOS[t]})</button>
-          ))}
-        </div>
-        <p className="nota">{L('Estos espacios pueden usarse para armas y escudos. No cuentan para la carga.', 'Эти ячейки — для оружия и щитов. В груз не считаются.')}</p>
+        {p.equipo.cinto
+          ? <p className="nota">{L(`Cinturón ${p.equipo.cinto.cinturon ?? 'pequeño'} (${td(p.equipo.cinto.nombre)}): ${capCint} espacios. Sirven para armas y escudos y no cuentan para la carga.`, `Пояс «${td(p.equipo.cinto.nombre)}»: ${capCint} ячеек. Для оружия и щитов, в груз не считаются.`)}</p>
+          : <p className="nota">{sinCinturon()}</p>}
         {usadosCint > capCint && <p className="error">{L('El cinturón está lleno: pasa algo a la mochila.', 'Пояс полон: переложи что-нибудь в рюкзак.')}</p>}
-        <ListaItems items={p.cinturon.items} libres={capCint} onAbrir={(i) => setAbierto({ zona: 'cinturon', i })} onMover={(de, a) => upd((x) => { const [y] = x.cinturon.items.splice(de, 1); x.cinturon.items.splice(a, 0, y); })} />
-        <BotonAnadir onClick={() => setAnadir({ zona: 'cinturon' })}>Añadir al cinturón</BotonAnadir>
+        {(capCint > 0 || p.cinturon.items.length > 0) && <ListaItems items={p.cinturon.items} libres={capCint} onAbrir={(i) => setAbierto({ zona: 'cinturon', i })} onMover={(de, a) => upd((x) => { const [y] = x.cinturon.items.splice(de, 1); x.cinturon.items.splice(a, 0, y); })} />}
+        {capCint > 0 && <BotonAnadir onClick={() => usadosCint >= capCint ? alert(L('El cinturón está lleno.', 'Пояс полон.')) : setAnadir({ zona: 'cinturon' })}>Añadir al cinturón</BotonAnadir>}
       </Seccion>
 
       <EquipoViaje />
@@ -133,6 +145,11 @@ export function TabInventario() {
   );
 }
 
+/** «+1 CA, +2 Sigilo»: resumen de las mejoras de un objeto. */
+export function textoBonos(it: Item): string {
+  const op = opcionesBono(HABILIDADES.map((h) => ({ id: h.id, nombre: tr(h.nombre) })));
+  return (it.bonos ?? []).map((b) => { const o = op.find((x) => x.id === b.donde); return `${b.valor > 0 ? '+' : ''}${b.valor} ${o ? L(o.es, o.ru) : b.donde}`; }).join(', ');
+}
 const resumenItem = (it: Item) => <>
   {it.cantidad > 1 && <span className="cant"> ×{it.cantidad}</span>}
   {usaMunicion(it) && <span className="cant"> · 🏹 {it.municion ?? 0}/{MAX_MUNICION}</span>}
@@ -232,11 +249,16 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
         <Etiqueta texto="Cantidad"><Numero valor={it.cantidad} min={1} set={(n) => set((y) => { y.cantidad = n; })} /></Etiqueta>
         <Etiqueta texto="Precio (si lo sabes)"><input className="campo" value={it.precio} placeholder="p. ej. 25po" onChange={(e) => set((y) => { y.precio = e.target.value; })} /></Etiqueta>
         <Etiqueta texto="Máx. por espacio"><input className="campo" inputMode="numeric" value={it.maxPorEspacio ?? ''} placeholder="sin límite" onChange={(e) => { const n = parseInt(e.target.value, 10); set((y) => { y.maxPorEspacio = isNaN(n) || n < 1 ? undefined : n; }); }} /></Etiqueta>
-        <SelectorTipo valor={it.tipo} set={(t) => set((y) => { Object.assign(y, conTipo(y, t)); })} />
+        {!it.bolsa && <SelectorTipo valor={it.tipo} fija={lugar.zona === 'equipo' && !!TIPO_RANURA[lugar.r]} set={(t) => set((y) => { Object.assign(y, conTipo(y, t)); })} />}
       </div>
-      {['arma', 'armadura', 'escudo'].includes(it.tipo) && (editar
-        ? <EditorObjeto it={it} set={set} />
-        : <button className="btn pequeno" onClick={() => setEditar(true)}>✎ {L('Editar daño, propiedades, +1…', 'Изменить урон, свойства, +1…')}</button>)}
+      {lugar.zona === 'equipo' && TIPO_RANURA[lugar.r] && <p className="nota pequena">{L('Para cambiarle la categoría, quítatelo primero del equipo.', 'Чтобы сменить категорию, сначала сними предмет.')}</p>}
+      {editar ? <>
+        {tieneEditor(it.tipo) && <EditorObjeto it={it} set={set} />}
+        <EditorBonos it={it} set={set} />
+      </> : <>
+        {it.bonos?.length ? <p className="mejoras-item">✨ {textoBonos(it)}</p> : null}
+        <button className="btn pequeno" onClick={() => setEditar(true)}>✎ {tieneEditor(it.tipo) ? L('Editar daño, propiedades, mejoras (+1 a la CA, al daño…)', 'Изменить урон, свойства, бонусы (+1 к КД, урону…)') : L('Editar mejoras (+1 a la CA, al daño, a una salvación…)', 'Изменить бонусы (+1 к КД, урону, спасброску…)')}</button>
+      </>}
       {usaMunicion(it) && (
         <div className="municion">
           <Etiqueta texto={L(`Munición en el mismo espacio (máx. ${MAX_MUNICION})`, `Боеприпасы в той же ячейке (макс. ${MAX_MUNICION})`)}>
@@ -251,7 +273,7 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
       {equipar && (
         <Modal titulo="¿Dónde lo equipas?" onClose={() => setEquipar(false)}>
           <div className="lista-opciones">
-            {RANURAS_EQUIPO.map((r) => <button key={r.id} className="btn" onClick={() => mover({ zona: 'equipo', r: r.id })}>{r.icono} {tr(r.nombre)}{p.equipo[r.id] ? L(` (cambia ${p.equipo[r.id]!.nombre})`, ` (заменит «${p.equipo[r.id]!.nombre}»)`) : ''}</button>)}
+            {RANURAS_EQUIPO.filter((r) => cabeEnRanura(r.id, it.tipo)).map((r) => <button key={r.id} className="btn" onClick={() => mover({ zona: 'equipo', r: r.id })}>{r.icono} {tr(r.nombre)}{p.equipo[r.id] ? L(` (cambia ${p.equipo[r.id]!.nombre})`, ` (заменит «${p.equipo[r.id]!.nombre}»)`) : ''}</button>)}
           </div>
         </Modal>
       )}
@@ -340,7 +362,7 @@ function ModalBolsa({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
         {!ajeno && <button className="btn primario" disabled={!ok} onClick={sacar}>{L('Pasar a mis monedas', 'Переложить в мои монеты')}</button>}
         <button className="btn" onClick={() => setDejarB(true)}>🪨 {L('Tirar o dejar en alijo', 'Бросить или в тайник')}</button>
         {ajeno && <button className="btn robar" disabled={!okRobo} onClick={robarBolsa}>🫳 {okRobo && nRobo === b.cantidad ? L('Robar toda la bolsa', 'Украсть весь кошель') : L(`Robar ${okRobo ? nRobo : ''} ${b.moneda}`, `Украсть ${okRobo ? nRobo : ''} ${b.moneda}`)}</button>}
-        {lugar.zona === 'mochila' && <button className="btn" onClick={() => { upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'cinturon' }); }); onClose(); }}>{L('Al cinturón', 'На пояс')}</button>}
+        {lugar.zona === 'mochila' && <button className="btn" onClick={() => { if (!cabe(p, it, { zona: 'cinturon' }, lugar)) return; upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'cinturon' }); }); onClose(); }}>{L('Al cinturón', 'На пояс')}</button>}
         {lugar.zona === 'cinturon' && <button className="btn" onClick={() => { if (!cabe(p, it, { zona: 'mochila' }, lugar)) return; upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, { zona: 'mochila' }); }); onClose(); }}>{L('A la mochila', 'В рюкзак')}</button>}
         <button className="btn peligro" onClick={() => { if (confirm(L(`¿Eliminar esta bolsa con ${b.cantidad} ${b.moneda}?`, `Удалить кошель с ${b.cantidad} ${b.moneda}?`))) { upd((x) => { quitar(x, lugar); }); onClose(); } }}>{L('Eliminar bolsa', 'Удалить кошель')}</button>
         {iguales > 1 && <button className="btn peligro" onClick={() => {
@@ -377,7 +399,9 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
   const [base, setBase] = useState<ObjetoBase[] | null>(null);
   const [borrador, setBorrador] = useState<Item | null>(null);
   useEffect(() => { cargarObjetos().then(setBase); }, []);
-  const sueltos = destino.zona === 'equipo' ? [...p.mochila.map((it, i) => ({ it, l: { zona: 'mochila' as const, i } })), ...p.cinturon.items.map((it, i) => ({ it, l: { zona: 'cinturon' as const, i } }))] : [];
+  const sueltos = destino.zona === 'equipo' ? [...p.mochila.map((it, i) => ({ it, l: { zona: 'mochila' as const, i } })), ...p.cinturon.items.map((it, i) => ({ it, l: { zona: 'cinturon' as const, i } }))].filter(({ it }) => !it.bolsa && cabeEnRanura(destino.r, it.tipo)) : [];
+  /** Hueco que solo acepta una categoría (yelmo, anillo…): el objeto nuevo será de esa categoría. */
+  const tipoFijo = destino.zona === 'equipo' ? TIPO_RANURA[destino.r] : undefined;
   const nombreDestino = destino.zona === 'equipo' ? tr(RANURAS_EQUIPO.find((r) => r.id === destino.r)!.nombre) : destino.zona === 'mochila' ? L('la mochila', 'рюкзак') : L('el cinturón', 'пояс');
 
   if (borrador) return (
@@ -387,9 +411,10 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
         <Etiqueta texto="Nombre"><input className="campo" value={borrador.nombre} onChange={(e) => setBorrador({ ...borrador, nombre: e.target.value })} /></Etiqueta>
         <Etiqueta texto="Cantidad"><Numero valor={borrador.cantidad} min={1} set={(n) => setBorrador({ ...borrador, cantidad: n })} /></Etiqueta>
         <Etiqueta texto="Precio (si lo sabes)"><input className="campo" value={borrador.precio} placeholder="p. ej. 25po" onChange={(e) => setBorrador({ ...borrador, precio: e.target.value })} /></Etiqueta>
-        <SelectorTipo valor={borrador.tipo} set={(t) => setBorrador(conTipo(borrador, t))} />
+        <SelectorTipo valor={borrador.tipo} fija={!!tipoFijo} set={(t) => setBorrador(conTipo(borrador, t))} />
       </div>
       <EditorObjeto it={borrador} set={(f) => setBorrador((b) => { if (!b) return b; const y = structuredClone(b); f(y); return y; })} />
+      <EditorBonos it={borrador} set={(f) => setBorrador((b) => { if (!b) return b; const y = structuredClone(b); f(y); return y; })} />
       <Etiqueta texto="Descripción"><Texto multilinea filas={5} valor={borrador.descripcion} set={(v) => setBorrador((b) => b && { ...b, descripcion: v })} placeholder="Qué hace, cuánto cura, cuánto daño…" /></Etiqueta>
     </Modal>
   );
@@ -417,10 +442,10 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
       {!base ? <p>{L('Cargando base de objetos…', 'Загружаю базу предметов…')}</p> : (
         <Buscador<ObjetoBase>
           items={base} texto={(o) => o.nombre} placeholder="Escribe el nombre del objeto…"
-          filtro={(o) => destino.zona !== 'equipo' || !['yelmo', 'amuleto', 'capa', 'brazalete', 'guantes', 'anillo1', 'anillo2', 'cinto', 'botas'].includes(destino.r) || o.tipo === 'otro'}
+          filtro={(o) => !tipoFijo || o.tipo === tipoFijo}
           render={(o) => <span className="res-conjuro"><strong>{td(o.nombre)}</strong><small>{td(o.categoria)}{o.precio ? ` · ${o.precio}` : ''}{o.detalles?.['Daño'] ? ` · ${o.detalles['Daño']}` : ''}{o.detalles?.['Clase de armadura'] ? ` · ${L('CA', 'КД')} ${o.detalles['Clase de armadura']}` : ''}</small></span>}
           onElegir={(o) => setBorrador(typeof o === 'string'
-            ? { id: uid(), nombre: o, descripcion: '', precio: '', cantidad: 1, tipo: 'otro' }
+            ? conTipo({ id: uid(), nombre: o, descripcion: '', precio: '', cantidad: 1, tipo: 'otro' }, tipoFijo ?? 'otro')
             : { id: uid(), nombre: o.nombre, descripcion: o.descripcion, precio: o.precio, cantidad: o.maxPorEspacio ? 20 : 1, tipo: o.tipo, detalles: o.detalles, maxPorEspacio: o.maxPorEspacio })}
         />
       )}

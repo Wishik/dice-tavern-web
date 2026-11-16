@@ -1,6 +1,9 @@
 import { Etiqueta } from '../ui';
 import { L } from '../i18n';
-import type { Item } from '../types';
+import type { BonoItem, Item, TamanoCinturon } from '../types';
+import { CINTURON_ESPACIOS, HABILIDADES } from '../rules';
+import { opcionesBono } from '../bonosObjetos';
+import { tr } from '../ru';
 
 /**
  * Campos de combate de un objeto propio: daño y propiedades de un arma, CA de una armadura o escudo,
@@ -11,7 +14,63 @@ export function EditorObjeto({ it, set }: { it: Item; set: (f: (y: Item) => void
   if (it.tipo === 'arma') return <EditorArma it={it} set={set} />;
   if (it.tipo === 'armadura') return <EditorArmadura it={it} set={set} />;
   if (it.tipo === 'escudo') return <EditorEscudo it={it} set={set} />;
+  if (it.tipo === 'cinturon') return <EditorCinturon it={it} set={set} />;
   return null;
+}
+
+function EditorCinturon({ it, set }: { it: Item; set: (f: (y: Item) => void) => void }) {
+  const nombre = (t: TamanoCinturon) => (t === 'pequeño' ? L('Pequeño', 'Малый') : t === 'mediano' ? L('Mediano', 'Средний') : L('Grande', 'Большой'));
+  return (
+    <div className="editor-objeto">
+      <h4>🎗️ {L('Datos del cinturón', 'Параметры пояса')}</h4>
+      <Etiqueta texto={L('Tamaño (espacios de acceso rápido)', 'Размер (ячейки быстрого доступа)')}>
+        <div className="segmentado">
+          {(Object.keys(CINTURON_ESPACIOS) as TamanoCinturon[]).map((t) => (
+            <button key={t} type="button" className={(it.cinturon ?? 'pequeño') === t ? 'activo' : ''} onClick={() => set((y) => { y.cinturon = t; })}>{nombre(t)} ({CINTURON_ESPACIOS[t]})</button>
+          ))}
+        </div>
+      </Etiqueta>
+      <p className="nota pequena">{L('Póntelo en el hueco «Cinturón» del equipo para usar sus espacios.', 'Надень в слот «Пояс», чтобы пользоваться его ячейками.')}</p>
+    </div>
+  );
+}
+
+/**
+ * Mejoras que da el objeto mientras lo llevas equipado: +1 a la CA, +1 al daño, +2 a Constitución,
+ * +1 a las salvaciones de Constitución, +2 a Sigilo… Se pueden poner varias.
+ */
+export function EditorBonos({ it, set }: { it: Item; set: (f: (y: Item) => void) => void }) {
+  const opciones = opcionesBono(HABILIDADES.map((h) => ({ id: h.id, nombre: tr(h.nombre) })));
+  const grupos = [...new Set(opciones.map((o) => o.grupo))];
+  const bonos = it.bonos ?? [];
+  const cambiar = (i: number, b: Partial<BonoItem>) => set((y) => { const l = [...(y.bonos ?? [])]; l[i] = { ...l[i], ...b }; y.bonos = l; });
+  const quitar = (i: number) => set((y) => { const l = (y.bonos ?? []).filter((_, k) => k !== i); if (l.length) y.bonos = l; else delete y.bonos; });
+  const esArma = it.tipo === 'arma';
+  return (
+    <div className="editor-objeto editor-bonos">
+      <h4>✨ {L('Mejoras que da', 'Что даёт')}</h4>
+      {bonos.length === 0 && <p className="nota pequena">{L('Ninguna. Añade una si da algo: +1 a la CA, al ataque, al daño, a una característica, a una salvación, a una habilidad…', 'Ничего. Добавь, если предмет что-то даёт: +1 к КД, атаке, урону, характеристике, спасброску, навыку…')}</p>}
+      {bonos.map((b, i) => (
+        <div key={i} className="fila-bono">
+          <select className="campo valor-bono" value={b.valor} onChange={(e) => cambiar(i, { valor: +e.target.value })}>
+            {[-5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 10].map((v) => <option key={v} value={v}>{v > 0 ? `+${v}` : v}</option>)}
+          </select>
+          <select className="campo" value={b.donde} onChange={(e) => cambiar(i, { donde: e.target.value })}>
+            {grupos.map((g) => (
+              <optgroup key={g} label={tr(g)}>
+                {opciones.filter((o) => o.grupo === g).map((o) => <option key={o.id} value={o.id}>{L(o.es, o.ru)}</option>)}
+              </optgroup>
+            ))}
+          </select>
+          <button type="button" className="btn pequeno peligro" title={L('Quitar', 'Убрать')} onClick={() => quitar(i)}>✕</button>
+        </div>
+      ))}
+      <button type="button" className="btn pequeno" onClick={() => set((y) => { y.bonos = [...(y.bonos ?? []), { donde: 'CA', valor: 1 }]; })}>+ {L('Añadir mejora', 'Добавить бонус')}</button>
+      <p className="nota pequena">{esArma
+        ? L('Cuenta mientras lo llevas equipado. El ataque y el daño de un arma solo valen para esa arma.', 'Действует, пока предмет надет. Атака и урон оружия — только для этого оружия.')
+        : L('Cuenta mientras lo llevas equipado (en su hueco del equipo o en una mano).', 'Действует, пока предмет надет (в своём слоте или в руке).')}</p>
+    </div>
+  );
 }
 
 const CARAS = [4, 6, 8, 10, 12, 20];

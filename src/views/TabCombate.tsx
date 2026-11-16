@@ -23,6 +23,9 @@ function armasLlevadas(p: Personaje): ArmaLlevada[] {
   p.cinturon.items.forEach((it) => { if (it.tipo === 'arma') out.push({ it, donde: 'Cinturón', ref: (x) => x.cinturon.items.find((y) => y.id === it.id) }); });
   return out;
 }
+/** Lo que llevas en las manos que no es arma ni escudo: arma improvisada (el daño lo decide el máster en la partida). */
+const improvisadas = (p: Personaje) => ([['Mano hábil', p.equipo.manoHabil], ['Mano torpe', p.equipo.manoTorpe]] as const)
+  .filter(([, it]) => it && it.tipo !== 'arma' && it.tipo !== 'escudo') as [string, Item][];
 
 export function TabCombate() {
   const { p, upd, clases } = useFicha();
@@ -57,7 +60,7 @@ export function TabCombate() {
       </Seccion>
 
       <Seccion titulo="Armas que llevas">
-        {objetos.length === 0 && <p className="nota">{L('Equipa un arma en la mano hábil o torpe, o ponla en el cinturón (Inventario), y aparecerá aquí con su ataque y daño.', 'Возьми оружие в ведущую или вторую руку или повесь на пояс (Инвентарь) — оно появится здесь с атакой и уроном.')}</p>}
+        {objetos.length === 0 && improvisadas(p).length === 0 && <p className="nota">{L('Equipa un arma en la mano hábil o torpe, o ponla en el cinturón (Inventario), y aparecerá aquí con su ataque y daño.', 'Возьми оружие в ведущую или вторую руку или повесь на пояс (Инвентарь) — оно появится здесь с атакой и уроном.')}</p>}
         <ul className="lista-ataques">
           {llevadas.map(({ it, donde, ref, extra, natural }) => {
             const { ataque: ataqueBase, mod, atr, distancia, auto: atrAuto } = bonoArma(p, it);
@@ -117,6 +120,13 @@ export function TabCombate() {
             );
           })}
         </ul>
+        {improvisadas(p).length > 0 && <ul className="lista-ataques">
+          {improvisadas(p).map(([donde, it]) => (
+            <li key={it.id} className="ataque auto improvisada">
+              <div className="ataque-titulo"><strong>{td(it.nombre)}</strong><small>{tr(donde)} · {L('Arma improvisada', 'Импровизированное оружие')}</small></div>
+            </li>
+          ))}
+        </ul>}
         {llevadas.length > 0 && <p className="nota pequena">{L('Ataque = competencia + FUE (DES si es a distancia; la mejor si es sutil), o la característica que elijas en «Ataque con». Daño = dado del arma + el modificador de «Daño con». Cada ataque con arco o ballesta gasta 1 de munición.', 'Атака = бонус мастерства + СИЛ (ЛОВ для дальнобойного; лучшая для фехтовального) или характеристика, выбранная в «Атака от». Урон = кость оружия + модификатор из «Урон от». Каждый выстрел из лука или арбалета тратит 1 боеприпас.')}</p>}
       </Seccion>
 

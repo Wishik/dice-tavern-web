@@ -18,7 +18,12 @@ export interface Item {
   cantidad: number;
   /** Máximo de unidades por espacio (flechas/virotes: 20). Sin valor: la pila ocupa 1 espacio. */
   maxPorEspacio?: number;
-  tipo: 'pocion' | 'arma' | 'armadura' | 'escudo' | 'herramienta' | 'consumible' | 'monedas' | 'otro';
+  /** Categoría. «pocion» es de versiones antiguas (ahora «consumible»); «monedas» = bolsa de monedas. */
+  tipo: TipoItem;
+  /** Mejoras que da mientras está equipado: CA, ataque, daño, características, salvaciones, habilidades… */
+  bonos?: BonoItem[];
+  /** Solo cinturones: tamaño (cuántos espacios de acceso rápido da). */
+  cinturon?: TamanoCinturon;
   /** Bolsa llena de monedas que sale de las bolsas de monedas al pasar de 500. */
   bolsa?: { moneda: Moneda; cantidad: number };
   /** Datos extra mostrados en la ficha del objeto (daño, CA, propiedades...). */
@@ -30,6 +35,18 @@ export interface Item {
   /** Daño extra del arma (p. ej. «1d6 fuego» de una espada flamígera). */
   danoExtra?: string;
 }
+
+export type TipoItem = 'yelmo' | 'amuleto' | 'armadura' | 'capa' | 'arma' | 'escudo' | 'brazalete' | 'guantes' | 'anillo' | 'cinturon' | 'botas' | 'consumible' | 'herramienta' | 'otro' | 'pocion' | 'monedas';
+/** Categorías que se pueden elegir al crear un objeto, en este orden. */
+export const CATEGORIAS_ITEM: { id: TipoItem; nombre: string; ru: string }[] = [
+  { id: 'yelmo', nombre: 'Yelmo', ru: 'Шлем' }, { id: 'amuleto', nombre: 'Amuleto', ru: 'Амулет' }, { id: 'armadura', nombre: 'Armadura', ru: 'Доспех' },
+  { id: 'capa', nombre: 'Capa', ru: 'Плащ' }, { id: 'arma', nombre: 'Arma', ru: 'Оружие' }, { id: 'escudo', nombre: 'Escudo', ru: 'Щит' },
+  { id: 'brazalete', nombre: 'Brazalete', ru: 'Браслет' }, { id: 'guantes', nombre: 'Guantes', ru: 'Перчатки' }, { id: 'anillo', nombre: 'Anillo', ru: 'Кольцо' },
+  { id: 'cinturon', nombre: 'Cinturón', ru: 'Пояс' }, { id: 'botas', nombre: 'Botas', ru: 'Сапоги' }, { id: 'consumible', nombre: 'Consumible', ru: 'Расходник' },
+  { id: 'herramienta', nombre: 'Herramienta', ru: 'Инструмент' }, { id: 'otro', nombre: 'Otro', ru: 'Другое' },
+];
+/** Una mejora de un objeto. `donde`: 'CA', 'ataque', 'dano', 'ataqueConjuro', 'cdConjuro', 'iniciativa', 'velocidad', atributo ('FUE'…), 'salv:FUE' / 'salv:todas', 'hab:sigilo'. */
+export interface BonoItem { donde: string; valor: number }
 
 export type RanuraEquipo = 'yelmo' | 'amuleto' | 'armadura' | 'capa' | 'brazalete' | 'guantes' | 'anillo1' | 'anillo2' | 'cinto' | 'botas' | 'manoHabil' | 'manoTorpe';
 export const RANURAS_EQUIPO: { id: RanuraEquipo; nombre: string; icono: string }[] = [
@@ -48,6 +65,12 @@ export const RANURAS_EQUIPO: { id: RanuraEquipo; nombre: string; icono: string }
 ];
 
 export type TamanoCinturon = 'pequeño' | 'mediano' | 'grande';
+/** Qué categoría de objeto va en cada hueco del equipo (las manos aceptan cualquiera). */
+export const TIPO_RANURA: Partial<Record<RanuraEquipo, TipoItem>> = {
+  yelmo: 'yelmo', amuleto: 'amuleto', armadura: 'armadura', capa: 'capa', brazalete: 'brazalete', guantes: 'guantes',
+  anillo1: 'anillo', anillo2: 'anillo', cinto: 'cinturon', botas: 'botas',
+};
+export const cabeEnRanura = (r: RanuraEquipo, t: TipoItem) => !TIPO_RANURA[r] || TIPO_RANURA[r] === t;
 
 export interface EntradaTexto { nombre: string; texto: string; origen?: string }
 
@@ -189,7 +212,8 @@ export interface Personaje {
   mochila: Item[];
   /** Objetos tirados al suelo cuando el personaje no está en ninguna partida (en partida, el suelo es compartido). */
   suelo?: Item[];
-  cinturon: { tamano: TamanoCinturon; items: Item[] };
+  /** `tamano` es de versiones antiguas: ahora el tamaño lo da el cinturón equipado (equipo.cinto). */
+  cinturon: { tamano?: TamanoCinturon; items: Item[] };
   viaje: Viaje;
   monedas: Record<Moneda, number>;
   monturas: Montura[];

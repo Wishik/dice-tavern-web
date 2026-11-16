@@ -2,6 +2,7 @@ import { ajustarMulticlase, nivelEn, nivelTotal } from './multiclase';
 import type { Atributo, Item, Moneda, Personaje } from './types';
 import { bonoAtaqueArma, bonoAtaqueConjuro, bonoCdConjuro, bonoFuerzaCarga, bonoHabilidad, bonoPrueba, bonoSalvacion, bonosCA, bonosActivos, lineasBonos } from './bonos';
 import { NOMBRE_ATRIBUTO } from './types';
+import { bonoPropioArma, bonosEquipoEn, sumaEquipo } from './bonosObjetos';
 import { L, T, RU_NOMBRE_ATRIBUTO } from './i18n';
 import { tr } from './ru';
 
@@ -9,7 +10,8 @@ import { tr } from './ru';
 /** Valor de una característica con los efectos temporales del máster (entre 1 y 30). */
 export function car(p: Personaje, a: Atributo): number {
   const extra = (p.efectosCar ?? []).filter((e) => e.atributo === a).reduce((s, e) => s + e.valor, 0)
-    + (p.bonosExtra ?? []).filter((b) => b.donde === a).reduce((s, b) => s + (b.valor || 0), 0);
+    + (p.bonosExtra ?? []).filter((b) => b.donde === a).reduce((s, b) => s + (b.valor || 0), 0)
+    + sumaEquipo(p, a);
   return extra ? Math.max(1, Math.min(30, p.caracteristicas[a] + extra)) : p.caracteristicas[a];
 }
 /** Una línea del desglose: de dónde sale cada número. `id` = bonus puesto a mano (se puede cambiar o quitar). */
@@ -19,6 +21,7 @@ export function desgloseCar(p: Personaje, a: Atributo): LineaDesglose[] {
   return [
     { texto: L('Puntuación base', 'Базовое значение'), valor: p.caracteristicas[a], base: true },
     ...(p.bonosExtra ?? []).filter((b) => b.donde === a).map((b) => ({ texto: b.origen || L('Bonus', 'Бонус'), valor: b.valor, id: b.id })),
+    ...lineasEquipo(p, a),
     ...(p.efectosCar ?? []).filter((e) => e.atributo === a).map((e) => ({ texto: L('Máster', 'Мастер'), valor: e.valor, nota: e.nota })),
   ];
 }
@@ -66,7 +69,9 @@ export function idHabilidad(nombre: string): string | undefined {
 
 /** Bonus puestos a mano en un sitio (`hab:sigilo`, `salv:FUE`, `CA`, `FUE`...). */
 export const bonosManoEn = (p: Personaje, donde: string) => (p.bonosExtra ?? []).filter((b) => b.donde === donde);
-const lineasMano = (p: Personaje, donde: string): LineaDesglose[] => bonosManoEn(p, donde).map((b) => ({ texto: b.origen || L('Bonus', 'Бонус'), valor: b.valor || 0, id: b.id }));
+/** Mejoras de los objetos equipados (no se editan aquí: se cambian en el objeto). */
+const lineasEquipo = (p: Personaje, donde: string): LineaDesglose[] => bonosEquipoEn(p, donde).map((b) => ({ texto: `🎒 ${b.origen}`, valor: b.valor }));
+const lineasMano = (p: Personaje, donde: string): LineaDesglose[] => [...lineasEquipo(p, donde), ...bonosManoEn(p, donde).map((b) => ({ texto: b.origen || L('Bonus', 'Бонус'), valor: b.valor || 0, id: b.id }))];
 const nombreAtr = (a: Atributo) => T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a]);
 
 export function valorHabilidad(p: Personaje, id: string): number {
@@ -105,7 +110,7 @@ export function desgloseSalvacion(p: Personaje, a: Atributo): LineaDesglose[] {
   return [...l, ...lineasMano(p, `salv:${a}`)];
 }
 
-export const iniciativa = (p: Personaje) => valorPrueba(p, 'DES') + (p.bonusIniciativa || 0);
+export const iniciativa = (p: Personaje) => valorPrueba(p, 'DES') + (p.bonusIniciativa || 0) + sumaEquipo(p, 'iniciativa');
 export const percepcionPasiva = (p: Personaje) => 10 + valorHabilidad(p, 'percepcion') + (p.bonusPercepcionPasiva || 0);
 
 export function cdConjuros(p: Personaje): number | null {
@@ -164,6 +169,23 @@ export function estadoCarga(p: Personaje): EstadoCarga {
 }
 
 export const CINTURON_ESPACIOS = { pequeño: 3, mediano: 6, grande: 9 } as const;
+/** Espacios del cinturón: los del cinturón que llevas equipado (sin cinturón, ninguno). */
+export const capacidadCinturon = (p: Personaje) => { const c = p.equipo?.cinto; return c ? CINTURON_ESPACIOS[c.cinturon ?? 'pequeño'] ?? 3 : 0; };
+/**
+ * Si el cinturón ya no da para lo que llevas en él (te pones uno más pequeño o lo pierdes),
+ * lo que sobra (lo último) pasa a la mochila si cabe y, si no, al suelo. Devuelve qué movió.
+ */
+export function ajustarCinturon(p: Personaje): { mochila: string[]; suelo: string[] } | null {
+  const cap = capacidadCinturon(p);
+  if (espaciosUsados(p.cinturon.items) <= cap) return null;
+  const out = { mochila: [] as string[], suelo: [] as string[] };
+  while (p.cinturon.items.length && espaciosUsados(p.cinturon.items) > cap) {
+    const it = p.cinturon.items.pop()!;
+    if (cabeEnMochila(p, it)) { p.mochila.push(it); out.mochila.push(it.nombre); }
+    else { p.suelo = [...(p.suelo ?? []), it]; out.suelo.push(it.nombre); }
+  }
+  return out;
+}
 
 // ---------------------------------------------------------------- Monedas
 /** Valor de cada moneda en piezas de cobre. 1 PM = 100 PO, 1 PL = 7 PO, 1 PO = 5 PE = 10 PP = 100 PC. */
@@ -370,6 +392,7 @@ export function calcularCA(p: Personaje): DesgloseCA {
     fuerzaMinima = Math.max(fuerzaMinima, parseInt(it.detalles?.['Fuerza'] ?? '', 10) || 0);
   }
   lineas.push(...extra.lineas);
+  lineas.push(...lineasEquipo(p, 'CA'));
   for (const b of p.bonosExtra ?? []) if (b.donde === 'CA') lineas.push({ texto: b.origen || L('Bonus', 'Бонус'), valor: b.valor || 0, id: b.id });
   if (p.bonusCA) lineas.push({ texto: L('Ajuste', 'Поправка'), valor: p.bonusCA });
   const total = lineas.reduce((t, x) => t + x.valor, 0);
@@ -469,8 +492,9 @@ export function bonoArma(p: Personaje, it: Item): { ataque: number; mod: number;
   // El jugador puede elegir otra característica para el ataque y/o el daño de esta arma.
   const elegido = p.atrArmas?.[it.id];
   const atr: Atributo = elegido?.ataque ?? auto;
-  const mod = modificador(car(p, elegido?.dano ?? auto)) + magico;
-  return { ataque: modificador(car(p, atr)) + magico + bonoCompetencia(nivelTotal(p)) + bonoAtaqueArma(p, distancia), mod, atr, distancia, auto };
+  // Mejoras de objetos: las del arma solo para ella; las de otros objetos equipados (amuleto +1 al daño…), para todas.
+  const mod = modificador(car(p, elegido?.dano ?? auto)) + magico + bonoPropioArma(it, 'dano') + sumaEquipo(p, 'dano');
+  return { ataque: modificador(car(p, atr)) + magico + bonoCompetencia(nivelTotal(p)) + bonoAtaqueArma(p, distancia) + bonoPropioArma(it, 'ataque') + sumaEquipo(p, 'ataque'), mod, atr, distancia, auto };
 }
 
 // ---------------------------------------------------------------- Rasgos raciales recomendados e idiomas

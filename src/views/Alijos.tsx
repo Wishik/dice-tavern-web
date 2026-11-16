@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFicha } from './Ficha';
 import { BotonAnadir, Modal, Seccion } from '../ui';
 import { L } from '../i18n';
@@ -44,10 +44,21 @@ const nombreMiembro = (m: Miembro) => `${m.alias}${m.pj ? ` (${m.pj.nombre})` : 
 
 /** Sección del inventario: el suelo (objetos tirados) y los alijos de la partida. */
 export function SeccionAlijos() {
-  const { p, upd } = useFicha();
+  const { p, upd, ajeno } = useFicha();
   const { partida, alijos, suelo, miembros, master, mio, error, recargar } = useAlijos();
   const [editar, setEditar] = useState<Alijo | 'nuevo' | null>(null);
   const local = p.suelo ?? [];
+  // En una partida, lo que cayó al suelo «en local» (p. ej. lo que no cabía al cambiar de cinturón) pasa al suelo compartido.
+  const pasando = useRef(false);
+  useEffect(() => {
+    if (!partida || !suelo || !local.length || pasando.current || ajeno) return;
+    pasando.current = true;
+    const ids = new Set(local.map((it) => it.id));
+    cambiarItems(suelo.id, (l) => [...l, ...local.filter((it) => !l.some((y) => y.id === it.id))])
+      .then(() => { upd((x) => { x.suelo = (x.suelo ?? []).filter((it) => !ids.has(it.id)); }); recargar(); })
+      .catch(() => {})
+      .finally(() => { pasando.current = false; });
+  }, [partida, suelo, local, ajeno, upd, recargar]);
 
   /** Coger un objeto de un alijo (o del suelo) y ponerlo en la mochila. */
   const coger = async (a: Alijo, it: Item) => {

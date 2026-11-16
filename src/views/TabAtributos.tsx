@@ -36,7 +36,7 @@ export function TabAtributos() {
   const vel = bonoVelocidad(p);
   const ajusteVel = (base: number, mult: number) => {
     const d = vel * mult + pen * mult;
-    return d !== 0 && <b className={d < 0 ? 'penal' : 'extra'}> ({[vel && `+${vel * mult} ${L('rasgos', 'особенности')}`, pen && `${pen * mult} ${L('carga', 'груз')}`].filter(Boolean).join(', ')}) = {Math.max(0, base + d)}</b>;
+    return d !== 0 && <b className={d < 0 ? 'penal' : 'extra'}> ({[vel && `+${vel * mult} ${L('bonos', 'бонусы')}`, pen && `${pen * mult} ${L('carga', 'груз')}`].filter(Boolean).join(', ')}) = {Math.max(0, base + d)}</b>;
   };
   const [corregir, setCorregir] = useState(false);
   const ca = calcularCA(p);

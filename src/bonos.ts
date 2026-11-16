@@ -1,6 +1,7 @@
 import { L } from './i18n';
 import type { Atributo, Personaje } from './types';
 import { RASGOS_FIJOS } from './fijos';
+import { sumaEquipo } from './bonosObjetos';
 
 /**
  * Bonificadores fijos que dan rasgos de raza, rasgos genéricos y dotes, y que se pueden sumar solos.
@@ -117,10 +118,10 @@ export function bonoHabilidad(p: Personaje, id: string, compMarcada: boolean): {
 }
 export const bonoPrueba = (p: Personaje, a: Atributo) => sumar(bonosActivos(p), (b) => b.prueba?.[a]);
 export const bonoSalvacion = (p: Personaje, a: Atributo) => sumar(bonosActivos(p), (b) => b.salvacion?.[a]);
-export const bonoVelocidad = (p: Personaje) => sumar(bonosActivos(p), (b) => b.velocidad);
+export const bonoVelocidad = (p: Personaje) => sumar(bonosActivos(p), (b) => b.velocidad) + sumaEquipo(p, 'velocidad');
 export const bonoFuerzaCarga = (p: Personaje) => sumar(bonosActivos(p), (b) => b.fuerzaCarga);
-export const bonoAtaqueConjuro = (p: Personaje) => sumar(bonosActivos(p), (b) => b.ataqueConjuro);
-export const bonoCdConjuro = (p: Personaje) => sumar(bonosActivos(p), (b) => b.cdConjuro);
+export const bonoAtaqueConjuro = (p: Personaje) => sumar(bonosActivos(p), (b) => b.ataqueConjuro) + sumaEquipo(p, 'ataqueConjuro');
+export const bonoCdConjuro = (p: Personaje) => sumar(bonosActivos(p), (b) => b.cdConjuro) + sumaEquipo(p, 'cdConjuro');
 export const bonoAtaqueArma = (p: Personaje, distancia: boolean) => sumar(bonosActivos(p), (b) => distancia ? b.ataqueDistancia : b.ataqueCaC);
 export function bonosCA(p: Personaje, conArmadura: boolean): { total: number; menosDes: number; partes: string[]; lineas: { texto: string; valor: number }[] } {
   const l = bonosActivos(p).filter((x) => !x.b.conArmadura || conArmadura);

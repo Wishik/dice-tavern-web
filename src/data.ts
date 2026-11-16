@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import type { TipoItem } from './types';
 
 export interface Conjuro { nombre: string; nivel: number; escuela: string; clases: string[]; tiempo: string; alcance: string; componentes: string; duracion: string; descripcion: string }
 export interface RasgoDef { nombre: string; texto: string }
@@ -29,7 +30,7 @@ export function useDatos<T>(archivo: string): T | null {
 }
 
 /** Base de objetos unificada para el buscador del inventario. */
-export interface ObjetoBase { nombre: string; descripcion: string; precio: string; tipo: 'pocion' | 'arma' | 'armadura' | 'escudo' | 'herramienta' | 'consumible' | 'otro'; categoria: string; detalles?: Record<string, string>; maxPorEspacio?: number }
+export interface ObjetoBase { nombre: string; descripcion: string; precio: string; tipo: TipoItem; categoria: string; detalles?: Record<string, string>; maxPorEspacio?: number }
 let baseObjetos: Promise<ObjetoBase[]> | null = null;
 export function cargarObjetos(): Promise<ObjetoBase[]> {
   if (!baseObjetos) baseObjetos = Promise.all([cargar<(Arma | Armadura)[]>('armas'), cargar<Equipo[]>('gear')]).then(([aa, gg]) => {
@@ -41,7 +42,7 @@ export function cargarObjetos(): Promise<ObjetoBase[]> {
         detalles: { 'Clase de armadura': a.ca, 'Fuerza': a.fuerza, 'Sigilo': a.sigilo } });
     }
     for (const g of gg) {
-      const tipo = g.categoria === 'pociones' ? 'pocion' : g.categoria === 'herramientas' ? 'herramienta' : g.categoria === 'pergaminos' ? 'consumible' : 'otro';
+      const tipo = g.categoria === 'pociones' ? 'consumible' : g.categoria === 'herramientas' ? 'herramienta' : g.categoria === 'pergaminos' ? 'consumible' : 'otro';
       out.push({ nombre: g.nombre, precio: g.precio, tipo, categoria: g.categoria, descripcion: g.descripcion });
     }
     // Munición: no está en las tablas como objeto aparte; se añade con máximo 20 por espacio.

@@ -6,7 +6,7 @@ import { backend } from '../store';
 import { useDatos, type Clase, type Conjuro, type Dote, type Razas, type Trasfondo } from '../data';
 import { calcularAvisos, manaMaximo, type Avisos } from '../avisos';
 import { DadoIcono, PanelDados, useDados } from '../dice';
-import { car, conSigno, modificador } from '../rules';
+import { ajustarCinturon, capacidadCinturon, car, conSigno, espaciosUsados, modificador } from '../rules';
 import { Etiqueta, Modal, PuntoRojo } from '../ui';
 import { GANAS_MULTICLASE, asignarNivel, clasesDe, cumpleRequisito, fijarClases, textoClases, textoRequisito } from '../multiclase';
 import { TabPersonaje } from './TabPersonaje';
@@ -186,6 +186,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
         <SubidaNivel />
         <SincronizarMana />
         {!ajeno && <SincronizarConjuros />}
+        {!ajeno && <SincronizarCinturon />}
         {dados && <Modal titulo={L('Dados', 'Кубики')} onClose={() => setDados(false)}><PanelDados /></Modal>}
       </div>
     </Ctx.Provider>
@@ -243,6 +244,25 @@ function SincronizarMana() {
     if (!clases || max === p.pm.max) return;
     upd((x) => { const d = max - x.pm.max; x.pm.max = max; x.pm.actual = Math.max(0, Math.min(max, x.pm.actual + Math.max(0, d))); });
   }, [max, p.pm.max, clases, upd]);
+  return null;
+}
+
+/** Si el cinturón equipado ya no da para lo que hay en él, lo que sobra va a la mochila o, si no cabe, al suelo. */
+function SincronizarCinturon() {
+  const { p, upd } = useFicha();
+  const cap = capacidadCinturon(p);
+  const usados = espaciosUsados(p.cinturon.items);
+  useEffect(() => {
+    if (usados <= cap) return;
+    const r = ajustarCinturon(structuredClone(p));
+    upd((x) => { ajustarCinturon(x); });
+    if (r) setTimeout(() => alert([
+      L('Tu cinturón ya no tiene sitio para todo.', 'На поясе больше нет места для всего.'),
+      r.mochila.length ? L(`A la mochila: ${r.mochila.join(', ')}.`, `В рюкзак: ${r.mochila.join(', ')}.`) : '',
+      r.suelo.length ? L(`Al suelo (no cabía en la mochila): ${r.suelo.join(', ')}.`, `На пол (не влезло в рюкзак): ${r.suelo.join(', ')}.`) : '',
+    ].filter(Boolean).join('\n')), 50);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cap, usados]);
   return null;
 }
 

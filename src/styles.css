@@ -906,3 +906,10 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .alijo { margin: 10px 0; padding: 8px 12px; border: 1.5px solid var(--madera-borde); border-radius: 12px; background: rgba(255,255,255,.18); }
 .cab-alijo { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px; }
 .cab-alijo small { color: var(--tinta-suave); flex: 1; }
+
+/* Mejoras de objetos */
+.editor-bonos .fila-bono { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; }
+.editor-bonos .fila-bono .campo { flex: 1; min-width: 0; }
+.editor-bonos .fila-bono .valor-bono { flex: 0 0 72px; }
+.mejoras-item { margin: 6px 0; font-weight: 600; color: var(--acento, #b8860b); }
+.ataque.improvisada { opacity: .9; }
