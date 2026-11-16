@@ -4,6 +4,8 @@ import type { Tirada } from './dice';
 /** Hoja propia abierta ahora: sus tiradas se apuntan en el historial de sus partidas (lo ve el máster). */
 let activo: string | null = null;
 export const setPersonajeActivo = (id: string | null) => { activo = id; };
+/** Hoja propia abierta (sus tiradas ya van al historial con el nombre del personaje). */
+export const personajeActivo = () => activo;
 
 export const detalleTirada = (t: Pick<Tirada, 'dados' | 'mod'>) =>
   [...t.dados.map((d) => (d.descartado ? `(${d.valor})` : String(d.valor))), t.mod ? (t.mod > 0 ? `+${t.mod}` : String(t.mod)) : ''].filter(Boolean).join(' ');

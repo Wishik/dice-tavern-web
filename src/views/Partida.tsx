@@ -92,23 +92,23 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
         {verCombateMovil ? zonaCombate : <>
         {tarjetaInvitacion}
 
-        {yo && !soyMaster && (
+        {yo && (
           <section className="tarjeta">
-            <label className="etiqueta"><span>{L('Tu personaje en esta partida', 'Твой персонаж в этой партии')}</span>
+            <label className="etiqueta"><span>{soyMaster ? L('Tu personaje (opcional: si también juegas)', 'Твой персонаж (если ты тоже играешь)') : L('Tu personaje en esta partida', 'Твой персонаж в этой партии')}</span>
               <select className="campo" value={yo.personaje ?? ''} onChange={(e) => accion(async () => {
                 const pj = e.target.value || null;
                 await elegirPersonaje(partida.id, pj);
                 // Al entrar en juego, los datos de creación quedan bloqueados (el lápiz de la lista los desbloquea).
                 if (pj) { const x = await backend.cargar(pj); if (x && !x.bloqueado) await backend.guardar({ ...x, bloqueado: true, actualizado: new Date().toISOString() }); }
               })}>
-                <option value="">{L('— Elige —', '— Выбери —')}</option>
+                <option value="">{soyMaster ? L('— Sin personaje (solo máster) —', '— Без персонажа (только мастер) —') : L('— Elige —', '— Выбери —')}</option>
                 {mios.map((r) => <option key={r.id} value={r.id}>{r.nombre || L('Sin nombre', 'Без имени')} ({trClases(r.clase)} {r.nivel})</option>)}
               </select>
             </label>
           </section>
         )}
 
-        <h2 className="titulo-seccion espacio-arriba">{L('Jugadores', 'Игроки')} ({miembros.filter((m) => m.usuario !== partida.master).length})</h2>
+        <h2 className="titulo-seccion espacio-arriba">{L('Jugadores', 'Игроки')} ({miembros.filter((m) => m.usuario !== partida.master || m.personaje).length})</h2>
         <div className="rejilla-personajes">
           {ordenar(miembros).map((m) => {
             const esMaster = m.usuario === partida.master;
@@ -117,10 +117,10 @@ export function PantallaPartida({ id, usuario, onVolver, onAbrirFicha }: { id: s
               <div key={m.usuario} className={`tarjeta-personaje miembro ${ancho && sel && sel === m.personaje ? 'elegido' : ''}`}>
                 <button className="miembro-cuerpo" disabled={!puedeAbrir} onClick={() => m.personaje && (ancho ? setSel(m.personaje) : onAbrirFicha(m.personaje))}>
                   {m.pj?.iniciativaActual != null && <span className="insignia-ini" title={L('Iniciativa', 'Инициатива')}>{m.pj.iniciativaActual}</span>}
-                  <div className="retrato">{m.pj?.foto ? <img src={m.pj.foto} alt="" /> : <span>{esMaster ? '👑' : (m.pj?.nombre || m.alias || '?')[0]}</span>}</div>
+                  <div className="retrato">{m.pj?.foto ? <img src={m.pj.foto} alt="" /> : <span>{esMaster && !m.pj ? '👑' : (m.pj?.nombre || m.alias || '?')[0]}</span>}</div>
                   <div className="tp-texto">
-                    <strong>{esMaster ? L('Máster', 'Мастер') : m.pj ? (m.pj.nombre || L('Sin nombre', 'Без имени')) : L('Sin personaje', 'Без персонажа')}</strong>
-                    <span>@{m.alias}{m.usuario === usuario.id ? ` (${L('tú', 'ты')})` : ''}</span>
+                    <strong>{esMaster && !m.pj ? L('Máster', 'Мастер') : m.pj ? (m.pj.nombre || L('Sin nombre', 'Без имени')) : L('Sin personaje', 'Без персонажа')}</strong>
+                    <span>@{m.alias}{m.usuario === usuario.id ? ` (${L('tú', 'ты')})` : ''}{esMaster && m.pj ? ` · 👑 ${L('máster', 'мастер')}` : ''}</span>
                     {m.pj && <span>{linea(m.pj)}</span>}
                     {m.pj && <span className="nivel">❤️ {m.pj.pg?.actual ?? 0}/{m.pj.pg?.max ?? 0}{m.pj.pg?.temp ? ` (+${m.pj.pg.temp} ${L('temp.', 'врем.')})` : ''} · 🛡 {m.pj.ca}{m.pj.pm?.max ? ` · 🔷 ${m.pj.pm.actual}/${m.pj.pm.max}` : ''}</span>}
                     {m.pj && !soyMaster && <ChipsEstados estados={m.pj.estados} agotamiento={m.pj.agotamiento} detalles={m.pj.estadosDetalle} />}

@@ -4,6 +4,7 @@ import { L, idioma } from '../i18n';
 import { Modal, Numero } from '../ui';
 import { ChipsEstados, estadosPorVida, muereAhora, pasarRonda } from '../estados';
 import { escucharTiradas, useDados } from '../dice';
+import { personajeActivo } from '../tiradasPartida';
 import { detalleTirada } from '../tiradasPartida';
 import { HistorialTiradas } from './Historial';
 import { HABILIDADES } from '../rules';
@@ -133,11 +134,11 @@ export function PanelCombate({ partida, miembros, onRecargar, onAbrirPj }: { par
   }, [c, partida.id]);
   // Las tiradas que hace el máster aquí (ataques y daño de los enemigos…) van al historial de la partida.
   const verRef = useRef(PRINCIPAL);
-  useEffect(() => escucharTiradas((t) => setC((x) => ({ ...x, tiradas: [{ id: uid(), combate: verRef.current, quien: L('Máster', 'Мастер'), etiqueta: t.etiqueta, formula: t.formula, total: t.total, detalle: detalleTirada(t), modo: t.modo, critico: t.critico ?? null, creada: new Date().toISOString() }, ...(x.tiradas ?? [])].slice(0, 60) }))), []);
+  useEffect(() => escucharTiradas((t) => (t.tipo && personajeActivo()) ? undefined : setC((x) => ({ ...x, tiradas: [{ id: uid(), combate: verRef.current, quien: L('Máster', 'Мастер'), etiqueta: t.etiqueta, formula: t.formula, total: t.total, detalle: detalleTirada(t), modo: t.modo, critico: t.critico ?? null, creada: new Date().toISOString() }, ...(x.tiradas ?? [])].slice(0, 60) }))), []);
 
   const lista = aLista(c);
   const setLista = (f: (l: CombateUno[]) => CombateUno[]) => setC((x) => deLista(f(aLista(x)), x));
-  const jugadores = miembros.filter((m) => m.usuario !== partida.master && m.pj && m.personaje);
+  const jugadores = miembros.filter((m) => m.pj && m.personaje);
   const jugador = async (m: Miembro, cambios: Record<string, unknown>) => {
     try { await cambiarJugador(m.personaje!, cambios); onRecargar(); } catch (e) { setError((e as Error).message); }
   };
