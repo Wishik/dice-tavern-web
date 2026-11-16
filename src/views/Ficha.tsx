@@ -6,7 +6,7 @@ import { backend } from '../store';
 import { useDatos, type Clase, type Conjuro, type Dote, type Razas, type Trasfondo } from '../data';
 import { calcularAvisos, manaMaximo, type Avisos } from '../avisos';
 import { DadoIcono, PanelDados, useDados } from '../dice';
-import { ajustarCinturon, capacidadCinturon, car, conSigno, espaciosUsados, modificador } from '../rules';
+import { ajustarCinturon, capacidadCinturon, car, conSigno, espaciosUsados, modificador, pgExtra } from '../rules';
 import { Etiqueta, Modal, PuntoRojo } from '../ui';
 import { GANAS_MULTICLASE, asignarNivel, clasesDe, cumpleRequisito, fijarClases, textoClases, textoRequisito } from '../multiclase';
 import { TabPersonaje } from './TabPersonaje';
@@ -187,6 +187,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
         <button className="fab" onClick={() => setDados(true)} aria-label={L('Dados', 'Кубики')}><DadoIcono caras={20} size={40} /></button>
         <SubidaNivel />
         <SincronizarMana />
+        <SincronizarPG />
         {!ajeno && <SincronizarConjuros />}
         {!ajeno && <SincronizarCinturon />}
         <SincronizarBiblioteca />
@@ -247,6 +248,17 @@ function SincronizarMana() {
     if (!clases || max === p.pm.max) return;
     upd((x) => { const d = max - x.pm.max; x.pm.max = max; x.pm.actual = Math.max(0, Math.min(max, x.pm.actual + Math.max(0, d))); });
   }, [max, p.pm.max, clases, upd]);
+  return null;
+}
+
+/** PG extra de dotes y rasgos (Duro, Don de la fortaleza, Resistencia dracónica): se suma o se quita solo la diferencia. */
+function SincronizarPG() {
+  const { p, upd } = useFicha();
+  const extra = pgExtra(p).reduce((s, x) => s + x.valor, 0);
+  useEffect(() => {
+    if (!p.clase || extra === (p.pgExtra ?? 0)) return;
+    upd((x) => { const d = extra - (x.pgExtra ?? 0); x.pgExtra = extra; x.pg.max = Math.max(1, x.pg.max + d); x.pg.actual = Math.min(x.pg.max, x.pg.actual + Math.max(0, d)); });
+  }, [extra, p.pgExtra, p.clase, upd]);
   return null;
 }
 

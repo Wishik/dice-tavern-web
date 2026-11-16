@@ -58,7 +58,7 @@ export function TabPersonaje() {
     // Al elegir clase, si aún no has tocado las características, pone el conjunto estándar del manual.
     if (caracteristicasSinTocar(x)) aplicarConjuntoEstandar(x, nombre);
     // PG por defecto si aún no los habías puesto (o seguían siendo los de la clase anterior).
-    if (c && (x.pg.max === 0 || x.pg.max === pgViejo)) { x.pg.max = pgPorDefecto(x, c.atributos.dadoGolpe); x.pg.actual = x.pg.max; }
+    if (c && (x.pg.max === 0 || x.pg.max === pgViejo)) { x.pg.max = pgPorDefecto(x, c.atributos.dadoGolpe); x.pg.actual = x.pg.max; x.pgExtra = 0; }
     // La característica de conjuros vuelve a ser la automática de la clase.
     x.conjuroCaracteristica = '';
   });

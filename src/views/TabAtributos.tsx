@@ -6,8 +6,8 @@ import { ChipsEstados } from '../estados';
 import { useState } from 'react';
 import { BotonAnadir, Etiqueta, Modal, Numero, Seccion, Texto } from '../ui';
 import { Contador, useDados } from '../dice';
-import { car, CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetencia, calcularCA, conDados, conSigno, textoMod, desgloseCar, uid, type LineaDesglose, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto, valorPrueba } from '../rules';
-import { bonoVelocidad } from '../bonos';
+import { car, CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosIniciativa, avisosTirada, pgExtra, bonoCompetencia, calcularCA, conDados, conSigno, textoMod, desgloseCar, uid, type LineaDesglose, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto, valorPrueba } from '../rules';
+import { bonoVelocidad, velocidadRasgo } from '../bonos';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo, type RecursoExtra } from '../types';
 import { buscarClase } from '../avisos';
 import { descansoCorto, descansoLargo, dgRecuperados, extraDadoGolpe, recursosPersonaje, recuperaExtra, resumenCorto } from '../recursos';
@@ -42,7 +42,7 @@ export function TabAtributos() {
   const [corregir, setCorregir] = useState(false);
   const ca = calcularCA(p);
   const [desglose, setDesglose] = useState<Atributo | 'CA' | null>(null);
-  const pgDef = pgPorDefecto(p, dado);
+  const pgDef = pgPorDefecto(p, dado) + (p.pgExtra ?? 0);
 
   return (
     <div className="tab">
@@ -55,6 +55,7 @@ export function TabAtributos() {
             <Contador valor={p.pg.actual} set={(n) => upd((x) => { x.pg.actual = Math.min(n, x.pg.max); })} min={-99} max={p.pg.max} />
             <button className="de enlace-max" disabled={bloqueado} onClick={() => setCorregir(true)} title={L('Corregir máximo', 'Исправить максимум')}>/ {p.pg.max}</button>
           </div>
+          {pgExtra(p).length > 0 && <p className="nota pequena centro">{L('Incluye', 'Включая')} {pgExtra(p).map((x) => `+${x.valor} ${x.texto}`).join(', ')}</p>}
           <Etiqueta texto="Temporales"><Numero valor={p.pg.temp} min={0} set={(n) => upd((x) => { x.pg.temp = n; })} /></Etiqueta>
           {corregir && (
             <Modal titulo="Corregir PG máximos" onClose={() => setCorregir(false)}>
@@ -158,7 +159,7 @@ export function TabAtributos() {
 
       <div className="fila-3-tarjetas">
         <Seccion titulo="Iniciativa">
-          <button className="valor-grande tirable" onClick={() => tirarD20(L('Iniciativa', 'Инициатива'), conDados(iniciativa(p), dadosEquipo(p, 'iniciativa')), avisosTirada(p, 'prueba', 'DES'), (t) => upd((x) => { x.iniciativaActual = t; }), 'combate')}>{textoMod(conDados(iniciativa(p), dadosEquipo(p, 'iniciativa')))}</button>
+          <button className="valor-grande tirable" onClick={() => tirarD20(L('Iniciativa', 'Инициатива'), conDados(iniciativa(p), dadosEquipo(p, 'iniciativa')), avisosIniciativa(p), (t) => upd((x) => { x.iniciativaActual = t; }), 'combate')}>{textoMod(conDados(iniciativa(p), dadosEquipo(p, 'iniciativa')))}</button>
           {p.iniciativaActual !== null && <p className="nota centro">{L('En este combate', 'В этом бою')}: <strong>{p.iniciativaActual}</strong> <button className="btn enlace pequeno" onClick={() => upd((x) => { x.iniciativaActual = null; })}>✕</button></p>}
           <Etiqueta texto="Bonus extra"><Numero valor={p.bonusIniciativa} set={(n) => upd((x) => { x.bonusIniciativa = n; })} /></Etiqueta>
         </Seccion>
@@ -186,9 +187,11 @@ export function TabAtributos() {
               <span className="pies">{L('pies', 'фт')}{ajusteVel(p.velocidad.andando, 1)}</span></li>
             <li><span>{L('Corriendo', 'Бегом')}</span><Numero valor={p.velocidad.corriendo} min={0} set={(n) => upd((x) => { x.velocidad.corriendo = n; })} ancho={64} />
               <span className="pies">{L('pies', 'фт')}{ajusteVel(p.velocidad.corriendo, 2)}</span></li>
-            <li><span>{L('Trepando', 'Лазая')}</span><Texto valor={p.velocidad.trepando} set={(s) => upd((x) => { x.velocidad.trepando = s; })} /></li>
-            <li><span>{L('Nadando', 'Плавая')}</span><Texto valor={p.velocidad.nadando} set={(s) => upd((x) => { x.velocidad.nadando = s; })} /></li>
-            <li><span>{L('Volando', 'Летая')}</span><Texto valor={p.velocidad.volando} set={(s) => upd((x) => { x.velocidad.volando = s; })} /></li>
+            {([['trepando', 'trepar', L('Trepando', 'Лазая')], ['nadando', 'nadar', L('Nadando', 'Плавая')], ['volando', 'volar', L('Volando', 'Летая')]] as const).map(([campo, k, txt]) => {
+              // Si un rasgo da esta velocidad (Trepadores, Anfibio, Alas…) y no has escrito otra, sale sola.
+              const auto = velocidadRasgo(p, k);
+              return <li key={campo}><span>{txt}</span><Texto valor={p.velocidad[campo]} placeholder={auto ? `${auto.pies} ${L('pies', 'фт')} (${auto.origen})` : ''} set={(s) => upd((x) => { x.velocidad[campo] = s; })} /></li>;
+            })}
           </ul>
           {pen < 0 && <p className="aviso-carga">{L('Mochila sobrecargada', 'Рюкзак перегружен')} ({carga.usados}/{carga.libres} {L('espacios', 'ячеек')}). {carga.efecto}</p>}
         </Seccion>

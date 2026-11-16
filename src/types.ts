@@ -173,6 +173,8 @@ export interface Personaje {
   caV2?: boolean;
   /** PG de nivel 1 ya con el +1 de la mesa. */
   pgV2?: boolean;
+  /** PG máximos extra ya sumados por dotes/rasgos (Duro, Don de la fortaleza…), para sumar solo la diferencia. */
+  pgExtra?: number;
   bonusPercepcionPasiva: number;
   recursos: string;
   /** Usos gastados de cada recurso de clase (claves de src/recursos.ts); el descanso largo lo vacía. */

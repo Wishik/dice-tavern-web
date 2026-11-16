@@ -1,6 +1,6 @@
-import { ajustarMulticlase, nivelEn, nivelTotal } from './multiclase';
+import { ajustarMulticlase, clasesDe, nivelEn, nivelTotal } from './multiclase';
 import type { Atributo, Item, Moneda, Personaje } from './types';
-import { bonoAtaqueArma, bonoAtaqueConjuro, bonoCdConjuro, bonoFuerzaCarga, bonoHabilidad, bonoPrueba, bonoSalvacion, bonosCA, bonosActivos, lineasBonos } from './bonos';
+import { ventajaIniciativa, ventajasRasgos, bonoAtaqueArma, bonoAtaqueConjuro, bonoCdConjuro, bonoFuerzaCarga, bonoHabilidad, bonoPrueba, bonoSalvacion, bonosCA, bonosActivos, lineasBonos } from './bonos';
 import { NOMBRE_ATRIBUTO } from './types';
 import { bonoPropioArma, bonosEquipoEn, sumaEquipo } from './bonosObjetos';
 import { L, T, RU_NOMBRE_ATRIBUTO } from './i18n';
@@ -11,8 +11,19 @@ import { tr } from './ru';
 export function car(p: Personaje, a: Atributo): number {
   const extra = (p.efectosCar ?? []).filter((e) => e.atributo === a).reduce((s, e) => s + e.valor, 0)
     + (p.bonosExtra ?? []).filter((b) => b.donde === a).reduce((s, b) => s + (b.valor || 0), 0)
-    + sumaEquipo(p, a);
+    + sumaEquipo(p, a) + aumentoClase(p, a).reduce((s, x) => s + x.valor, 0);
   return extra ? Math.max(1, Math.min(30, p.caracteristicas[a] + extra)) : p.caracteristicas[a];
+}
+/** Aumentos de nivel 20: Campeón primordial (bárbaro, FUE y CON +4) y Cuerpo y mente (monje, DES y SAB +4), hasta 25. */
+export function aumentoClase(p: Personaje, a: Atributo): LineaDesglose[] {
+  const r: [string, string, number, Atributo[]][] = [['Bárbaro', 'Campeón primordial', 20, ['FUE', 'CON']], ['Monje', 'Cuerpo y mente', 20, ['DES', 'SAB']]];
+  const out: LineaDesglose[] = [];
+  for (const [clase, rasgo, nv, atrs] of r) {
+    if (!atrs.includes(a) || nivelEn(p, clase) < nv) continue;
+    const v = Math.max(0, Math.min(4, 25 - (p.caracteristicas[a] ?? 10)));
+    if (v) out.push({ texto: rasgo, valor: v });
+  }
+  return out;
 }
 /** Una línea del desglose: de dónde sale cada número. `id` = bonus puesto a mano (se puede cambiar o quitar). */
 export interface LineaDesglose { texto: string; valor: number; id?: string; nota?: string; base?: boolean }
@@ -22,6 +33,7 @@ export function desgloseCar(p: Personaje, a: Atributo): LineaDesglose[] {
     { texto: L('Puntuación base', 'Базовое значение'), valor: p.caracteristicas[a], base: true },
     ...(p.bonosExtra ?? []).filter((b) => b.donde === a).map((b) => ({ texto: b.origen || L('Bonus', 'Бонус'), valor: b.valor, id: b.id })),
     ...lineasEquipo(p, a),
+    ...aumentoClase(p, a),
     ...(p.efectosCar ?? []).filter((e) => e.atributo === a).map((e) => ({ texto: L('Máster', 'Мастер'), valor: e.valor, nota: e.nota })),
   ];
 }
@@ -94,6 +106,7 @@ export function desgloseHabilidad(p: Personaje, id: string): LineaDesglose[] {
   }
   if (h.comp) l.push({ texto: L('Competencia', 'Владение'), valor: bc });
   if (h.pericia) l.push({ texto: L('Pericia', 'Компетентность'), valor: bc });
+  if (!comp && !h.comp && nivelEn(p, 'Bardo') >= 2) l.push({ texto: L('Aprendiz de muchos (½ competencia)', 'Мастер на все руки (½ владения)'), valor: Math.floor(bc / 2) });
   l.push(...lineasBonos(p, (b) => b.habilidad?.[id]), ...lineasBonos(p, (b) => b.prueba?.[def.atributo]));
   if (h.bonus) l.push({ texto: L('Ajuste', 'Поправка'), valor: h.bonus });
   return [...l, ...lineasMano(p, `hab:${id}`)];
@@ -107,13 +120,33 @@ export function valorSalvacion(p: Personaje, a: Atributo): number {
 export function desgloseSalvacion(p: Personaje, a: Atributo): LineaDesglose[] {
   const s = p.salvaciones[a];
   const l: LineaDesglose[] = [{ texto: L(`Modificador de ${NOMBRE_ATRIBUTO[a]}`, `Модификатор: ${nombreAtr(a)}`), valor: modificador(car(p, a)) }];
+  const auto = compSalvacionAuto(p, a);
   if (s.comp) l.push({ texto: L('Competencia', 'Владение'), valor: bonoCompetencia(nivelTotal(p)) });
+  else if (auto) l.push({ texto: L(`Competencia (${auto})`, `Владение (${auto})`), valor: bonoCompetencia(nivelTotal(p)) });
   l.push(...lineasBonos(p, (b) => b.salvacion?.[a]));
+  if (nivelEn(p, 'Paladín') >= 6) l.push({ texto: L('Aura de protección', 'Аура защиты'), valor: Math.max(1, modificador(car(p, 'CAR'))) });
   if (s.bonus) l.push({ texto: L('Ajuste', 'Поправка'), valor: s.bonus });
   return [...l, ...lineasMano(p, `salv:${a}`)];
 }
 
-export const iniciativa = (p: Personaje) => valorPrueba(p, 'DES') + (p.bonusIniciativa || 0) + sumaEquipo(p, 'iniciativa');
+/** Competencia en salvaciones que dan rasgos de clase (Mente escurridiza: SAB y CAR). */
+export function compSalvacionAuto(p: Personaje, a: Atributo): string | null {
+  if (nivelEn(p, 'Pícaro') >= 15 && (a === 'SAB' || a === 'CAR')) return L('Mente escurridiza', 'Скользкий разум');
+  return null;
+}
+export const tieneDote = (p: Personaje, n: string) => p.dotes.some((d) => d.nombre === n);
+export const iniciativa = (p: Personaje) => valorPrueba(p, 'DES') + (p.bonusIniciativa || 0) + sumaEquipo(p, 'iniciativa') + (tieneDote(p, 'Alerta') ? bonoCompetencia(nivelTotal(p)) : 0);
+/** Avisos al tirar iniciativa (los de una prueba de Destreza + ventaja de Instinto salvaje). */
+export const avisosIniciativa = (p: Personaje) => [...avisosTirada(p, 'prueba', 'DES'), ...ventajaIniciativa(p).map((o) => L(`Ventaja por ${o}.`, `Преимущество: ${o}.`))];
+/** PG máximos extra que dan dotes y rasgos (Duro, Don de la fortaleza, Resistencia dracónica). */
+export function pgExtra(p: Personaje): { texto: string; valor: number }[] {
+  const out: { texto: string; valor: number }[] = [];
+  if (tieneDote(p, 'Duro')) out.push({ texto: 'Duro', valor: 2 * nivelTotal(p) });
+  if (tieneDote(p, 'Don de la fortaleza')) out.push({ texto: 'Don de la fortaleza', valor: 40 });
+  const hech = clasesDe(p).find((c) => c.clase === 'Hechicero');
+  if (hech && hech.nivel >= 3 && /drac[oó]nica/i.test(hech.subclase)) out.push({ texto: 'Resistencia dracónica', valor: hech.nivel });
+  return out;
+}
 export const percepcionPasiva = (p: Personaje) => 10 + valorHabilidad(p, 'percepcion') + (p.bonusPercepcionPasiva || 0);
 
 export function cdConjuros(p: Personaje): number | null {
@@ -375,8 +408,9 @@ export function calcularCA(p: Personaje): DesgloseCA {
     lineas.push({ texto: arm.nombre, valor: n, base: true });
     if (/Destreza/i.test(f)) {
       const tope = f.match(/m[aá]x\.?\s*(\d+)/i);
-      const d = tope ? Math.min(desEf, parseInt(tope[1], 10)) : desEf;
-      lineas.push({ texto: tope && d < desEf ? `${DES} (${L('máx.', 'макс.')} ${tope[1]})` : DES, valor: d });
+      const max = tope ? Math.max(parseInt(tope[1], 10), tieneDote(p, 'Maestro en armaduras medias') ? 3 : 0) : 0;
+      const d = tope ? Math.min(desEf, max) : desEf;
+      lineas.push({ texto: tope && d < desEf ? `${DES} (${L('máx.', 'макс.')} ${max})` : DES, valor: d });
     }
     const mg = bonoMagicoArma(arm);
     if (mg) lineas.push({ texto: `${arm.nombre} (${L('mágica', 'магия')})`, valor: mg });
@@ -386,6 +420,7 @@ export function calcularCA(p: Personaje): DesgloseCA {
     lineas.push({ texto: L('Base', 'База'), valor: 10, base: true }, { texto: DES, valor: desEf });
     if (nivelEn(p, 'Bárbaro') > 0) lineas.push({ texto: L('Constitución (Defensa sin armadura)', 'Телосложение (защита без доспехов)'), valor: modificador(car(p, 'CON')) });
     else if (nivelEn(p, 'Monje') > 0 && !escudo) lineas.push({ texto: L('Sabiduría (Defensa sin armadura)', 'Мудрость (защита без доспехов)'), valor: modificador(car(p, 'SAB')) });
+    else if (pgExtra(p).some((x) => x.texto === 'Resistencia dracónica')) lineas.push({ texto: L('Carisma (Resistencia dracónica)', 'Харизма (драконья стойкость)'), valor: modificador(car(p, 'CAR')) });
   }
   for (const it of [p.equipo.manoHabil, p.equipo.manoTorpe]) {
     if (it?.tipo !== 'escudo') continue;
@@ -458,6 +493,7 @@ export function avisosTirada(p: Personaje, tipo: TipoTirada, atr: Atributo | nul
   else if (fisica && tramo === 1 && (tipo === 'salvacion' || tipo === 'habilidad')) out.push(L(`Desventaja: mochila sobrecargada (${carga.usados} espacios), TS y habilidades de Fuerza y Destreza.`, `Помеха: рюкзак перегружен (${carga.usados} ячеек), спасброски и навыки Силы и Ловкости.`));
   const ca = calcularCA(p);
   if (habilidad === 'sigilo' && ca.sigiloDesventaja.length) out.push(L(`Desventaja en Sigilo por ${ca.sigiloDesventaja.join(' y ')}.`, `Помеха на Скрытность из-за: ${ca.sigiloDesventaja.join(', ')}.`));
+  if (tipo === 'salvacion' || tipo === 'habilidad') for (const o of ventajasRasgos(p, tipo, atr, habilidad)) out.push(L(`Ventaja por ${o}.`, `Преимущество: ${o}.`));
   if (ca.fuerzaMinima && car(p, 'FUE') < ca.fuerzaMinima && fisica) out.push(L(`Tu armadura pide Fuerza ${ca.fuerzaMinima}: pregunta al DM si te penaliza.`, `Доспех требует Силу ${ca.fuerzaMinima}: спроси мастера о штрафе.`));
   return out;
 }
