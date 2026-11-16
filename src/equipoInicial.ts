@@ -51,7 +51,7 @@ export function meterEquipoInicial(p: Personaje, descripcion: string, base: Obje
   });
   // Las flechas o virotes van dentro del arco o la ballesta (la munición se cuenta en el arma).
   for (const arma of items.filter(usaMunicion)) {
-    const mun = items.find((i) => i.tipo === 'consumible' && /flecha|virote|bala|dardo|proyectil/i.test(i.nombre));
+    const mun = items.find((i) => (i.tipo === 'consumible' || i.tipo === 'municion') && /flecha|virote|bala|dardo|proyectil/i.test(i.nombre));
     if (!mun) break;
     arma.municion = Math.min(MAX_MUNICION, mun.cantidad);
     items.splice(items.indexOf(mun), 1);

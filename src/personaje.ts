@@ -73,6 +73,12 @@ export function normalizar(p: Partial<Personaje>): Personaje {
 function migrarObjetos(out: Personaje) {
   const todos = [...out.mochila ?? [], ...out.cinturon?.items ?? [], ...Object.values(out.equipo ?? {})];
   for (const it of todos) if (it && it.tipo === 'pocion') it.tipo = 'consumible';
+  // La munición y sus contenedores tienen ya su categoría.
+  for (const it of todos) {
+    if (!it || it.tipo === 'arma') continue;
+    if (/^(flechas?|virotes?|balas?|dardos? de cerbatana|proyectiles? de honda)\b/i.test(it.nombre) && (it.tipo === 'consumible' || it.tipo === 'otro')) it.tipo = 'municion';
+    else if (/^(aljaba|estuche para virotes|bolsa para balas|estuche para dardos)/i.test(it.nombre) && it.tipo === 'otro') it.tipo = 'contenedorMunicion';
+  }
   for (const [r, t] of Object.entries(TIPO_RANURA) as [RanuraEquipo, NonNullable<(typeof TIPO_RANURA)[RanuraEquipo]>][]) {
     const it = out.equipo[r];
     if (it && it.tipo === 'otro') it.tipo = t;

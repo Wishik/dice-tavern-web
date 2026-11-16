@@ -66,6 +66,17 @@ export function poner(p: Personaje, it: Item, d: Destino) {
   if (d.zona === 'equipo') { const prev = p.equipo[d.r]; if (prev) p.mochila.push(prev); p.equipo[d.r] = it; }
   else (d.zona === 'mochila' ? p.mochila : p.cinturon.items).push(it);
 }
+/**
+ * Al equipar o pasar al cinturón solo se mueve una unidad del montón (la munición, lo que cabe en un espacio).
+ * A la mochila se mueve todo. Devuelve false si no cabe.
+ */
+function moverParte(p: Personaje, upd: (f: (x: Personaje) => void) => void, it: Item, desde: Lugar, d: Destino): boolean {
+  const parte = d.zona !== 'mochila' && it.cantidad > 1 ? (it.maxPorEspacio ? Math.min(it.cantidad, it.maxPorEspacio) : 1) : it.cantidad;
+  const todo = parte >= it.cantidad;
+  if (!cabe(p, { ...it, cantidad: parte }, d, todo ? desde : undefined)) return false;
+  upd((x) => { const y = sacarDe(desde)(x, parte); if (y) poner(x, y, d); });
+  return true;
+}
 const mochilaLlena = () => L(`La mochila está llena: como máximo ${MOCHILA_MAX} espacios. Saca, vende o tira algo antes.`, `Рюкзак полон: максимум ${MOCHILA_MAX} ячеек. Сначала вынь, продай или выброси что-нибудь.`);
 /** ¿Se puede hacer el movimiento sin pasar de 22 espacios en la mochila? Si no, avisa. */
 export function cabe(p: Personaje, it: Item, d: Destino, desde?: Lugar): boolean {
@@ -224,7 +235,7 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
   const [equipar, setEquipar] = useState(false);
   const [editar, setEditar] = useState(false);
   const set = (f: (it: Item) => void) => upd((x) => { const y = leer(x, lugar); if (y) f(y); });
-  const mover = (d: Destino) => { if (!cabe(p, it, d, lugar)) return; upd((x) => { const y = quitar(x, lugar); if (y) poner(x, y, d); }); onClose(); };
+  const mover = (d: Destino) => { if (moverParte(p, upd, it, lugar, d)) onClose(); };
   const usable = it.tipo === 'pocion' || it.tipo === 'consumible';
   const [vender, setVender] = useState(false);
   const [dejar, setDejar] = useState(false);
@@ -446,7 +457,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
         <>
           <h4>{L('De tu inventario', 'Из инвентаря')}</h4>
           <div className="lista-opciones">
-            {sueltos.map(({ it, l }) => <button key={it.id} className="btn" onClick={() => { if (!cabe(p, it, destino, l)) return; upd((x) => { const y = quitar(x, l); if (y) poner(x, y, destino); }); onClose(); }}>{td(it.nombre)} <small>({l.zona === 'mochila' ? L('mochila', 'рюкзак') : L('cinturón', 'пояс')})</small></button>)}
+            {sueltos.map(({ it, l }) => <button key={it.id} className="btn" onClick={() => { if (moverParte(p, upd, it, l, destino)) onClose(); }}>{td(it.nombre)} <small>({l.zona === 'mochila' ? L('mochila', 'рюкзак') : L('cinturón', 'пояс')})</small></button>)}
           </div>
           <h4>{L('Nuevo objeto', 'Новый предмет')}</h4>
         </>
@@ -459,7 +470,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
           onElegir={(o) => { setNuevo(typeof o === 'string'); setBorrador(typeof o === 'string'
             ? conTipo({ id: uid(), nombre: o, descripcion: '', precio: '', cantidad: 1, tipo: 'otro' }, tipoFijo ?? 'otro')
             : o.item ? { ...structuredClone(o.item), id: uid(), cantidad: 1 }
-            : { id: uid(), nombre: o.nombre, descripcion: o.descripcion, precio: o.precio, cantidad: o.maxPorEspacio ? 20 : 1, tipo: o.tipo, detalles: o.detalles, maxPorEspacio: o.maxPorEspacio }); }}
+            : { id: uid(), nombre: o.nombre, descripcion: o.descripcion, precio: o.precio, cantidad: o.cantidad ?? (o.maxPorEspacio ? 20 : 1), tipo: o.tipo, detalles: o.detalles, maxPorEspacio: o.maxPorEspacio }); }}
         />
       )}
     </Modal>

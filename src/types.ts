@@ -38,13 +38,15 @@ export interface Item {
   danoExtra?: string;
 }
 
-export type TipoItem = 'yelmo' | 'amuleto' | 'armadura' | 'capa' | 'arma' | 'escudo' | 'brazalete' | 'guantes' | 'anillo' | 'cinturon' | 'botas' | 'consumible' | 'herramienta' | 'otro' | 'pocion' | 'monedas';
+export type TipoItem = 'yelmo' | 'amuleto' | 'armadura' | 'capa' | 'arma' | 'escudo' | 'brazalete' | 'guantes' | 'anillo' | 'cinturon' | 'botas' | 'municion' | 'contenedorMunicion' | 'consumible' | 'herramienta' | 'otro' | 'pocion' | 'monedas';
 /** Categorías que se pueden elegir al crear un objeto, en este orden. */
 export const CATEGORIAS_ITEM: { id: TipoItem; nombre: string; ru: string }[] = [
   { id: 'yelmo', nombre: 'Yelmo', ru: 'Шлем' }, { id: 'amuleto', nombre: 'Amuleto', ru: 'Амулет' }, { id: 'armadura', nombre: 'Armadura', ru: 'Доспех' },
   { id: 'capa', nombre: 'Capa', ru: 'Плащ' }, { id: 'arma', nombre: 'Arma', ru: 'Оружие' }, { id: 'escudo', nombre: 'Escudo', ru: 'Щит' },
   { id: 'brazalete', nombre: 'Brazalete', ru: 'Браслет' }, { id: 'guantes', nombre: 'Guantes', ru: 'Перчатки' }, { id: 'anillo', nombre: 'Anillo', ru: 'Кольцо' },
-  { id: 'cinturon', nombre: 'Cinturón', ru: 'Пояс' }, { id: 'botas', nombre: 'Botas', ru: 'Сапоги' }, { id: 'consumible', nombre: 'Consumible', ru: 'Расходник' },
+  { id: 'cinturon', nombre: 'Cinturón', ru: 'Пояс' }, { id: 'botas', nombre: 'Botas', ru: 'Сапоги' },
+  { id: 'municion', nombre: 'Munición', ru: 'Боеприпасы' }, { id: 'contenedorMunicion', nombre: 'Contenedor de munición', ru: 'Контейнер для боеприпасов' },
+  { id: 'consumible', nombre: 'Consumible', ru: 'Расходник' },
   { id: 'herramienta', nombre: 'Herramienta', ru: 'Инструмент' }, { id: 'otro', nombre: 'Otro', ru: 'Другое' },
 ];
 /** Una mejora de un objeto. `donde`: 'CA', 'ataque', 'dano', 'ataqueConjuro', 'cdConjuro', 'iniciativa', 'velocidad', atributo ('FUE'…), 'salv:FUE' / 'salv:todas', 'hab:sigilo'. */
