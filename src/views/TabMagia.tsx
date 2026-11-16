@@ -1,11 +1,12 @@
 import { Fragment, useState } from 'react';
+import { dadosEquipo } from '../bonosObjetos';
 import { useFicha } from './Ficha';
 import { BotonAnadir, Buscador, Check, Etiqueta, Modal, PuntoRojo, Seccion, Texto, TextoLargo } from '../ui';
 import { Contador, useDados } from '../dice';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo } from '../types';
 import { useDatos, type Conjuro } from '../data';
 import type { ConjuroPersonaje } from '../types';
-import { CARACTERISTICA_CONJUROS, conSigno, dadosConjuro, mejoraCalculada, mejoraNivelSuperior, multiplicadorTruco } from '../rules';
+import { CARACTERISTICA_CONJUROS, conDados, conSigno, textoMod, dadosConjuro, mejoraCalculada, mejoraNivelSuperior, multiplicadorTruco } from '../rules';
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
 import { esMulticlase, nivelEn } from '../multiclase';
 import { claseDeConjuro, type MagiaClase } from '../avisos';
@@ -92,7 +93,7 @@ export function TabMagia() {
           </select>
         </Etiqueta>
         <div className="valores-conjuro">
-          <div><small>{L('Ataque', 'Атака')}</small>{at !== null ? <button className="lt-valor" onClick={() => tirarD20(L('Ataque de conjuro', 'Атака заклинанием'), at, [], undefined, 'combate')}>{conSigno(at)}</button> : <strong>—</strong>}</div>
+          <div><small>{L('Ataque', 'Атака')}</small>{at !== null ? <button className="lt-valor" onClick={() => tirarD20(L('Ataque de conjuro', 'Атака заклинанием'), conDados(at, dadosEquipo(p, 'ataqueConjuro')), [], undefined, 'combate')}>{textoMod(conDados(at, dadosEquipo(p, 'ataqueConjuro')))}</button> : <strong>—</strong>}</div>
           <div><small>{L('CD', 'Сл')}</small><strong>{cd ?? '—'}</strong></div>
         </div>
       </div>
@@ -393,7 +394,7 @@ function Lanzar({ texto: completo, nivel, nombre, atr }: { texto: string; nivel:
       {hayTiradas && at === null && dados.length === 0
         ? <p className="nota">{L('Para lanzar con ataque, elige la «Característica de conjuro» de su grupo en la lista.', 'Чтобы атаковать заклинанием, выбери заклинательную характеристику его группы в списке.')}</p>
         : <div className="fila-botones">
-            {at !== null && pideAtaque && <button className="btn primario" onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${nombre}`, at, [], undefined, 'combate')}>🎲 {L('Ataque', 'Атака')} {conSigno(at)}{proy ? ` (${L('uno por', 'по одной на')} ${proy.nombre.replace(/s$/, '')} · ×${proy.n})` : ''}</button>}
+            {at !== null && pideAtaque && <button className="btn primario" onClick={() => tirarD20(`${L('Ataque', 'Атака')}: ${nombre}`, conDados(at, dadosEquipo(p, 'ataqueConjuro')), [], undefined, 'combate')}>🎲 {L('Ataque', 'Атака')} {textoMod(conDados(at, dadosEquipo(p, 'ataqueConjuro')))}{proy ? ` (${L('uno por', 'по одной на')} ${proy.nombre.replace(/s$/, '')} · ×${proy.n})` : ''}</button>}
             {cd !== null && pideSalvacion && <span className="cd-chip">{L('El objetivo salva contra CD', 'Цель делает спасбросок, Сл')} <strong>{cd}</strong></span>}
             {dados.map((d, i) => <button key={d} className="btn" onClick={() => tirar(`${nombre}${nivel > 0 ? ` (${L('nivel', 'ур.')} ${espacio})` : ''} (${d})`, d, 'normal', 'combate')}>🎲 {i === 0 && nivel > 0 ? `${cura && !pideAtaque && !pideSalvacion ? L('Curación', 'Лечение') : L('Daño', 'Урон')} ${L('a nivel', 'на ур.')} ${espacio}${proy ? (pideAtaque ? ` (${L('por', 'за')} ${proy.nombre.replace(/s$/, '')})` : ` (${proy.n} ${proy.nombre})`) : ''}: ` : ''}{d}</button>)}
             {uno && <button className="btn" onClick={() => tirar(`${nombre}: 1 ${proy!.nombre.replace(/s$/, '')}`, uno, 'normal', 'combate')}>🎲 {L(`1 ${proy!.nombre.replace(/s$/, '')}`, '1 шт.')}: {uno}</button>}

@@ -1,7 +1,8 @@
+import { dadosEquipo } from '../bonosObjetos';
 import { useFicha } from './Ficha';
 import { Check, PuntoRojo, Seccion } from '../ui';
 import { useDados } from '../dice';
-import { HABILIDADES, avisosTirada, bonosManoEn, conSigno, desgloseHabilidad, desgloseSalvacion, idHabilidad, valorHabilidad, valorSalvacion } from '../rules';
+import { HABILIDADES, avisosTirada, bonosManoEn, conDados, conSigno, textoMod, desgloseHabilidad, desgloseSalvacion, idHabilidad, valorHabilidad, valorSalvacion } from '../rules';
 import { ModalDesglose } from './Desglose';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo } from '../types';
 import { buscarClase } from '../avisos';
@@ -84,7 +85,7 @@ export function TabHabilidades() {
                 <Check valor={p.salvaciones[a].comp} set={(b) => upd((x) => { x.salvaciones[a].comp = b; })} titulo="Competencia" />
                 <span className="lt-nombre">{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}</span>
                 <BotonBonus donde={`salv:${a}`} />
-                <button className={`lt-valor ${bonosManoEn(p, `salv:${a}`).length ? 'con-bonus' : ''}`} onClick={() => tirarD20(L(`Salvación de ${NOMBRE_ATRIBUTO[a]}`, `Спасбросок: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}`), v, avisosTirada(p, 'salvacion', a), undefined, 'salvacion')}>{conSigno(v)}</button>
+                <button className={`lt-valor ${bonosManoEn(p, `salv:${a}`).length ? 'con-bonus' : ''}`} onClick={() => tirarD20(L(`Salvación de ${NOMBRE_ATRIBUTO[a]}`, `Спасбросок: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}`), conDados(v, dadosEquipo(p, `salv:${a}`)), avisosTirada(p, 'salvacion', a), undefined, 'salvacion')}>{textoMod(conDados(v, dadosEquipo(p, `salv:${a}`)))}</button>
               </li>
             );
           })}
@@ -134,7 +135,7 @@ function Grupo({ grupo, titulo, sugeridas }: { grupo: string; titulo: string; su
               <span className="lt-nombre">{T(RU_HABILIDADES, h.id) === h.id ? h.nombre : T(RU_HABILIDADES, h.id)} <small>({T(RU_ATRIBUTOS, h.atributo.slice(0, 3))})</small>{sugeridas.has(h.id) && !st.comp && !r.comp && <span className="sugerida">◆</span>}
                 </span>
               <BotonBonus donde={`hab:${h.id}`} />
-              <button className={`lt-valor ${bonosManoEn(p, `hab:${h.id}`).length ? 'con-bonus' : ''}`} onClick={() => tirarD20(T(RU_HABILIDADES, h.id) === h.id ? h.nombre : T(RU_HABILIDADES, h.id), v, [...r.notas, ...avisosTirada(p, 'habilidad', h.atributo, h.id)], undefined, 'habilidad')}>{conSigno(v)}</button>
+              <button className={`lt-valor ${bonosManoEn(p, `hab:${h.id}`).length ? 'con-bonus' : ''}`} onClick={() => tirarD20(T(RU_HABILIDADES, h.id) === h.id ? h.nombre : T(RU_HABILIDADES, h.id), conDados(v, dadosEquipo(p, `hab:${h.id}`)), [...r.notas, ...avisosTirada(p, 'habilidad', h.atributo, h.id)], undefined, 'habilidad')}>{textoMod(conDados(v, dadosEquipo(p, `hab:${h.id}`)))}</button>
             </li>
           );
         })}

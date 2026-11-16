@@ -1,11 +1,12 @@
 import { clasesDe, nivelTotal, textoClases } from '../multiclase';
+import { dadosEquipo } from '../bonosObjetos';
 import { ListaEfectosCar } from '../efectosCar';
 import { Bloq, useFicha } from './Ficha';
 import { ChipsEstados } from '../estados';
 import { useState } from 'react';
 import { BotonAnadir, Etiqueta, Modal, Numero, Seccion, Texto } from '../ui';
 import { Contador, useDados } from '../dice';
-import { car, CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetencia, calcularCA, conSigno, desgloseCar, uid, type LineaDesglose, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto, valorPrueba } from '../rules';
+import { car, CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosTirada, bonoCompetencia, calcularCA, conDados, conSigno, textoMod, desgloseCar, uid, type LineaDesglose, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto, valorPrueba } from '../rules';
 import { bonoVelocidad } from '../bonos';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo, type RecursoExtra } from '../types';
 import { buscarClase } from '../avisos';
@@ -157,7 +158,7 @@ export function TabAtributos() {
 
       <div className="fila-3-tarjetas">
         <Seccion titulo="Iniciativa">
-          <button className="valor-grande tirable" onClick={() => tirarD20(L('Iniciativa', 'Инициатива'), iniciativa(p), avisosTirada(p, 'prueba', 'DES'), (t) => upd((x) => { x.iniciativaActual = t; }), 'combate')}>{conSigno(iniciativa(p))}</button>
+          <button className="valor-grande tirable" onClick={() => tirarD20(L('Iniciativa', 'Инициатива'), conDados(iniciativa(p), dadosEquipo(p, 'iniciativa')), avisosTirada(p, 'prueba', 'DES'), (t) => upd((x) => { x.iniciativaActual = t; }), 'combate')}>{textoMod(conDados(iniciativa(p), dadosEquipo(p, 'iniciativa')))}</button>
           {p.iniciativaActual !== null && <p className="nota centro">{L('En este combate', 'В этом бою')}: <strong>{p.iniciativaActual}</strong> <button className="btn enlace pequeno" onClick={() => upd((x) => { x.iniciativaActual = null; })}>✕</button></p>}
           <Etiqueta texto="Bonus extra"><Numero valor={p.bonusIniciativa} set={(n) => upd((x) => { x.bonusIniciativa = n; })} /></Etiqueta>
         </Seccion>

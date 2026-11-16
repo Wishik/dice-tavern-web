@@ -28,6 +28,9 @@ export function desgloseCar(p: Personaje, a: Atributo): LineaDesglose[] {
 
 export const modificador = (valor: number) => Math.floor((valor - 10) / 2);
 export const conSigno = (n: number) => (n >= 0 ? `+${n}` : `${n}`);
+/** Bonificador con dados de objetos: 3 y ['1d4'] → «+3+1d4» (para tirar y mostrar); sin dados, el número. */
+export const conDados = (n: number, dados: string[]): number | string => (dados.length ? `${conSigno(n)}${dados.map((d) => `+${d}`).join('')}` : n);
+export const textoMod = (m: number | string) => (typeof m === 'number' ? conSigno(m) : m.replace(/\+/g, ' +').replace(/-/g, ' -').trim());
 
 /** Bonificador por competencia según nivel (1-4: +2, 5-8: +3, 9-12: +4, 13-16: +5, 17+: +6). */
 export const bonoCompetencia = (nivel: number) => 2 + Math.floor((Math.max(1, Math.min(20, nivel)) - 1) / 4);

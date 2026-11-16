@@ -46,7 +46,8 @@ export const CATEGORIAS_ITEM: { id: TipoItem; nombre: string; ru: string }[] = [
   { id: 'herramienta', nombre: 'Herramienta', ru: 'Инструмент' }, { id: 'otro', nombre: 'Otro', ru: 'Другое' },
 ];
 /** Una mejora de un objeto. `donde`: 'CA', 'ataque', 'dano', 'ataqueConjuro', 'cdConjuro', 'iniciativa', 'velocidad', atributo ('FUE'…), 'salv:FUE' / 'salv:todas', 'hab:sigilo'. */
-export interface BonoItem { donde: string; valor: number }
+/** `dado` (p. ej. «1d4»): en vez de un número fijo, se tira y se suma (entonces `valor` no cuenta). */
+export interface BonoItem { donde: string; valor: number; dado?: string }
 
 export type RanuraEquipo = 'yelmo' | 'amuleto' | 'armadura' | 'capa' | 'brazalete' | 'guantes' | 'anillo1' | 'anillo2' | 'cinto' | 'botas' | 'manoHabil' | 'manoTorpe';
 export const RANURAS_EQUIPO: { id: RanuraEquipo; nombre: string; icono: string }[] = [

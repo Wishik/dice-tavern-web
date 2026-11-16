@@ -1,8 +1,8 @@
 import { Etiqueta } from '../ui';
 import { L } from '../i18n';
-import type { BonoItem, Item, TamanoCinturon } from '../types';
+import type { Item, TamanoCinturon } from '../types';
 import { CINTURON_ESPACIOS, HABILIDADES } from '../rules';
-import { opcionesBono } from '../bonosObjetos';
+import { DADOS_BONO, opcionesBono, soloFijo } from '../bonosObjetos';
 import { tr } from '../ru';
 
 /**
@@ -43,7 +43,6 @@ export function EditorBonos({ it, set }: { it: Item; set: (f: (y: Item) => void)
   const opciones = opcionesBono(HABILIDADES.map((h) => ({ id: h.id, nombre: tr(h.nombre) })));
   const grupos = [...new Set(opciones.map((o) => o.grupo))];
   const bonos = it.bonos ?? [];
-  const cambiar = (i: number, b: Partial<BonoItem>) => set((y) => { const l = [...(y.bonos ?? [])]; l[i] = { ...l[i], ...b }; y.bonos = l; });
   const quitar = (i: number) => set((y) => { const l = (y.bonos ?? []).filter((_, k) => k !== i); if (l.length) y.bonos = l; else delete y.bonos; });
   const esArma = it.tipo === 'arma';
   return (
@@ -52,10 +51,22 @@ export function EditorBonos({ it, set }: { it: Item; set: (f: (y: Item) => void)
       {bonos.length === 0 && <p className="nota pequena">{L('Ninguna. Añade una si da algo: +1 a la CA, al ataque, al daño, a una característica, a una salvación, a una habilidad…', 'Ничего. Добавь, если предмет что-то даёт: +1 к КД, атаке, урону, характеристике, спасброску, навыку…')}</p>}
       {bonos.map((b, i) => (
         <div key={i} className="fila-bono">
-          <select className="campo valor-bono" value={b.valor} onChange={(e) => cambiar(i, { valor: +e.target.value })}>
-            {[-5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 10].map((v) => <option key={v} value={v}>{v > 0 ? `+${v}` : v}</option>)}
+          <select className="campo valor-bono" value={b.dado ? `d:${b.dado}` : b.valor} onChange={(e) => {
+            const v = e.target.value;
+            set((y) => { const l = [...(y.bonos ?? [])]; l[i] = v.startsWith('d:') ? { donde: l[i].donde, valor: 0, dado: v.slice(2) } : { donde: l[i].donde, valor: +v }; y.bonos = l; });
+          }}>
+            <optgroup label={L('Fijo', 'Число')}>
+              {[-5, -4, -3, -2, -1, 1, 2, 3, 4, 5, 6, 10].map((v) => <option key={v} value={v}>{v > 0 ? `+${v}` : v}</option>)}
+            </optgroup>
+            {!soloFijo(b.donde) && <optgroup label={L('Dados (se tiran y se suman)', 'Кости (бросаются и прибавляются)')}>
+              {DADOS_BONO.map((d) => <option key={d} value={`d:${d}`}>+{d}</option>)}
+            </optgroup>}
           </select>
-          <select className="campo" value={b.donde} onChange={(e) => cambiar(i, { donde: e.target.value })}>
+          <select className="campo" value={b.donde} onChange={(e) => {
+            const donde = e.target.value;
+            // La CA, la CD, la velocidad y las características no se tiran: si tenía dado, pasa a +1.
+            set((y) => { const l = [...(y.bonos ?? [])]; l[i] = soloFijo(donde) && l[i].dado ? { donde, valor: 1 } : { ...l[i], donde }; y.bonos = l; });
+          }}>
             {grupos.map((g) => (
               <optgroup key={g} label={tr(g)}>
                 {opciones.filter((o) => o.grupo === g).map((o) => <option key={o.id} value={o.id}>{L(o.es, o.ru)}</option>)}
@@ -68,7 +79,7 @@ export function EditorBonos({ it, set }: { it: Item; set: (f: (y: Item) => void)
       <button type="button" className="btn pequeno" onClick={() => set((y) => { y.bonos = [...(y.bonos ?? []), { donde: 'CA', valor: 1 }]; })}>+ {L('Añadir mejora', 'Добавить бонус')}</button>
       <p className="nota pequena">{esArma
         ? L('Cuenta mientras lo llevas equipado. El ataque y el daño de un arma solo valen para esa arma.', 'Действует, пока предмет надет. Атака и урон оружия — только для этого оружия.')
-        : L('Cuenta mientras lo llevas equipado (en su hueco del equipo o en una mano).', 'Действует, пока предмет надет (в своём слоте или в руке).')}</p>
+        : L('Cuenta mientras lo llevas equipado (en su hueco del equipo o en una mano).', 'Действует, пока предмет надет (в своём слоте или в руке).')}{' '}{L('Los dados (+1d4…) se tiran y se suman solos al ataque, al daño, a la salvación o a la habilidad; la CA, la CD, la velocidad y las características solo admiten números.', 'Кости (+1d4…) бросаются и прибавляются сами к атаке, урону, спасброску или навыку; КД, СЛ, скорость и характеристики — только числа.')}</p>
     </div>
   );
 }

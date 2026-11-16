@@ -67,3 +67,19 @@ describe('cinturón', () => {
     expect(p.equipo.yelmo?.tipo).toBe('yelmo');
   });
 });
+
+describe('mejoras con dados', () => {
+  it('los dados no suman al número y se tiran aparte', async () => {
+    const { dadosEquipo } = await import('../bonosObjetos');
+    const { conDados, textoMod, parseFormula } = await import('../rules');
+    const p = nuevoPersonaje();
+    const s0 = valorSalvacion(p, 'CON');
+    p.equipo.amuleto = item({ tipo: 'amuleto', bonos: [{ donde: 'salv:todas', valor: 0, dado: '1d4' }] });
+    expect(valorSalvacion(p, 'CON')).toBe(s0);
+    expect(dadosEquipo(p, 'salv:CON')).toEqual(['1d4']);
+    const m = conDados(2, ['1d4']);
+    expect(m).toBe('+2+1d4');
+    expect(textoMod(m)).toBe('+2 +1d4');
+    expect(parseFormula(`1d20${m}`)?.dados).toEqual([{ n: 1, caras: 20 }, { n: 1, caras: 4 }]);
+  });
+});

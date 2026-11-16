@@ -148,7 +148,7 @@ export function TabInventario() {
 /** «+1 CA, +2 Sigilo»: resumen de las mejoras de un objeto. */
 export function textoBonos(it: Item): string {
   const op = opcionesBono(HABILIDADES.map((h) => ({ id: h.id, nombre: tr(h.nombre) })));
-  return (it.bonos ?? []).map((b) => { const o = op.find((x) => x.id === b.donde); return `${b.valor > 0 ? '+' : ''}${b.valor} ${o ? L(o.es, o.ru) : b.donde}`; }).join(', ');
+  return (it.bonos ?? []).map((b) => { const o = op.find((x) => x.id === b.donde); return `${b.dado ? `+${b.dado}` : `${b.valor > 0 ? '+' : ''}${b.valor}`} ${o ? L(o.es, o.ru) : b.donde}`; }).join(', ');
 }
 const resumenItem = (it: Item) => <>
   {it.cantidad > 1 && <span className="cant"> ×{it.cantidad}</span>}
@@ -411,6 +411,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
         <Etiqueta texto="Nombre"><input className="campo" value={borrador.nombre} onChange={(e) => setBorrador({ ...borrador, nombre: e.target.value })} /></Etiqueta>
         <Etiqueta texto="Cantidad"><Numero valor={borrador.cantidad} min={1} set={(n) => setBorrador({ ...borrador, cantidad: n })} /></Etiqueta>
         <Etiqueta texto="Precio (si lo sabes)"><input className="campo" value={borrador.precio} placeholder="p. ej. 25po" onChange={(e) => setBorrador({ ...borrador, precio: e.target.value })} /></Etiqueta>
+        <Etiqueta texto="Máx. por espacio"><input className="campo" inputMode="numeric" value={borrador.maxPorEspacio ?? ''} placeholder="sin límite" onChange={(e) => { const n = parseInt(e.target.value, 10); setBorrador({ ...borrador, maxPorEspacio: isNaN(n) || n < 1 ? undefined : n }); }} /></Etiqueta>
         <SelectorTipo valor={borrador.tipo} fija={!!tipoFijo} set={(t) => setBorrador(conTipo(borrador, t))} />
       </div>
       <EditorObjeto it={borrador} set={(f) => setBorrador((b) => { if (!b) return b; const y = structuredClone(b); f(y); return y; })} />

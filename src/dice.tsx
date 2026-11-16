@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { conSigno, parseFormula } from './rules';
+import { conSigno, parseFormula, textoMod } from './rules';
 import { L } from './i18n';
 import { registrarTirada } from './tiradasPartida';
 
@@ -26,7 +26,7 @@ export const escucharTiradas = (f: (t: Tirada) => void) => { oyentes.add(f); ret
 interface Ctx {
   tirar: (etiqueta: string, formula: string, modo?: Modo, tipo?: TipoTirada) => Tirada | null;
   /** `avisos`: motivos de ventaja/desventaja que se muestran antes de tirar. */
-  tirarD20: (etiqueta: string, mod: number, avisos?: string[], alTirar?: (total: number) => void, tipo?: TipoTirada) => void;
+  tirarD20: (etiqueta: string, mod: number | string, avisos?: string[], alTirar?: (total: number) => void, tipo?: TipoTirada) => void;
   historial: Tirada[];
   limpiar: () => void;
 }
@@ -39,7 +39,7 @@ let contador = 0;
 export function DiceProvider({ children }: { children: ReactNode }) {
   const [historial, setHistorial] = useState<Tirada[]>([]);
   const [actual, setActual] = useState<Tirada | null>(null);
-  const [pendiente, setPendiente] = useState<{ etiqueta: string; mod: number; avisos: string[]; alTirar?: (total: number) => void; tipo?: TipoTirada } | null>(null);
+  const [pendiente, setPendiente] = useState<{ etiqueta: string; mod: number | string; avisos: string[]; alTirar?: (total: number) => void; tipo?: TipoTirada } | null>(null);
 
   const tirar = useCallback((etiqueta: string, formula: string, modo: Modo = 'normal', tipo?: TipoTirada) => {
     const f = parseFormula(formula);
@@ -64,7 +64,7 @@ export function DiceProvider({ children }: { children: ReactNode }) {
     return t;
   }, []);
 
-  const tirarD20 = useCallback((etiqueta: string, mod: number, avisos: string[] = [], alTirar?: (total: number) => void, tipo?: TipoTirada) => setPendiente({ etiqueta, mod, avisos, alTirar, tipo }), []);
+  const tirarD20 = useCallback((etiqueta: string, mod: number | string, avisos: string[] = [], alTirar?: (total: number) => void, tipo?: TipoTirada) => setPendiente({ etiqueta, mod, avisos, alTirar, tipo }), []);
 
   return (
     <DiceCtx.Provider value={{ tirar, tirarD20, historial, limpiar: () => setHistorial([]) }}>
@@ -73,12 +73,12 @@ export function DiceProvider({ children }: { children: ReactNode }) {
         <div className="modal-fondo" onClick={() => setPendiente(null)}>
           <div className="modal elegir-modo" onClick={(e) => e.stopPropagation()}>
             <h3>{pendiente.etiqueta}</h3>
-            <p className="formula-grande">1d20 {conSigno(pendiente.mod)}</p>
+            <p className="formula-grande">1d20 {textoMod(pendiente.mod)}</p>
             {pendiente.avisos.map((a, i) => <p key={i} className="aviso-tirada">⚠️ {a}</p>)}
             <div className="fila-botones">
               {(['desventaja', 'normal', 'ventaja'] as Modo[]).map((m) => (
                 <button key={m} className={`${m === 'normal' ? 'btn primario' : 'btn'}${m !== 'normal' && pendiente.avisos.some((a) => (m === 'ventaja' ? /^(ventaja|преимущество)/i : /^(desventaja|помеха)/i).test(a)) ? ' sugerido' : ''}`}
-                  onClick={() => { const t = tirar(pendiente.etiqueta, `1d20${conSigno(pendiente.mod)}`, m, pendiente.tipo); if (t) pendiente.alTirar?.(t.total); setPendiente(null); }}>
+                  onClick={() => { const t = tirar(pendiente.etiqueta, `1d20${typeof pendiente.mod === 'number' ? conSigno(pendiente.mod) : pendiente.mod}`, m, pendiente.tipo); if (t) pendiente.alTirar?.(t.total); setPendiente(null); }}>
                   {m === 'normal' ? L('Tirar', 'Бросить') : m === 'ventaja' ? L('Ventaja', 'Преимущество') : L('Desventaja', 'Помеха')}
                 </button>
               ))}

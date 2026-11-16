@@ -1,8 +1,9 @@
 import { useState } from 'react';
+import { dadosEquipo, dadosPropioArma } from '../bonosObjetos';
 import { useFicha } from './Ficha';
 import { BotonAnadir, Etiqueta, Numero, Seccion, Texto } from '../ui';
 import { useDados } from '../dice';
-import { CARACTERISTICA_CONJUROS, MAX_MUNICION, esArmaMonje, ataqueConjuros, avisosTirada, bonoArma, cdConjuros, conSigno, parseFormula, usaMunicion } from '../rules';
+import { CARACTERISTICA_CONJUROS, MAX_MUNICION, conDados, textoMod, esArmaMonje, ataqueConjuros, avisosTirada, bonoArma, cdConjuros, conSigno, parseFormula, usaMunicion } from '../rules';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo, type Item, type Personaje } from '../types';
 import { L, T, RU_ATRIBUTOS, RU_CLASES, RU_NOMBRE_ATRIBUTO } from '../i18n';
 import { tr } from '../ru';
@@ -68,6 +69,9 @@ export function TabCombate() {
             const pots = disponibles.filter((pt) => aplicaArma(pt, it, atr, distancia));
             const act = pots.filter((pt) => activos.has(pt.id));
             const ataque = ataqueBase + bonoAt(act);
+            // Dados de objetos (+1d4 al ataque, +1d6 al daño…): los del arma y los de lo demás que llevas equipado.
+            const dadosAt = [...(natural ? [] : dadosPropioArma(it, 'ataque')), ...dadosEquipo(p, 'ataque')];
+            const dadosDano = [...(natural ? [] : dadosPropioArma(it, 'dano')), ...dadosEquipo(p, 'dano')].map((d) => `+${d}`);
             const danoTxt = it.detalles?.['Daño'] ?? '';
             // Monje con arma de monje: usa el dado de artes marciales si es mayor que el del arma.
             const artes = !natural && esArmaMonje(it) ? dadoArtesMarciales(p, clase) : null;
@@ -76,7 +80,7 @@ export function TabCombate() {
             const tipo = danoTxt.replace(/^\s*(\d+d\d+|\d+)\s*/i, '');
             const versatilArma = (it.detalles?.['Propiedades'] ?? '').match(/vers[aá]til\s*\((\d+d\d+)\)/i)?.[1];
             const versatil = versatilArma && dadoMayor(versatilArma, artes) !== dado ? dadoMayor(versatilArma, artes) : undefined;
-            const formula = (d: string) => sumarDano(/d/.test(d) ? `${d}${mod ? conSigno(mod) : ''}` : `${Math.max(1, parseInt(d, 10) + mod)}`, [...(extra ? [extra] : []), ...(it.danoExtra ? [`+${it.danoExtra.split(' ')[0]}`] : []), ...extrasDano(act)]);
+            const formula = (d: string) => sumarDano(/d/.test(d) ? `${d}${mod ? conSigno(mod) : ''}` : `${Math.max(1, parseInt(d, 10) + mod)}`, [...(extra ? [extra] : []), ...(it.danoExtra ? [`+${it.danoExtra.split(' ')[0]}`] : []), ...dadosDano, ...extrasDano(act)]);
             const tirarDano = (titulo: string, f: string) => { tirar(`${titulo}: ${td(it.nombre)}${nombres(act)}`, f, 'normal', 'combate'); upd((x) => apagarDeUnGolpe(x, act)); };
             const municion = usaMunicion(it);
             const sinMunicion = municion && !(it.municion ?? 0);
@@ -104,8 +108,8 @@ export function TabCombate() {
                 <div className="ataque-fila">
                   <button className="btn primario" disabled={sinMunicion} onClick={() => {
                     if (municion) upd((x) => { const y = ref(x); if (y) y.municion = Math.max(0, (y.municion ?? 0) - 1); });
-                    tirarD20(`${L('Ataque', 'Атака')}: ${td(it.nombre)}${nombres(act.filter((x) => x.ataque))}`, ataque, avisosTirada(p, 'ataque', atr), undefined, 'combate');
-                  }}>🎲 {L('Ataque', 'Атака')} {conSigno(ataque)}</button>
+                    tirarD20(`${L('Ataque', 'Атака')}: ${td(it.nombre)}${nombres(act.filter((x) => x.ataque))}`, conDados(ataque, dadosAt), avisosTirada(p, 'ataque', atr), undefined, 'combate');
+                  }}>🎲 {L('Ataque', 'Атака')} {textoMod(conDados(ataque, dadosAt))}</button>
                   {dado && <button className="btn" onClick={() => tirarDano(L('Daño', 'Урон'), formula(dado))}>🎲 {formula(dado)}</button>}
                   {versatil && <button className="btn" onClick={() => tirarDano(L('Daño a dos manos', 'Урон двумя руками'), formula(versatil))}>🎲 {L('A dos manos', 'Двумя руками')} {formula(versatil)}</button>}
                 </div>
