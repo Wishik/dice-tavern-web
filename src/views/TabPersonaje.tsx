@@ -1,3 +1,4 @@
+import { esRetratoRaza, imagenRaza, retratoRaza } from '../imagenesRazas';
 import { Fragment, useRef, useState } from 'react';
 import { Bloq, useFicha } from './Ficha';
 import { Etiqueta, Modal, Numero, PuntoRojo, Seccion, Texto, TextoLargo, comprimirFoto } from '../ui';
@@ -35,6 +36,8 @@ export function TabPersonaje() {
 
   const elegirRaza = (nombre: string) => upd((x) => {
     x.raza = nombre;
+    // Sin foto propia, el retrato de la raza hace de foto.
+    if (!x.foto || esRetratoRaza(x.foto)) x.foto = retratoRaza(nombre);
     const r = buscarRaza(razas, nombre);
     if (r) {
       x.tamano = r.tamano;
@@ -92,7 +95,10 @@ export function TabPersonaje() {
           </div>
         </div>
         {verExp && <ModalExperiencia onClose={() => setVerExp(false)} />}
-        {p.foto && <button className="btn enlace pequeno" onClick={() => upd((x) => { x.foto = ''; })}>{L('Quitar foto', 'Убрать фото')}</button>}
+        <div className="fila-botones-foto">
+          {p.foto && <button className="btn enlace pequeno" onClick={() => upd((x) => { x.foto = ''; })}>{L('Quitar foto', 'Убрать фото')}</button>}
+          {retratoRaza(p.raza) && p.foto !== retratoRaza(p.raza) && <button className="btn enlace pequeno" onClick={() => upd((x) => { x.foto = retratoRaza(x.raza); })}>🖼 {L(`Usar el retrato de ${p.raza}`, `Портрет расы: ${T(RU_RAZAS, p.raza)}`)}</button>}
+        </div>
         {errFoto && <p className="error">{errFoto}</p>}
         <div className="rejilla-campos">
           <Etiqueta texto="Raza">
@@ -177,6 +183,7 @@ export function TabPersonaje() {
 
       {info === 'raza' && raza && (
         <Modal titulo={T(RU_RAZAS, raza.nombre)} onClose={() => setInfo(null)}>
+          {imagenRaza(raza.nombre) && <img className="imagen-raza" src={imagenRaza(raza.nombre)} alt={raza.nombre} loading="lazy" />}
           <TextoLargo texto={raza.descripcion} />
           <dl className="lista-datos"><dt>{L('Características', 'Характеристики')}</dt><dd>{td(raza.caracteristicas)}</dd><dt>{L('Tamaño', 'Размер')}</dt><dd>{td(raza.tamano)}</dd><dt>{L('Velocidad', 'Скорость')}</dt><dd>{td(raza.velocidad)}</dd><dt>{L('Idiomas', 'Языки')}</dt><dd>{td(raza.idiomas)}</dd></dl>
           <h4>{L('Rasgos fijos', 'Постоянные особенности')}</h4>
