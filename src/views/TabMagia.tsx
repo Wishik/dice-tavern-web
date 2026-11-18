@@ -39,7 +39,8 @@ export function TabMagia() {
   // Multiclase: un bloque de trucos y conjuros por cada clase que lanza conjuros (o la principal si ninguna).
   const magia: MagiaClase[] = avisos.magia.length ? avisos.magia : [{ clase: p.clase, nivel: p.nivel, limiteTrucos: null, limiteConjuros: null, conjurosAbierto: false, limitePreparados: null, nivelMaxConjuro: null, nTrucos: 0, nConj: 0, nPrep: 0 }];
   const lanzadoras = magia.filter((m) => m.limiteTrucos !== null || m.limiteConjuros !== null);
-  const grupos = multi ? (lanzadoras.length ? [...lanzadoras, ...magia.filter((m) => !lanzadoras.includes(m) && (m.nTrucos || m.nConj))] : [magia[0]]) : [magia[0]];
+  // Solo las clases que lanzan conjuros a su nivel (el Pícaro no hasta Embaucador arcano 3), o las que ya tienen conjuros apuntados.
+  const grupos = [...lanzadoras, ...magia.filter((m) => !lanzadoras.includes(m) && (m.nTrucos || m.nConj))];
   const lleno = (que: string, n: number, nivel: number) => alert(L(`Ya tienes los ${n} ${que} que te tocan a nivel ${nivel}. Quita uno para cambiarlo, o añádelo en «Conjuros adicionales» si te lo da la raza, una dote o un objeto.`, `У тебя уже ${n} ${que === 'trucos' ? 'заговоров' : 'заклинаний'} — столько положено на ${nivel} уровне. Убери одно, чтобы заменить, или добавь в «Дополнительные заклинания», если его даёт раса, черта или предмет.`));
 
   const ListaConjuros = ({ lista, preparar, m }: { lista: { c: ConjuroPersonaje; idx: number }[]; preparar: boolean; m?: MagiaClase }) => (

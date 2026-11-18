@@ -3,7 +3,7 @@ import { aplicarClase, aplicarRaza, aplicarTrasfondo } from '../creacion';
 import { Fragment, useRef, useState } from 'react';
 import { Bloq, useFicha } from './Ficha';
 import { Etiqueta, Modal, Numero, PuntoRojo, Seccion, Texto, TextoLargo, comprimirFoto } from '../ui';
-import { listaIdiomas } from '../rules';
+import { listaIdiomas, HUECOS_IDIOMAS_ANTIGUOS, type Hueco } from '../rules';
 import { car, HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, aplicarConjuntoEstandar, aplicarExperiencia, caracteristicasSinTocar, huecoDisponible, idHabilidad, cambiarNivel, idiomasDeTexto, pgPorDefecto, pxParaSubir, RASGOS_IDIOMA } from '../rules';
 import { ATRIBUTOS, type Atributo, type Personaje } from '../types';
 import { buscarClase, buscarRaza } from '../avisos';
@@ -220,7 +220,7 @@ export function Alineamiento({ p, set }: { p: Personaje; set: (a: Personaje['ali
 }
 
 /** Idiomas: los de la raza salen puestos por defecto pero se pueden cambiar; los de clase o elecciones van fijos; luego los huecos del trasfondo e INT. */
-export function IdiomasEditor() {
+export function IdiomasEditor({ soloCreacion }: { soloCreacion?: boolean }) {
   const { p, upd, clases, razas } = useFicha();
   const clase = buscarClase(clases, p.clase);
   const raza = buscarRaza(razas, p.raza);
@@ -256,16 +256,16 @@ export function IdiomasEditor() {
       </ul>
     )}
     {fijos.length > 0 && (
-      <ul className="idiomas-fijos">
-        {fijos.map((i) => <li key={i.nombre} className="chip-idioma" title={i.origen}>{td(i.nombre)}<small>{i.origen}</small></li>)}
+      <ul className="huecos">
+        {fijos.map((i) => <li key={i.nombre}><span className="hueco-etq">{T(RU_CLASES, i.origen)}</span><div className="campo campo-fijo" title={L('Viene dado, no se cambia', 'Дано, не меняется')}>{td(i.nombre)}</div></li>)}
       </ul>
     )}
-    <Huecos huecos={HUECOS_IDIOMAS} valores={Object.fromEntries(Object.entries(p.idiomas).filter(([k]) => !k.startsWith('raza-')))} set={(k, v) => upd((x) => { x.idiomas[k] = v; })} p={p} opciones={todos.filter((n) => !deRaza.includes(n) && !fijos.some((i) => i.nombre === n))} />
+    {!soloCreacion && <Huecos huecos={[...HUECOS_IDIOMAS_ANTIGUOS.filter((h) => (p.idiomas[h.id] ?? '').trim()), ...HUECOS_IDIOMAS]} valores={Object.fromEntries(Object.entries(p.idiomas).filter(([k]) => !k.startsWith('raza-')))} set={(k, v) => upd((x) => { x.idiomas[k] = v; })} p={p} opciones={todos.filter((n) => !deRaza.includes(n) && !fijos.some((i) => i.nombre === n))} />}
     {raza && /elecci[oó]n/i.test(raza.idiomas) && !p.elecciones?.['raza:idioma']?.[0]?.trim() && <p className="nota">{L('Tu raza te da además un idioma a tu elección: escríbelo en «Por elegir».', 'Раса даёт ещё один язык на выбор: впиши его в «Нужно выбрать».')}</p>}
   </>;
 }
 
-function Huecos({ huecos, valores, set, p, opciones }: { huecos: readonly { id: string; etiqueta: string; atr: null | 'INT' | 'SAB'; min: number }[]; valores: Record<string, string>; set: (k: string, v: string) => void; p: Personaje; opciones?: string[] }) {
+export function Huecos({ huecos, valores, set, p, opciones }: { huecos: readonly Hueco[]; valores: Record<string, string>; set: (k: string, v: string) => void; p: Personaje; opciones?: string[] }) {
   return (
     <ul className="huecos">
       {huecos.map((h) => {
@@ -273,7 +273,7 @@ function Huecos({ huecos, valores, set, p, opciones }: { huecos: readonly { id: 
         const vacio = !(valores[h.id] ?? '').trim();
         return (
           <li key={h.id} className={disp ? '' : 'bloqueado'}>
-            <span className="hueco-etq">{tr(h.etiqueta)}{disp && vacio && h.atr && <PuntoRojo />}</span>
+            <span className="hueco-etq">{tr(h.etiqueta)}{disp && vacio && h.atr && !h.aprendido && <PuntoRojo />}</span>
             {opciones && disp ? (
               <select className="campo" value={valores[h.id] ?? ''} onChange={(e) => {
                 if (e.target.value !== '__otro') { set(h.id, e.target.value); return; }

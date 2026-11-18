@@ -8,21 +8,22 @@ import { buscarClase, buscarRaza } from '../avisos';
 import { aplicarClase, aplicarRaza, aplicarTrasfondo } from '../creacion';
 import { imagenRaza, retratoRaza } from '../imagenesRazas';
 import { CONJUNTO_ESTANDAR, HABILIDADES, RASGOS_RECOMENDADOS, car, conSigno, idHabilidad, modificador } from '../rules';
-import { anotarOrden } from '../limitesHabilidades';
+import { anotarOrden, limitesHabilidades } from '../limitesHabilidades';
 import { Elecciones } from './Elecciones';
-import { Alineamiento, IdiomasEditor } from './TabPersonaje';
+import { Alineamiento, Huecos, IdiomasEditor } from './TabPersonaje';
+import { HUECOS_OFICIOS, HUECOS_PROFESIONES } from '../rules';
 import { eleccionesDe, eleccionesPendientes } from '../elecciones';
 
 /**
  * Asistente para crear un personaje por partes (para gente nueva). Se puede saltar en cualquier momento:
  * todo lo que se elige aquí queda en la hoja normal. El paso va guardado en `p.asistente`.
  */
-const PASOS = ['bienvenida', 'raza', 'rasgos', 'clase', 'trasfondo', 'caracteristicas', 'habilidades', 'elecciones', 'idiomas', 'alineamiento', 'detalles', 'fin'] as const;
+const PASOS = ['bienvenida', 'raza', 'rasgos', 'clase', 'trasfondo', 'caracteristicas', 'habilidades', 'elecciones', 'idiomas', 'oficios', 'alineamiento', 'detalles', 'fin'] as const;
 type Paso = (typeof PASOS)[number];
 const TITULOS: Record<Paso, [string, string]> = {
   bienvenida: ['Crear tu personaje', 'Создание персонажа'], raza: ['1. Raza', '1. Раса'], rasgos: ['2. Rasgos de tu raza', '2. Особенности расы'],
   clase: ['3. Clase', '3. Класс'], trasfondo: ['4. Trasfondo', '4. Предыстория'], caracteristicas: ['5. Características', '5. Характеристики'],
-  habilidades: ['6. Habilidades', '6. Навыки'], elecciones: ['7. Equipo y elecciones', '7. Снаряжение и выборы'], idiomas: ['8. Idiomas', '8. Языки'], alineamiento: ['9. Alineamiento', '9. Мировоззрение'], detalles: ['10. Nombre y detalles', '10. Имя и детали'], fin: ['¡Listo!', 'Готово!'],
+  habilidades: ['6. Habilidades', '6. Навыки'], elecciones: ['7. Equipo y elecciones', '7. Снаряжение и выборы'], idiomas: ['8. Idiomas', '8. Языки'], oficios: ['9. Oficios y profesiones', '9. Ремёсла и профессии'], alineamiento: ['10. Alineamiento', '10. Мировоззрение'], detalles: ['11. Nombre y detalles', '11. Имя и детали'], fin: ['¡Listo!', 'Готово!'],
 };
 const nombreAtr = (a: Atributo) => T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a]);
 
@@ -84,6 +85,7 @@ function PasoActual({ paso }: { paso: Paso }) {
     case 'habilidades': return <PasoHabilidades />;
     case 'elecciones': return <PasoElecciones />;
     case 'idiomas': return <PasoIdiomas />;
+    case 'oficios': return <PasoOficios />;
     case 'alineamiento': return <PasoAlineamiento />;
     case 'detalles': return <PasoDetalles />;
     case 'fin': return <PasoFin />;
@@ -102,6 +104,7 @@ function PasoBienvenida() {
       <li>{L('Habilidades en las que eres bueno.', 'Навыки, в которых ты хорош.')}</li>
       <li>{L('Equipo y otras elecciones.', 'Снаряжение и прочие выборы.')}</li>
       <li>{L('Idiomas que hablas.', 'Языки, которые знаешь.')}</li>
+      <li>{L('Oficios y profesiones (si tu trasfondo te los da).', 'Ремёсла и профессии (если даёт предыстория).')}</li>
       <li>{L('Alineamiento: tu forma de ser.', 'Мировоззрение: твой характер.')}</li>
       <li>{L('Nombre y detalles.', 'Имя и детали.')}</li>
     </ol>
@@ -286,10 +289,22 @@ function PasoHabilidades() {
     const on = !x.habilidades[id].comp;
     if (on && elegidas.length >= n) return;
     x.habilidades[id].comp = on;
+    const quitaP = !on && x.habilidades[id].pericia;
+    if (!on) x.habilidades[id].pericia = false;
     const o = x.ordenHabilidades ?? { comp: [], pericia: [] };
-    x.ordenHabilidades = { comp: anotarOrden(o.comp, id, on), pericia: o.pericia };
+    x.ordenHabilidades = { comp: anotarOrden(o.comp, id, on), pericia: quitaP ? anotarOrden(o.pericia, id, false) : o.pericia };
   });
   const nombre = (id: string) => HABILIDADES.find((h) => h.id === id)?.nombre ?? id;
+  const nPer = limitesHabilidades(p, c, trasfondos).pericia;
+  const competentes = HABILIDADES.filter((h) => p.habilidades[h.id]?.comp).map((h) => h.id);
+  const pericias = competentes.filter((id) => p.habilidades[id]?.pericia);
+  const ponerPericia = (id: string) => upd((x) => {
+    const on = !x.habilidades[id].pericia;
+    if (on && pericias.length >= nPer) return;
+    x.habilidades[id].pericia = on;
+    const o = x.ordenHabilidades ?? { comp: [], pericia: [] };
+    x.ordenHabilidades = { comp: o.comp, pericia: anotarOrden(o.pericia, id, on) };
+  });
   return <>
     <Ayuda>{L('Ser competente en una habilidad suma tu bonificador de competencia (+2 a nivel 1) a esas tiradas.', 'Владение навыком добавляет бонус мастерства (+2 на 1 уровне) к этим броскам.')}</Ayuda>
     {deTras.size > 0 && <p>{L('Por tu trasfondo ya tienes', 'От предыстории уже есть')}: <strong>{[...deTras].map(nombre).join(', ')}</strong>.</p>}
@@ -301,6 +316,19 @@ function PasoHabilidades() {
           return <button key={id} className={`chip ${sel ? 'activo' : ''}`} disabled={!sel && elegidas.length >= n} onClick={() => poner(id)}>{td(nombre(id))}</button>;
         })}
       </div>
+    </>}
+    {nPer > 0 && <>
+      <h4>{L('Pericia', 'Компетентность')}</h4>
+      <Ayuda>{L('Pericia: en estas habilidades sumas el doble de tu bonificador de competencia. Se elige entre las habilidades en las que ya eres competente.', 'Компетентность: к этим навыкам прибавляется двойной бонус мастерства. Выбирается из навыков, которыми уже владеешь.')}</Ayuda>
+      <p>{L(`Elige ${nPer}`, `Выбери ${nPer}`)}: <span className="contador-eleccion">{pericias.length} / {nPer}</span></p>
+      {competentes.length === 0
+        ? <p className="nota">{L('Primero elige arriba tus habilidades.', 'Сначала выбери навыки выше.')}</p>
+        : <div className="chips">
+          {competentes.map((id) => {
+            const sel = !!p.habilidades[id]?.pericia;
+            return <button key={id} className={`chip ${sel ? 'activo' : ''}`} disabled={!sel && pericias.length >= nPer} onClick={() => ponerPericia(id)}>{td(nombre(id))}</button>;
+          })}
+        </div>}
     </>}
   </>;
 }
@@ -318,8 +346,21 @@ function PasoElecciones() {
 
 function PasoIdiomas() {
   return <>
-    <Ayuda>{L('Estos son los idiomas que hablas. Los de tu raza ya vienen puestos, pero puedes cambiarlos si tu personaje se crió en otro sitio. Tu trasfondo te da además dos idiomas a elegir.', 'Это языки, которые ты знаешь. Расовые уже стоят, но их можно поменять. Предыстория даёт ещё два языка на выбор.')}</Ayuda>
-    <div className="detalle-asistente"><IdiomasEditor /></div>
+    <Ayuda>{L('Estos son los idiomas que hablas. Los de tu raza ya vienen puestos, pero puedes cambiarlos si tu personaje se crió en otro sitio. Más adelante, jugando, podrás aprender otros según tu Inteligencia.', 'Это языки, которые ты знаешь. Расовые уже стоят, но их можно поменять. Позже в игре можно выучить другие — по Интеллекту.')}</Ayuda>
+    <div className="detalle-asistente"><IdiomasEditor soloCreacion /></div>
+  </>;
+}
+
+function PasoOficios() {
+  const { p, upd } = useFicha();
+  return <>
+    <Ayuda>{L('Solo si tu trasfondo te da un oficio (herrero, cocinero…) o una profesión (escriba, comerciante…). No es obligatorio: si no te da ninguno, déjalo vacío y sigue. Los demás se aprenden jugando.', 'Только если предыстория даёт ремесло (кузнец, повар…) или профессию (писарь, торговец…). Не обязательно: если нет — оставь пустым. Остальные учатся в игре.')}</Ayuda>
+    <div className="detalle-asistente">
+      <h4>{L('Oficio', 'Ремесло')}</h4>
+      <Huecos huecos={HUECOS_OFICIOS.filter((h) => !('aprendido' in h))} valores={p.oficios} set={(k, v) => upd((x) => { x.oficios[k] = v; })} p={p} />
+      <h4>{L('Profesión', 'Профессия')}</h4>
+      <Huecos huecos={HUECOS_PROFESIONES.filter((h) => !('aprendido' in h))} valores={p.profesiones} set={(k, v) => upd((x) => { x.profesiones[k] = v; })} p={p} />
+    </div>
   </>;
 }
 

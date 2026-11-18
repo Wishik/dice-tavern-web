@@ -256,32 +256,36 @@ export function convertir(m: Record<Moneda, number>, desde: Moneda, hacia: Moned
 }
 
 // ---------------------------------------------------------------- Idiomas, oficios, profesiones
+// Los huecos por característica se aprenden jugando (no son obligatorios al crear el personaje): sin punto rojo.
 export const HUECOS_IDIOMAS = [
+  { id: 'INT5', etiqueta: 'INT 5+ (aprendido)', atr: 'INT', min: 5, aprendido: true },
+  { id: 'INT10', etiqueta: 'INT 10+ (aprendido)', atr: 'INT', min: 10, aprendido: true },
+  { id: 'INT14', etiqueta: 'INT 14+ (aprendido)', atr: 'INT', min: 14, aprendido: true },
+  { id: 'INT17', etiqueta: 'INT 17+ (aprendido)', atr: 'INT', min: 17, aprendido: true },
+  { id: 'INT19', etiqueta: 'INT 19+ (aprendido)', atr: 'INT', min: 19, aprendido: true },
+] as const;
+/** Huecos de idioma «Trasfondo» de antes: solo se enseñan si ya tenían algo escrito. */
+export const HUECOS_IDIOMAS_ANTIGUOS = [
   { id: 'trasfondo-0', etiqueta: 'Trasfondo', atr: null, min: 0 },
   { id: 'trasfondo-1', etiqueta: 'Trasfondo', atr: null, min: 0 },
-  { id: 'INT5', etiqueta: 'INT 5+', atr: 'INT', min: 5 },
-  { id: 'INT10', etiqueta: 'INT 10+', atr: 'INT', min: 10 },
-  { id: 'INT14', etiqueta: 'INT 14+ (aprendido)', atr: 'INT', min: 14 },
-  { id: 'INT17', etiqueta: 'INT 17+ (aprendido)', atr: 'INT', min: 17 },
-  { id: 'INT19', etiqueta: 'INT 19+ (aprendido)', atr: 'INT', min: 19 },
 ] as const;
 export const HUECOS_OFICIOS = [
   { id: 'trasfondo', etiqueta: 'Trasfondo', atr: null, min: 0 },
-  { id: 'SAB5', etiqueta: 'SAB 5+', atr: 'SAB', min: 5 },
-  { id: 'SAB12', etiqueta: 'SAB 12+ (aprendido)', atr: 'SAB', min: 12 },
-  { id: 'SAB18', etiqueta: 'SAB 18+ (aprendido)', atr: 'SAB', min: 18 },
+  { id: 'SAB5', etiqueta: 'SAB 5+ (aprendido)', atr: 'SAB', min: 5, aprendido: true },
+  { id: 'SAB12', etiqueta: 'SAB 12+ (aprendido)', atr: 'SAB', min: 12, aprendido: true },
+  { id: 'SAB18', etiqueta: 'SAB 18+ (aprendido)', atr: 'SAB', min: 18, aprendido: true },
 ] as const;
 export const HUECOS_PROFESIONES = [
   { id: 'trasfondo', etiqueta: 'Trasfondo', atr: null, min: 0 },
-  { id: 'INT5', etiqueta: 'INT 5+', atr: 'INT', min: 5 },
-  { id: 'INT12', etiqueta: 'INT 12+ (aprendida)', atr: 'INT', min: 12 },
-  { id: 'INT18', etiqueta: 'INT 18+ (aprendida)', atr: 'INT', min: 18 },
+  { id: 'INT5', etiqueta: 'INT 5+ (aprendida)', atr: 'INT', min: 5, aprendido: true },
+  { id: 'INT12', etiqueta: 'INT 12+ (aprendida)', atr: 'INT', min: 12, aprendido: true },
+  { id: 'INT18', etiqueta: 'INT 18+ (aprendida)', atr: 'INT', min: 18, aprendido: true },
 ] as const;
 
-type Hueco = { id: string; atr: null | 'INT' | 'SAB'; min: number };
+export type Hueco = { id: string; etiqueta: string; atr: null | 'INT' | 'SAB'; min: number; aprendido?: boolean };
 export const huecoDisponible = (p: Personaje, h: Hueco) => !h.atr || p.caracteristicas[h.atr] >= h.min;
 export const huecosVacios = (p: Personaje, huecos: readonly Hueco[], valores: Record<string, string>) =>
-  huecos.filter((h) => h.atr && huecoDisponible(p, h) && !(valores[h.id] ?? '').trim()).length;
+  huecos.filter((h) => h.atr && !h.aprendido && huecoDisponible(p, h) && !(valores[h.id] ?? '').trim()).length;
 
 // ---------------------------------------------------------------- Varios
 export function uid() {

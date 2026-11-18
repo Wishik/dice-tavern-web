@@ -980,3 +980,4 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .asistente .campo { background: #fffaf0; color: #2a1b11; border-color: #a9884f; }
 .asistente .campo::placeholder { color: #8a765c; }
 .asistente .detalle-asistente .etiqueta span, .asistente .detalle-asistente .hueco-etq { color: #4a3420; }
+.campo-fijo { display: flex; align-items: center; }
