@@ -230,6 +230,7 @@ function Lista({ usuario, onUsuario, onAbrir, onPartida, onSalir }: { usuario: U
     setCreando(true); setError('');
     try {
       const p = nuevoPersonaje(L('Nuevo personaje', 'Новый персонаж'));
+      p.asistente = 0; // los personajes nuevos empiezan con el asistente (se puede saltar)
       await backend.guardar(p); onAbrir(p.id);
     } catch (e) {
       setError(`${L('No se pudo crear el personaje', 'Не удалось создать персонажа')}: ${(e as Error).message}`);

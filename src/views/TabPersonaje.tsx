@@ -1,4 +1,5 @@
-import { esRetratoRaza, imagenRaza, retratoRaza } from '../imagenesRazas';
+import { imagenRaza, retratoRaza } from '../imagenesRazas';
+import { aplicarClase, aplicarRaza, aplicarTrasfondo } from '../creacion';
 import { Fragment, useRef, useState } from 'react';
 import { Bloq, useFicha } from './Ficha';
 import { Etiqueta, Modal, Numero, PuntoRojo, Seccion, Texto, TextoLargo, comprimirFoto } from '../ui';
@@ -17,7 +18,7 @@ import { GANAS_MULTICLASE, clasesDe, cumpleRequisito, esMulticlase, textoRequisi
 const ABREV: Record<string, Atributo> = { FUE: 'FUE', DES: 'DES', CON: 'CON', INT: 'INT', SAB: 'SAB', CAR: 'CAR' };
 
 export function TabPersonaje() {
-  const { p, upd, clases, razas, trasfondos, avisos } = useFicha();
+  const { p, upd, clases, razas, trasfondos, avisos, bloqueado } = useFicha();
   const [info, setInfo] = useState<'raza' | 'clase' | 'trasfondo' | null>(null);
   const [verExp, setVerExp] = useState(false);
   const [errFoto, setErrFoto] = useState('');
@@ -34,44 +35,9 @@ export function TabPersonaje() {
     ...idiomasElegidos(p, eleccionesDe(p, clases, raza)),
   ];
 
-  const elegirRaza = (nombre: string) => upd((x) => {
-    x.raza = nombre;
-    // Sin foto propia, el retrato de la raza hace de foto.
-    if (!x.foto || esRetratoRaza(x.foto)) x.foto = retratoRaza(nombre);
-    const r = buscarRaza(razas, nombre);
-    if (r) {
-      x.tamano = r.tamano;
-      const v = parseInt(r.velocidad, 10);
-      if (!isNaN(v)) { x.velocidad.andando = v; x.velocidad.corriendo = v * 2; }
-      const nad = r.velocidad.match(/(\d+)\s*pies\s+nadando/); if (nad) x.velocidad.nadando = nad[1];
-      x.rasgosRaza = [];
-      // Lo elegido para la raza anterior (Resiliencia, linaje…) ya no vale.
-      for (const a of x.elecciones?.['raza:resiliencia'] ?? []) if (a in x.salvaciones && !buscarClase(clases, x.clase)?.atributos.salvaciones.includes(a)) x.salvaciones[a as Atributo].comp = false;
-      if (x.elecciones) x.elecciones = Object.fromEntries(Object.entries(x.elecciones).filter(([k]) => !k.startsWith('raza:')));
-    }
-  });
-  const elegirClase = (nombre: string) => upd((x) => {
-    const viejo = buscarClase(clases, x.clase);
-    const pgViejo = viejo ? pgPorDefecto(x, viejo.atributos.dadoGolpe) : 0;
-    x.clase = nombre; x.subclase = '';
-    const c = buscarClase(clases, nombre);
-    if (c) for (const a of ATRIBUTOS) x.salvaciones[a].comp = c.atributos.salvaciones.includes(a) || !!x.elecciones?.['raza:resiliencia']?.includes(a);
-    // El estilo de combate de la clase anterior ya no vale.
-    if (viejo && viejo.nombre !== nombre) x.dotes = x.dotes.filter((d) => d.origen !== `Estilo de combate · ${viejo.nombre}`);
-    // Al elegir clase, si aún no has tocado las características, pone el conjunto estándar del manual.
-    if (caracteristicasSinTocar(x)) aplicarConjuntoEstandar(x, nombre);
-    // PG por defecto si aún no los habías puesto (o seguían siendo los de la clase anterior).
-    if (c && (x.pg.max === 0 || x.pg.max === pgViejo)) { x.pg.max = pgPorDefecto(x, c.atributos.dadoGolpe); x.pg.actual = x.pg.max; x.pgExtra = 0; }
-    // La característica de conjuros vuelve a ser la automática de la clase.
-    x.conjuroCaracteristica = '';
-  });
-  const elegirTrasfondo = (nombre: string) => upd((x) => {
-    const viejo = trasfondos?.find((t) => t.nombre === x.trasfondoEstilo);
-    viejo?.habilidades.forEach((h) => { const id = idHabilidad(h); if (id) x.habilidades[id].comp = false; });
-    x.trasfondoEstilo = nombre;
-    const t = trasfondos?.find((t) => t.nombre === nombre);
-    t?.habilidades.forEach((h) => { const id = idHabilidad(h); if (id) x.habilidades[id].comp = true; });
-  });
+  const elegirRaza = (nombre: string) => upd((x) => { aplicarRaza(x, nombre, razas, clases); });
+  const elegirClase = (nombre: string) => upd((x) => { aplicarClase(x, nombre, clases); });
+  const elegirTrasfondo = (nombre: string) => upd((x) => { aplicarTrasfondo(x, nombre, trasfondos); });
 
   return (
     <div className="tab">
@@ -99,6 +65,7 @@ export function TabPersonaje() {
           {p.foto && <button className="btn enlace pequeno" onClick={() => upd((x) => { x.foto = ''; })}>{L('Quitar foto', 'Убрать фото')}</button>}
           {retratoRaza(p.raza) && p.foto !== retratoRaza(p.raza) && <button className="btn enlace pequeno" onClick={() => upd((x) => { x.foto = retratoRaza(x.raza); })}>🖼 {L(`Usar el retrato de ${p.raza}`, `Портрет расы: ${T(RU_RAZAS, p.raza)}`)}</button>}
         </div>
+        {p.nivel === 1 && !bloqueado && <p className="nota pequena"><button className="btn enlace pequeno" onClick={() => upd((x) => { x.asistente = 1; })}>🧭 {L('Crear paso a paso con el asistente', 'Создать по шагам с помощником')}</button></p>}
         {errFoto && <p className="error">{errFoto}</p>}
         <div className="rejilla-campos">
           <Etiqueta texto="Raza">

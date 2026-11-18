@@ -6,6 +6,7 @@ import { backend } from '../store';
 import { useDatos, type Clase, type Conjuro, type Dote, type Razas, type Trasfondo } from '../data';
 import { calcularAvisos, manaMaximo, type Avisos } from '../avisos';
 import { DadoIcono, PanelDados, useDados } from '../dice';
+import { Asistente } from './Asistente';
 import { ModalMejoraNivel, mejorasPendientes } from './MejoraNivel';
 import { ajustarCinturon, capacidadCinturon, car, conSigno, espaciosUsados, modificador, pgExtra } from '../rules';
 import { Etiqueta, Modal, PuntoRojo } from '../ui';
@@ -145,6 +146,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
   const tabs = ajeno ? TABS_MASTER : TABS;
   const Tab = tabs.find((t) => t.id === tab) ?? tabs[0];
   const bloqueado = !ajeno && !!p.bloqueado;
+  const enAsistente = !ajeno && p.asistente !== undefined;
 
   const borrar = async () => {
     if (!confirm(L(`¿Borrar a ${p.nombre || 'este personaje'} para siempre?`, `Удалить ${p.nombre || 'этого персонажа'} навсегда?`))) return;
@@ -176,20 +178,20 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
             {p.iniciativaActual !== null && <span className="chip-estado iniciativa">⚔️ {L('Iniciativa', 'Инициатива')} {p.iniciativaActual}</span>}
           </div>
         )}
-        <nav className="pestanas">
+        {!enAsistente && <nav className="pestanas">
           {tabs.map((t) => {
             const n = t.aviso(avisos);
             return <button key={t.id} className={Tab.id === t.id ? 'activa' : ''} onClick={() => setTab(t.id)}>{t.nombre()}{n > 0 && <PuntoRojo n={n} />}</button>;
           })}
-        </nav>
+        </nav>}
         </div>
-        <main className="contenido"><Tab.C /></main>
+        <main className="contenido">{enAsistente ? <Asistente /> : <Tab.C />}</main>
         {Tab.id === 'notas' && !ajeno && <div className="pie-borrar"><button className="btn peligro" onClick={borrar}>{L('Borrar personaje', 'Удалить персонажа')}</button></div>}
-        <button className="fab" onClick={() => setDados(true)} aria-label={L('Dados', 'Кубики')}><DadoIcono caras={20} size={40} /></button>
+        {!enAsistente && <button className="fab" onClick={() => setDados(true)} aria-label={L('Dados', 'Кубики')}><DadoIcono caras={20} size={40} /></button>}
         <SubidaNivel />
         <SincronizarMana />
         <SincronizarPG />
-        {!ajeno && !bloqueado && <AvisoMejora />}
+        {!ajeno && !bloqueado && !enAsistente && <AvisoMejora />}
         {!ajeno && <SincronizarConjuros />}
         {!ajeno && <SincronizarCinturon />}
         <SincronizarBiblioteca />

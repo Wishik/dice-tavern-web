@@ -12,9 +12,11 @@ import { aumentosDotes } from './mejoras';
 export function car(p: Personaje, a: Atributo): number {
   const extra = (p.efectosCar ?? []).filter((e) => e.atributo === a).reduce((s, e) => s + e.valor, 0)
     + (p.bonosExtra ?? []).filter((b) => b.donde === a).reduce((s, b) => s + (b.valor || 0), 0)
-    + sumaEquipo(p, a) + aumentoClase(p, a).reduce((s, x) => s + x.valor, 0) + aumentosDotes(p, a).reduce((s, x) => s + x.valor, 0);
+    + sumaEquipo(p, a) + aumentoClase(p, a).reduce((s, x) => s + x.valor, 0) + aumentosDotes(p, a).reduce((s, x) => s + x.valor, 0) + bonoRazaEn(p, a);
   return extra ? Math.max(1, Math.min(30, p.caracteristicas[a] + extra)) : p.caracteristicas[a];
 }
+/** +2 / +1 de la raza (elegidos en el asistente). */
+export const bonoRazaEn = (p: Personaje, a: Atributo) => (p.bonoRaza?.[0] === a ? 2 : 0) + (p.bonoRaza?.[1] === a ? 1 : 0);
 /** Aumentos de nivel 20: Campeón primordial (bárbaro, FUE y CON +4) y Cuerpo y mente (monje, DES y SAB +4), hasta 25. */
 export function aumentoClase(p: Personaje, a: Atributo): LineaDesglose[] {
   const r: [string, string, number, Atributo[]][] = [['Bárbaro', 'Campeón primordial', 20, ['FUE', 'CON']], ['Monje', 'Cuerpo y mente', 20, ['DES', 'SAB']]];
@@ -33,6 +35,7 @@ export function desgloseCar(p: Personaje, a: Atributo): LineaDesglose[] {
   return [
     { texto: L('Puntuación base', 'Базовое значение'), valor: p.caracteristicas[a], base: true },
     ...(p.bonosExtra ?? []).filter((b) => b.donde === a).map((b) => ({ texto: b.origen || L('Bonus', 'Бонус'), valor: b.valor, id: b.id })),
+    ...(bonoRazaEn(p, a) ? [{ texto: L(`Raza (${p.raza})`, `Раса (${p.raza})`), valor: bonoRazaEn(p, a) }] : []),
     ...aumentosDotes(p, a),
     ...lineasEquipo(p, a),
     ...aumentoClase(p, a),

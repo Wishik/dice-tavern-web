@@ -930,3 +930,49 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .mejora-dote.falta { color: #b3261e; }
 .imagen-raza { display: block; max-width: 100%; max-height: 360px; margin: 0 auto 12px; border-radius: 10px; object-fit: contain; }
 .fila-botones-foto { display: flex; flex-wrap: wrap; gap: 4px 14px; }
+/* Asistente de creación */
+.asistente-cabecera { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 10px; text-align: center; }
+.asistente-cabecera h2 { margin: 4px 0; font-family: var(--fuente-titulo); color: var(--oro-claro); }
+.pasos-barra { display: flex; gap: 4px; width: 100%; }
+.pasos-barra span { flex: 1; height: 6px; border-radius: 3px; background: rgba(255,255,255,.15); }
+.pasos-barra span.hecho { background: var(--oro); }
+.pasos-barra span.actual { background: var(--oro-claro); box-shadow: 0 0 6px var(--oro); }
+.ayuda-asistente { background: rgba(240,201,106,.12); border-left: 3px solid var(--oro); padding: 8px 12px; border-radius: 6px; color: var(--pergamino); }
+.asistente-pie { display: flex; justify-content: space-between; gap: 10px; margin: 18px 0 6px; position: sticky; bottom: 8px; z-index: 5; }
+.asistente-pie .btn { flex: 1; }
+.lista-pasos { color: var(--pergamino); line-height: 1.6; }
+.rejilla-razas { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 8px; }
+.ficha-raza { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px; background: #2a1b11; border: 2px solid transparent; border-radius: 10px; color: var(--pergamino); font-size: 12px; line-height: 1.15; }
+.ficha-raza img, .ficha-raza .sin-img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; display: grid; place-items: center; }
+.ficha-raza.vista { border-color: var(--oro-claro); }
+.ficha-raza.elegida { border-color: var(--oro); background: #4a3218; }
+.detalle-asistente { background: var(--pergamino, #efe3c8); color: #2a1b11; border-radius: 12px; padding: 14px; margin-top: 14px; }
+.detalle-asistente h3, .detalle-asistente h4 { margin: 4px 0 8px; font-family: var(--fuente-titulo); }
+.btn.ancho { width: 100%; margin-top: 10px; }
+.lista-clases-asistente { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; }
+.opcion-clase { display: flex; flex-direction: column; gap: 2px; padding: 10px; background: #2a1b11; border: 2px solid transparent; border-radius: 10px; color: var(--pergamino); text-align: left; }
+.opcion-clase small { opacity: .75; }
+.opcion-clase.vista { border-color: var(--oro-claro); }
+.opcion-clase.elegida { border-color: var(--oro); background: #4a3218; }
+.lista-opciones-asistente { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.lista-opciones-asistente li { display: flex; gap: 6px; background: #2a1b11; border-radius: 10px; border: 2px solid transparent; }
+.lista-opciones-asistente li.sel { border-color: var(--oro); background: #4a3218; }
+.lista-opciones-asistente .texto-opcion { flex: 1; display: flex; flex-direction: column; gap: 3px; text-align: left; padding: 8px 10px; background: none; border: 0; color: var(--pergamino); }
+.lista-opciones-asistente .texto-opcion small { opacity: .75; }
+.check-opcion { background: none; border: 0; color: var(--oro-claro); font-size: 22px; padding: 0 4px 0 10px; }
+.check-opcion:disabled { opacity: .3; }
+.contador-eleccion { font-weight: bold; color: var(--oro-claro); }
+.rejilla-car-asistente { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.car-asistente { display: flex; flex-direction: column; align-items: center; padding: 8px 4px; background: #2a1b11; border: 2px solid transparent; border-radius: 10px; color: var(--pergamino); }
+.car-asistente strong { font-size: 26px; color: var(--oro-claro); }
+.car-asistente em { font-size: 11px; opacity: .7; }
+.car-asistente.cambiando { border-color: var(--oro-claro); box-shadow: 0 0 8px var(--oro); }
+.fila-bono-raza { display: flex; align-items: center; gap: 8px; margin: 6px 0; }
+.fila-bono-raza > span { font-weight: bold; width: 28px; }
+.detalle-asistente .chips, .asistente .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.detalles-asistente { display: grid; gap: 10px; }
+.retrato-asistente { width: 120px; height: 120px; border-radius: 12px; border: 2px solid var(--oro); object-fit: cover; justify-self: center; }
+.asistente h4 { color: var(--oro-claro); margin: 14px 0 6px; }
+.asistente .detalle-asistente h4 { color: #2a1b11; }
+.asistente > * { margin-top: 0; }
+.detalle-asistente { scroll-margin-top: 190px; }

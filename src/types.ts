@@ -175,6 +175,10 @@ export interface Personaje {
   pgV2?: boolean;
   /** PG máximos extra ya sumados por dotes/rasgos (Duro, Don de la fortaleza…), para sumar solo la diferencia. */
   pgExtra?: number;
+  /** Asistente de creación: paso en el que va (sin valor = hoja completa). */
+  asistente?: number;
+  /** Bonificador de raza a características: [la de +2, la de +1]. */
+  bonoRaza?: Atributo[];
   bonusPercepcionPasiva: number;
   recursos: string;
   /** Usos gastados de cada recurso de clase (claves de src/recursos.ts); el descanso largo lo vacía. */
