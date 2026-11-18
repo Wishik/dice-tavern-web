@@ -10,18 +10,19 @@ import { imagenRaza, retratoRaza } from '../imagenesRazas';
 import { CONJUNTO_ESTANDAR, HABILIDADES, RASGOS_RECOMENDADOS, car, conSigno, idHabilidad, modificador } from '../rules';
 import { anotarOrden } from '../limitesHabilidades';
 import { Elecciones } from './Elecciones';
+import { Alineamiento, IdiomasEditor } from './TabPersonaje';
 import { eleccionesDe, eleccionesPendientes } from '../elecciones';
 
 /**
  * Asistente para crear un personaje por partes (para gente nueva). Se puede saltar en cualquier momento:
  * todo lo que se elige aquí queda en la hoja normal. El paso va guardado en `p.asistente`.
  */
-const PASOS = ['bienvenida', 'raza', 'rasgos', 'clase', 'trasfondo', 'caracteristicas', 'habilidades', 'elecciones', 'detalles', 'fin'] as const;
+const PASOS = ['bienvenida', 'raza', 'rasgos', 'clase', 'trasfondo', 'caracteristicas', 'habilidades', 'elecciones', 'idiomas', 'alineamiento', 'detalles', 'fin'] as const;
 type Paso = (typeof PASOS)[number];
 const TITULOS: Record<Paso, [string, string]> = {
   bienvenida: ['Crear tu personaje', 'Создание персонажа'], raza: ['1. Raza', '1. Раса'], rasgos: ['2. Rasgos de tu raza', '2. Особенности расы'],
   clase: ['3. Clase', '3. Класс'], trasfondo: ['4. Trasfondo', '4. Предыстория'], caracteristicas: ['5. Características', '5. Характеристики'],
-  habilidades: ['6. Habilidades', '6. Навыки'], elecciones: ['7. Equipo y elecciones', '7. Снаряжение и выборы'], detalles: ['8. Nombre y detalles', '8. Имя и детали'], fin: ['¡Listo!', 'Готово!'],
+  habilidades: ['6. Habilidades', '6. Навыки'], elecciones: ['7. Equipo y elecciones', '7. Снаряжение и выборы'], idiomas: ['8. Idiomas', '8. Языки'], alineamiento: ['9. Alineamiento', '9. Мировоззрение'], detalles: ['10. Nombre y detalles', '10. Имя и детали'], fin: ['¡Listo!', 'Готово!'],
 };
 const nombreAtr = (a: Atributo) => T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a]);
 
@@ -82,6 +83,8 @@ function PasoActual({ paso }: { paso: Paso }) {
     case 'caracteristicas': return <PasoCaracteristicas />;
     case 'habilidades': return <PasoHabilidades />;
     case 'elecciones': return <PasoElecciones />;
+    case 'idiomas': return <PasoIdiomas />;
+    case 'alineamiento': return <PasoAlineamiento />;
     case 'detalles': return <PasoDetalles />;
     case 'fin': return <PasoFin />;
   }
@@ -98,6 +101,8 @@ function PasoBienvenida() {
       <li>{L('Características: fuerza, destreza…', 'Характеристики: сила, ловкость…')}</li>
       <li>{L('Habilidades en las que eres bueno.', 'Навыки, в которых ты хорош.')}</li>
       <li>{L('Equipo y otras elecciones.', 'Снаряжение и прочие выборы.')}</li>
+      <li>{L('Idiomas que hablas.', 'Языки, которые знаешь.')}</li>
+      <li>{L('Alineamiento: tu forma de ser.', 'Мировоззрение: твой характер.')}</li>
       <li>{L('Nombre y detalles.', 'Имя и детали.')}</li>
     </ol>
     <Ayuda>{L('Puedes saltar el asistente cuando quieras y seguir en la hoja completa. Lo que hayas elegido se queda.', 'Помощника можно пропустить в любой момент — выбранное сохранится.')}</Ayuda>
@@ -311,11 +316,26 @@ function PasoElecciones() {
   </>;
 }
 
+function PasoIdiomas() {
+  return <>
+    <Ayuda>{L('Estos son los idiomas que hablas. Los de tu raza ya vienen puestos, pero puedes cambiarlos si tu personaje se crió en otro sitio. Tu trasfondo te da además dos idiomas a elegir.', 'Это языки, которые ты знаешь. Расовые уже стоят, но их можно поменять. Предыстория даёт ещё два языка на выбор.')}</Ayuda>
+    <div className="detalle-asistente"><IdiomasEditor /></div>
+  </>;
+}
+
+function PasoAlineamiento() {
+  const { p, upd } = useFicha();
+  return <>
+    <Ayuda>{L('El alineamiento resume cómo es tu personaje. De izquierda a derecha: si respeta las normas (legal) o va a su aire (caótico). De arriba abajo: si es bueno, neutral o malvado. Toca la casilla que mejor le pegue.', 'Мировоззрение описывает характер. Слева направо: чтит законы (законный) или живёт как хочет (хаотичный). Сверху вниз: добрый, нейтральный или злой. Нажми подходящую клетку.')}</Ayuda>
+    <div className="detalle-asistente"><Alineamiento p={p} set={(a) => upd((x) => { x.alineamiento = a; })} /></div>
+  </>;
+}
+
 function PasoDetalles() {
   const { p, upd } = useFicha();
   return <>
     <Ayuda>{L('Ponle nombre a tu personaje. Lo demás es opcional y puedes cambiarlo cuando quieras.', 'Дай персонажу имя. Остальное — по желанию.')}</Ayuda>
-    <div className="detalles-asistente">
+    <div className="detalle-asistente detalles-asistente">
       {p.foto && <img className="retrato-asistente" src={p.foto} alt="" />}
       <Etiqueta texto="Nombre"><Texto valor={p.nombre === L('Nuevo personaje', 'Новый персонаж') ? '' : p.nombre} placeholder={L('Nombre de tu personaje', 'Имя персонажа')} set={(s) => upd((x) => { x.nombre = s; })} /></Etiqueta>
       <Etiqueta texto="Edad"><Texto valor={p.edad} set={(s) => upd((x) => { x.edad = s; })} /></Etiqueta>

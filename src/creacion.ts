@@ -16,6 +16,8 @@ export function aplicarRaza(x: Personaje, nombre: string, razas: Razas | null, c
     if (!isNaN(v)) { x.velocidad.andando = v; x.velocidad.corriendo = v * 2; }
     const nad = r.velocidad.match(/(\d+)\s*pies\s+nadando/); if (nad) x.velocidad.nadando = nad[1];
     x.rasgosRaza = [];
+    // Los idiomas de la raza anterior cambiados a mano ya no valen.
+    if (x.idiomas) for (const k of Object.keys(x.idiomas)) if (k.startsWith('raza-')) delete x.idiomas[k];
     // Lo elegido para la raza anterior (Resiliencia, linaje…) ya no vale.
     for (const a of x.elecciones?.['raza:resiliencia'] ?? []) if (a in x.salvaciones && !buscarClase(clases, x.clase)?.atributos.salvaciones.includes(a)) x.salvaciones[a as Atributo].comp = false;
     if (x.elecciones) x.elecciones = Object.fromEntries(Object.entries(x.elecciones).filter(([k]) => !k.startsWith('raza:')));

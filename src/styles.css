@@ -976,3 +976,7 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .asistente .detalle-asistente h4 { color: #2a1b11; }
 .asistente > * { margin-top: 0; }
 .detalle-asistente { scroll-margin-top: 190px; }
+/* En el asistente los campos van sobre pergamino: que se vean claros y activos, no grises. */
+.asistente .campo { background: #fffaf0; color: #2a1b11; border-color: #a9884f; }
+.asistente .campo::placeholder { color: #8a765c; }
+.asistente .detalle-asistente .etiqueta span, .asistente .detalle-asistente .hueco-etq { color: #4a3420; }

@@ -28,13 +28,6 @@ export function TabPersonaje() {
   const [nuevaClase, setNuevaClase] = useState(false);
   const raza = buscarRaza(razas, p.raza);
   const tras = trasfondos?.find((t) => t.nombre === p.trasfondoEstilo);
-  // Idiomas que ya vienen dados: los de la raza y los de rasgos de clase como «Druídico» o «Jerga de ladrones».
-  const idiomasFijos = [
-    ...(raza ? idiomasDeTexto(raza.idiomas).map((n) => ({ nombre: n, origen: raza.nombre })) : []),
-    ...(clase?.rasgos ?? []).filter((r) => r.nivel <= nivelPrincipal && RASGOS_IDIOMA[r.nombre]).map((r) => ({ nombre: RASGOS_IDIOMA[r.nombre], origen: clase!.nombre })),
-    ...idiomasElegidos(p, eleccionesDe(p, clases, raza)),
-  ];
-
   const elegirRaza = (nombre: string) => upd((x) => { aplicarRaza(x, nombre, razas, clases); });
   const elegirClase = (nombre: string) => upd((x) => { aplicarClase(x, nombre, clases); });
   const elegirTrasfondo = (nombre: string) => upd((x) => { aplicarTrasfondo(x, nombre, trasfondos); });
@@ -131,13 +124,7 @@ export function TabPersonaje() {
       </Seccion>
 
       <Seccion titulo="Idiomas" aviso={avisos.idiomas}>
-        {idiomasFijos.length > 0 && (
-          <ul className="idiomas-fijos">
-            {idiomasFijos.map((i) => <li key={i.nombre} className="chip-idioma" title={i.origen}>{td(i.nombre)}<small>{i.origen}</small></li>)}
-          </ul>
-        )}
-        <Huecos huecos={HUECOS_IDIOMAS} valores={p.idiomas} set={(k, v) => upd((x) => { x.idiomas[k] = v; })} p={p} opciones={listaIdiomas(razas).filter((n) => !idiomasFijos.some((i) => i.nombre === n))} />
-        {raza && /elecci[oó]n/i.test(raza.idiomas) && !p.elecciones?.['raza:idioma']?.[0]?.trim() && <p className="nota">{L('Tu raza te da además un idioma a tu elección: escríbelo arriba, en «Por elegir».', 'Раса даёт ещё один язык на выбор: впиши его выше, в «Нужно выбрать».')}</p>}
+        <IdiomasEditor />
       </Seccion>
       <div className="fila-2-tarjetas">
         <Seccion titulo="Oficios" aviso={avisos.oficios}>
@@ -201,7 +188,7 @@ const ORDENES = [['legal', 'Legal'], ['neutral', 'Neutral'], ['caotico', 'Caóti
 const MORALES = [['bueno', 'Bueno'], ['neutral', 'Neutral'], ['maligno', 'Maligno']] as const;
 const RU_AL: Record<string, string> = { Legal: 'Законный', Neutral: 'Нейтральный', 'Caótico': 'Хаотичный', Bueno: 'Добрый', Maligno: 'Злой' };
 /** Rejilla de 15×15: cada bloque de 5×5 es uno de los 9 alineamientos clásicos. */
-function Alineamiento({ p, set }: { p: Personaje; set: (a: Personaje['alineamiento']) => void }) {
+export function Alineamiento({ p, set }: { p: Personaje; set: (a: Personaje['alineamiento']) => void }) {
   const a = p.alineamiento;
   const io = ORDENES.findIndex(([o]) => o === a.orden), im = MORALES.findIndex(([m]) => m === a.moral);
   const x = a.x ?? (io >= 0 ? io * 5 + 2 : -1), y = a.y ?? (im >= 0 ? im * 5 + 2 : -1);
@@ -230,6 +217,52 @@ function Alineamiento({ p, set }: { p: Personaje; set: (a: Personaje['alineamien
       <p className="nota centro">{nombre ? <>{L('Alineamiento:', 'Мировоззрение:')} <strong>{nombre}</strong></> : L('Toca una casilla.', 'Нажми на клетку.')}</p>
     </>
   );
+}
+
+/** Idiomas: los de la raza salen puestos por defecto pero se pueden cambiar; los de clase o elecciones van fijos; luego los huecos del trasfondo e INT. */
+export function IdiomasEditor() {
+  const { p, upd, clases, razas } = useFicha();
+  const clase = buscarClase(clases, p.clase);
+  const raza = buscarRaza(razas, p.raza);
+  const nivelPrincipal = clasesDe(p)[0]?.nivel ?? p.nivel;
+  const huecosRaza = raza ? idiomasDeTexto(raza.idiomas).map((n, i) => ({ id: `raza-${i}`, def: n })) : [];
+  const deRaza = huecosRaza.map((h) => p.idiomas[h.id] ?? h.def).filter((n) => n.trim());
+  const fijos = [
+    ...(clase?.rasgos ?? []).filter((r) => r.nivel <= nivelPrincipal && RASGOS_IDIOMA[r.nombre]).map((r) => ({ nombre: RASGOS_IDIOMA[r.nombre], origen: clase!.nombre })),
+    ...idiomasElegidos(p, eleccionesDe(p, clases, raza)),
+  ];
+  const todos = listaIdiomas(razas);
+  const ocupados = new Set([...deRaza, ...fijos.map((i) => i.nombre), ...Object.entries(p.idiomas).filter(([k]) => !k.startsWith('raza-')).map(([, v]) => v)]);
+  return <>
+    {huecosRaza.length > 0 && (
+      <ul className="huecos">
+        {huecosRaza.map((h) => {
+          const v = p.idiomas[h.id] ?? h.def;
+          return (
+            <li key={h.id}>
+              <span className="hueco-etq">{T(RU_RAZAS, raza!.nombre)}{v !== h.def && <button className="btn enlace pequeno" title={L('Volver al de la raza', 'Вернуть расовый')} onClick={() => upd((x) => { delete x.idiomas[h.id]; })}>↺</button>}</span>
+              <select className="campo" value={v} onChange={(e) => {
+                let n = e.target.value;
+                if (n === '__otro') { n = window.prompt(L('Escribe el idioma', 'Впиши язык'), '')?.trim() ?? ''; if (!n) return; }
+                upd((x) => { if (n === h.def) delete x.idiomas[h.id]; else x.idiomas[h.id] = n; });
+              }}>
+                <option value="">{L('— Ninguno —', '— Нет —')}</option>
+                {[...new Set([...(v ? [v] : []), h.def, ...todos.filter((o) => !ocupados.has(o))])].map((o) => <option key={o} value={o}>{td(o)}</option>)}
+                <option value="__otro">{L('Otro (escribir)…', 'Другой (вписать)…')}</option>
+              </select>
+            </li>
+          );
+        })}
+      </ul>
+    )}
+    {fijos.length > 0 && (
+      <ul className="idiomas-fijos">
+        {fijos.map((i) => <li key={i.nombre} className="chip-idioma" title={i.origen}>{td(i.nombre)}<small>{i.origen}</small></li>)}
+      </ul>
+    )}
+    <Huecos huecos={HUECOS_IDIOMAS} valores={Object.fromEntries(Object.entries(p.idiomas).filter(([k]) => !k.startsWith('raza-')))} set={(k, v) => upd((x) => { x.idiomas[k] = v; })} p={p} opciones={todos.filter((n) => !deRaza.includes(n) && !fijos.some((i) => i.nombre === n))} />
+    {raza && /elecci[oó]n/i.test(raza.idiomas) && !p.elecciones?.['raza:idioma']?.[0]?.trim() && <p className="nota">{L('Tu raza te da además un idioma a tu elección: escríbelo en «Por elegir».', 'Раса даёт ещё один язык на выбор: впиши его в «Нужно выбрать».')}</p>}
+  </>;
 }
 
 function Huecos({ huecos, valores, set, p, opciones }: { huecos: readonly { id: string; etiqueta: string; atr: null | 'INT' | 'SAB'; min: number }[]; valores: Record<string, string>; set: (k: string, v: string) => void; p: Personaje; opciones?: string[] }) {
