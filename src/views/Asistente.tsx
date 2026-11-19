@@ -34,6 +34,7 @@ export function Asistente() {
   const ir = (n: number) => { upd((x) => { x.asistente = Math.max(0, Math.min(PASOS.length - 1, n)); }); window.scrollTo({ top: 0 }); };
   const salir = () => upd((x) => { delete x.asistente; });
   const listo = usePuedeSeguir(paso);
+  const abajo = useAlFinal(paso);
   return (
     <div className="tab asistente">
       <div className="asistente-cabecera">
@@ -48,11 +49,31 @@ export function Asistente() {
         {i > 0 && <button className="btn" onClick={() => ir(i - 1)}>← {L('Atrás', 'Назад')}</button>}
         {paso === 'fin'
           ? <button className="btn primario" onClick={salir}>📜 {L('Ver mi hoja de personaje', 'Открыть лист персонажа')}</button>
-          : <button className="btn primario" disabled={!listo.ok} onClick={() => ir(i + 1)}>{paso === 'bienvenida' ? L('Empezar', 'Начать') : L('Siguiente', 'Далее')} →</button>}
+          : <button className="btn primario" disabled={!listo.ok || !abajo} onClick={() => ir(i + 1)}>{!abajo ? '↓ ' + L('Baja hasta el final', 'Пролистай до конца') : <>{paso === 'bienvenida' ? L('Empezar', 'Начать') : L('Siguiente', 'Далее')} →</>}</button>}
       </div>
       {!listo.ok && listo.falta && <p className="nota centro pequena">{listo.falta}</p>}
     </div>
   );
+}
+
+/** Si ya se ha bajado hasta el final de la página (para no saltarse nada). Se vuelve a mirar al cambiar de paso o de tamaño. */
+function useAlFinal(paso: string) {
+  const [abajo, setAbajo] = useState(false);
+  useEffect(() => {
+    let visto = false;
+    const mirar = () => {
+      if (visto) return;
+      const h = document.documentElement;
+      if (window.innerHeight + window.scrollY >= h.scrollHeight - 60) { visto = true; setAbajo(true); }
+    };
+    setAbajo(false);
+    const t = setTimeout(mirar, 300);
+    window.addEventListener('scroll', mirar, { passive: true });
+    window.addEventListener('resize', mirar);
+    const ro = new ResizeObserver(mirar); ro.observe(document.body);
+    return () => { clearTimeout(t); window.removeEventListener('scroll', mirar); window.removeEventListener('resize', mirar); ro.disconnect(); };
+  }, [paso]);
+  return abajo;
 }
 
 /** Si se puede pasar al siguiente paso (y qué falta). */
