@@ -22,6 +22,8 @@ export interface Eleccion {
   ayuda_es?: string; ayuda_ru?: string;
   /** Va a la lista de dotes (Estilo de combate). */
   dote?: boolean;
+  /** Origen de la dote de estilo (por defecto «Estilo de combate · Clase»). */
+  origenDote?: string;
   /** Equipo inicial: al elegir se mete en el inventario (una vez). */
   equipo?: boolean;
   /** Idiomas: además salen en la sección «Idiomas». */
@@ -154,6 +156,7 @@ export function eleccionesDe(p: Personaje, clases: Clase[] | null, raza: Raza | 
     }
     if (c.clase === 'Hechicero' && c.nivel >= 2) { const n = c.nivel >= 17 ? 6 : c.nivel >= 10 ? 4 : 2; out.push({ id: id('metamagia'), es: `Metamagia (${n})`, ru: `Метамагия (${n})`, origen: org, cantidad: n, modo: 'lista', opciones: metamagia(datos) }); }
     if (c.clase === 'Explorador' && c.nivel >= 2) out.push({ id: id('idiomas'), es: 'Explorador hábil: dos idiomas', ru: 'Ловкий следопыт: два языка', origen: org, cantidad: 2, modo: 'lista', idioma: true, opciones: [] });
+    out.push(...eleccionesSubclase(p, c, datos, org));
     if (principal && datos?.atributos.equipo) out.push({ id: id('equipo'), es: 'Equipo inicial', ru: 'Стартовое снаряжение', origen: org, cantidad: 1, modo: 'chips', equipo: true, opciones: opcionesEquipo(datos.atributos.equipo), ayuda_es: 'Al elegir se mete en el inventario y en las monedas.', ayuda_ru: 'После выбора всё попадёт в инвентарь и кошелёк.' });
   });
 
@@ -186,7 +189,7 @@ export function fijarEleccion(p: Personaje, e: Eleccion, valores: string[], desc
     for (const a of valores) if (a in p.salvaciones) p.salvaciones[a as keyof typeof p.salvaciones].comp = true;
   }
   if (e.dote) {
-    const origen = `Estilo de combate · ${e.id.split(':')[0]}`;
+    const origen = e.origenDote ?? `Estilo de combate · ${e.id.split(':')[0]}`;
     p.dotes = p.dotes.filter((d) => d.origen !== origen);
     for (const v of valores) if (ESTILOS.includes(v)) p.dotes.push({ nombre: v, texto: descripcionDote?.(v) ?? '', origen });
   }
@@ -205,3 +208,83 @@ export const armasConMaestria = (p: Personaje) => clasesDe(p).flatMap((c) => ele
 /** Truco extra de Taumaturgo (clérigo) o Mago (druida). */
 export const trucoExtraOrden = (p: Personaje, clase: string) =>
   (clase === 'Clérigo' && p.elecciones?.['Clérigo:orden']?.[0] === 'Taumaturgo') || (clase === 'Druida' && p.elecciones?.['Druida:orden']?.[0] === 'Mago') ? 1 : 0;
+
+
+// ---------------------------------------------------------------- Subclases
+/** Texto de un rasgo de la subclase. */
+export function textoRasgoSub(datos: Clase | null | undefined, sub: string, rasgo: string): string {
+  return datos?.subclases.find((x) => x.nombre === sub)?.rasgos.find((r) => r.nombre === rasgo)?.texto ?? '';
+}
+/** Opciones «Nombre: descripción…» de un texto, con su descripción (hasta la siguiente opción). */
+export function opcionesNombradas(texto: string, nombres: string[]): Opcion[] {
+  const pos = nombres.map((n) => ({ n, i: texto.indexOf(`${n}:`) })).filter((x) => x.i >= 0).sort((a, b) => a.i - b.i);
+  const desc: Record<string, string> = {};
+  pos.forEach((x, k) => { desc[x.n] = texto.slice(x.i + x.n.length + 1, k + 1 < pos.length ? pos[k + 1].i : undefined).replace(/\s+/g, ' ').trim(); });
+  return nombres.map((n) => ({ ...o(n), desc: desc[n] || undefined }));
+}
+const DISPAROS = ['Disparo Buscador', 'Disparo Debilitador', 'Disparo Desterrador', 'Disparo Enraizador', 'Disparo Explosivo', 'Disparo Perforante', 'Disparo Seductor', 'Disparo Sombrío'];
+const MANIOBRAS = ['Arremetida', 'Ataque amenazador', 'Ataque de barrido', 'Ataque preciso', 'Ataque provocado', 'Ataque y desarme', 'Ataque y distracción', 'Ataque y empujón', 'Ataque y maniobra', 'Cambio de posición ventajosa', 'Contraataque', 'Emboscada', 'Evaluación táctica', 'Finta', 'Orden de ataque', 'Parada', 'Presencia imponente', 'Reagrupar'];
+/** Órdenes del Caballero de la orden y sus armas exóticas. */
+export const ORDENES_CABALLERO: Record<string, string[]> = {
+  'Orden del chacal': ['Arco Nubio', 'Kopesh', 'Mer', 'Sekhetep'],
+  'Orden del coliseo': ['Arcus', 'Contus', 'Gladius', 'Pilum', 'Pugio'],
+  'Orden del jaguar': ['Atlatl', 'Macuahuitl', 'Tepoztopilli', 'Tlahuitolli'],
+  'Orden del Filo de Asgard': ['Bogi', 'Breidox', 'Espada de Ulfberht', 'Skeggox'],
+  'Orden del loto': ['Katana', 'Wakizashi', 'Yari', 'Yumi'],
+  'Orden del puño de hierro': ['Bec de corbin', 'Ballesta de asedio', 'Espada de Arzón', 'Mayal', 'Stilleto'],
+};
+export const ARMAS_NINJA = ['Kama', 'Kama con cadena', 'Katana', 'Katar', 'Shuriken'];
+const cuenta = (nivel: number, tabla: [number, number][]) => tabla.reduce((v, [n, x]) => (nivel >= n ? x : v), 0);
+
+/** Lo que manda elegir la subclase (opciones de rasgos, maniobras, disparos…). */
+function eleccionesSubclase(p: Personaje, c: { clase: string; subclase: string; nivel: number }, datos: Clase | null | undefined, org: string): Eleccion[] {
+  const sub = c.subclase, nv = c.nivel;
+  if (!sub || nv < 3) return [];
+  const out: Eleccion[] = [];
+  const id = (x: string) => `${c.clase}:sub:${x}`;
+  const origen = `${org} · ${sub}`;
+  const txt = (r: string) => textoRasgoSub(datos, sub, r);
+  const una = (clave: string, es: string, ru: string, opciones: Opcion[], ayuda_es?: string, ayuda_ru?: string): Eleccion => ({ id: id(clave), es, ru, origen, cantidad: 1, modo: 'chips', opciones, ayuda_es, ayuda_ru });
+  switch (sub) {
+    case 'Senda del corazón salvaje':
+      if (nv >= 6) out.push(una('aspecto', 'Aspecto de lo salvaje', 'Облик дикой природы', opcionesNombradas(txt('Aspecto de lo salvaje'), ['Búho', 'Pantera', 'Salmón']), 'Se puede cambiar tras un descanso largo. Pantera y Salmón se suman solos a tus velocidades.', 'Можно менять после долгого отдыха. Пантера и Лосось сами добавляются к скоростям.'));
+      break;
+    case 'Cazador':
+      out.push(una('presa', 'El cazador y la presa', 'Охотник и добыча', opcionesNombradas(txt('El cazador y la presa'), ['Azote de colosos', 'Destructor de hordas']), 'Se puede cambiar tras un descanso corto o largo.', 'Можно менять после короткого или долгого отдыха.'));
+      if (nv >= 7) out.push(una('tacticas', 'Tácticas defensivas', 'Оборонительная тактика', opcionesNombradas(txt('Tácticas defensivas'), ['Defensa contra ataques múltiples', 'Escapar de la horda']), 'Se puede cambiar tras un descanso corto o largo.', 'Можно менять после короткого или долгого отдыха.'));
+      break;
+    case 'Señor de las bestias':
+      out.push(una('bestia', 'Perfil de tu bestia primigenia', 'Профиль первородного зверя', [o('Bestia de tierra firme', 'Зверь суши'), o('Bestia de los mares', 'Зверь морей'), o('Bestia del cielo', 'Зверь небес')], 'Tras un descanso largo puedes invocar otra con un perfil distinto.', 'После долгого отдыха можно призвать другого.'));
+      break;
+    case 'Arquero arcano': {
+      const n = 2 + [7, 10, 15, 18].filter((x) => nv >= x).length;
+      out.push({ id: id('disparos'), es: `Opciones de Disparo arcano (${n})`, ru: `Варианты магического выстрела (${n})`, origen, cantidad: n, modo: 'lista', opciones: opcionesNombradas(txt('Disparo arcano maestro'), DISPAROS) });
+      break;
+    }
+    case 'Caballero de la orden': {
+      out.push(una('orden', 'Juramento marcial: tu orden', 'Боевая клятва: орден', opcionesNombradas(txt('Juramento marcial'), Object.keys(ORDENES_CABALLERO)).map((x) => ({ ...x, nota_es: ORDENES_CABALLERO[x.valor].join(', '), nota_ru: ORDENES_CABALLERO[x.valor].join(', ') })), 'Te da competencia con las armas exóticas de la orden y su técnica secreta.', 'Даёт владение экзотическим оружием ордена и его тайную технику.'));
+      out.push(una('tecnica', 'Castigar o Defender', 'Покарать или защитить', opcionesNombradas(txt('Castigar o Defender'), ['Contraataque', 'Parada'])));
+      break;
+    }
+    case 'Campeón':
+      if (nv >= 7) out.push({ id: id('estilo'), es: 'Estilo de combate adicional', ru: 'Дополнительный боевой стиль', origen, cantidad: 1, modo: 'lista', dote: true, origenDote: 'Estilo de combate · Campeón', opciones: ESTILOS.map((n) => o(n)), ayuda_es: 'Se añade a tus dotes.', ayuda_ru: 'Добавится к твоим чертам.' });
+      break;
+    case 'Maestro del combate': {
+      out.push({ id: id('herramienta'), es: 'Estudioso de la guerra: herramientas de artesano', ru: 'Знаток войны: инструменты ремесленника', origen, cantidad: 1, modo: 'lista', opciones: ARTESANO });
+      const n = cuenta(nv, [[3, 3], [7, 5], [10, 7], [15, 9]]);
+      out.push({ id: id('maniobras'), es: `Maniobras (${n})`, ru: `Приёмы (${n})`, origen, cantidad: n, modo: 'lista', opciones: opcionesNombradas(txt('Supremacía en combate definitiva'), MANIOBRAS), ayuda_es: 'Cada vez que aprendes maniobras nuevas puedes cambiar una que ya conozcas.', ayuda_ru: 'При изучении новых приёмов можно заменить один известный.' });
+      break;
+    }
+    case 'Hechicería dracónica':
+      if (nv >= 6) out.push(una('afinidad', 'Afinidad elemental', 'Стихийное родство', ['Ácido', 'Frío', 'Fuego', 'Relámpago', 'Veneno'].map((x) => o(x)), 'Resistencia a ese daño y + mod. de Carisma al daño de tus conjuros de ese tipo.', 'Сопротивление этому урону и + мод. Харизмы к урону заклинаний этого типа.'));
+      break;
+    case 'Monje de la sombra (Ninja)':
+      out.push(una('arma', 'Arma exótica que recibes', 'Экзотическое оружие, которое получаешь', ARMAS_NINJA.map((x) => o(x)), 'Si no tienes ninguna de estas armas, recibes una. Ya eres competente con todas.', 'Если у тебя нет ни одного из них, получаешь одно. Владеешь всеми.'));
+      break;
+  }
+  if (sub === 'Caballero de la orden') {
+    const orden = elegido(p, id('orden'))[0];
+    if (orden && ORDENES_CABALLERO[orden]) out.push(una('arma', 'Arma de la orden que recibes', 'Оружие ордена, которое получаешь', ORDENES_CABALLERO[orden].map((x) => o(x)), 'Si no tienes ninguna de estas armas, recibes una.', 'Если у тебя нет ни одного из них, получаешь одно.'));
+  }
+  return out;
+}

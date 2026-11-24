@@ -117,3 +117,6 @@ export const dotesDeClases = (p: Personaje, clase: Clase | null | undefined) =>
 
 /** Para listas y la partida (sin traducir): «Pícaro» o «Pícaro / Guerrero». */
 export const textoClasesBreve = (p: Personaje) => (p.multiclase?.length ? clasesDe(p).map((c) => `${c.clase} ${c.nivel}`).join(' / ') : p.clase);
+
+/** Si tiene esa subclase de esa clase con nivel suficiente (multiclase incluida). */
+export const conSubclase = (p: Personaje, clase: string, sub: string, nivel = 3) => clasesDe(p).some((c) => c.clase === clase && c.subclase === sub && c.nivel >= nivel);

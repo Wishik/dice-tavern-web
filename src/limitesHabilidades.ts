@@ -33,8 +33,6 @@ const SUBCLASES: Record<string, number> = {
   'Colegio del conocimiento': 3,
   'Errante feérico': 1,
   'Maestro del combate': 1,
-  'Arquero arcano': 2,
-  'Monje de la misericordia': 2,
 };
 
 /** Pericias por nivel de clase: [nivel, cantidad]. */

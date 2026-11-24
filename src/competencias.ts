@@ -1,7 +1,7 @@
 import type { Personaje } from './types';
 import { L, T, RU_CLASES } from './i18n';
 import { clasesDe } from './multiclase';
-import { ARTESANO, INSTRUMENTOS, elegido } from './elecciones';
+import { ARMAS_NINJA, ARTESANO, INSTRUMENTOS, ORDENES_CABALLERO, elegido } from './elecciones';
 import { normalizarTexto } from './data';
 
 /** Competencias con armas, armaduras y herramientas: las automáticas salen de clase, multiclase, elecciones y dotes. */
@@ -87,6 +87,18 @@ export function competenciasAuto(p: Personaje): CompAuto[] {
     if (c.clase === 'Druida' && p.elecciones?.['Druida:orden']?.[0] === 'Guardián') addTodo({ armas: [MAR], armaduras: [MED] }, `${org} (${L('Guardián', 'Страж')})`);
     if (c.clase === 'Bardo' && c.subclase === 'Colegio del valor' && c.nivel >= 3) addTodo({ armas: [MAR], armaduras: [MED, ESC] }, `${org} (${L('Colegio del valor', 'Коллегия доблести')})`);
     for (const s of ['instrumentos', 'herramienta']) elegido(p, `${c.clase}:${s}`).forEach((n) => add('herramientas', parDe(n), org));
+    // Subclases
+    if (c.nivel >= 3 && c.subclase) {
+      const os = `${org} (${c.subclase})`;
+      const armas = (l: string[]) => l.forEach((n) => add('armas', [n, n], os));
+      if (c.subclase === 'Asesino') { add('herramientas', ['Útiles de envenenador', 'Набор отравителя'], os); add('herramientas', ['Útiles para disfrazarse', 'Набор для грима'], os); }
+      if (c.subclase === 'Tirador experto') add('armas', ['Todas las armas a distancia', 'Всё дальнобойное оружие'], os);
+      if (c.subclase === 'Monje de la misericordia') add('herramientas', ['Útiles de herborista', 'Набор травника'], os);
+      if (c.subclase === 'Monje de la sombra (Ninja)') armas(ARMAS_NINJA);
+      const orden = elegido(p, `${c.clase}:sub:orden`)[0];
+      if (c.subclase === 'Caballero de la orden' && orden) armas(ORDENES_CABALLERO[orden] ?? []);
+      elegido(p, `${c.clase}:sub:herramienta`).forEach((n) => add('herramientas', parDe(n), os));
+    }
   });
   // Las otras clases también «tienen» lo que ya sale de la principal (p. ej. Armas sencillas: Pícaro, Mago); solo se añade el origen.
   for (const c of todas.slice(1)) {

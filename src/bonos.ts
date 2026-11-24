@@ -2,7 +2,7 @@ import { L } from './i18n';
 import type { Atributo, Personaje } from './types';
 import { RASGOS_FIJOS } from './fijos';
 import { dadosEquipo, sumaEquipo } from './bonosObjetos';
-import { nivelEn } from './multiclase';
+import { conSubclase, nivelEn } from './multiclase';
 
 /**
  * Bonificadores fijos que dan rasgos de raza, rasgos genéricos y dotes, y que se pueden sumar solos.
@@ -62,6 +62,14 @@ function bonosClase(p: Personaje): BonoActivo[] {
   if (bar >= 7) out.push({ origen: L('Instinto salvaje', 'Дикий инстинкт'), b: { ventajaIniciativa: true } });
   if (exp >= 6 && arm !== 'pesada') out.push({ origen: L('Errante', 'Странник'), b: { velocidad: 10, trepar: IGUAL_VELOCIDAD, nadar: IGUAL_VELOCIDAD } });
   if (monje >= 2 && !arm && !llevaEscudo(p)) out.push({ origen: L('Movimiento sin armadura', 'Движение без доспехов'), b: { velocidad: VEL_MONJE[Math.min(20, monje)] } });
+  // Subclases
+  if (conSubclase(p, 'Guerrero', 'Arquero arcano')) out.push({ origen: 'Conocimiento del Arquero Arcano', b: { competencia: ['arcano', 'naturaleza'] } });
+  if (conSubclase(p, 'Monje', 'Monje de la misericordia')) out.push({ origen: 'Instrumentos de misericordia', b: { competencia: ['medicina', 'perspicacia'] } });
+  if (conSubclase(p, 'Bárbaro', 'Senda del corazón salvaje', 6)) {
+    const a = p.elecciones?.['Bárbaro:sub:aspecto']?.[0];
+    if (a === 'Pantera') out.push({ origen: 'Aspecto de lo salvaje (Pantera)', b: { trepar: IGUAL_VELOCIDAD } });
+    if (a === 'Salmón') out.push({ origen: 'Aspecto de lo salvaje (Salmón)', b: { nadar: IGUAL_VELOCIDAD } });
+  }
   return out;
 }
 

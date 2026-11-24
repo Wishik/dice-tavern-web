@@ -1,4 +1,4 @@
-import { ajustarMulticlase, clasesDe, nivelEn, nivelTotal } from './multiclase';
+import { ajustarMulticlase, clasesDe, conSubclase, nivelEn, nivelTotal } from './multiclase';
 import type { Atributo, Item, Moneda, Personaje } from './types';
 import { ventajaIniciativa, ventajasRasgos, bonoAtaqueArma, bonoAtaqueConjuro, bonoCdConjuro, bonoFuerzaCarga, bonoHabilidad, bonoPrueba, bonoSalvacion, bonosCA, bonosActivos, lineasBonos } from './bonos';
 import { NOMBRE_ATRIBUTO } from './types';
@@ -137,6 +137,7 @@ export function desgloseSalvacion(p: Personaje, a: Atributo): LineaDesglose[] {
 /** Competencia en salvaciones que dan rasgos de clase (Mente escurridiza: SAB y CAR). */
 export function compSalvacionAuto(p: Personaje, a: Atributo): string | null {
   if (nivelEn(p, 'Pícaro') >= 15 && (a === 'SAB' || a === 'CAR')) return L('Mente escurridiza', 'Скользкий разум');
+  if (a === 'SAB' && conSubclase(p, 'Explorador', 'Acechador en la penumbra', 7)) return L('Mente de hierro', 'Железный разум');
   return null;
 }
 export const tieneDote = (p: Personaje, n: string) => p.dotes.some((d) => d.nombre === n);
