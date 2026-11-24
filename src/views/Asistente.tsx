@@ -51,7 +51,7 @@ export function Asistente() {
           ? <button className="btn primario" onClick={salir}>📜 {L('Ver mi hoja de personaje', 'Открыть лист персонажа')}</button>
           : <button className="btn primario" disabled={!listo.ok || !abajo} onClick={() => ir(i + 1)}>{!abajo ? '↓ ' + L('Baja hasta el final', 'Пролистай до конца') : <>{paso === 'bienvenida' ? L('Empezar', 'Начать') : L('Siguiente', 'Далее')} →</>}</button>}
       </div>
-      {!listo.ok && listo.falta && <p className="nota centro pequena">{listo.falta}</p>}
+      {!listo.ok && listo.falta && <p className="nota centro falta-asistente">⚠ {listo.falta}</p>}
     </div>
   );
 }
@@ -78,10 +78,36 @@ function useAlFinal(paso: string) {
 
 /** Si se puede pasar al siguiente paso (y qué falta). */
 function usePuedeSeguir(paso: Paso): { ok: boolean; falta?: string } {
-  const { p, razas } = useFicha();
-  if (paso === 'raza' && !p.raza) return { ok: false, falta: L('Elige una raza para seguir.', 'Выбери расу, чтобы продолжить.') };
-  if (paso === 'clase' && !p.clase) return { ok: false, falta: L('Elige una clase para seguir.', 'Выбери класс, чтобы продолжить.') };
-  if (paso === 'rasgos') { const r = buscarRaza(razas, p.raza); if (r && p.rasgosRaza.length < r.rasgosAElegir) return { ok: true, falta: L(`Te faltan ${r.rasgosAElegir - p.rasgosRaza.length} rasgos (puedes elegirlos luego).`, `Осталось выбрать особенностей: ${r.rasgosAElegir - p.rasgosRaza.length}.`) }; }
+  const { p, razas, clases, trasfondos } = useFicha();
+  const no = (es: string, ru: string) => ({ ok: false, falta: L(es, ru) });
+  const r = buscarRaza(razas, p.raza), c = buscarClase(clases, p.clase);
+  switch (paso) {
+    case 'raza': if (!p.raza) return no('Elige una raza para seguir.', 'Выбери расу, чтобы продолжить.'); break;
+    case 'rasgos': if (r && p.rasgosRaza.length < r.rasgosAElegir) { const n = r.rasgosAElegir - p.rasgosRaza.length; return no(`Te faltan ${n} rasgos por elegir.`, `Осталось выбрать особенностей: ${n}.`); } break;
+    case 'clase': if (!p.clase) return no('Elige una clase para seguir.', 'Выбери класс, чтобы продолжить.'); break;
+    case 'trasfondo': {
+      const t = trasfondos?.find((x) => x.nombre === p.trasfondoEstilo);
+      if (!t) return no('Elige un trasfondo para seguir.', 'Выбери предысторию, чтобы продолжить.');
+      if (t.dotes.length && !p.dotes.some((d) => d.origen === 'origen' || t.dotes.includes(d.nombre))) return no('Elige tu dote de origen.', 'Выбери черту происхождения.');
+      break;
+    }
+    case 'caracteristicas': if (r && !(p.bonoRaza?.[0] && p.bonoRaza?.[1])) return no('Elige a qué características van el +2 y el +1.', 'Выбери, куда идут +2 и +1.'); break;
+    case 'habilidades': {
+      const t = trasfondos?.find((x) => x.nombre === p.trasfondoEstilo);
+      const deTras = new Set((t?.habilidades ?? []).map(idHabilidad).filter(Boolean) as string[]);
+      const opciones = !c || c.atributos.habilidades.includes('*') ? HABILIDADES.map((h) => h.id) : c.atributos.habilidades.map(idHabilidad).filter(Boolean) as string[];
+      const n = Math.min(c?.atributos.habilidadesN ?? 0, opciones.filter((id) => !deTras.has(id)).length);
+      const elegidas = HABILIDADES.filter((h) => p.habilidades[h.id]?.comp && !deTras.has(h.id)).length;
+      if (elegidas < n) return no(`Te faltan ${n - elegidas} habilidades por elegir.`, `Осталось выбрать навыков: ${n - elegidas}.`);
+      const nPer = limitesHabilidades(p, c, trasfondos).pericia;
+      const per = HABILIDADES.filter((h) => p.habilidades[h.id]?.pericia).length;
+      if (per < nPer) return no(`Te faltan ${nPer - per} pericias por elegir.`, `Осталось выбрать компетентностей: ${nPer - per}.`);
+      break;
+    }
+    case 'elecciones': { const n = eleccionesPendientes(p, eleccionesDe(p, clases, r)); if (n) return no(`Te quedan ${n} cosas por elegir.`, `Осталось выбрать: ${n}.`); break; }
+    case 'alineamiento': if (!p.alineamiento.orden || !p.alineamiento.moral) return no('Toca una casilla para elegir tu alineamiento.', 'Нажми на клетку, чтобы выбрать мировоззрение.'); break;
+    case 'detalles': if (!p.nombre.trim() || p.nombre === L('Nuevo personaje', 'Новый персонаж')) return no('Ponle nombre a tu personaje.', 'Дай персонажу имя.'); break;
+  }
   return { ok: true };
 }
 
