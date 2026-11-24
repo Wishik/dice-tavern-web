@@ -60,23 +60,29 @@ const valorSin = (p: Personaje, i: number | null) => (a: Atributo) => {
 /** Ventana de la Mejora de característica: subir características o coger una dote (con sus requisitos). */
 export function ModalMejoraNivel({ onClose, onMasTarde }: { onClose: () => void; onMasTarde?: () => void }) {
   const tarde = onMasTarde ?? onClose;
+  return <Modal titulo={L('Mejora de característica', 'Увеличение характеристик')} onClose={tarde}><CuerpoMejora onHecho={onClose} onMasTarde={tarde} /></Modal>;
+}
+
+/** Contenido de la Mejora de característica (también va dentro de la subida de nivel, sin «más tarde»). */
+export function CuerpoMejora({ onHecho, onMasTarde }: { onHecho: () => void; onMasTarde?: () => void }) {
+  const tarde = onMasTarde;
   const { p, upd, dotes } = useFicha();
   const [paso, setPaso] = useState<'inicio' | 'carac' | 'dote'>('inicio');
   const [dote, setDote] = useState<Dote | null>(null);
   const epico = nivelTotal(p) >= 19;
   const mejora = dotes?.find((d) => d.nombre === DOTE_MEJORA);
   const valor = (a: Atributo) => car(p, a);
-  const anadir = (e: EntradaTexto) => { upd((x) => { x.dotes.push(e); }); onClose(); };
+  const anadir = (e: EntradaTexto) => { upd((x) => { x.dotes.push(e); }); setPaso('inicio'); setDote(null); onHecho(); };
   const opDote = dote && opcionesMejora({ nombre: dote.nombre, texto: dote.descripcion });
   return (
-    <Modal titulo={L('Mejora de característica', 'Увеличение характеристик')} onClose={tarde}>
+    <>
       {paso === 'inicio' && <>
         <p>{L('Al llegar a este nivel puedes mejorar tus características o adquirir una dote.', 'На этом уровне можно увеличить характеристики или взять черту.')}</p>
         <div className="opciones-mejora">
           <button className="btn primario" onClick={() => setPaso('carac')}>📈 {L('Mejorar características', 'Увеличить характеристики')}<small>{L('+2 a una o +1 a dos', '+2 к одной или +1 к двум')}</small></button>
           <button className="btn" onClick={() => setPaso('dote')}>⭐ {L('Adquirir una dote', 'Взять черту')}<small>{epico ? L('generales o dones épicos', 'общие или эпические дары') : L('de las que cumples los requisitos', 'из тех, чьи требования выполняешь')}</small></button>
         </div>
-        <p className="nota pequena centro"><button className="btn enlace pequeno" onClick={tarde}>{L('Decidir más tarde', 'Решить позже')}</button> · {L('queda pendiente en «Rasgos» → Dotes.', 'останется в «Особенности» → Черты.')}</p>
+        {tarde && <p className="nota pequena centro"><button className="btn enlace pequeno" onClick={tarde}>{L('Decidir más tarde', 'Решить позже')}</button> · {L('queda pendiente en «Rasgos» → Dotes.', 'останется в «Особенности» → Черты.')}</p>}
       </>}
       {paso === 'carac' && <ElegirAtributos op={{ atrs: [...ATRIBUTOS], cantidad: 2, max: 20 }} valor={valor}
         onListo={(m) => anadir({ nombre: DOTE_MEJORA, texto: mejora?.descripcion ?? '', origen: 'general', mejora: m })} />}
@@ -100,7 +106,7 @@ export function ModalMejoraNivel({ onClose, onMasTarde }: { onClose: () => void;
         <ElegirAtributos op={opDote} valor={valor} onListo={(m) => anadir({ nombre: dote.nombre, texto: dote.descripcion, origen: dote.categoria, mejora: m })} />
       </>}
       {paso !== 'inicio' && <p className="nota pequena centro"><button className="btn enlace pequeno" onClick={() => { if (dote) setDote(null); else setPaso('inicio'); }}>← {L('Volver', 'Назад')}</button></p>}
-    </Modal>
+    </>
   );
 }
 

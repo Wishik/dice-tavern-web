@@ -2,7 +2,8 @@ import type { Clase, Trasfondo } from './data';
 import type { Personaje } from './types';
 import { HABILIDADES, idHabilidad } from './rules';
 import { RASGOS_FIJOS } from './fijos';
-import { HABILIDADES_MULTICLASE, clasesDe, dotesDeClases } from './multiclase';
+import { HABILIDADES_MULTICLASE, clasesDe, conSubclase, dotesDeClases } from './multiclase';
+import { bonosActivos } from './bonos';
 
 /** Una fuente que da competencias o pericias en habilidades «a elegir» (las fijas de raza ya se suman solas en bonos.ts). */
 export interface FuenteHabilidad { es: string; ru: string; comp: number; pericia: number; /** Vale como competencia o, si ya la tienes, como pericia. */ flexible?: boolean }
@@ -68,6 +69,12 @@ export function limitesHabilidades(p: Personaje, clase: Clase | null | undefined
   for (const [r, v] of Object.entries(RASGOS)) if (rasgos.has(r) && !(r === 'Hábil' && humanoConDote)) f.push({ es: r, ru: r, ...v });
   for (const d of p.dotes ?? []) { const k = Object.keys(DOTES).find((x) => igual(x, d.nombre)); if (k) f.push({ es: k, ru: k, ...DOTES[k] }); }
 
+  // Conocimiento del Arquero Arcano: Arcano y Naturaleza; por cada una que ya tuvieras, otra habilidad a tu elección.
+  if (conSubclase(p, 'Guerrero', 'Arquero arcano')) {
+    const otras = new Set(bonosActivos(p).filter((b) => b.origen !== 'Conocimiento del Arquero Arcano').flatMap((b) => b.b.competencia ?? []));
+    const repetidas = ['arcano', 'naturaleza'].filter((h) => otras.has(h) || p.habilidades[h]?.comp).length;
+    if (repetidas) f.push({ es: 'Arquero arcano (ya las tenías)', ru: 'Arquero arcano (уже были)', comp: repetidas, pericia: 0 });
+  }
   const comp = Math.min(HABILIDADES.length, f.reduce((s, x) => s + x.comp, 0));
   const pericia = f.reduce((s, x) => s + x.pericia + (x.flexible ? x.comp : 0), 0);
   return { comp, pericia, fuentes: f };

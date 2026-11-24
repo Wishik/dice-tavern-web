@@ -7,6 +7,7 @@ import { useDatos, type Clase, type Conjuro, type Dote, type Razas, type Trasfon
 import { calcularAvisos, manaMaximo, type Avisos } from '../avisos';
 import { DadoIcono, PanelDados, useDados } from '../dice';
 import { Asistente } from './Asistente';
+import { SubidaPasos } from './SubidaPasos';
 import { ModalMejoraNivel, mejorasPendientes } from './MejoraNivel';
 import { ajustarCinturon, capacidadCinturon, car, conSigno, espaciosUsados, modificador, pgExtra } from '../rules';
 import { Etiqueta, Modal, PuntoRojo } from '../ui';
@@ -146,7 +147,8 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
   const tabs = ajeno ? TABS_MASTER : TABS;
   const Tab = tabs.find((t) => t.id === tab) ?? tabs[0];
   const bloqueado = !ajeno && !!p.bloqueado;
-  const enAsistente = !ajeno && p.asistente !== undefined;
+  const enSubida = !ajeno && !!p.subida && !p.subidasPendientes && p.asistente === undefined;
+  const enAsistente = (!ajeno && p.asistente !== undefined) || enSubida;
 
   const borrar = async () => {
     if (!confirm(L(`¿Borrar a ${p.nombre || 'este personaje'} para siempre?`, `Удалить ${p.nombre || 'этого персонажа'} навсегда?`))) return;
@@ -185,7 +187,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
           })}
         </nav>}
         </div>
-        <main className="contenido">{enAsistente ? <Asistente /> : <Tab.C />}</main>
+        <main className="contenido">{enSubida ? <SubidaPasos /> : enAsistente ? <Asistente /> : <Tab.C />}</main>
         {Tab.id === 'notas' && !ajeno && <div className="pie-borrar"><button className="btn peligro" onClick={borrar}>{L('Borrar personaje', 'Удалить персонажа')}</button></div>}
         {!enAsistente && <button className="fab" onClick={() => setDados(true)} aria-label={L('Dados', 'Кубики')}><DadoIcono caras={20} size={40} /></button>}
         <SubidaNivel />
@@ -235,7 +237,11 @@ function SubidaNivel() {
             const t = tirar(L(`PG al subir a nivel ${nivelDe}`, `Хиты за уровень ${nivelDe}`), `1${dado}+1${conSigno(con)}`);
             if (!t) return;
             const gana = Math.max(1, t.total); // ya incluye +1 y CON
-            upd((x) => { x.pg.max += gana; x.pg.actual += gana; x.subidasPendientes = Math.max(0, x.subidasPendientes - 1); asignarNivel(x, clase); });
+            upd((x) => {
+              // Para la subida paso a paso: niveles de cada clase antes de esta tanda de subidas.
+              if (!x.subida) x.subida = { i: 0, antes: Object.fromEntries(clasesDe(x).map((c) => [c.clase, c.clase === x.clase ? c.nivel - x.subidasPendientes : c.nivel])) };
+              x.pg.max += gana; x.pg.actual += gana; x.subidasPendientes = Math.max(0, x.subidasPendientes - 1); asignarNivel(x, clase);
+            });
             setClase(p.clase);
           }} disabled={!dado}>🎲 {L('Tirar', 'Бросить')} 1{dado}</button>
         </div>

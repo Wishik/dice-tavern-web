@@ -57,7 +57,7 @@ export function Asistente() {
 }
 
 /** Si ya se ha bajado hasta el final de la página (para no saltarse nada). Se vuelve a mirar al cambiar de paso o de tamaño. */
-function useAlFinal(paso: string) {
+export function useAlFinal(paso: string) {
   const [abajo, setAbajo] = useState(false);
   useEffect(() => {
     let visto = false;
@@ -119,7 +119,7 @@ function useBajar(clave: string) {
   return ref;
 }
 
-function Ayuda({ children }: { children: ReactNode }) { return <p className="ayuda-asistente">💡 {children}</p>; }
+export function Ayuda({ children }: { children: ReactNode }) { return <p className="ayuda-asistente">💡 {children}</p>; }
 
 function PasoActual({ paso }: { paso: Paso }) {
   switch (paso) {

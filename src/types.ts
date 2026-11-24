@@ -177,6 +177,8 @@ export interface Personaje {
   pgExtra?: number;
   /** Asistente de creación: paso en el que va (sin valor = hoja completa). */
   asistente?: number;
+  /** Subida de nivel en curso: niveles de cada clase antes de subir, pasos a recorrer y en cuál va. */
+  subida?: { antes: Record<string, number>; pasos?: string[]; i: number };
   /** Bonificador de raza a características: [la de +2, la de +1]. */
   bonoRaza?: Atributo[];
   bonusPercepcionPasiva: number;

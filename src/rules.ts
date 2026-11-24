@@ -138,6 +138,7 @@ export function desgloseSalvacion(p: Personaje, a: Atributo): LineaDesglose[] {
 export function compSalvacionAuto(p: Personaje, a: Atributo): string | null {
   if (nivelEn(p, 'Pícaro') >= 15 && (a === 'SAB' || a === 'CAR')) return L('Mente escurridiza', 'Скользкий разум');
   if (a === 'SAB' && conSubclase(p, 'Explorador', 'Acechador en la penumbra', 7)) return L('Mente de hierro', 'Железный разум');
+  if (conSubclase(p, 'Explorador', 'Acechador en la penumbra', 7) && p.salvaciones.SAB.comp && p.elecciones?.['Explorador:sub:menteHierro']?.[0] === a) return L('Mente de hierro', 'Железный разум');
   return null;
 }
 export const tieneDote = (p: Personaje, n: string) => p.dotes.some((d) => d.nombre === n);

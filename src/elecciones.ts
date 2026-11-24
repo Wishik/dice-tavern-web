@@ -278,6 +278,10 @@ function eleccionesSubclase(p: Personaje, c: { clase: string; subclase: string; 
     case 'Hechicería dracónica':
       if (nv >= 6) out.push(una('afinidad', 'Afinidad elemental', 'Стихийное родство', ['Ácido', 'Frío', 'Fuego', 'Relámpago', 'Veneno'].map((x) => o(x)), 'Resistencia a ese daño y + mod. de Carisma al daño de tus conjuros de ese tipo.', 'Сопротивление этому урону и + мод. Харизмы к урону заклинаний этого типа.'));
       break;
+    case 'Acechador en la penumbra':
+      // Mente de hierro: si ya eras competente en TS de Sabiduría (por otra clase o rasgo), eliges Inteligencia o Carisma.
+      if (nv >= 7 && p.salvaciones.SAB.comp) out.push(una('menteHierro', 'Mente de hierro: ya tenías la TS de Sabiduría', 'Железный разум: спасбросок Мудрости уже был', [o('INT', 'ИНТ', 'Inteligencia', 'Интеллект'), o('CAR', 'ХАР', 'Carisma', 'Харизма')], 'Ganas competencia en esa tirada de salvación.', 'Получаешь владение этим спасброском.'));
+      break;
     case 'Monje de la sombra (Ninja)':
       out.push(una('arma', 'Arma exótica que recibes', 'Экзотическое оружие, которое получаешь', ARMAS_NINJA.map((x) => o(x)), 'Si no tienes ninguna de estas armas, recibes una. Ya eres competente con todas.', 'Если у тебя нет ни одного из них, получаешь одно. Владеешь всеми.'));
       break;
