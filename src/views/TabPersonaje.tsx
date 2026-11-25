@@ -1,5 +1,5 @@
 import { imagenRaza, retratoRaza } from '../imagenesRazas';
-import { aplicarClase, aplicarRaza, aplicarTrasfondo } from '../creacion';
+import { aplicarClase, aplicarRaza, aplicarSubclase, aplicarTrasfondo } from '../creacion';
 import { Fragment, useRef, useState } from 'react';
 import { Bloq, useFicha } from './Ficha';
 import { Etiqueta, Modal, Numero, PuntoRojo, Seccion, Texto, TextoLargo, comprimirFoto } from '../ui';
@@ -83,7 +83,7 @@ export function TabPersonaje() {
           {clase && (
             <Etiqueta texto={L(`Subclase${nivelPrincipal < 3 ? ' (nivel 3)' : ''}`, `Подкласс${nivelPrincipal < 3 ? ' (3 уровень)' : ''}`)}>
               <div className="con-boton">
-                <Bloq si={!!p.subclase}><select className="campo" value={p.subclase} onChange={(e) => upd((x) => { x.subclase = e.target.value; })}>
+                <Bloq si={!!p.subclase}><select className="campo" value={p.subclase} onChange={(e) => upd((x) => { aplicarSubclase(x, x.clase, e.target.value); })}>
                   <option value="">{L('— Ninguna —', '— Нет —')}</option>
                   {clase.subclases.map((s) => <option key={s.nombre} value={s.nombre}>{td(s.nombre)}</option>)}
                 </select></Bloq>
@@ -342,7 +342,7 @@ function Multiclase({ abrir, setAbrir }: { abrir: boolean; setAbrir: (b: boolean
             <strong>{T(RU_CLASES, m.clase)}</strong>
             <Etiqueta texto={L('Nivel', 'Уровень')}><Numero valor={m.nivel} min={1} max={m.nivel + principal - 1} set={(n) => upd((x) => { x.multiclase![i].nivel = Math.max(1, Math.min(n, m.nivel + principal - 1)); })} /></Etiqueta>
             {datos && <Etiqueta texto={L(`Subclase${m.nivel < 3 ? ' (nivel 3)' : ''}`, `Подкласс${m.nivel < 3 ? ' (3 ур.)' : ''}`)}>
-              <select className="campo" value={m.subclase} disabled={bloqueado && !!m.subclase} onChange={(e) => upd((x) => { x.multiclase![i].subclase = e.target.value; })}>
+              <select className="campo" value={m.subclase} disabled={bloqueado && !!m.subclase} onChange={(e) => upd((x) => { aplicarSubclase(x, m.clase, e.target.value); })}>
                 <option value="">{L('— Ninguna —', '— Нет —')}</option>
                 {datos.subclases.map((s) => <option key={s.nombre} value={s.nombre}>{td(s.nombre)}</option>)}
               </select>

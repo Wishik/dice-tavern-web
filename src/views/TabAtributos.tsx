@@ -6,7 +6,7 @@ import { ChipsEstados } from '../estados';
 import { useState } from 'react';
 import { BotonAnadir, Etiqueta, Modal, Numero, Seccion, Texto } from '../ui';
 import { Contador, useDados } from '../dice';
-import { car, CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosIniciativa, avisosTirada, pgExtra, bonoCompetencia, calcularCA, conDados, conSigno, textoMod, desgloseCar, uid, type LineaDesglose, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto, valorPrueba } from '../rules';
+import { car, carPermanente, CONJUNTO_ESTANDAR, aplicarConjuntoEstandar, avisosIniciativa, avisosTirada, pgExtra, bonoCompetencia, calcularCA, conDados, conSigno, textoMod, desgloseCar, uid, type LineaDesglose, estadoCarga, iniciativa, modificador, percepcionPasiva, pgPorDefecto, valorPrueba } from '../rules';
 import { bonoVelocidad, velocidadRasgo } from '../bonos';
 import { sumaEquipo } from '../bonosObjetos';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo, type RecursoExtra } from '../types';
@@ -147,7 +147,7 @@ export function TabAtributos() {
               <div className="car-nombre">{T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}</div>
               {ef === p.caracteristicas[a]
                 ? <Bloq><Numero valor={p.caracteristicas[a]} min={1} max={30} set={(n) => upd((x) => { x.caracteristicas[a] = n; })} className="car-valor" /></Bloq>
-                : <button className={`campo car-valor car-cambiado ${ef < p.caracteristicas[a] ? 'debuff' : 'buff'}`} onClick={() => setDesglose(a)} title={L(`Base ${p.caracteristicas[a]}: toca para ver de dónde sale`, `База ${p.caracteristicas[a]}: нажми, чтобы посмотреть, откуда`)}>{ef}</button>}
+                : <button className={`campo car-valor car-cambiado ${ef < carPermanente(p, a) ? 'debuff' : ef > carPermanente(p, a) ? 'buff' : ''}`} onClick={() => setDesglose(a)} title={L(`Base ${p.caracteristicas[a]}: toca para ver de dónde sale`, `База ${p.caracteristicas[a]}: нажми, чтобы посмотреть, откуда`)}>{ef}</button>}
               <button className="car-desglose" onClick={() => setDesglose(a)} title={L('De dónde sale y bonus', 'Откуда и бонусы')}>{ef !== p.caracteristicas[a] ? 'ⓘ' : '＋'}</button>
               <button className="car-mod" onClick={() => tirarD20(L(`Prueba de ${NOMBRE_ATRIBUTO[a]}`, `Проверка: ${T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a])}`), valorPrueba(p, a), avisosTirada(p, 'prueba', a))} title={L('Tirar prueba', 'Бросить проверку')}>{conSigno(m)}{valorPrueba(p, a) !== m && <small className="extra-rasgo">{conSigno(valorPrueba(p, a) - m)}</small>}</button>
             </div>

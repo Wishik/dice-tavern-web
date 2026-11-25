@@ -15,6 +15,12 @@ export function car(p: Personaje, a: Atributo): number {
     + sumaEquipo(p, a) + aumentoClase(p, a).reduce((s, x) => s + x.valor, 0) + aumentosDotes(p, a).reduce((s, x) => s + x.valor, 0) + bonoRazaEn(p, a);
   return extra ? Math.max(1, Math.min(30, p.caracteristicas[a] + extra)) : p.caracteristicas[a];
 }
+/** Valor «de por vida»: base + raza + dotes + rasgos de clase + bonus a mano. Lo que no entra (efectos del máster, objetos) es temporal. */
+export function carPermanente(p: Personaje, a: Atributo): number {
+  const extra = (p.bonosExtra ?? []).filter((b) => b.donde === a).reduce((s, b) => s + (b.valor || 0), 0)
+    + aumentoClase(p, a).reduce((s, x) => s + x.valor, 0) + aumentosDotes(p, a).reduce((s, x) => s + x.valor, 0) + bonoRazaEn(p, a);
+  return extra ? Math.max(1, Math.min(30, p.caracteristicas[a] + extra)) : p.caracteristicas[a];
+}
 /** +2 / +1 de la raza (elegidos en el asistente). */
 export const bonoRazaEn = (p: Personaje, a: Atributo) => (p.bonoRaza?.[0] === a ? 2 : 0) + (p.bonoRaza?.[1] === a ? 1 : 0);
 /** Aumentos de nivel 20: Campeón primordial (bárbaro, FUE y CON +4) y Cuerpo y mente (monje, DES y SAB +4), hasta 25. */

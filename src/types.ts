@@ -178,7 +178,7 @@ export interface Personaje {
   /** Asistente de creación: paso en el que va (sin valor = hoja completa). */
   asistente?: number;
   /** Subida de nivel en curso: niveles de cada clase antes de subir, pasos a recorrer y en cuál va. */
-  subida?: { antes: Record<string, number>; pasos?: string[]; i: number };
+  subida?: { antes: Record<string, number>; pasos?: string[]; i: number; /** Clases cuya clase o subclase se ha cambiado: se enseñan todos sus rasgos y se vuelve a elegir. */ cambio?: string[] };
   /** Bonificador de raza a características: [la de +2, la de +1]. */
   bonoRaza?: Atributo[];
   bonusPercepcionPasiva: number;

@@ -66,7 +66,7 @@ export function SubidaPasos() {
     <div className="tab asistente">
       <div className="asistente-cabecera">
         <div className="pasos-barra">{pasos.map((x, k) => <span key={x} className={k < i ? 'hecho' : k === i ? 'actual' : ''} />)}</div>
-        <h2>{L(`Nivel ${p.nivel}`, `Уровень ${p.nivel}`)} · {L(...TITULOS[paso])}</h2>
+        <h2>{s.cambio?.length ? L('Cambio de clase', 'Смена класса') : L(`Nivel ${p.nivel}`, `Уровень ${p.nivel}`)} · {paso === 'rasgos' && s.cambio?.length ? L('Lo que te da', 'Что это даёт') : L(...TITULOS[paso])}</h2>
       </div>
       {paso === 'rasgos' && <PasoRasgos />}
       {paso === 'subclase' && <PasoSubclase />}
@@ -94,7 +94,8 @@ function PasoRasgos() {
     const datos = buscarClase(clases, c.clase);
     const desde = antes[c.clase] ?? 0;
     const sub = datos?.subclases.find((x) => x.nombre === c.subclase);
-    return [...(datos?.rasgos ?? []), ...(sub?.rasgos ?? [])].filter((r) => r.nivel > desde && r.nivel <= c.nivel && !/^Opciones de|^Lista de conjuros/.test(r.nombre)).map((r) => ({ clase: c.clase, ...r }));
+    const cambio = p.subida?.cambio?.includes(c.clase);
+    return [...(datos?.rasgos ?? []).filter((r) => r.nivel > desde), ...(sub?.rasgos ?? []).filter((r) => cambio || r.nivel > desde)].filter((r) => r.nivel <= c.nivel && !/^Opciones de|^Lista de conjuros/.test(r.nombre)).map((r) => ({ clase: c.clase, ...r }));
   });
   return <>
     <Ayuda>{L('Esto es lo que ganas con el nivel. Lo que da números (recursos, bonos…) ya se ha sumado solo; en los pasos siguientes eliges lo que toque.', 'Вот что даёт уровень. Числа (ресурсы, бонусы) уже добавлены; дальше выбираешь, что нужно.')}</Ayuda>

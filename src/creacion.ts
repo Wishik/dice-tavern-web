@@ -3,6 +3,7 @@ import { ATRIBUTOS, type Atributo, type Personaje } from './types';
 import { buscarClase, buscarRaza } from './avisos';
 import { aplicarConjuntoEstandar, caracteristicasSinTocar, idHabilidad, pgPorDefecto } from './rules';
 import { esRetratoRaza, retratoRaza } from './imagenesRazas';
+import { clasesDe } from './multiclase';
 
 /** Lo que pasa al elegir raza, clase o trasfondo (lo usan la hoja y el asistente de creación). */
 export function aplicarRaza(x: Personaje, nombre: string, razas: Razas | null, clases: Clase[] | null) {
@@ -38,6 +39,31 @@ export function aplicarClase(x: Personaje, nombre: string, clases: Clase[] | nul
   if (c && (x.pg.max === 0 || x.pg.max === pgViejo)) { x.pg.max = pgPorDefecto(x, c.atributos.dadoGolpe); x.pg.actual = x.pg.max; x.pgExtra = 0; }
   // La característica de conjuros vuelve a ser la automática de la clase.
   x.conjuroCaracteristica = '';
+  // Con el personaje ya creado: lo elegido para la clase anterior ya no vale y se vuelve a elegir todo paso a paso.
+  if (viejo && viejo.nombre !== nombre) {
+    if (x.elecciones) x.elecciones = Object.fromEntries(Object.entries(x.elecciones).filter(([k]) => !k.startsWith(`${viejo.nombre}:`)));
+    if (x.asistente === undefined) { empezarCambio(x, nombre); x.subida!.antes[nombre] = 0; delete x.subida!.antes[viejo.nombre]; }
+  }
+}
+
+/** Con el personaje ya creado, cambiar de clase o subclase abre los pasos guiados para volver a elegir lo que toque. */
+function empezarCambio(x: Personaje, clase: string) {
+  if (x.asistente !== undefined) return;
+  const antes = Object.fromEntries(clasesDe(x).map((c) => [c.clase, c.nivel]));
+  x.subida = { i: 0, antes: { ...antes, ...(x.subida?.antes ?? {}) }, cambio: [...new Set([...(x.subida?.cambio ?? []), clase])] };
+}
+/** Borra lo elegido para una subclase (`Clase:sub:…`). */
+const borrarEleccionesSub = (x: Personaje, clase: string) => {
+  if (x.elecciones) x.elecciones = Object.fromEntries(Object.entries(x.elecciones).filter(([k]) => !k.startsWith(`${clase}:sub:`)));
+};
+/** Cambiar la subclase (principal o de multiclase): lo elegido para la anterior ya no vale y se vuelve a elegir. */
+export function aplicarSubclase(x: Personaje, clase: string, nombre: string) {
+  const m = clase === x.clase ? null : x.multiclase?.find((y) => y.clase === clase);
+  const viejo = m ? m.subclase : x.subclase;
+  if (m) m.subclase = nombre; else x.subclase = nombre;
+  if (viejo === nombre) return;
+  borrarEleccionesSub(x, clase);
+  if (nombre) empezarCambio(x, clase);
 }
 
 export function aplicarTrasfondo(x: Personaje, nombre: string, trasfondos: Trasfondo[] | null) {
