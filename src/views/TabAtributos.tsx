@@ -11,7 +11,7 @@ import { bonoVelocidad, velocidadRasgo } from '../bonos';
 import { sumaEquipo } from '../bonosObjetos';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo, type RecursoExtra } from '../types';
 import { buscarClase } from '../avisos';
-import { descansoCorto, descansoLargo, dgRecuperados, extraDadoGolpe, recursosPersonaje, recuperaExtra, resumenCorto } from '../recursos';
+import { alTirarIniciativa, descansoCorto, descansoLargo, dgRecuperados, extraDadoGolpe, recursosPersonaje, recuperaExtra, resumenCorto } from '../recursos';
 import { L, T, RU_CLASES, RU_NOMBRE_ATRIBUTO, idioma } from '../i18n';
 import { MAX_DESCANSOS_CORTOS, catalogoRecursos, recordatoriosCorto } from '../descansoCorto';
 import { useDatos, type Conjuro } from '../data';
@@ -32,6 +32,7 @@ export function TabAtributos() {
   // Multiclase: un botón por cada tipo de dado de golpe de tus clases.
   const dadosDG = [...new Set(clasesDe(p).map((c) => buscarClase(clases, c.clase)?.atributos.dadoGolpe).filter(Boolean) as string[])];
   const recursos = recursosPersonaje(p, clase);
+  const [recIni, setRecIni] = useState<string[]>([]);
   const dgQuedan = Math.max(0, p.nivel - p.dgUsados);
   const extraDg = extraDadoGolpe(p);
   const pen = carga.penalizacion;
@@ -110,7 +111,7 @@ export function TabAtributos() {
       {corto && (() => {
         const ru = idioma() === 'ru';
         const auto = resumenCorto(p, clase, ru);
-        const extra = recordatoriosCorto(p, razas, todosConjuros, ru);
+        const extra = recordatoriosCorto(p, razas, todosConjuros, ru, recursosPersonaje(p, clase).filter((r) => !r.extra).map((r) => r.id));
         const notas = (p.recursosExtra ?? []).filter((r) => recuperaExtra(r) !== 'largo');
         return (
           <Modal titulo={L('Descanso corto', 'Короткий отдых')} onClose={() => setCorto(false)}
@@ -161,7 +162,8 @@ export function TabAtributos() {
 
       <div className="fila-3-tarjetas">
         <Seccion titulo="Iniciativa">
-          <button className="valor-grande tirable" onClick={() => tirarD20(L('Iniciativa', 'Инициатива'), conDados(iniciativa(p), dadosEquipo(p, 'iniciativa')), avisosIniciativa(p), (t) => upd((x) => { x.iniciativaActual = t; }), 'combate')}>{textoMod(conDados(iniciativa(p), dadosEquipo(p, 'iniciativa')))}</button>
+          <button className="valor-grande tirable" onClick={() => tirarD20(L('Iniciativa', 'Инициатива'), conDados(iniciativa(p), dadosEquipo(p, 'iniciativa')), avisosIniciativa(p), (t) => { setRecIni(alTirarIniciativa(structuredClone(p), clase)); upd((x) => { x.iniciativaActual = t; alTirarIniciativa(x, clase); }); }, 'combate')}>{textoMod(conDados(iniciativa(p), dadosEquipo(p, 'iniciativa')))}</button>
+          {recIni.length > 0 && p.iniciativaActual !== null && <p className="nota centro exito">✓ {L(`Recuperado al tirar iniciativa: ${recIni.join(', ')}.`, `Восстановлено при броске инициативы: ${recIni.join(', ')}.`)}</p>}
           {p.iniciativaActual !== null && <p className="nota centro">{L('En este combate', 'В этом бою')}: <strong>{p.iniciativaActual}</strong> <button className="btn enlace pequeno" onClick={() => upd((x) => { x.iniciativaActual = null; })}>✕</button></p>}
           <Etiqueta texto="Bonus extra"><Numero valor={p.bonusIniciativa} set={(n) => upd((x) => { x.bonusIniciativa = n; })} /></Etiqueta>
         </Seccion>
@@ -246,8 +248,8 @@ const OPCIONES_RECUPERA = [
 ] as const;
 
 function ModalRecurso({ onClose, editar }: { onClose: () => void; editar?: RecursoExtra }) {
-  const { p, upd, razas } = useFicha();
-  const cat = catalogoRecursos(p, razas);
+  const { p, upd, razas, clases } = useFicha();
+  const cat = catalogoRecursos(p, razas, recursosPersonaje(p, buscarClase(clases, p.clase)).filter((r) => !r.extra).map((r) => r.id));
   const [form, setForm] = useState<RecursoExtra | null>(editar ? { ...editar, recupera: recuperaExtra(editar), corto: undefined } : null);
   const nuevo = (): RecursoExtra => ({ id: `propio-${Date.now()}`, es: '', ru: '', max: 1, recupera: 'largo', notas: '' });
   const guardar = () => {

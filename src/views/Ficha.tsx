@@ -9,9 +9,10 @@ import { DadoIcono, PanelDados, useDados } from '../dice';
 import { Asistente } from './Asistente';
 import { SubidaPasos } from './SubidaPasos';
 import { ModalMejoraNivel, mejorasPendientes } from './MejoraNivel';
-import { ajustarCinturon, capacidadCinturon, car, conSigno, espaciosUsados, modificador, pgExtra } from '../rules';
+import { subirUnNivel, ajustarCinturon, capacidadCinturon, car, conSigno, espaciosUsados, modificador, pgExtra } from '../rules';
 import { Etiqueta, Modal, PuntoRojo } from '../ui';
-import { GANAS_MULTICLASE, asignarNivel, clasesDe, cumpleRequisito, fijarClases, textoClases, textoRequisito } from '../multiclase';
+import { fijarRazas } from '../recursosTexto';
+import { GANAS_MULTICLASE, clasesDe, cumpleRequisito, fijarClases, textoClases, textoRequisito } from '../multiclase';
 import { TabPersonaje } from './TabPersonaje';
 import { TabAtributos } from './TabAtributos';
 import { TabHabilidades } from './TabHabilidades';
@@ -77,6 +78,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
   const clases = useDatos<Clase[]>('clases');
   fijarClases(clases);
   const razas = useDatos<Razas>('razas');
+  fijarRazas(razas);
   const trasfondos = useDatos<Trasfondo[]>('trasfondos');
   const dotes = useDatos<Dote[]>('dotes');
   const timer = useRef<number>();
@@ -147,7 +149,7 @@ export function Ficha({ id, onVolver, volverTexto, ajeno }: { id: string; onVolv
   const tabs = ajeno ? TABS_MASTER : TABS;
   const Tab = tabs.find((t) => t.id === tab) ?? tabs[0];
   const bloqueado = !ajeno && !!p.bloqueado;
-  const enSubida = !ajeno && !!p.subida && !p.subidasPendientes && p.asistente === undefined;
+  const enSubida = !ajeno && !!p.subida && p.asistente === undefined;
   const enAsistente = (!ajeno && p.asistente !== undefined) || enSubida;
 
   const borrar = async () => {
@@ -209,9 +211,10 @@ function SubidaNivel() {
   const { tirar } = useDados();
   const [clase, setClase] = useState(p.clase);
   const dado = clases?.find((c) => c.nombre === clase)?.atributos.dadoGolpe ?? '';
-  if (!p.subidasPendientes || !p.clase) return null;
+  // Mientras se elige lo del nivel anterior (subida paso a paso), el siguiente nivel espera.
+  if (!p.subidasPendientes || !p.clase || p.subida) return null;
   const con = modificador(car(p, 'CON'));
-  const nivelDe = p.nivel - p.subidasPendientes + 1;
+  const nivelDe = p.nivel + 1;
   const mias = clasesDe(p).map((c) => c.clase);
   const nueva = !mias.includes(clase);
   const valor = (a: Atributo) => car(p, a);
@@ -222,7 +225,7 @@ function SubidaNivel() {
         <h3>{L(`¡Subes a nivel ${nivelDe}!`, `Новый уровень: ${nivelDe}!`)}</h3>
         <Etiqueta texto={L('¿En qué clase subes este nivel?', 'В какой класс идёт этот уровень?')}>
           <select className="campo" value={clase} onChange={(e) => setClase(e.target.value)}>
-            {clasesDe(p).map((c) => <option key={c.clase} value={c.clase}>{T(RU_CLASES, c.clase)} {c.clase === p.clase ? `${c.nivel - p.subidasPendientes} → ${c.nivel - p.subidasPendientes + 1}` : `${c.nivel} → ${c.nivel + 1}`}</option>)}
+            {clasesDe(p).map((c) => <option key={c.clase} value={c.clase}>{T(RU_CLASES, c.clase)} {`${c.nivel} → ${c.nivel + 1}`}</option>)}
             <optgroup label={L('Nueva clase (multiclase)', 'Новый класс (мультикласс)')}>
               {(clases ?? []).filter((c) => !mias.includes(c.nombre)).map((c) => <option key={c.nombre} value={c.nombre}>{T(RU_CLASES, c.nombre)} 1</option>)}
             </optgroup>
@@ -231,7 +234,7 @@ function SubidaNivel() {
         {nueva && <p className="nota">{L(`Multiclase: ganas ${(GANAS_MULTICLASE[clase]?.[0] ?? '').toLowerCase()} Requisito: ${textoRequisito(p.clase)} (${p.clase}) y ${textoRequisito(clase)} (${clase}).`, `Мультикласс: получаешь ${(GANAS_MULTICLASE[clase]?.[1] ?? '').toLowerCase()} Требование: ${textoRequisito(p.clase)} (${T(RU_CLASES, p.clase)}) и ${textoRequisito(clase)} (${T(RU_CLASES, clase)}).`)}</p>}
         {sinRequisito && <p className="error">⚠ {L('No llegas a 13 en la característica que pide. Pregunta a tu máster.', 'Не хватает 13 в нужной характеристике. Уточни у мастера.')}</p>}
         <p>{L(`Tira tu dado de golpe de ${clase}:`, `Брось кость хитов класса ${T(RU_CLASES, clase)}:`)} <strong>1{dado} +1 {conSigno(con)} {T(RU_ATRIBUTOS, 'CON')}</strong>. {L('El total se suma a tus PG máximos y actuales.', 'Сумма прибавится к максимуму и текущим хитам.')}</p>
-        {p.subidasPendientes > 1 && <p className="nota">{L(`Te quedan ${p.subidasPendientes} niveles por tirar.`, `Осталось бросков за уровни: ${p.subidasPendientes}.`)}</p>}
+        {p.subidasPendientes > 1 && <p className="nota">{L(`Subes de nivel en nivel: después de elegir lo de este nivel, te quedarán ${p.subidasPendientes - 1} más.`, `Уровни повышаются по одному: после выбора на этом уровне останется ещё ${p.subidasPendientes - 1}.`)}</p>}
         <div className="fila-botones">
           <button className="btn primario" onClick={() => {
             const t = tirar(L(`PG al subir a nivel ${nivelDe}`, `Хиты за уровень ${nivelDe}`), `1${dado}+1${conSigno(con)}`);
@@ -239,8 +242,9 @@ function SubidaNivel() {
             const gana = Math.max(1, t.total); // ya incluye +1 y CON
             upd((x) => {
               // Para la subida paso a paso: niveles de cada clase antes de esta tanda de subidas.
-              if (!x.subida) x.subida = { i: 0, antes: Object.fromEntries(clasesDe(x).map((c) => [c.clase, c.clase === x.clase ? c.nivel - x.subidasPendientes : c.nivel])) };
-              x.pg.max += gana; x.pg.actual += gana; x.subidasPendientes = Math.max(0, x.subidasPendientes - 1); asignarNivel(x, clase);
+              // Subida paso a paso: niveles de cada clase antes de este nivel; luego se elige todo lo de este nivel.
+              x.subida = { i: 0, antes: Object.fromEntries(clasesDe(x).map((c) => [c.clase, c.nivel])) };
+              x.pg.max += gana; x.pg.actual += gana; subirUnNivel(x, clase);
             });
             setClase(p.clase);
           }} disabled={!dado}>🎲 {L('Tirar', 'Бросить')} 1{dado}</button>
@@ -267,7 +271,7 @@ function AvisoMejora() {
   const n = clases ? mejorasPendientes(p, clases, trasfondos) : 0;
   const [cerrado, setCerrado] = useState(-1);
   // Se vuelve a preguntar si aparece otra pendiente (otro nivel); «más tarde» la deja en Rasgos → Dotes.
-  if (!n || p.subidasPendientes || cerrado >= n) return null;
+  if (!n || p.subidasPendientes || p.subida || cerrado >= n) return null;
   return <ModalMejoraNivel key={n} onClose={() => {}} onMasTarde={() => setCerrado(n)} />;
 }
 

@@ -1,4 +1,4 @@
-import { ajustarMulticlase, clasesDe, conSubclase, nivelEn, nivelTotal } from './multiclase';
+import { ajustarMulticlase, asignarNivel, clasesDe, conSubclase, nivelEn, nivelTotal } from './multiclase';
 import type { Atributo, Item, Moneda, Personaje } from './types';
 import { ventajaIniciativa, ventajasRasgos, bonoAtaqueArma, bonoAtaqueConjuro, bonoCdConjuro, bonoFuerzaCarga, bonoHabilidad, bonoPrueba, bonoSalvacion, bonosCA, bonosActivos, lineasBonos } from './bonos';
 import { NOMBRE_ATRIBUTO } from './types';
@@ -371,6 +371,19 @@ export const CONJUNTO_ESTANDAR: Record<string, [number, number, number, number, 
   'Monje': [12, 15, 13, 10, 14, 8], 'Paladín': [15, 10, 13, 8, 12, 14], 'Pícaro': [12, 15, 13, 14, 10, 8],
 };
 const ORDEN_CAR: Atributo[] = ['FUE', 'DES', 'CON', 'INT', 'SAB', 'CAR'];
+/** Coste en puntos (PDF, «Coste en puntos de las puntuaciones de característica»): 27 puntos, de 8 a 15. */
+export const COSTE_PUNTOS: Record<number, number> = { 8: 0, 9: 1, 10: 2, 11: 3, 12: 4, 13: 5, 14: 7, 15: 9 };
+export const PUNTOS_TOTAL = 27;
+export const puntosGastados = (p: Personaje) => ORDEN_CAR.reduce((s, a) => s + (COSTE_PUNTOS[p.caracteristicas[a]] ?? 99), 0);
+/** Generación aleatoria (PDF): 4d6 y se suman los tres más altos, seis veces. */
+export const tirar4d6 = () => Array.from({ length: 4 }, () => 1 + Math.floor(Math.random() * 6));
+export const sumaTres = (t: number[]) => t.reduce((s, x) => s + x, 0) - Math.min(...t);
+/** Reparte seis valores según la prioridad del conjunto estándar de la clase (el más alto a su característica principal). */
+export function repartirPorClase(p: Personaje, clase: string, valores: number[]) {
+  const est = CONJUNTO_ESTANDAR[clase] ?? [15, 14, 13, 12, 10, 8];
+  const orden = ORDEN_CAR.map((a, i) => [a, est[i]] as const).sort((x, y) => y[1] - x[1]).map(([a]) => a);
+  [...valores].sort((x, y) => y - x).forEach((v, i) => { p.caracteristicas[orden[i]] = v; });
+}
 export function aplicarConjuntoEstandar(p: Personaje, clase: string): boolean {
   const c = CONJUNTO_ESTANDAR[clase]; if (!c) return false;
   ORDEN_CAR.forEach((a, i) => { p.caracteristicas[a] = c[i]; });
@@ -397,12 +410,22 @@ export function pgPorDefecto(p: Personaje, dado: string): number {
   // Regla de la mesa: a nivel 1, dado máximo + CON + 1 (el mismo +1 que en cada subida).
   return Math.max(1, c + 1 + modificador(car(p, 'CON')));
 }
-/** Cambia el nivel y apunta las subidas pendientes de tirar dado de golpe. */
+/** Nivel al que llega el personaje contando los niveles que aún no ha subido (pendientes de tirar). */
+export const nivelObjetivo = (p: Personaje) => p.nivel + (p.subidasPendientes || 0);
+/**
+ * Cambia el nivel. Al subir, los niveles nuevos quedan pendientes y se suben de uno en uno:
+ * tirar el dado de golpe → elegir lo de ese nivel → el siguiente. `p.nivel` es el nivel ya subido.
+ */
 export function cambiarNivel(p: Personaje, nivel: number) {
-  const d = nivel - p.nivel;
+  if (nivel >= p.nivel) { p.subidasPendientes = nivel - p.nivel; return; }
+  // Bajar por debajo de lo ya subido: sin pendientes y se quitan niveles.
+  p.subidasPendientes = 0;
   p.nivel = nivel;
-  p.subidasPendientes = Math.max(0, (p.subidasPendientes || 0) + d);
-  if (d < 0) ajustarMulticlase(p);
+  ajustarMulticlase(p);
+}
+/** Sube uno de los niveles pendientes (después de tirar el dado de golpe), en la clase elegida. */
+export function subirUnNivel(p: Personaje, clase: string) {
+  p.nivel += 1; p.subidasPendientes = Math.max(0, (p.subidasPendientes || 0) - 1); asignarNivel(p, clase);
 }
 /** PG ganados al subir un nivel: lo que sale en el dado + 1 + modificador de CON (mínimo 1). */
 export const pgSubida = (tirada: number, con: number) => Math.max(1, tirada + 1 + modificador(con));

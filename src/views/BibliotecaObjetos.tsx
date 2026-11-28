@@ -3,7 +3,7 @@ import { Modal, Seccion, TextoLargo, ListaDatos } from '../ui';
 import { L } from '../i18n';
 import { td } from '../datosRu';
 import { codificar, decodificar } from '../codigo';
-import { guardarEnBiblioteca, quitarDeBiblioteca } from '../bibliotecaObjetos';
+import { guardarEnBiblioteca, quitarDeBiblioteca, visiblesBiblioteca } from '../bibliotecaObjetos';
 import { CATEGORIAS_ITEM, type Item } from '../types';
 import { useAlijos } from './Alijos';
 import { textoBonos } from './TabInventario';
@@ -17,7 +17,11 @@ export function SeccionBiblioteca() {
   const [viendo, setViendo] = useState<Item | null>(null);
   const [exportar, setExportar] = useState(false);
   const [importar, setImportar] = useState(false);
-  const items = biblioteca?.items ?? [];
+  const items = visiblesBiblioteca(biblioteca?.items);
+  const quitar = async (it: Item) => {
+    if (!partida || !confirm(L(`¿Eliminar «${it.nombre}» de la biblioteca? (No se lo quita a quien ya lo tenga.)`, `Удалить «${it.nombre}» из библиотеки? (У тех, у кого он уже есть, он останется.)`))) return;
+    try { await quitarDeBiblioteca(partida, it.id); setViendo(null); } catch (e) { alert((e as Error).message); }
+  };
   return (
     <Seccion titulo={L('Biblioteca de objetos', 'Библиотека предметов')}>
       {!partida ? <p className="nota pequena">{L('La biblioteca es de la partida: entra con este personaje en una partida y los objetos que creéis se guardarán aquí.', 'Библиотека общая для партии: войди этим персонажем в партию, и созданные предметы будут сохраняться здесь.')}</p> : <>
@@ -26,7 +30,8 @@ export function SeccionBiblioteca() {
         {items.length === 0 ? <p className="vacio">{L('Aún no hay objetos creados.', 'Созданных предметов пока нет.')}</p> : (
           <ul className="lista-alijo">
             {items.map((it) => (
-              <li key={it.id}><button className="item-boton" onClick={() => setViendo(it)}>📚 {td(it.nombre)} <small className="nota pequena">· {nombreCat(it.tipo)}{it.bonos?.length ? ` · ✨ ${textoBonos(it)}` : ''}</small></button></li>
+              <li key={it.id} className="fila-biblioteca"><button className="item-boton" onClick={() => setViendo(it)}>📚 {td(it.nombre)} <small className="nota pequena">· {nombreCat(it.tipo)}{it.bonos?.length ? ` · ✨ ${textoBonos(it)}` : ''}</small></button>
+                <button className="btn pequeno peligro" title={L('Eliminar de la biblioteca', 'Удалить из библиотеки')} onClick={() => quitar(it)}>🗑</button></li>
             ))}
           </ul>
         )}
@@ -37,10 +42,7 @@ export function SeccionBiblioteca() {
       </>}
       {viendo && partida && (
         <Modal titulo={td(viendo.nombre)} onClose={() => setViendo(null)}
-          pie={<button className="btn peligro" onClick={async () => {
-            if (!confirm(L(`¿Quitar «${viendo.nombre}» de la biblioteca? (No se lo quita a quien ya lo tenga.)`, `Убрать «${viendo.nombre}» из библиотеки? (У тех, у кого он уже есть, он останется.)`))) return;
-            try { await quitarDeBiblioteca(partida, viendo.id); setViendo(null); } catch (e) { alert((e as Error).message); }
-          }}>{L('Quitar de la biblioteca', 'Убрать из библиотеки')}</button>}>
+          pie={<button className="btn peligro" onClick={() => quitar(viendo)}>🗑 {L('Eliminar de la biblioteca', 'Удалить из библиотеки')}</button>}>
           <p className="nota">{nombreCat(viendo.tipo)}{viendo.precio ? ` · ${viendo.precio}` : ''}{viendo.maxPorEspacio ? ` · ${L('máx.', 'макс.')} ${viendo.maxPorEspacio} ${L('por espacio', 'на ячейку')}` : ''}</p>
           {viendo.bonos?.length ? <p className="mejoras-item">✨ {textoBonos(viendo)}</p> : null}
           {viendo.detalles && <ListaDatos datos={viendo.detalles} />}

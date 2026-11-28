@@ -4,7 +4,7 @@ import { Fragment, useRef, useState } from 'react';
 import { Bloq, useFicha } from './Ficha';
 import { Etiqueta, Modal, Numero, PuntoRojo, Seccion, Texto, TextoLargo, comprimirFoto } from '../ui';
 import { listaIdiomas, HUECOS_IDIOMAS_ANTIGUOS, type Hueco } from '../rules';
-import { car, HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, aplicarConjuntoEstandar, aplicarExperiencia, caracteristicasSinTocar, huecoDisponible, idHabilidad, cambiarNivel, idiomasDeTexto, pgPorDefecto, pxParaSubir, RASGOS_IDIOMA } from '../rules';
+import { car, HUECOS_IDIOMAS, HUECOS_OFICIOS, HUECOS_PROFESIONES, aplicarConjuntoEstandar, aplicarExperiencia, caracteristicasSinTocar, huecoDisponible, idHabilidad, cambiarNivel, nivelObjetivo, idiomasDeTexto, pgPorDefecto, pxParaSubir, RASGOS_IDIOMA } from '../rules';
 import { ATRIBUTOS, type Atributo, type Personaje } from '../types';
 import { buscarClase, buscarRaza } from '../avisos';
 import { L, T, idioma, RU_ATRIBUTOS, RU_CLASES, RU_RAZAS } from '../i18n';
@@ -47,7 +47,7 @@ export function TabPersonaje() {
           <div className="datos-basicos">
             <Etiqueta texto="Nombre"><Texto valor={p.nombre} set={(s) => upd((x) => { x.nombre = s; })} /></Etiqueta>
             <div className="fila-2">
-              <Etiqueta texto="Nivel"><Bloq><Numero valor={p.nivel} min={1} max={20} set={(n) => upd((x) => { cambiarNivel(x, n); })} /></Bloq></Etiqueta>
+              <Etiqueta texto="Nivel"><Bloq><Numero valor={nivelObjetivo(p)} min={1} max={20} set={(n) => upd((x) => { cambiarNivel(x, n); })} /></Bloq></Etiqueta>
               <Etiqueta texto="Exp."><button type="button" className="campo boton-exp" onClick={() => setVerExp(true)}>{p.exp}{pxParaSubir(p.nivel) !== null && <small> / {pxParaSubir(p.nivel)}</small>}</button></Etiqueta>
             </div>
             {pxParaSubir(p.nivel) !== null && <div className="barra-exp"><div style={{ width: `${Math.min(100, (p.exp / pxParaSubir(p.nivel)!) * 100)}%` }} /></div>}
@@ -97,7 +97,7 @@ export function TabPersonaje() {
         </div>
       </Seccion>
 
-      <Elecciones />
+      <Elecciones soloPendientes />
 
       <Seccion titulo="Trasfondo">
         <Etiqueta texto="Estilo de trasfondo (opcional)">
@@ -296,19 +296,19 @@ function ModalExperiencia({ onClose }: { onClose: () => void }) {
   const { p, upd } = useFicha();
   const [txt, setTxt] = useState('');
   const n = parseInt(txt, 10) || 0;
-  const r = aplicarExperiencia(p.nivel, p.exp + n);
-  const necesita = pxParaSubir(p.nivel);
+  const r = aplicarExperiencia(nivelObjetivo(p), p.exp + n);
+  const necesita = pxParaSubir(nivelObjetivo(p));
   const aplicar = () => {
     if (!n) return;
-    upd((x) => { const q = aplicarExperiencia(x.nivel, x.exp + n); cambiarNivel(x, q.nivel); x.exp = q.exp; });
+    upd((x) => { const q = aplicarExperiencia(nivelObjetivo(x), x.exp + n); cambiarNivel(x, q.nivel); x.exp = q.exp; });
     onClose();
   };
   return (
     <Modal titulo="Experiencia" onClose={onClose}
       pie={<button className="btn primario" disabled={!n} onClick={aplicar}>{L('Añadir PX', 'Добавить опыт')}</button>}>
       {idioma() === 'ru'
-        ? <p className="nota">Уровень {p.nivel}: у тебя <strong>{p.exp}</strong>{necesita !== null ? <> из <strong>{necesita}</strong> опыта до {p.nivel + 1} уровня.</> : ' опыта (максимальный уровень).'} При повышении остаток сохраняется.</p>
-        : <p className="nota">Nivel {p.nivel}: llevas <strong>{p.exp}</strong>{necesita !== null ? <> de <strong>{necesita}</strong> PX para subir a nivel {p.nivel + 1}.</> : ' PX (nivel máximo).'} Al subir, lo que sobra se queda como experiencia.</p>}
+        ? <p className="nota">Уровень {nivelObjetivo(p)}: у тебя <strong>{p.exp}</strong>{necesita !== null ? <> из <strong>{necesita}</strong> опыта до {nivelObjetivo(p) + 1} уровня.</> : ' опыта (максимальный уровень).'} При повышении остаток сохраняется.</p>
+        : <p className="nota">Nivel {nivelObjetivo(p)}: llevas <strong>{p.exp}</strong>{necesita !== null ? <> de <strong>{necesita}</strong> PX para subir a nivel {nivelObjetivo(p) + 1}.</> : ' PX (nivel máximo).'} Al subir, lo que sobra se queda como experiencia.</p>}
       <form onSubmit={(e) => { e.preventDefault(); aplicar(); }}>
         <input className="campo grande" autoFocus inputMode="numeric" value={txt} onChange={(e) => setTxt(e.target.value.replace(/\D/g, ''))} placeholder={L('PX ganados', 'Полученный опыт')} />
       </form>
@@ -317,7 +317,7 @@ function ModalExperiencia({ onClose }: { onClose: () => void }) {
       <details className="corregir">
         <summary>{L('Corregir a mano', 'Исправить вручную')}</summary>
         <div className="fila-2">
-          <Etiqueta texto="Nivel"><Bloq><Numero valor={p.nivel} min={1} max={20} set={(v) => upd((x) => { cambiarNivel(x, v); })} /></Bloq></Etiqueta>
+          <Etiqueta texto="Nivel"><Bloq><Numero valor={nivelObjetivo(p)} min={1} max={20} set={(v) => upd((x) => { cambiarNivel(x, v); })} /></Bloq></Etiqueta>
           <Etiqueta texto="PX actuales"><Numero valor={p.exp} min={0} set={(v) => upd((x) => { x.exp = v; })} /></Etiqueta>
         </div>
       </details>

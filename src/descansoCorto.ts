@@ -3,6 +3,7 @@ import type { Conjuro, Razas } from './data';
 import type { Personaje } from './types';
 import { FUENTES, concesionesActivas, fuenteActiva } from './conjurosRasgos';
 import { bonoCompetencia, car, modificador } from './rules';
+import { razasFijadas } from './recursosTexto';
 
 /** Descansos cortos que se pueden hacer entre dos descansos largos (regla de la mesa). */
 export const MAX_DESCANSOS_CORTOS = 2;
@@ -90,11 +91,26 @@ const aplica = (p: Personaje, razas: Razas | null) => (r: Recordatorio) => {
   return true;
 };
 
+/** Nombres de rasgos y dotes del catálogo que ya dan un recurso (para no sacarlos otra vez del texto). */
+export const NOMBRES_CATALOGO = R.filter((r) => r.rec).map((r) => r.rasgo ?? r.dote ?? r.rec!.es);
+
+/** Recursos del catálogo que le tocan al personaje: salen solos en la hoja (ya no hay que añadirlos a mano). */
+export function recursosCatalogoActivos(p: Personaje): { id: string; es: string; ru: string; max: number; corto: 'uno' | 'todos' }[] {
+  const ok = aplica(p, razasFijadas());
+  const out: { id: string; es: string; ru: string; max: number; corto: 'uno' | 'todos' }[] = [];
+  for (const r of R) {
+    if (!r.rec || !ok(r) || out.some((x) => x.id === r.rec!.id)) continue;
+    const c = r.clase ? clasesDe(p).find((x) => x.clase === r.clase) : undefined;
+    out.push({ id: r.rec.id, es: r.rec.es, ru: r.rec.ru, max: r.rec.max(c ? vistaClase(p, c) : p), corto: r.rec.corto });
+  }
+  return out;
+}
+
 export interface RecursoCatalogo { id: string; es: string; ru: string; max: number; corto: 'uno' | 'todos'; tuyo: boolean }
 
 /** Recursos que se pueden añadir a la hoja: primero los que le corresponden al personaje (tuyo), luego el resto. Sin los ya añadidos. */
-export function catalogoRecursos(p: Personaje, razas: Razas | null): RecursoCatalogo[] {
-  const ya = new Set((p.recursosExtra ?? []).map((r) => r.id));
+export function catalogoRecursos(p: Personaje, razas: Razas | null, auto: string[] = []): RecursoCatalogo[] {
+  const ya = new Set([...(p.recursosExtra ?? []).map((r) => r.id), ...auto]);
   const vistos = new Set<string>();
   const ok = aplica(p, razas);
   const out: RecursoCatalogo[] = [];
@@ -106,9 +122,9 @@ export function catalogoRecursos(p: Personaje, razas: Razas | null): RecursoCata
   return out;
 }
 
-export function recordatoriosCorto(p: Personaje, razas: Razas | null, todos: Conjuro[] | null, ru: boolean): string[] {
+export function recordatoriosCorto(p: Personaje, razas: Razas | null, todos: Conjuro[] | null, ru: boolean, auto: string[] = []): string[] {
   // Los que ya están como recurso en la hoja se recuperan solos: no hace falta recordarlos.
-  const ya = new Set((p.recursosExtra ?? []).map((r) => r.id));
+  const ya = new Set([...(p.recursosExtra ?? []).map((r) => r.id), ...auto]);
   const out = R.filter(aplica(p, razas)).filter((r) => !r.rec || !ya.has(r.rec.id)).map((r) => (ru ? r.ru : r.es));
   // Conjuros de raza que se lanzan gratis 1 vez por descanso.
   const nombres = concesionesActivas(p, razas)

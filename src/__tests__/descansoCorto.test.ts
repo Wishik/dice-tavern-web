@@ -35,13 +35,14 @@ describe('recursos añadidos a mano', () => {
     expect(cat[0].tuyo).toBe(true);
     const sup = cat.find((r) => r.id === 'dadosSupremacia')!;
     expect(sup.max).toBe(4);
+    // Ahora sale solo (sin añadirlo a mano), se recupera en el descanso corto y no se repite si estaba añadido.
     p.recursosExtra = [{ id: sup.id, es: sup.es, ru: sup.ru, max: sup.max, corto: sup.corto }];
-    expect(recursosPersonaje(p, null).some((r) => r.id === 'dadosSupremacia' && r.extra)).toBe(true);
+    expect(recursosPersonaje(p, null).filter((r) => r.id === 'dadosSupremacia').map((r) => !!r.extra)).toEqual([false]);
     p.recursosUsados = { dadosSupremacia: 3 };
     descansoCorto(p, null);
-    expect(p.recursosUsados.dadosSupremacia).toBe(3); // los añadidos no se recuperan solos
-    expect(recordatoriosCorto(p, null, null, false).some((t) => t.startsWith('Dados de supremacía'))).toBe(false);
-    expect(catalogoRecursos(p, null).some((r) => r.id === 'dadosSupremacia')).toBe(false);
+    expect(p.recursosUsados.dadosSupremacia).toBe(0);
+    expect(recordatoriosCorto(p, null, null, false, ['dadosSupremacia']).some((t) => t.startsWith('Dados de supremacía'))).toBe(false);
+    expect(catalogoRecursos(p, null, ['dadosSupremacia']).some((r) => r.id === 'dadosSupremacia')).toBe(false);
   });
 });
 

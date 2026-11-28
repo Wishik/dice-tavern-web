@@ -11,12 +11,14 @@ import { meterEquipoInicial } from '../equipoInicial';
 import { idiomasDeTexto, listaIdiomas } from '../rules';
 
 /** «Por elegir»: lo que la raza, la clase o una dote mandan escoger. Lo pendiente sale con punto rojo. */
-export function Elecciones() {
+/** `soloPendientes` (en la hoja): solo sale si queda algo y solo lo que falta; lo ya elegido está en sus apartados y no se cambia hasta subir de nivel. */
+export function Elecciones({ soloPendientes }: { soloPendientes?: boolean }) {
   const { p, razas, clases } = useFicha();
   const lista = eleccionesDe(p, clases, buscarRaza(razas, p.raza));
   if (!lista.length) return null;
   const pendientes = eleccionesPendientes(p, lista);
-  const orden = [...lista.filter((e) => faltan(p, e) > 0), ...lista.filter((e) => faltan(p, e) === 0)];
+  if (soloPendientes && !pendientes) return null;
+  const orden = [...lista.filter((e) => faltan(p, e) > 0), ...(soloPendientes ? [] : lista.filter((e) => faltan(p, e) === 0))];
   return (
     <Seccion titulo={L('Por elegir', 'Нужно выбрать')} aviso={pendientes}>
       <p className="nota pequena">{pendientes > 0

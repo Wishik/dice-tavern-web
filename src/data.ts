@@ -47,6 +47,9 @@ export const CONTENEDORES_MUNICION = [
 ];
 export interface ObjetoBase { nombre: string; descripcion: string; precio: string; tipo: TipoItem; categoria: string; detalles?: Record<string, string>; maxPorEspacio?: number; /** Unidades que se compran juntas (munición). */ cantidad?: number; /** Objeto de la biblioteca de la partida (completo). */ item?: Item }
 let baseObjetos: Promise<ObjetoBase[]> | null = null;
+let baseLista: ObjetoBase[] | null = null;
+/** La base de objetos si ya se ha cargado (sin esperar). */
+export const baseCargada = () => baseLista;
 export function cargarObjetos(): Promise<ObjetoBase[]> {
   if (!baseObjetos) baseObjetos = Promise.all([cargar<(Arma | Armadura)[]>('armas'), cargar<Equipo[]>('gear')]).then(([aa, gg]) => {
     const out: ObjetoBase[] = [];
@@ -67,7 +70,8 @@ export function cargarObjetos(): Promise<ObjetoBase[]> {
     // Munición: tabla «Lista de munición para armas a distancia» del manual (cantidad que se compra y precio).
     for (const m of MUNICION)
       out.push({ nombre: m.nombre, precio: m.precio, tipo: 'municion', categoria: 'munición', descripcion: m.descripcion, maxPorEspacio: 20, cantidad: m.cantidad });
-    return out.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+    baseLista = out.sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+    return baseLista;
   });
   return baseObjetos;
 }

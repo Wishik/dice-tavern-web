@@ -7,7 +7,7 @@ import type { Dote } from '../data';
 import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo, type EntradaTexto, type Personaje } from '../types';
 import { car } from '../rules';
 import { DOTE_MEJORA, mejoraDe, opcionesMejora, requisitoDote, type OpcionesMejora } from '../mejoras';
-import { dotesDeClases, nivelTotal } from '../multiclase';
+import { dotesDeClases, nivelTotal, nivelesMejora } from '../multiclase';
 import { esDoteDeEstilo } from '../elecciones';
 import type { Clase, Trasfondo } from '../data';
 
@@ -15,16 +15,22 @@ const nombreAtr = (a: Atributo) => T(RU_NOMBRE_ATRIBUTO, NOMBRE_ATRIBUTO[a]);
 
 /** Cuántas «Mejora de característica» / «Don épico» de las clases faltan por resolver (con características o con una dote). */
 export function mejorasPendientes(p: Personaje, clases: Clase[] | null, trasfondos: Trasfondo[] | null): number {
+  return Math.max(0, dotesDeClases(p, clases?.find((c) => c.nombre === p.clase)) - dotesTomadas(p, trasfondos));
+}
+/** Dotes que gastan una «Mejora de característica» de la clase (sin la de origen del trasfondo ni los estilos de combate). */
+function dotesTomadas(p: Personaje, trasfondos: Trasfondo[] | null): number {
   const deOrigen = new Set(trasfondos?.find((t) => t.nombre === p.trasfondoEstilo)?.dotes ?? []);
   let origenUsado = false;
-  const tomadas = p.dotes.filter((d) => {
+  return p.dotes.filter((d) => {
     if (esDoteDeEstilo(d)) return false;
     // La primera dote de origen (la del trasfondo) no cuenta: es la de nivel 1.
     if (!origenUsado && (d.origen === 'origen' || deOrigen.has(d.nombre))) { origenUsado = true; return false; }
     return true;
   }).length;
-  return Math.max(0, dotesDeClases(p, clases?.find((c) => c.nombre === p.clase)) - tomadas);
 }
+/** De qué nivel es la siguiente mejora pendiente («Nivel 8»). */
+export const siguienteMejora = (p: Personaje, clases: Clase[] | null, trasfondos: Trasfondo[] | null) =>
+  nivelesMejora(p, clases?.find((c) => c.nombre === p.clase))[dotesTomadas(p, trasfondos)] ?? `Nivel ${nivelTotal(p)}`;
 
 /** Elegir a qué característica(s) va el +1 de una dote (o los +2 de la Mejora de Característica). */
 export function ElegirAtributos({ op, valor, inicial, onListo }: { op: OpcionesMejora; valor: (a: Atributo) => number; inicial?: Atributo[]; onListo: (a: Atributo[]) => void }) {
@@ -39,7 +45,7 @@ export function ElegirAtributos({ op, valor, inicial, onListo }: { op: OpcionesM
         : L('¿A qué característica va el +1?', 'Какой характеристике +1?')} {L(`Máximo ${op.max}.`, `Максимум ${op.max}.`)}</p>
       <div className="chips">
         {ATRIBUTOS.filter((a) => op.atrs.includes(a)).map((a) => (
-          <button key={a} className={`chip ${sube(a) ? 'activo' : ''}`} disabled={!cabe(a) && op.cantidad === 2 && !sube(a)} onClick={() => poner(a)}>
+          <button key={a} className={`chip ${sube(a) ? 'activo' : ''}`} disabled={!cabe(a) && !(op.cantidad === 1 && sube(a))} onClick={() => poner(a)}>
             {nombreAtr(a)} {valor(a)}{sube(a) ? ` → ${Math.min(op.max, valor(a) + sube(a))}` : ''}
           </button>
         ))}
@@ -66,13 +72,13 @@ export function ModalMejoraNivel({ onClose, onMasTarde }: { onClose: () => void;
 /** Contenido de la Mejora de característica (también va dentro de la subida de nivel, sin «más tarde»). */
 export function CuerpoMejora({ onHecho, onMasTarde }: { onHecho: () => void; onMasTarde?: () => void }) {
   const tarde = onMasTarde;
-  const { p, upd, dotes } = useFicha();
+  const { p, upd, dotes, clases, trasfondos } = useFicha();
   const [paso, setPaso] = useState<'inicio' | 'carac' | 'dote'>('inicio');
   const [dote, setDote] = useState<Dote | null>(null);
   const epico = nivelTotal(p) >= 19;
   const mejora = dotes?.find((d) => d.nombre === DOTE_MEJORA);
   const valor = (a: Atributo) => car(p, a);
-  const anadir = (e: EntradaTexto) => { upd((x) => { x.dotes.push(e); }); setPaso('inicio'); setDote(null); onHecho(); };
+  const anadir = (e: EntradaTexto) => { upd((x) => { x.dotes.push({ ...e, fuente: siguienteMejora(x, clases, trasfondos) }); }); setPaso('inicio'); setDote(null); onHecho(); };
   const opDote = dote && opcionesMejora({ nombre: dote.nombre, texto: dote.descripcion });
   return (
     <>

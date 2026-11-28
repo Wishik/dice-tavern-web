@@ -7,7 +7,7 @@ import { ATRIBUTOS, NOMBRE_ATRIBUTO, type Atributo } from '../types';
 import { buscarClase, buscarRaza } from '../avisos';
 import { aplicarClase, aplicarRaza, aplicarTrasfondo } from '../creacion';
 import { imagenRaza, retratoRaza } from '../imagenesRazas';
-import { CONJUNTO_ESTANDAR, HABILIDADES, RASGOS_RECOMENDADOS, car, conSigno, idHabilidad, modificador } from '../rules';
+import { CONJUNTO_ESTANDAR, COSTE_PUNTOS, HABILIDADES, PUNTOS_TOTAL, RASGOS_RECOMENDADOS, aplicarConjuntoEstandar, car, conSigno, idHabilidad, modificador, puntosGastados, repartirPorClase, sumaTres, tirar4d6 } from '../rules';
 import { anotarOrden, limitesHabilidades } from '../limitesHabilidades';
 import { Elecciones } from './Elecciones';
 import { Alineamiento, Huecos, IdiomasEditor } from './TabPersonaje';
@@ -91,7 +91,10 @@ function usePuedeSeguir(paso: Paso): { ok: boolean; falta?: string } {
       if (t.dotes.length && !p.dotes.some((d) => d.origen === 'origen' || t.dotes.includes(d.nombre))) return no('Elige tu dote de origen.', 'Выбери черту происхождения.');
       break;
     }
-    case 'caracteristicas': if (r && !(p.bonoRaza?.[0] && p.bonoRaza?.[1])) return no('Elige a qué características van el +2 y el +1.', 'Выбери, куда идут +2 и +1.'); break;
+    case 'caracteristicas':
+      if (p.metodoCar === 'aleatorio' && !p.tiradasCar?.length) return no('Tira los dados de tus características.', 'Брось кости характеристик.');
+      if (p.metodoCar === 'puntos' && puntosGastados(p) > PUNTOS_TOTAL) return no('Te has pasado de los 27 puntos.', 'Больше 27 очков.');
+      if (r && !(p.bonoRaza?.[0] && p.bonoRaza?.[1])) return no('Elige a qué características van el +2 y el +1.', 'Выбери, куда идут +2 и +1.'); break;
     case 'habilidades': {
       const t = trasfondos?.find((x) => x.nombre === p.trasfondoEstilo);
       const deTras = new Set((t?.habilidades ?? []).map(idHabilidad).filter(Boolean) as string[]);
@@ -269,7 +272,7 @@ function PasoTrasfondo() {
   const elegirDote = (n: string) => upd((x) => {
     x.dotes = x.dotes.filter((d) => !(d.origen === 'origen' || t?.dotes.includes(d.nombre)));
     const d = dotes?.find((y) => y.nombre === n);
-    x.dotes.unshift({ nombre: n, texto: d?.descripcion ?? '', origen: 'origen' });
+    x.dotes.unshift({ nombre: n, texto: d?.descripcion ?? '', origen: 'origen', fuente: `Trasfondo ${x.trasfondoEstilo}` });
   });
   return <>
     <Ayuda>{L('El trasfondo es tu vida antes de la aventura. Te da dos habilidades y una dote de origen.', 'Предыстория — жизнь до приключений. Даёт два навыка и черту происхождения.')}</Ayuda>
@@ -300,11 +303,52 @@ function PasoCaracteristicas() {
     if (cambiar !== a) upd((x) => { const v = x.caracteristicas[a]; x.caracteristicas[a] = x.caracteristicas[cambiar]; x.caracteristicas[cambiar] = v; });
     setCambiar(null);
   };
+  const metodo = p.metodoCar ?? 'estandar';
+  const ponerMetodo = (m: 'estandar' | 'aleatorio' | 'puntos') => upd((x) => {
+    if ((x.metodoCar ?? 'estandar') === m) return;
+    // Las tiradas son una sola vez: si ya tiraste, volver a «aleatoria» recupera las mismas.
+    x.metodoCar = m;
+    if (m === 'estandar') aplicarConjuntoEstandar(x, x.clase);
+    if (m === 'puntos') for (const a of ATRIBUTOS) x.caracteristicas[a] = 8;
+    if (m === 'aleatorio' && x.tiradasCar?.length) repartirPorClase(x, x.clase, x.tiradasCar.map(sumaTres));
+    if (m === 'aleatorio' && !x.tiradasCar?.length) for (const a of ATRIBUTOS) x.caracteristicas[a] = 10;
+  });
+  const tirar = () => upd((x) => { if (x.tiradasCar?.length) return; x.tiradasCar = Array.from({ length: 6 }, tirar4d6); repartirPorClase(x, x.clase, x.tiradasCar.map(sumaTres)); });
+  const gastados = puntosGastados(p);
+  const cambiarPunto = (a: Atributo, d: number) => upd((x) => {
+    const v = x.caracteristicas[a] + d;
+    if (v < 8 || v > 15) return;
+    const antes = x.caracteristicas[a]; x.caracteristicas[a] = v;
+    if (puntosGastados(x) > PUNTOS_TOTAL) x.caracteristicas[a] = antes;
+  });
   const bono = (k: 0 | 1, a: Atributo) => upd((x) => { const b = [...(x.bonoRaza ?? [])]; b[k] = a; if (b[1 - k] === a) b[1 - k] = undefined as unknown as Atributo; x.bonoRaza = b; });
   return <>
-    <Ayuda>{L('Tus seis características dicen en qué eres bueno. Te hemos puesto el reparto recomendado para tu clase; toca dos para intercambiarlas.', 'Шесть характеристик показывают, в чём ты силён. Мы поставили рекомендованный набор для класса; нажми две, чтобы поменять местами.')}</Ayuda>
-    <div className="rejilla-car-asistente">
-      {ATRIBUTOS.map((a) => (
+    <Ayuda>{L('Tus seis características dicen en qué eres bueno. Elige cómo generarlas (son los tres métodos del manual).', 'Шесть характеристик показывают, в чём ты силён. Выбери способ (три способа из книги).')}</Ayuda>
+    <div className="segmentado metodo-car">
+      <button type="button" className={metodo === 'estandar' ? 'activo' : ''} onClick={() => ponerMetodo('estandar')}>{L('Conjunto estándar', 'Стандартный набор')}</button>
+      <button type="button" className={metodo === 'aleatorio' ? 'activo' : ''} onClick={() => ponerMetodo('aleatorio')}>{L('Aleatoria (4d6)', 'Случайно (4d6)')}</button>
+      <button type="button" className={metodo === 'puntos' ? 'activo' : ''} onClick={() => ponerMetodo('puntos')}>{L('Coste en puntos', 'Покупка очками')}</button>
+    </div>
+    {metodo === 'estandar' && <p className="nota">{L('El reparto recomendado para tu clase (15, 14, 13, 12, 10, 8). Toca dos para intercambiarlas.', 'Рекомендованный набор класса (15, 14, 13, 12, 10, 8). Нажми две, чтобы поменять местами.')}</p>}
+    {metodo === 'aleatorio' && (!p.tiradasCar?.length
+      ? <><p className="nota">{L('Tira 4d6 y suma los tres dados más altos, seis veces. Solo se tira una vez. Luego toca dos características para intercambiarlas.', 'Бросок 4d6, сумма трёх лучших, шесть раз. Бросается один раз. Потом нажми две, чтобы поменять.')}</p>
+        <button type="button" className="btn primario" onClick={tirar}>🎲 {L('Tirar mis características', 'Бросить характеристики')}</button></>
+      : <p className="nota">{L('Tus tiradas', 'Броски')}: {p.tiradasCar.map((t, i) => <span key={i} className="tirada-car">{sumaTres(t)} <small>({t.join(', ')})</small></span>)}. {L('Toca dos para intercambiarlas.', 'Нажми две, чтобы поменять.')}</p>)}
+    {metodo === 'puntos' && <p className={`nota ${gastados > PUNTOS_TOTAL ? 'falta-asistente' : ''}`}>{L(`Tienes ${PUNTOS_TOTAL} puntos; cada característica va de 8 a 15. Te quedan ${PUNTOS_TOTAL - gastados}.`, `${PUNTOS_TOTAL} очков, каждая характеристика от 8 до 15. Осталось ${PUNTOS_TOTAL - gastados}.`)}
+      <br /><small>{L('Coste', 'Цена')}: {Object.entries(COSTE_PUNTOS).map(([v, c]) => `${v}=${c}`).join(' · ')}</small></p>}
+    {(metodo !== 'aleatorio' || !!p.tiradasCar?.length) && <div className="rejilla-car-asistente">
+      {ATRIBUTOS.map((a) => metodo === 'puntos' ? (
+        <div key={a} className="car-asistente">
+          <small>{nombreAtr(a)}</small>
+          <strong>{car(p, a)}</strong>
+          <span>{conSigno(modificador(car(p, a)))}</span>
+          <div className="puntos-car">
+            <button type="button" className="btn pequeno" disabled={p.caracteristicas[a] <= 8} onClick={() => cambiarPunto(a, -1)}>−</button>
+            <em>{p.caracteristicas[a]}</em>
+            <button type="button" className="btn pequeno" disabled={p.caracteristicas[a] >= 15 || puntosGastados({ ...p, caracteristicas: { ...p.caracteristicas, [a]: p.caracteristicas[a] + 1 } }) > PUNTOS_TOTAL} onClick={() => cambiarPunto(a, 1)}>+</button>
+          </div>
+        </div>
+      ) : (
         <button key={a} className={`car-asistente ${cambiar === a ? 'cambiando' : ''}`} onClick={() => intercambiar(a)}>
           <small>{nombreAtr(a)}</small>
           <strong>{car(p, a)}</strong>
@@ -312,9 +356,8 @@ function PasoCaracteristicas() {
           {car(p, a) !== p.caracteristicas[a] && <em>{L('base', 'база')} {p.caracteristicas[a]}</em>}
         </button>
       ))}
-    </div>
+    </div>}
     {cambiar && <p className="nota centro">{L(`Toca la característica con la que cambiar ${nombreAtr(cambiar)}.`, `Нажми, с чем поменять: ${nombreAtr(cambiar)}.`)}</p>}
-    {est && <p className="nota centro pequena">{L('Reparto estándar', 'Стандартный набор')}: 15, 14, 13, 12, 10, 8</p>}
     {r && <div className="detalle-asistente">
       <h4>{L('Bonificador de tu raza', 'Бонус расы')}</h4>
       <p className="nota">{td(r.caracteristicas)} {L('Lo normal es subir la característica principal de tu clase.', 'Обычно повышают основную характеристику класса.')}</p>

@@ -1,4 +1,6 @@
-import { clasesDe, datosClase, esMulticlase, nivelEn, nivelTotal, vistaClase } from './multiclase';
+import { NOMBRES_CATALOGO, recursosCatalogoActivos } from './descansoCorto';
+import { recursosTexto } from './recursosTexto';
+import { clasesDe, conSubclase, datosClase, esMulticlase, nivelEn, nivelTotal, vistaClase } from './multiclase';
 import type { Clase } from './data';
 import type { Personaje, RecursoExtra } from './types';
 import { bonoCompetencia, car, modificador } from './rules';
@@ -39,7 +41,18 @@ export function recursosRaza(p: Personaje): Recurso[] {
 }
 
 /** Todos los recursos con usos del personaje: los de su clase y los de su raza. */
-export const recursosPersonaje = (p: Personaje, clase: Clase | null | undefined): Recurso[] => [...recursosClase(p, clase), ...recursosRaza(p), ...(p.recursosExtra ?? []).map(recursoDeExtra)];
+export const recursosPersonaje = (p: Personaje, clase: Clase | null | undefined): Recurso[] => {
+  const auto = [...recursosClase(p, clase), ...recursosRaza(p)];
+  // Rasgos de raza, genéricos y dotes del catálogo (Alas celestiales, Aliento de dragón, Don del destino…): ya van solos.
+  for (const r of recursosCatalogoActivos(p)) if (!auto.some((x) => x.id === r.id)) auto.push(r);
+  // Los añadidos a mano que ahora salen solos no se repiten.
+  const fijos = [...auto, ...(p.recursosExtra ?? []).filter((e) => !auto.some((x) => x.id === e.id)).map(recursoDeExtra)];
+  // Lo que el texto de los rasgos dice que tiene usos (Luz divina, Poder de los Altos Cielos, Afortunado…).
+  const ya = [...fijos.map((r) => r.es.replace(/\s*\(d\d+\)$/, '')), ...NO_RECURSO, ...NOMBRES_CATALOGO];
+  return [...fijos, ...recursosTexto(p, clase, ya)];
+};
+/** Rasgos cuyo texto habla de usos pero que ya se llevan de otra forma (columnas de la tabla, maná, recordatorios). */
+const NO_RECURSO = ['Furia', 'Canalizar divinidad', 'Forma salvaje', 'Tomar aliento', 'Puntos de hechicería', 'Fuente de magia', 'Puntos de ki', 'Disciplina monástica', 'Concentración', 'Enemigo predilecto', 'Inspiración bárdica', 'Imponer las manos', 'Superioridad en combate', 'Trance', 'Trance Trol', 'Bendición de los Espíritus', 'Hibernar', 'Conocimiento Astral', 'Fabricante', 'Chef', 'Líder inspirador', 'Maestro de armas', 'Don de la resistencia a energías', 'Mejora de Característica', 'Magia Duergar', 'Conjuros característicos', 'Vampiro'];
 
 export function recursoDeExtra(r: RecursoExtra): Recurso {
   // Los recursos añadidos no se recuperan solos: el descanso solo los recuerda.
@@ -87,6 +100,8 @@ const PSI_D: [number, string][] = [[3, 'd6'], [5, 'd8'], [11, 'd10'], [17, 'd12'
 
 /** Rasgos de clase con usos que no salen en la tabla de la clase (aquí `sub` es el nombre de la clase). */
 export const RECURSOS_CLASE: RecSub[] = [
+  { sub: 'Guerrero', nivel: 9, id: 'indomito', es: 'Indómito', ru: 'Неукротимый', max: (p) => porNivel(p, [[9, 1], [13, 2], [17, 3]]) },
+  { sub: 'Druida', nivel: 20, id: 'archidruida', es: 'Archidruida', ru: 'Архидруид', max: uno },
   { sub: 'Guerrero', nivel: 2, id: 'accionSubita', es: 'Acción súbita', ru: 'Всплеск действий', max: (p) => (p.nivel >= 17 ? 2 : 1), corto: 'todos' },
   { sub: 'Brujo', nivel: 2, id: 'astuciaMagica', es: 'Astucia mágica', ru: 'Магическая хитрость', max: uno },
   { sub: 'Brujo', nivel: 9, id: 'contactarPatron', es: 'Contactar patrón', ru: 'Связь с покровителем', max: uno },
@@ -233,6 +248,29 @@ export function descansoCorto(x: Personaje, clase: Clase | null | undefined): st
   x.recursosUsados = usados;
   x.descansosCortos = (x.descansosCortos ?? 0) + 1;
   if (nivelEn(x, 'Explorador') >= 10 && x.agotamiento > 0) { x.agotamiento -= 1; hecho.push('agotamiento'); }
+  return hecho;
+}
+
+/**
+ * Al tirar iniciativa, lo que los rasgos devuelven solos: Disparo siempre listo (Arquero arcano 7; 2 usos con Reserva arcana 18),
+ * Forma salvaje permanente (Archidruida), Inspiración superior (Bardo 18, hasta 2) y Concentración perfecta (Monje 15, ki hasta 4).
+ * Devuelve qué ha recuperado (para avisarlo).
+ */
+export function alTirarIniciativa(x: Personaje, clase: Clase | null | undefined): string[] {
+  const hecho: string[] = [];
+  const recs = recursosPersonaje(x, clase);
+  const usados = { ...(x.recursosUsados ?? {}) };
+  const quedan = (id: string) => { const r = recs.find((y) => y.id === id); return r ? r.max - (usados[id] ?? 0) : null; };
+  const hasta = (id: string, n: number, es: string) => {
+    const r = recs.find((y) => y.id === id); const q = quedan(id);
+    if (!r || q === null || q >= Math.min(n, r.max)) return;
+    usados[id] = Math.max(0, r.max - Math.min(n, r.max)); hecho.push(es);
+  };
+  if (conSubclase(x, 'Guerrero', 'Arquero arcano', 7) && quedan('disparoArcano') === 0) hasta('disparoArcano', conSubclase(x, 'Guerrero', 'Arquero arcano', 18) ? 2 : 1, 'Disparo siempre listo');
+  if (nivelEn(x, 'Druida') >= 20 && quedan('formaSalvaje') === 0) hasta('formaSalvaje', 1, 'Archidruida');
+  if (nivelEn(x, 'Bardo') >= 18) hasta('inspiracionBardica', 2, 'Inspiración superior');
+  if (nivelEn(x, 'Monje') >= 15 && (quedan('ki') ?? 99) <= 3) hasta('ki', 4, 'Concentración perfecta');
+  x.recursosUsados = usados;
   return hecho;
 }
 

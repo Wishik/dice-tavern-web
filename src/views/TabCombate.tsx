@@ -14,6 +14,7 @@ import { recursosPersonaje } from '../recursos';
 import { alternarPotenciador, apagarDeUnGolpe, aplicaArma, potenciadoresDisponibles, sumarDano, type Potenciador } from '../potenciadores';
 import { armasConMaestria, textoMaestria } from '../elecciones';
 import { normalizarTexto } from '../data';
+import { ataquesPorRasgos } from '../multiclase';
 
 type ArmaLlevada = { it: Item; donde: string; ref: (x: Personaje) => Item | null | undefined; extra?: string; natural?: boolean };
 /** Armas que llevas en las manos o en el cinturón: salen solas en Combate. */
@@ -51,13 +52,15 @@ export function TabCombate() {
   const maestrias = armasConMaestria(p);
   const llevadas: ArmaLlevada[] = [...objetos, ...armasNaturales(p, buscarClase(clases, p.clase)).map((n) => ({ ...n, ref: () => null, natural: true }))];
   const auto = CARACTERISTICA_CONJUROS[p.clase];
+  const ataquesRasgos = ataquesPorRasgos(p, buscarClase(clases, p.clase));
   return (
     <div className="tab">
       <Seccion titulo="Ataques por turno">
         <div className="fila-2 alineada">
-          <Etiqueta texto="Mano hábil"><Numero valor={p.ataquesTurno.habil} min={0} set={(n) => upd((x) => { x.ataquesTurno.habil = n; })} /></Etiqueta>
-          <Etiqueta texto="Mano torpe"><Numero valor={p.ataquesTurno.torpe} min={0} set={(n) => upd((x) => { x.ataquesTurno.torpe = n; })} /></Etiqueta>
+          <Etiqueta texto="Mano hábil"><Numero valor={Math.max(p.ataquesTurno.habil, ataquesRasgos)} min={ataquesRasgos} set={(n) => upd((x) => { x.ataquesTurno.habil = n; })} /></Etiqueta>
+          <Etiqueta texto="Mano torpe"><Numero valor={Math.max(p.ataquesTurno.torpe, 1)} min={1} set={(n) => upd((x) => { x.ataquesTurno.torpe = n; })} /></Etiqueta>
         </div>
+        {ataquesRasgos > 1 && <p className="nota pequena">{L(`Tus rasgos te dan ${ataquesRasgos} ataques con la acción de atacar (Ataque adicional).`, `Умения дают ${ataquesRasgos} атаки за действие «Атака» (Дополнительная атака).`)}</p>}
       </Seccion>
 
       <Seccion titulo="Armas que llevas">
@@ -88,7 +91,7 @@ export function TabCombate() {
               <li key={it.id} className="ataque auto">
                 <div className="ataque-titulo"><strong>{natural ? it.nombre : td(it.nombre)}</strong><small>{natural ? donde : tr(donde)}{tipo ? ` · ${tipo}` : ''}{it.danoExtra ? ` + ${it.danoExtra}` : ''}{it.magico ? ` · +${it.magico}` : ''}</small></div>
                 {natural && it.descripcion && <p className="nota pequena">{it.descripcion}</p>}
-                {!natural && maestrias.some((n) => normalizarTexto(it.nombre).includes(normalizarTexto(n))) && <p className="nota pequena maestria-arma">⭐ {L('Maestría', 'Мастерство')}{it.detalles?.['Maestría'] ? `: ${textoMaestria(it.detalles['Maestría'])}` : ''}</p>}
+                {!natural && maestrias.some((n) => normalizarTexto(`${it.nombre} ${it.detalles?.['Tipo de arma'] ?? ''}`).includes(normalizarTexto(n))) && <p className="nota pequena maestria-arma">⭐ {L('Maestría', 'Мастерство')}{it.detalles?.['Maestría'] ? `: ${textoMaestria(it.detalles['Maestría'])}` : ''}</p>}
                 {artes && <p className="nota pequena">🥋 {dado !== dadoArma ? L(`Arma de monje: usa tu dado de artes marciales (${artes}) en vez de ${dadoArma}.`, `Оружие монаха: кость боевых искусств (${artes}) вместо ${dadoArma}.`) : L('Arma de monje: puedes usar FUE o DES.', 'Оружие монаха: можно бить от СИЛ или ЛОВ.')}</p>}
                 <div className="atr-arma">
                   {(['ataque', 'dano'] as const).map((k) => (

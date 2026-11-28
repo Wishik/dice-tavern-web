@@ -128,7 +128,7 @@ function Grupo({ grupo, titulo, sugeridas }: { grupo: string; titulo: string; su
           const r = bonoHabilidad(p, h.id, st.comp);
           return (
             <li key={h.id} className={`${r.origen.length ? 'con-rasgo' : ''} ${deMas.comp.has(h.id) || deMas.pericia.has(h.id) ? 'de-mas' : ''}`}>
-              <Check valor={st.comp} clase={deMas.comp.has(h.id) ? 'de-mas' : ''} titulo={deMas.comp.has(h.id) ? L('Competencia (pasa del límite)', 'Владение (сверх лимита)') : 'Competencia'}
+              <Check valor={st.comp || !!r.comp} clase={deMas.comp.has(h.id) ? 'de-mas' : !st.comp && r.comp ? 'comp-auto' : ''} titulo={deMas.comp.has(h.id) ? L('Competencia (pasa del límite)', 'Владение (сверх лимита)') : !st.comp && r.comp ? L(`Competencia automática: ${r.origen.join(', ')}`, `Владение автоматически: ${r.origen.join(', ')}`) : 'Competencia'}
                 set={(b) => upd((x) => { const quitaP = !b && x.habilidades[h.id].pericia; x.habilidades[h.id].comp = b; if (!b) x.habilidades[h.id].pericia = false; orden(x, h.id, b, quitaP ? false : undefined); })} />
               <Check valor={st.pericia} clase={deMas.pericia.has(h.id) ? 'de-mas' : ''} titulo={deMas.pericia.has(h.id) ? L('Pericia (pasa del límite)', 'Компетентность (сверх лимита)') : 'Pericia'}
                 set={(b) => upd((x) => { const ponC = b && !x.habilidades[h.id].comp; x.habilidades[h.id].pericia = b; if (b) x.habilidades[h.id].comp = true; orden(x, h.id, ponC ? true : undefined, b); })} />

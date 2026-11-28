@@ -11,10 +11,11 @@ import { L, T, idioma, RU_MONEDAS } from '../i18n';
 import { tr } from '../ru';
 import { td } from '../datosRu';
 import { nombreBotin, useBotin } from '../botin';
-import { EditorBonos, EditorObjeto } from './EditorObjeto';
+import { CATS_ARMA, CATS_ARMADURA, EditorBonos, EditorObjeto, ponerSubcategoria, valorCategoria } from './EditorObjeto';
 import { opcionesBono } from '../bonosObjetos';
 import { ModalDejar, SeccionAlijos, useAlijos } from './Alijos';
 import { SeccionBiblioteca } from './BibliotecaObjetos';
+import { visiblesBiblioteca } from '../bibliotecaObjetos';
 
 /** Saca n unidades del objeto de la hoja (todo si n ≥ cantidad) y devuelve esa parte. */
 const sacarDe = (lugar: Lugar) => (x: Personaje, n: number): Item | null => {
@@ -36,12 +37,19 @@ function conTipo(it: Item, tipo: Item['tipo']): Item {
 }
 
 /** Categoría del objeto. `fija`: va en un hueco del equipo que solo acepta esa categoría (no se puede cambiar). */
-function SelectorTipo({ valor, set, fija }: { valor: Item['tipo']; set: (t: Item['tipo']) => void; fija?: boolean }) {
-  const v = valor === 'pocion' ? 'consumible' : valor;
+/** Las armas y armaduras salen con su subcategoría (arma sencilla, armadura pesada…). */
+function SelectorTipo({ it, set, fija }: { it: Item; set: (y: Item) => void; fija?: boolean }) {
   return (
     <Etiqueta texto={L('Categoría', 'Категория')}>
-      <select className="campo" value={v} disabled={fija} onChange={(e) => set(e.target.value as Item['tipo'])}>
-        {CATEGORIAS_ITEM.map((c) => <option key={c.id} value={c.id}>{L(c.nombre, c.ru)}</option>)}
+      <select className="campo" value={valorCategoria(it)} disabled={fija && it.tipo !== 'arma' && it.tipo !== 'armadura'} onChange={(e) => {
+        const [t, sub] = e.target.value.split('|') as [Item['tipo'], string?];
+        const y = t === it.tipo ? structuredClone(it) : conTipo(it, t);
+        if (sub) ponerSubcategoria(y, sub);
+        set(y);
+      }}>
+        {CATEGORIAS_ITEM.filter((c) => !fija || c.id === it.tipo).flatMap((c) => c.id === 'arma' ? CATS_ARMA.map(([es, ru]) => <option key={es} value={`arma|${es}`}>{L(es, ru)}</option>)
+          : c.id === 'armadura' ? CATS_ARMADURA.map(([id, es, ru]) => <option key={id} value={`armadura|${id}`}>{L(es, ru)}</option>)
+          : [<option key={c.id} value={c.id}>{L(c.nombre, c.ru)}</option>])}
       </select>
     </Etiqueta>
   );
@@ -262,7 +270,7 @@ function ModalItem({ lugar, onClose }: { lugar: Lugar; onClose: () => void }) {
         <Etiqueta texto="Cantidad"><Numero valor={it.cantidad} min={1} set={(n) => set((y) => { y.cantidad = n; })} /></Etiqueta>
         <Etiqueta texto="Precio (si lo sabes)"><input className="campo" value={it.precio} placeholder="p. ej. 25po" onChange={(e) => set((y) => { y.precio = e.target.value; })} /></Etiqueta>
         <Etiqueta texto="Máx. por espacio"><input className="campo" inputMode="numeric" value={it.maxPorEspacio ?? ''} placeholder="sin límite" onChange={(e) => { const n = parseInt(e.target.value, 10); set((y) => { y.maxPorEspacio = isNaN(n) || n < 1 ? undefined : n; }); }} /></Etiqueta>
-        {!it.bolsa && <SelectorTipo valor={it.tipo} fija={lugar.zona === 'equipo' && !!TIPO_RANURA[lugar.r]} set={(t) => set((y) => { Object.assign(y, conTipo(y, t)); })} />}
+        {!it.bolsa && <SelectorTipo it={it} fija={lugar.zona === 'equipo' && !!TIPO_RANURA[lugar.r]} set={(n) => set((y) => { Object.assign(y, n); })} />}
       </div>
       {lugar.zona === 'equipo' && TIPO_RANURA[lugar.r] && <p className="nota pequena">{L('Para cambiarle la categoría, quítatelo primero del equipo.', 'Чтобы сменить категорию, сначала сними предмет.')}</p>}
       {editar ? <>
@@ -414,7 +422,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
   /** Objeto creado ahora (no sale de la base): al añadirlo se guarda en la biblioteca de la partida. */
   const [nuevo, setNuevo] = useState(false);
   const { biblioteca } = useAlijos();
-  const deBiblioteca: ObjetoBase[] = (biblioteca?.items ?? []).map((it) => ({ nombre: it.nombre, descripcion: it.descripcion, precio: it.precio, tipo: it.tipo, categoria: L('📚 Biblioteca de la partida', '📚 Библиотека партии'), detalles: it.detalles, maxPorEspacio: it.maxPorEspacio, item: it }));
+  const deBiblioteca: ObjetoBase[] = visiblesBiblioteca(biblioteca?.items).map((it) => ({ nombre: it.nombre, descripcion: it.descripcion, precio: it.precio, tipo: it.tipo, categoria: L('📚 Biblioteca de la partida', '📚 Библиотека партии'), detalles: it.detalles, maxPorEspacio: it.maxPorEspacio, item: it }));
   useEffect(() => { cargarObjetos().then(setBase); }, []);
   const sueltos = destino.zona === 'equipo' ? [...p.mochila.map((it, i) => ({ it, l: { zona: 'mochila' as const, i } })), ...p.cinturon.items.map((it, i) => ({ it, l: { zona: 'cinturon' as const, i } }))].filter(({ it }) => !it.bolsa && cabeEnRanura(destino.r, it.tipo)) : [];
   /** Hueco que solo acepta una categoría (yelmo, anillo…): el objeto nuevo será de esa categoría. */
@@ -434,7 +442,7 @@ function ModalAnadir({ destino, onClose }: { destino: Destino; onClose: () => vo
         <Etiqueta texto="Cantidad"><Numero valor={borrador.cantidad} min={1} set={(n) => setBorrador({ ...borrador, cantidad: n })} /></Etiqueta>
         <Etiqueta texto="Precio (si lo sabes)"><input className="campo" value={borrador.precio} placeholder="p. ej. 25po" onChange={(e) => setBorrador({ ...borrador, precio: e.target.value })} /></Etiqueta>
         <Etiqueta texto="Máx. por espacio"><input className="campo" inputMode="numeric" value={borrador.maxPorEspacio ?? ''} placeholder="sin límite" onChange={(e) => { const n = parseInt(e.target.value, 10); setBorrador({ ...borrador, maxPorEspacio: isNaN(n) || n < 1 ? undefined : n }); }} /></Etiqueta>
-        <SelectorTipo valor={borrador.tipo} fija={!!tipoFijo} set={(t) => setBorrador(conTipo(borrador, t))} />
+        <SelectorTipo it={borrador} fija={!!tipoFijo} set={setBorrador} />
       </div>
       <EditorObjeto it={borrador} set={(f) => setBorrador((b) => { if (!b) return b; const y = structuredClone(b); f(y); return y; })} />
       <EditorBonos it={borrador} set={(f) => setBorrador((b) => { if (!b) return b; const y = structuredClone(b); f(y); return y; })} />

@@ -12,6 +12,10 @@ export const NOMBRE_BIBLIOTECA = '__biblioteca__';
 export const esBiblioteca = (a: Alijo) => !a.suelo && a.nombre === NOMBRE_BIBLIOTECA;
 
 const clave = (n: string) => n.trim().toLocaleLowerCase('es');
+/** Firma del contenido de un objeto (sin id): para saber si un objeto quitado ha vuelto igual o cambiado. */
+export const firmaObjeto = (it: Item) => { const { id: _i, borrado: _b, ...r } = paraBiblioteca(it); return JSON.stringify(r); };
+/** Lo que se ve de la biblioteca: sin las marcas de objetos quitados. */
+export const visiblesBiblioteca = (items: Item[] | undefined) => (items ?? []).filter((x) => !x.borrado);
 
 /** Objetos de un personaje que van a la biblioteca: los creados o editados por los jugadores. */
 export function objetosPropios(p: Personaje): Item[] {
@@ -47,6 +51,8 @@ export async function guardarEnBiblioteca(partida: string, items: Item[]): Promi
       if (!it.nombre.trim()) continue;
       const limpio = paraBiblioteca(it);
       const i = out.findIndex((x) => clave(x.nombre) === clave(limpio.nombre));
+      // Quitado a mano de la biblioteca: no vuelve mientras alguien lo tenga igual; si se cambia, vuelve.
+      if (i >= 0 && out[i].borrado && out[i].borrado === firmaObjeto(it)) continue;
       if (i >= 0) out[i] = { ...limpio, id: out[i].id }; else { out.push(limpio); nuevos++; }
     }
     return { out: out.sort((a, c) => a.nombre.localeCompare(c.nombre, 'es')), nuevos };
@@ -61,6 +67,7 @@ export async function guardarEnBiblioteca(partida: string, items: Item[]): Promi
 
 export async function quitarDeBiblioteca(partida: string, id: string) {
   const b = await bibliotecaDe(partida);
-  await cambiarItems(b.id, (l) => l.filter((x) => x.id !== id));
+  // Se deja una marca (nombre + firma) para que los personajes que aún lo llevan no lo vuelvan a subir solos.
+  await cambiarItems(b.id, (l) => l.map((x) => x.id === id ? { id: x.id, nombre: x.nombre, descripcion: '', precio: '', cantidad: 1, tipo: x.tipo, borrado: firmaObjeto(x) } : x));
   window.dispatchEvent(new Event('alijos-cambio'));
 }

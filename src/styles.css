@@ -982,3 +982,10 @@ fieldset.bloq:disabled .campo, fieldset.bloq:disabled select { background: #d9cc
 .asistente .detalle-asistente .etiqueta span, .asistente .detalle-asistente .hueco-etq { color: #4a3420; }
 .campo-fijo { display: flex; align-items: center; }
 .falta-asistente { color: #f2a48c; font-weight: 600; }
+.elegir-base { text-align: left; cursor: pointer; }
+.fila-biblioteca .item-boton { flex: 1; }
+.metodo-car { flex-wrap: wrap; margin: 8px 0; }
+.tirada-car { display: inline-block; margin: 0 6px 0 0; font-weight: 600; }
+.tirada-car small { font-weight: 400; opacity: .7; }
+.puntos-car { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 4px; }
+.comp-auto { opacity: .6; }

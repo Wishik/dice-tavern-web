@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Etiqueta } from '../ui';
+import { td } from '../datosRu';
+import { baseCargada, cargarObjetos, normalizarTexto, type ObjetoBase } from '../data';
 import { L } from '../i18n';
 import type { Item, TamanoCinturon } from '../types';
 import { CINTURON_ESPACIOS, HABILIDADES } from '../rules';
@@ -97,10 +100,60 @@ const TIPOS_DANO: [string, string][] = [
   ['Contundente', 'дробящий'], ['Cortante', 'рубящий'], ['Perforante', 'колющий'], ['Ácido', 'кислота'], ['Frío', 'холод'], ['Fuego', 'огонь'],
   ['Fuerza', 'силовое поле'], ['Necrótico', 'некротический'], ['Psíquico', 'психический'], ['Radiante', 'излучение'], ['Relámpago', 'молния'], ['Trueno', 'звук'], ['Veneno', 'яд'],
 ];
-const CATEGORIAS: [string, string][] = [
-  ['Arma sencilla cuerpo a cuerpo', 'Простое, ближний бой'], ['Arma marcial cuerpo a cuerpo', 'Воинское, ближний бой'],
-  ['Arma sencilla a distancia', 'Простое, дальний бой'], ['Arma marcial a distancia', 'Воинское, дальний бой'], ['Arma exótica', 'Экзотическое'],
+/** Categorías de arma: [nombre, ruso, categoría en la base del manual]. */
+export const CATS_ARMA: [string, string, string][] = [
+  ['Arma sencilla cuerpo a cuerpo', 'Простое, ближний бой', 'armas sencillas cuerpo a cuerpo'], ['Arma sencilla a distancia', 'Простое, дальний бой', 'armas sencillas a distancia'],
+  ['Arma marcial cuerpo a cuerpo', 'Воинское, ближний бой', 'armas marciales cuerpo a cuerpo'], ['Arma marcial a distancia', 'Воинское, дальний бой', 'armas marciales a distancia'],
+  ['Arma exótica cuerpo a cuerpo', 'Экзотическое, ближний бой', 'armas exóticas cuerpo a cuerpo'], ['Arma exótica a distancia', 'Экзотическое, дальний бой', 'armas exóticas a distancia'],
 ];
+export const CATS_ARMADURA: [string, string, string, string][] = [
+  ['ligera', 'Armadura ligera', 'Лёгкий доспех', 'armaduras ligeras'], ['media', 'Armadura media', 'Средний доспех', 'armaduras medias'], ['pesada', 'Armadura pesada', 'Тяжёлый доспех', 'armaduras pesadas'],
+];
+/** Categoría de un arma: la guardada o, si viene del manual, la de la base. */
+export function categoriaArma(it: Item): string {
+  const c = it.detalles?.['Categoría'];
+  if (c === 'Arma exótica') return CATS_ARMA[4][0];
+  if (c) return c;
+  const b = baseCargada()?.find((o) => o.tipo === 'arma' && o.nombre === (it.detalles?.['Tipo de arma'] ?? it.nombre));
+  return CATS_ARMA.find((x) => x[2] === b?.categoria)?.[0] ?? CATS_ARMA[0][0];
+}
+export const tipoArmadura = (it: Item) => { const ca = it.detalles?.['Clase de armadura'] ?? ''; return /m[aá]x/i.test(ca) ? 'media' : /destreza/i.test(ca) || !ca ? 'ligera' : 'pesada'; };
+const escribirCA = (b: number, t: string) => t === 'ligera' ? `${b} + modificador de Destreza` : t === 'media' ? `${b} + modificador de Destreza (máx.2)` : `${b}`;
+/** Valor del desplegable «Categoría»: las armas y armaduras van con su subcategoría. */
+export const valorCategoria = (it: Item) => it.tipo === 'arma' ? `arma|${categoriaArma(it)}` : it.tipo === 'armadura' ? `armadura|${tipoArmadura(it)}` : it.tipo === 'pocion' ? 'consumible' : it.tipo;
+/** Pone la subcategoría elegida (el tipo ya está puesto). */
+export function ponerSubcategoria(y: Item, sub: string) {
+  y.detalles = { ...(y.detalles ?? {}) };
+  if (y.tipo === 'arma') { if (y.detalles['Categoría'] !== sub) delete y.detalles['Tipo de arma']; y.detalles['Categoría'] = sub; }
+  if (y.tipo === 'armadura') {
+    if (tipoArmadura(y) !== sub) delete y.detalles['Tipo de armadura'];
+    y.detalles['Clase de armadura'] = escribirCA(parseInt(y.detalles['Clase de armadura'] ?? '', 10) || (sub === 'ligera' ? 11 : sub === 'media' ? 12 : 14), sub);
+  }
+}
+
+/** Elegir el arma o armadura exacta del manual (daga, hacha, cota de malla…), con buscador: copia sus datos. */
+function ElegirBase({ titulo, cat, actual, onElegir }: { titulo: string; cat: string; actual?: string; onElegir: (o: ObjetoBase) => void }) {
+  const [base, setBase] = useState<ObjetoBase[] | null>(baseCargada());
+  const [abierto, setAbierto] = useState(false);
+  const [q, setQ] = useState('');
+  useEffect(() => { if (!base) cargarObjetos().then(setBase); }, [base]);
+  const lista = (base ?? []).filter((o) => o.categoria === cat && (!q.trim() || normalizarTexto(o.nombre).includes(normalizarTexto(q.trim())) || normalizarTexto(td(o.nombre)).includes(normalizarTexto(q.trim()))));
+  return (
+    <Etiqueta texto={titulo}>
+      <button type="button" className="campo elegir-base" onClick={() => setAbierto(!abierto)}>{actual ? td(actual) : L('— Elige —', '— Выбери —')} ▾</button>
+      {abierto && <div className="buscador">
+        <input className="campo" autoFocus value={q} placeholder={L('Buscar…', 'Поиск…')} onChange={(e) => setQ(e.target.value)} />
+        <ul className="resultados">
+          {lista.map((o) => <li key={o.nombre}><button type="button" onClick={() => { onElegir(o); setAbierto(false); setQ(''); }}>
+            <span className="res-conjuro"><strong>{td(o.nombre)}</strong><small>{[o.detalles?.['Daño'], o.detalles?.['Propiedades'], o.detalles?.['Clase de armadura'] && `${L('CA', 'КД')} ${o.detalles['Clase de armadura']}`, o.precio].filter((x) => x && x !== '--').join(' · ')}</small></span>
+          </button></li>)}
+          {base && !lista.length && <li className="vacio">{L('Nada con ese nombre.', 'Ничего не найдено.')}</li>}
+          {!base && <li className="vacio">{L('Cargando…', 'Загрузка…')}</li>}
+        </ul>
+      </div>}
+    </Etiqueta>
+  );
+}
 /** Propiedades que se marcan; las que llevan algo entre paréntesis lo sacan de «distancia» o «dado versátil». */
 const PROPS: { id: string; es: string; ru: string; re: RegExp }[] = [
   { id: 'Ligera', es: 'Ligera', ru: 'Лёгкое', re: /\bliger[ao]\b/i },
@@ -166,12 +219,8 @@ function EditorArma({ it, set }: { it: Item; set: (f: (y: Item) => void) => void
     <div className="editor-objeto">
       <h4>⚔️ {L('Datos del arma', 'Параметры оружия')}</h4>
       <div className="rejilla-campos">
-        <Etiqueta texto={L('Tipo de arma', 'Вид оружия')}>
-          <select className="campo" value={det['Categoría'] ?? ''} onChange={(e) => setDet('Categoría', e.target.value)}>
-            <option value="">—</option>
-            {CATEGORIAS.map(([es, ru]) => <option key={es} value={es}>{L(es, ru)}</option>)}
-          </select>
-        </Etiqueta>
+        <ElegirBase titulo={L('Tipo de arma', 'Вид оружия')} cat={CATS_ARMA.find((x) => x[0] === categoriaArma(it))?.[2] ?? ''} actual={det['Tipo de arma']}
+          onElegir={(o) => set((y) => { y.detalles = { ...(y.detalles ?? {}), ...o.detalles, 'Categoría': categoriaArma(it), 'Tipo de arma': o.nombre }; if (!y.precio) y.precio = o.precio; })} />
         <Etiqueta texto={L('Daño', 'Урон')}><SelectorDado fijo valor={dano} set={(n, c) => setDet('Daño', escribirDano(n, c, dano.tipo))} /></Etiqueta>
         <Etiqueta texto={L('Tipo de daño', 'Тип урона')}>
           <select className="campo" value={tipoRu(dano.tipo)?.[0] ?? dano.tipo} onChange={(e) => setDet('Daño', escribirDano(dano.n, dano.caras, e.target.value))}>
@@ -224,20 +273,15 @@ function EditorArmadura({ it, set }: { it: Item; set: (f: (y: Item) => void) => 
   const det = it.detalles ?? {};
   const ca = det['Clase de armadura'] ?? '11 + modificador de Destreza';
   const base = parseInt(ca, 10) || 10;
-  const tipo = /m[aá]x/i.test(ca) ? 'media' : /destreza/i.test(ca) ? 'ligera' : 'pesada';
-  const escribir = (b: number, t: string) => t === 'ligera' ? `${b} + modificador de Destreza` : t === 'media' ? `${b} + modificador de Destreza (máx.2)` : `${b}`;
+  const tipo = tipoArmadura(it);
+  const escribir = escribirCA;
   const setDet = (k: string, v: string) => set((y) => { y.detalles = { ...(y.detalles ?? {}), [k]: v }; });
   return (
     <div className="editor-objeto">
       <h4>🛡️ {L('Datos de la armadura', 'Параметры доспеха')}</h4>
       <div className="rejilla-campos">
-        <Etiqueta texto={L('Tipo', 'Тип')}>
-          <select className="campo" value={tipo} onChange={(e) => setDet('Clase de armadura', escribir(base, e.target.value))}>
-            <option value="ligera">{L('Ligera (CA + DES)', 'Лёгкий (КД + ЛОВ)')}</option>
-            <option value="media">{L('Media (CA + DES, máx. 2)', 'Средний (КД + ЛОВ, макс. 2)')}</option>
-            <option value="pesada">{L('Pesada (CA fija)', 'Тяжёлый (КД без ЛОВ)')}</option>
-          </select>
-        </Etiqueta>
+        <ElegirBase titulo={L('Tipo de armadura', 'Вид доспеха')} cat={CATS_ARMADURA.find((x) => x[0] === tipo)![3]} actual={det['Tipo de armadura']}
+          onElegir={(o) => set((y) => { y.detalles = { ...(y.detalles ?? {}), ...o.detalles, 'Tipo de armadura': o.nombre }; if (!y.precio) y.precio = o.precio; })} />
         <Etiqueta texto={L('CA base', 'Базовый КД')}><input className="campo" inputMode="numeric" value={base} onChange={(e) => setDet('Clase de armadura', escribir(parseInt(e.target.value.replace(/\D/g, ''), 10) || 10, tipo))} /></Etiqueta>
         <SelectorMagico it={it} set={set} que={L('CA', 'КД')} />
         <Etiqueta texto={L('Fuerza mínima', 'Мин. Сила')}><input className="campo" inputMode="numeric" value={/^\d+$/.test(det['Fuerza'] ?? '') ? det['Fuerza'] : ''} placeholder="—" onChange={(e) => setDet('Fuerza', e.target.value.replace(/\D/g, '') || '--')} /></Etiqueta>
@@ -254,6 +298,8 @@ function EditorEscudo({ it, set }: { it: Item; set: (f: (y: Item) => void) => vo
     <div className="editor-objeto">
       <h4>🔰 {L('Datos del escudo', 'Параметры щита')}</h4>
       <div className="rejilla-campos">
+        <ElegirBase titulo={L('Tipo de escudo', 'Вид щита')} cat="escudos" actual={it.detalles?.['Tipo de escudo']}
+          onElegir={(o) => set((y) => { y.detalles = { ...(y.detalles ?? {}), ...o.detalles, 'Tipo de escudo': o.nombre }; if (!y.precio) y.precio = o.precio; })} />
         <Etiqueta texto={L('CA que da', 'Бонус КД')}><input className="campo" inputMode="numeric" value={b} onChange={(e) => set((y) => { y.detalles = { ...(y.detalles ?? {}), 'Clase de armadura': `+${parseInt(e.target.value.replace(/\D/g, ''), 10) || 2}` }; })} /></Etiqueta>
         <SelectorMagico it={it} set={set} que={L('CA', 'КД')} />
       </div>

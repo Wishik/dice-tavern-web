@@ -36,6 +36,8 @@ export interface Item {
   magico?: number;
   /** Daño extra del arma (p. ej. «1d6 fuego» de una espada flamígera). */
   danoExtra?: string;
+  /** Solo en la biblioteca de la partida: objeto quitado a mano (firma de su contenido). */
+  borrado?: string;
 }
 
 export type TipoItem = 'yelmo' | 'amuleto' | 'armadura' | 'capa' | 'arma' | 'escudo' | 'brazalete' | 'guantes' | 'anillo' | 'cinturon' | 'botas' | 'municion' | 'contenedorMunicion' | 'consumible' | 'herramienta' | 'otro' | 'pocion' | 'monedas';
@@ -78,7 +80,7 @@ export const TIPO_RANURA: Partial<Record<RanuraEquipo, TipoItem>> = {
 };
 export const cabeEnRanura = (r: RanuraEquipo, t: TipoItem) => !TIPO_RANURA[r] || TIPO_RANURA[r] === t;
 
-export interface EntradaTexto { nombre: string; texto: string; origen?: string; /** Dotes: características elegidas para su +1 (Mejora de Característica: dos). */ mejora?: Atributo[] }
+export interface EntradaTexto { nombre: string; texto: string; origen?: string; /** Dotes: de dónde sale, para enseñarlo («Nivel 4», «Trasfondo Soldado», «Añadida a mano»…). */ fuente?: string; /** Dotes: características elegidas para su +1 (Mejora de Característica: dos). */ mejora?: Atributo[] }
 
 export interface NivelClase { clase: string; subclase: string; nivel: number }
 
@@ -163,6 +165,8 @@ export interface Personaje {
   dgUsados: number;
   /** Subidas de nivel cuyo dado de golpe aún no se ha tirado (al tirar se suma a los PG máximos). */
   subidasPendientes: number;
+  /** Las subidas pendientes ya no están sumadas en `nivel` (se suben de una en una). */
+  nivelV2?: boolean;
   caracteristicas: Record<Atributo, number>;
   bonusIniciativa: number;
   velocidad: { andando: number; corriendo: number; trepando: string; nadando: string; volando: string };
@@ -181,6 +185,10 @@ export interface Personaje {
   subida?: { antes: Record<string, number>; pasos?: string[]; i: number; /** Clases cuya clase o subclase se ha cambiado: se enseñan todos sus rasgos y se vuelve a elegir. */ cambio?: string[] };
   /** Bonificador de raza a características: [la de +2, la de +1]. */
   bonoRaza?: Atributo[];
+  /** Cómo se generaron las características en la creación (PDF, paso 3). */
+  metodoCar?: 'estandar' | 'aleatorio' | 'puntos';
+  /** Tiradas de 4d6 de la generación aleatoria (una sola vez). */
+  tiradasCar?: number[][];
   bonusPercepcionPasiva: number;
   recursos: string;
   /** Usos gastados de cada recurso de clase (claves de src/recursos.ts); el descanso largo lo vacía. */

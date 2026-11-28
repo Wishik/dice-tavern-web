@@ -115,6 +115,22 @@ export const datosClase = (nombre: string, preferida?: Clase | null): Clase | nu
 export const dotesDeClases = (p: Personaje, clase: Clase | null | undefined) =>
   clasesDe(p).reduce((s, c) => s + (datosClase(c.clase, clase)?.tabla.filter((r) => r.nivel <= c.nivel && /Mejora de característica|Don épico/.test(r.rasgos)).length ?? 0), 0);
 
+/** Ataques con la acción de atacar según los rasgos (Ataque adicional = 2, Dos ataques adicionales = 3, Tres = 4). No se suman entre clases. */
+export const ataquesPorRasgos = (p: Personaje, clase: Clase | null | undefined): number => clasesDe(p).reduce((m, c) => {
+  const d = datosClase(c.clase, clase);
+  const sub = d?.subclases?.find((s) => s.nombre === c.subclase);
+  const n = [...(d?.rasgos ?? []), ...(sub?.rasgos ?? [])].filter((r) => r.nivel <= c.nivel)
+    .reduce((k, r) => Math.max(k, /^Ataque adicional/i.test(r.nombre) ? 2 : /^Dos ataques adicionales/i.test(r.nombre) ? 3 : /^Tres ataques adicionales/i.test(r.nombre) ? 4 : 1), 1);
+  return Math.max(m, n);
+}, 1);
+
+/** Etiqueta de cada «Mejora de característica / Don épico» de las clases, en orden: «Nivel 4» (o «Guerrero 4» en multiclase). */
+export const nivelesMejora = (p: Personaje, clase: Clase | null | undefined): string[] => {
+  const cs = clasesDe(p);
+  return cs.flatMap((c) => (datosClase(c.clase, clase)?.tabla.filter((r) => r.nivel <= c.nivel && /Mejora de característica|Don épico/.test(r.rasgos)) ?? [])
+    .map((r) => ({ n: r.nivel, t: cs.length > 1 ? `${c.clase} ${r.nivel}` : `Nivel ${r.nivel}` }))).sort((a, b) => a.n - b.n).map((x) => x.t);
+};
+
 /** Para listas y la partida (sin traducir): «Pícaro» o «Pícaro / Guerrero». */
 export const textoClasesBreve = (p: Personaje) => (p.multiclase?.length ? clasesDe(p).map((c) => `${c.clase} ${c.nivel}`).join(' / ') : p.clase);
 

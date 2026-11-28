@@ -4,7 +4,7 @@ import { nuevoPersonaje } from '../personaje';
 import { ajustarMulticlase, asignarNivel, clasesDe, fijarClases, nivelLanzador, textoClasesBreve } from '../multiclase';
 import { calcularAvisos, manaMaximo } from '../avisos';
 import { recursosClase } from '../recursos';
-import { bonoCompetencia, cambiarNivel } from '../rules';
+import { bonoCompetencia, cambiarNivel, subirUnNivel } from '../rules';
 import { potenciadoresDisponibles } from '../potenciadores';
 import type { Clase } from '../data';
 
@@ -15,9 +15,9 @@ const cl = (n: string) => clases.find((c) => c.nombre === n)!;
 describe('multiclase', () => {
   it('niveles por clase, total y subida en otra clase', () => {
     const p = nuevoPersonaje(); p.clase = 'Pícaro'; p.nivel = 3;
-    cambiarNivel(p, 4); asignarNivel(p, 'Guerrero');
+    cambiarNivel(p, 4); expect(p.nivel).toBe(3); subirUnNivel(p, 'Guerrero');
     expect(clasesDe(p)).toEqual([{ clase: 'Pícaro', subclase: '', nivel: 3 }, { clase: 'Guerrero', subclase: '', nivel: 1 }]);
-    cambiarNivel(p, 5); asignarNivel(p, 'Guerrero');
+    cambiarNivel(p, 5); subirUnNivel(p, 'Guerrero');
     expect(clasesDe(p)[1].nivel).toBe(2);
     expect(textoClasesBreve(p)).toBe('Pícaro 3 / Guerrero 2');
     cambiarNivel(p, 2); // bajar: la principal se queda al menos con 1
